@@ -267,13 +267,19 @@ impl IntoVCL<VCL_STRING> for &[u8] {
     fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_STRING, VclError> {
         // Try to save some work if the buffer is already in the workspace.
         // We assume that &[u8] has always been readonly, so workspace data is valid.
-        if ws.contains(self) {
+        // However, we need to make sure that the buffer is null-terminated, either by its own last
+        // byte, or by the one after it
+        let with_extra_byte = unsafe { std::slice::from_raw_parts(self.as_ptr(), self.len() + 1) };
+        if (ws.contains(self) && self.ends_with(b"\0"))
+            || (ws.contains(with_extra_byte) && with_extra_byte.last() == Some(&b'\0'))
+        {
             Ok(VCL_STRING(self.as_ptr().cast::<c_char>()))
         } else {
             Ok(VCL_STRING(ws.copy_bytes_with_null(self)?.b))
         }
     }
 }
+
 impl IntoVCL<VCL_STRING> for &str {
     fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_STRING, VclError> {
         self.as_bytes().into_vcl(ws)
