@@ -15,29 +15,29 @@ use std::time::Duration;
 use varnish_sys::ffi;
 use varnish_sys::vcl::{VclError, VclResult};
 
-/// A statistics set, created using a [`StatsBuilder`]
+/// A statistics set allowing to access VSC metrics counters, created with a [`MetricsReaderBuilder`]
 #[derive(Debug)]
-pub struct Stats<'a> {
+pub struct MetricsReader<'a> {
     vsm: *mut ffi::vsm,
     vsc: *mut ffi::vsc,
-    internal: Box<StatsImpl<'a>>,
+    internal: Box<MetricsReaderImpl<'a>>,
 }
 
 #[derive(Debug, Default)]
-struct StatsImpl<'a> {
-    points: HashMap<usize, Stat<'a>>,
+struct MetricsReaderImpl<'a> {
+    points: HashMap<usize, Metric<'a>>,
     added: Vec<usize>,
     deleted: Vec<usize>,
 }
 
-/// Initialize and configure a [`Stats`] but do not attach it to a running `varnishd` instance
-pub struct StatsBuilder<'a> {
+/// Initialize and configure a [`MetricsReader`] but do not attach it to a running `varnishd` instance
+pub struct MetricsReaderBuilder<'a> {
     vsm: *mut ffi::vsm,
     vsc: *mut ffi::vsc,
     phantom: PhantomData<&'a ()>,
 }
 
-impl<'a> StatsBuilder<'a> {
+impl<'a> MetricsReaderBuilder<'a> {
     /// Create a new `VSCBuilder`
     #[expect(clippy::new_without_default)] // TODO: consider implementing
     pub fn new() -> Self {
@@ -69,26 +69,33 @@ impl<'a> StatsBuilder<'a> {
 
     /// How long to wait when attaching
     ///
-    /// When [`StatsBuilder::build()`] is called, it'll internally call `VSM_Attach`, hoping to find a running
+    /// When [`MetricsReaderBuilder::build()`] is called, it'll internally call `VSM_Attach`, hoping to find a running
     /// `varnishd` instance. If `None`, the function will not return until it connects, otherwise
     /// it specifies the timeout to use.
-    pub fn patience(self, t: Option<Duration>) -> VclResult<Self> {
-        // the things we do for love...
-        let arg = match t {
+    #[must_use]
+    pub fn patience(self, t: Option<Duration>) -> Self {
+        let arg = CString::new(match t {
             None => "off".to_string(),
-            Some(t) => format!("{}\0", t.as_secs_f64()),
-        };
+            Some(t) => t.as_secs_f64().to_string(),
+        })
+        .unwrap(); // Can never fail since we control the content of the string
+
+        // # Safety
+        // we just created this string, no point to double-check it for nul bytes
         unsafe {
-            let ret = ffi::VSM_Arg(self.vsm, 't' as c_char, arg.as_ptr().cast::<c_char>());
+            // TODO: document why this can fail, and if we should return an error
+            // TODO: Document why using `self.vsm` here, and `self.vsc` in the other `VSM_Arg` calls
+            let ret = ffi::VSM_Arg(self.vsm, 't' as c_char, arg.as_ptr());
             assert_eq!(ret, 1);
         }
-        Ok(self)
+
+        self
     }
 
     fn vsc_arg(self, o: char, s: &str) -> Result<Self, NulError> {
         let c_s = CString::new(s)?;
         unsafe {
-            let ret = ffi::VSC_Arg(self.vsc, o as c_char, c_s.as_ptr().cast::<c_char>());
+            let ret = ffi::VSC_Arg(self.vsc, o as c_char, c_s.as_ptr());
             assert_eq!(ret, 1);
         }
         Ok(self)
@@ -96,14 +103,14 @@ impl<'a> StatsBuilder<'a> {
 
     /// Provide a globbing pattern of statistics names to include.
     ///
-    /// May be called multiple times, interleaved with [`StatsBuilder::exclude()`], the order matters.
+    /// May be called multiple times, interleaved with [`MetricsReaderBuilder::exclude()`], the order matters.
     pub fn include(self, s: &str) -> Result<Self, NulError> {
         self.vsc_arg('I', s)
     }
 
     /// Provide a globbing pattern of statistics names to exclude.
     ///
-    /// May be called multiple times, interleaved with [`StatsBuilder::include()`], the order matters.
+    /// May be called multiple times, interleaved with [`MetricsReaderBuilder::include()`], the order matters.
     pub fn exclude(self, s: &str) -> Result<Self, NulError> {
         self.vsc_arg('X', s)
     }
@@ -114,8 +121,8 @@ impl<'a> StatsBuilder<'a> {
         self.vsc_arg('R', s)
     }
 
-    /// Build the [`Stats`], attaching to a running `varnishd` instance
-    pub fn build(mut self) -> VclResult<Stats<'a>> {
+    /// Build the [`MetricsReader`], attaching to a running `varnishd` instance
+    pub fn build(mut self) -> VclResult<MetricsReader<'a>> {
         let ret = unsafe { ffi::VSM_Attach(self.vsm, 0) };
         if ret != 0 {
             let err = vsm_error(self.vsm);
@@ -124,13 +131,13 @@ impl<'a> StatsBuilder<'a> {
             }
             Err(err)
         } else {
-            let mut internal = Box::new(StatsImpl::default());
+            let mut internal = Box::new(MetricsReaderImpl::default());
             unsafe {
                 ffi::VSC_State(
                     self.vsc,
                     Some(add_point),
                     Some(del_point),
-                    ptr::from_mut::<StatsImpl>(&mut *internal).cast::<c_void>(),
+                    ptr::from_mut::<MetricsReaderImpl>(&mut *internal).cast::<c_void>(),
                 );
             }
             let vsm = self.vsm;
@@ -138,7 +145,7 @@ impl<'a> StatsBuilder<'a> {
             // nullify so that .drop() doesn't destroy vsm/vsc
             self.vsm = ptr::null_mut();
             self.vsc = ptr::null_mut();
-            Ok(Stats { vsm, vsc, internal })
+            Ok(MetricsReader { vsm, vsc, internal })
         }
     }
 }
@@ -154,7 +161,7 @@ fn vsm_error(p: *const ffi::vsm) -> VclError {
     }
 }
 
-impl<'a> Drop for StatsBuilder<'a> {
+impl Drop for MetricsReaderBuilder<'_> {
     fn drop(&mut self) {
         assert!(
             (self.vsc.is_null() && self.vsm.is_null())
@@ -168,7 +175,7 @@ impl<'a> Drop for StatsBuilder<'a> {
     }
 }
 
-impl<'a> Drop for Stats<'a> {
+impl Drop for MetricsReader<'_> {
     fn drop(&mut self) {
         unsafe {
             ffi::VSC_Destroy(&mut self.vsc, self.vsm);
@@ -214,7 +221,7 @@ impl From<Semantics> for char {
 
 /// Unit of a value
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum Format {
+pub enum MetricFormat {
     /// No unit
     Integer,
     /// Bytes, for data volumes
@@ -224,39 +231,41 @@ pub enum Format {
     /// Time
     Duration,
     /// Unit unknown
+    // FIXME: This should contain original value
     Unknown,
 }
 
-impl From<c_int> for Format {
+impl From<c_int> for MetricFormat {
     fn from(value: c_int) -> Self {
         match char::from_u32(value as u32).unwrap() {
-            'i' => Format::Integer,
-            'B' => Format::Bytes,
-            'b' => Format::Bitmap,
-            'd' => Format::Duration,
-            _ => Format::Unknown,
+            'i' => MetricFormat::Integer,
+            'B' => MetricFormat::Bytes,
+            'b' => MetricFormat::Bitmap,
+            'd' => MetricFormat::Duration,
+            _ => MetricFormat::Unknown,
         }
     }
 }
 
-impl From<Format> for char {
-    fn from(value: Format) -> char {
+impl From<MetricFormat> for char {
+    fn from(value: MetricFormat) -> char {
         match value {
-            Format::Integer => 'i',
-            Format::Bytes => 'B',
-            Format::Bitmap => 'b',
-            Format::Duration => 'd',
-            Format::Unknown => '?',
+            MetricFormat::Integer => 'i',
+            MetricFormat::Bytes => 'B',
+            MetricFormat::Bitmap => 'b',
+            MetricFormat::Duration => 'd',
+            MetricFormat::Unknown => '?',
         }
     }
 }
 
 unsafe extern "C" fn add_point(ptr: *mut c_void, point: *const ffi::VSC_point) -> *mut c_void {
-    let internal = ptr.cast::<StatsImpl>().as_mut().unwrap();
+    // FIXME: handle errors without panic
+    let internal = ptr.cast::<MetricsReaderImpl>().as_mut().unwrap();
     let k = point as usize;
     let point = point.as_ref().unwrap();
 
-    let stat = Stat {
+    let stat = Metric {
         value: point.ptr,
         name: CStr::from_ptr(point.name).to_str().unwrap(),
         short_desc: CStr::from_ptr(point.sdesc).to_str().unwrap(),
@@ -271,7 +280,7 @@ unsafe extern "C" fn add_point(ptr: *mut c_void, point: *const ffi::VSC_point) -
 }
 
 unsafe extern "C" fn del_point(ptr: *mut c_void, point: *const ffi::VSC_point) {
-    let internal = ptr.cast::<StatsImpl>().as_mut().unwrap();
+    let internal = ptr.cast::<MetricsReaderImpl>().as_mut().unwrap();
     let k = point as usize;
     assert!(internal.points.contains_key(&k));
     internal.deleted.push(k);
@@ -282,16 +291,16 @@ unsafe extern "C" fn del_point(ptr: *mut c_void, point: *const ffi::VSC_point) {
 ///
 /// Describes a live value, with little overhead over the C struct
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub struct Stat<'a> {
+pub struct Metric<'a> {
     value: *const u64,
     pub name: &'a str,
     pub short_desc: &'a str,
     pub long_desc: &'a str,
     pub semantics: Semantics,
-    pub format: Format,
+    pub format: MetricFormat,
 }
 
-impl<'a> Stat<'a> {
+impl Metric<'_> {
     /// Retrieve the current value of the statistic, as-is
     pub fn get_raw_value(&self) -> u64 {
         // # Safety
@@ -318,15 +327,15 @@ impl<'a> Stat<'a> {
     }
 }
 
-impl<'a> Stats<'a> {
+impl MetricsReader<'_> {
     /// Return a statistic set
     ///
     /// Names are not necessarily unique, so instead, statistics are tracked using `usize` handle
-    /// that can help you track which ones (dis)appeared during a [`Stats::update()`] call.
+    /// that can help you track which ones (dis)appeared during a [`MetricsReader::update()`] call.
     ///
     /// The C API guarantees we can access all the `Stat` in the `HashMap`, until the next `update`
     /// call, so the `rust` API mirrors this here.
-    pub fn stats(&self) -> &HashMap<usize, Stat> {
+    pub fn stats(&self) -> &HashMap<usize, Metric> {
         &self.internal.points
     }
 

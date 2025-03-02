@@ -39,7 +39,7 @@ build:
 
 # build all
 build-all-features:
-    cargo build --all-targets --workspace $({{just_executable()}} get-package-exclude-args) --features "ffi,vsc"
+    cargo build --all-targets --workspace $({{just_executable()}} get-package-exclude-args) --features "ffi"
 
 # Run all tests
 test *ARGS: build
