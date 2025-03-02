@@ -107,10 +107,22 @@ rust-info:
 ci-test-extras: test-doc
 
 # Run all tests as expected by CI
-ci-test: rust-info test-fmt clippy test build-all-features
+ci-test: rust-info test-fmt build-all-features clippy test check-git-status
 
 # Run minimal subset of tests to ensure compatibility with MSRV
 ci-test-msrv: rust-info test
+
+# Check that the git repository is clean
+check-git-status:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ -n "$(git status -u --porcelain)" ]; then
+        >&2 echo 'GIT repo is not clean'
+        git status
+        git diff
+        exit 1
+    fi
+
 
 # Verify that the current version of the crate is not the same as the one published on crates.io
 check-if-published:
