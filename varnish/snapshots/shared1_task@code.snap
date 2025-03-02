@@ -3,7 +3,7 @@ source: varnish-macros/src/tests.rs
 ---
 mod task {
     #[allow(non_snake_case, unused_imports, unused_qualifications, unused_variables)]
-    #[allow(clippy::needless_question_mark)]
+    #[allow(clippy::needless_question_mark, clippy::new_without_default)]
     #[automatically_derived]
     mod varnish_generated {
         use std::ffi::{c_char, c_int, c_uint, c_void, CStr};

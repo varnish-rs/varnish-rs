@@ -241,6 +241,7 @@ impl Generator {
             )]
             #[allow(
                 clippy::needless_question_mark,
+                clippy::new_without_default,
             )]
             #[automatically_derived]
             mod varnish_generated {
