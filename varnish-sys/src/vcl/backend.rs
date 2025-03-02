@@ -6,10 +6,10 @@
 //! idiomatic interface centered around vmod objects.
 //!
 //! Here's what's in the toolbox:
-//! - the [`Backend`] type wraps a `Serve`-implementing struct into a C backend
-//! - the [`Serve`] trait defines which methods to implement to act as a backend, and includes
+//! - the [`Backend`] type wraps a [`VclBackend`]-implementing struct into a C backend
+//! - the [`VclBackend`] trait defines which methods to implement to act as a backend, and includes
 //!   default implementations for most methods.
-//! - the [`Transfer`] trait provides a way to generate a response body,notably handling the
+//! - the [`VclResponse`] trait provides a way to generate a response body,notably handling the
 //!   transfer-encoding for you.
 //!
 //! Note: You can check out the [example/vmod_be
@@ -21,14 +21,14 @@
 //!
 //! ```
 //! # mod varnish { pub use varnish_sys::vcl; }
-//! use varnish::vcl::{Ctx, Backend, Serve, Transfer, VclError};
+//! use varnish::vcl::{Ctx, Backend, VclBackend, VclResponse, VclError};
 //!
-//! // First we need to define a struct that implement [Transfer]:
+//! // First we need to define a struct that implement `VclResponse`:
 //! struct BodyResponse {
 //!     left: usize,
 //! }
 //!
-//! impl Transfer for BodyResponse {
+//! impl VclResponse for BodyResponse {
 //!     fn read(&mut self, buf: &mut [u8]) -> Result<usize, VclError> {
 //!         let mut done = 0;
 //!         for p in buf {
@@ -43,14 +43,14 @@
 //!     }
 //! }
 //!
-//! // Then, we need a struct implementing `Serve` to build the headers and return a BodyResponse
+//! // Then, we need a struct implementing `VclBackend` to build the headers and return a BodyResponse
 //! // Here, MyBe only needs to know how many times to repeat the character
 //! struct MyBe {
 //!     n: usize
 //! }
 //!
-//! impl Serve<BodyResponse> for MyBe {
-//!      fn get_headers(&self, ctx: &mut Ctx) -> Result<Option<BodyResponse>, VclError> {
+//! impl VclBackend<BodyResponse> for MyBe {
+//!      fn get_response(&self, ctx: &mut Ctx) -> Result<Option<BodyResponse>, VclError> {
 //!          Ok(Some(
 //!            BodyResponse { left: self.n },
 //!          ))
@@ -91,7 +91,7 @@ use crate::{
 /// is just to have the backend be part of a vmod object because the object won't be dropped until
 /// the VCL is discarded and that can only happen once all the backend fetches are done.
 #[derive(Debug)]
-pub struct Backend<S: Serve<T>, T: Transfer> {
+pub struct Backend<S: VclBackend<T>, T: VclResponse> {
     bep: VCL_BACKEND,
     #[expect(dead_code)]
     methods: Box<ffi::vdi_methods>,
@@ -101,7 +101,7 @@ pub struct Backend<S: Serve<T>, T: Transfer> {
     phantom: PhantomData<T>,
 }
 
-impl<S: Serve<T>, T: Transfer> Backend<S, T> {
+impl<S: VclBackend<T>, T: VclResponse> Backend<S, T> {
     /// Access the inner type wrapped by [Backend]. Note that it isn't `mut` as other threads are
     /// likely to have access to it too.
     pub fn get_inner(&self) -> &S {
@@ -114,7 +114,7 @@ impl<S: Serve<T>, T: Transfer> Backend<S, T> {
         self.bep
     }
 
-    /// Create a new builder, wrapping the `inner` structure (that implements `Serve`),
+    /// Create a new builder, wrapping the `inner` structure (that implements [`VclBackend`]),
     /// calling the backend `backend_id`. If the backend has a probe attached to it, set `has_probe` to
     /// true.
     pub fn new(
@@ -169,21 +169,21 @@ impl<S: Serve<T>, T: Transfer> Backend<S, T> {
 
 /// The trait to implement to "be" a backend
 ///
-/// `Serve` maps to the `vdi_methods` structure of the C api, but presented in a more
-/// "rusty" form. Apart from [`Serve::get_headers`] all methods are optional.
+/// [`VclBackend`] maps to the `vdi_methods` structure of the C api, but presented in a more
+/// "rusty" form. Apart from [`VclBackend::get_response`] all methods are optional.
 ///
-/// If your backend doesn't return any content body, you can implement `Serve<()>` as `()` has a default
-/// `Transfer` implementation.
-pub trait Serve<T: Transfer> {
+/// If your backend doesn't return any content body, you can implement `VclBackend<()>` as `()` has a default
+/// [`VclResponse`] implementation.
+pub trait VclBackend<T: VclResponse> {
     /// If the VCL pick this backend (or a director ended up choosing it), this method gets called
-    /// so that the `Serve` implementer can:
+    /// so that the [`VclBackend`] implementer can:
     /// - inspect the request headers (`ctx.http_bereq`)
     /// - fill the response headers (`ctx.http_beresp`)
-    /// - possibly return a `Transfer` object that will generate the response body
+    /// - possibly return a [`VclResponse`] object that will generate the response body
     ///
     /// If this function returns a `Ok(_)` without having set the method and protocol of
     /// `ctx.http_beresp`, we'll default to `HTTP/1.1 200 OK`
-    fn get_headers(&self, _ctx: &mut Ctx) -> Result<Option<T>, VclError>;
+    fn get_response(&self, _ctx: &mut Ctx) -> Result<Option<T>, VclError>;
 
     /// Once a backend transaction is finished, the [`Backend`] has a chance to clean up, collect
     /// data and others in the finish methods.
@@ -240,16 +240,16 @@ pub trait Serve<T: Transfer> {
 
 /// An in-flight response body
 ///
-/// When `Serve::get_headers()` get called, the backend [`Backend`] can return a
-/// `Result<Option<Transfer>>`:
+/// When [`VclBackend::get_response`] get called, the backend [`Backend`] can return a
+/// `Result<Option<VclResponse>>`:
 /// - `Err(_)`: something went wrong, the error will be logged and synthetic backend response will be
 ///   generated by Varnish
 /// - `Ok(None)`: headers are set, but the response as no content body.
-/// - `Ok(Some(Transfer))`: headers are set, and Varnish will use the `Transfer` object to build
+/// - `Ok(Some(VclResponse))`: headers are set, and Varnish will use the [`VclResponse`] object to build
 ///   the response body.
 #[expect(clippy::len_without_is_empty)] // FIXME: should there be an is_empty() method?
-pub trait Transfer {
-    /// The only mandatory method, it will be called repeated so that the `Transfer` object can
+pub trait VclResponse {
+    /// The only mandatory method, it will be called repeated so that the [`VclResponse`] object can
     /// fill `buf`. The transfer will stop if any of its calls returns an error, and it will
     /// complete successfully when `Ok(0)` is returned.
     ///
@@ -271,13 +271,13 @@ pub trait Transfer {
     }
 }
 
-impl Transfer for () {
+impl VclResponse for () {
     fn read(&mut self, _buf: &mut [u8]) -> Result<usize, VclError> {
         Ok(0)
     }
 }
 
-unsafe extern "C" fn vfp_pull<T: Transfer>(
+unsafe extern "C" fn vfp_pull<T: VclResponse>(
     ctxp: *mut ffi::vfp_ctx,
     vfep: *mut ffi::vfp_entry,
     ptr: *mut c_void,
@@ -312,12 +312,12 @@ unsafe extern "C" fn vfp_pull<T: Transfer>(
     }
 }
 
-unsafe extern "C" fn wrap_event<S: Serve<T>, T: Transfer>(be: VCL_BACKEND, ev: VclEvent) {
+unsafe extern "C" fn wrap_event<S: VclBackend<T>, T: VclResponse>(be: VCL_BACKEND, ev: VclEvent) {
     let backend: &S = get_backend(validate_director(be));
     backend.event(ev);
 }
 
-unsafe extern "C" fn wrap_list<S: Serve<T>, T: Transfer>(
+unsafe extern "C" fn wrap_list<S: VclBackend<T>, T: VclResponse>(
     ctxp: *const ffi::vrt_ctx,
     be: VCL_BACKEND,
     vsbp: *mut ffi::vsb,
@@ -330,13 +330,16 @@ unsafe extern "C" fn wrap_list<S: Serve<T>, T: Transfer>(
     backend.list(&mut ctx, &mut vsb, detailed != 0, json != 0);
 }
 
-unsafe extern "C" fn wrap_panic<S: Serve<T>, T: Transfer>(be: VCL_BACKEND, vsbp: *mut ffi::vsb) {
+unsafe extern "C" fn wrap_panic<S: VclBackend<T>, T: VclResponse>(
+    be: VCL_BACKEND,
+    vsbp: *mut ffi::vsb,
+) {
     let mut vsb = Buffer::from_ptr(vsbp);
     let backend: &S = get_backend(validate_director(be));
     backend.panic(&mut vsb);
 }
 
-unsafe extern "C" fn wrap_pipe<S: Serve<T>, T: Transfer>(
+unsafe extern "C" fn wrap_pipe<S: VclBackend<T>, T: VclResponse>(
     ctxp: *const ffi::vrt_ctx,
     be: VCL_BACKEND,
 ) -> ffi::stream_close_t {
@@ -374,7 +377,7 @@ impl VCL_BACKEND {
 }
 
 #[allow(clippy::too_many_lines)] // fixme
-unsafe extern "C" fn wrap_gethdrs<S: Serve<T>, T: Transfer>(
+unsafe extern "C" fn wrap_gethdrs<S: VclBackend<T>, T: VclResponse>(
     ctxp: *const ffi::vrt_ctx,
     bep: VCL_BACKEND,
 ) -> c_int {
@@ -384,7 +387,7 @@ unsafe extern "C" fn wrap_gethdrs<S: Serve<T>, T: Transfer>(
     assert!(!be.vcl_name.is_null()); // FIXME: is this validation needed?
     validate_vdir(be); // FIXME: is this validation needed?
 
-    match backend.get_headers(&mut ctx) {
+    match backend.get_response(&mut ctx) {
         Ok(res) => {
             // default to HTTP/1.1 200 if the backend didn't provide anything
             let beresp = ctx.http_beresp.as_mut().unwrap();
@@ -427,7 +430,7 @@ unsafe extern "C" fn wrap_gethdrs<S: Serve<T>, T: Transfer>(
                         }
                     };
                     htc.priv_ = Box::into_raw(Box::new(transfer)).cast::<c_void>();
-                    // build a vfp to wrap the Transfer object if there's something to push
+                    // build a vfp to wrap the VclResponse object if there's something to push
                     if htc.body_status != ffi::BS_NONE.as_ptr() {
                         let Some(vfp) =
                             ffi::WS_Alloc(bo.ws.as_mut_ptr(), size_of::<ffi::vfp>() as u32)
@@ -472,7 +475,7 @@ unsafe extern "C" fn wrap_gethdrs<S: Serve<T>, T: Transfer>(
     }
 }
 
-unsafe extern "C" fn wrap_healthy<S: Serve<T>, T: Transfer>(
+unsafe extern "C" fn wrap_healthy<S: VclBackend<T>, T: VclResponse>(
     ctxp: *const ffi::vrt_ctx,
     be: VCL_BACKEND,
     changed: *mut VCL_TIME,
@@ -487,7 +490,7 @@ unsafe extern "C" fn wrap_healthy<S: Serve<T>, T: Transfer>(
     healthy.into()
 }
 
-unsafe extern "C" fn wrap_getip<T: Transfer>(
+unsafe extern "C" fn wrap_getip<T: VclResponse>(
     ctxp: *const ffi::vrt_ctx,
     _be: VCL_BACKEND,
 ) -> VCL_IP {
@@ -513,7 +516,7 @@ unsafe extern "C" fn wrap_getip<T: Transfer>(
         })
 }
 
-unsafe extern "C" fn wrap_finish<S: Serve<T>, T: Transfer>(
+unsafe extern "C" fn wrap_finish<S: VclBackend<T>, T: VclResponse>(
     ctxp: *const ffi::vrt_ctx,
     be: VCL_BACKEND,
 ) {
@@ -523,7 +526,7 @@ unsafe extern "C" fn wrap_finish<S: Serve<T>, T: Transfer>(
     let ctx = ctxp.as_ref().unwrap();
     let bo = ctx.bo.as_mut().unwrap();
 
-    // drop the Transfer
+    // drop the VclResponse
     if let Some(htc) = ptr::replace(&mut bo.htc, null_mut()).as_mut() {
         if let Some(val) = ptr::replace(&mut htc.priv_, null_mut())
             .cast::<T>()
@@ -537,7 +540,7 @@ unsafe extern "C" fn wrap_finish<S: Serve<T>, T: Transfer>(
     prev_backend.finish(&mut Ctx::from_ptr(ctx));
 }
 
-impl<S: Serve<T>, T: Transfer> Drop for Backend<S, T> {
+impl<S: VclBackend<T>, T: VclResponse> Drop for Backend<S, T> {
     fn drop(&mut self) {
         unsafe {
             ffi::VRT_DelDirector(&mut self.bep);
@@ -545,7 +548,7 @@ impl<S: Serve<T>, T: Transfer> Drop for Backend<S, T> {
     }
 }
 
-/// Return type for [`Serve::pipe`]
+/// Return type for [`VclBackend::pipe`]
 ///
 /// When piping a response, the backend is in charge of closing the file descriptor (which is done
 /// automatically by the rust layer), but also to provide how/why it got closed.
