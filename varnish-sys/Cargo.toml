@@ -12,6 +12,11 @@ rust-version.workspace = true
 license.workspace = true
 readme.workspace = true
 
+[features]
+default = []
+http0 = ["dep:http0"]
+http1 = ["dep:http1"]
+
 [lib]
 name = "varnish_sys"
 
@@ -26,6 +31,8 @@ pkg-config.workspace = true
 memchr.workspace = true
 serde.workspace = true
 thiserror.workspace = true
+http0 = { workspace = true, optional = true }
+http1 = { workspace = true, optional = true }
 
 [lints]
 workspace = true
