@@ -58,7 +58,7 @@ jobs:
         if: matrix.type == 'latest'
         run: |
           rustup install nightly --profile minimal
-          just test-publish
+          just clean test-publish
         #
         # MSRV Test - should be done after all the regular tests with the latest Rust are done
         #
