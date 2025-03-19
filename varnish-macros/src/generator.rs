@@ -178,6 +178,7 @@ impl Generator {
         cproto
     }
 
+    #[expect(clippy::too_many_lines)]
     fn render_generated_mod(&self, vmod: &VmodInfo) -> TokenStream {
         let cproto = self.generate_proto().force_cstr();
         let vmod_name_data = self.names.data_struct_name().to_ident();
