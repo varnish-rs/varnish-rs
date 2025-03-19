@@ -178,6 +178,7 @@ impl Generator {
         cproto
     }
 
+    #[expect(clippy::too_many_lines)]
     fn render_generated_mod(&self, vmod: &VmodInfo) -> TokenStream {
         let cproto = self.generate_proto().force_cstr();
         let vmod_name_data = self.names.data_struct_name().to_ident();
@@ -232,6 +233,15 @@ impl Generator {
             cproto_def = quote! {};
         }
 
+        let vmod_data_extras = if cfg!(varnishsys_77_vmod_data) {
+            quote! {
+                vcs: c"".as_ptr(),  // FIXME: value?
+                version: c"".as_ptr(),  // FIXME: value?
+            }
+        } else {
+            quote! {}
+        };
+
         quote!(
             #[allow(
                 non_snake_case,
@@ -277,6 +287,7 @@ impl Generator {
                     abi: VMOD_ABI_Version.as_ptr(),
                     json: JSON.as_ptr(),
                     proto: #cproto_ptr,
+                    #vmod_data_extras
                 };
 
                 const JSON: &CStr = #json;

@@ -1,0 +1,101 @@
+---
+source: varnish-macros/src/tests.rs
+---
+mod tuple {
+    #[allow(non_snake_case, unused_imports, unused_qualifications, unused_variables)]
+    #[allow(clippy::needless_question_mark, clippy::new_without_default)]
+    #[automatically_derived]
+    mod varnish_generated {
+        use std::ffi::{c_char, c_int, c_uint, c_void, CStr};
+        use std::ptr::null;
+        use varnish::ffi::{
+            VCL_BACKEND, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE, VCL_REAL,
+            VCL_STRING, VCL_VOID, VMOD_ABI_Version, VclEvent, vmod_data, vmod_priv,
+            vrt_ctx, VMOD_PRIV_METHODS_MAGIC, vmod_priv_methods,
+        };
+        use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
+        use super::*;
+        static PRIV_TASK_METHODS: vmod_priv_methods = vmod_priv_methods {
+            magic: VMOD_PRIV_METHODS_MAGIC,
+            type_: c"(PerTask1 , PerTask2)".as_ptr(),
+            fini: Some(vmod_priv::on_fini::<(PerTask1, PerTask2)>),
+        };
+        static PRIV_VCL_METHODS: vmod_priv_methods = vmod_priv_methods {
+            magic: VMOD_PRIV_METHODS_MAGIC,
+            type_: c"(PerVcl1 , PerVcl2)".as_ptr(),
+            fini: Some(vmod_priv::on_fini_per_vcl::<(PerVcl1, PerVcl2)>),
+        };
+        unsafe extern "C" fn vmod_c_on_event(
+            __ctx: *mut vrt_ctx,
+            __vp: *mut vmod_priv,
+            __ev: VclEvent,
+        ) -> VCL_INT {
+            let mut __obj_per_vcl = (*__vp).take_per_vcl::<(PerVcl1, PerVcl2)>();
+            super::on_event(&mut __obj_per_vcl.user_data);
+            let __result = VCL_INT(0);
+            (*__vp).put(__obj_per_vcl, &PRIV_VCL_METHODS);
+            __result
+        }
+        unsafe extern "C" fn vmod_c_per_tsk_val(
+            __ctx: *mut vrt_ctx,
+            tsk_vals: *mut vmod_priv,
+            vcl_vals: *const vmod_priv,
+        ) {
+            let mut __obj_per_task = (*tsk_vals).take();
+            let __result = super::per_tsk_val(
+                &mut __obj_per_task,
+                vcl_vals
+                    .as_ref()
+                    .and_then::<&PerVclState<_>, _>(|v| v.get_ref())
+                    .and_then(|v| v.get_user_data()),
+            );
+            if let Some(obj) = __obj_per_task {
+                (*tsk_vals).put(obj, &PRIV_TASK_METHODS);
+            }
+            __result
+        }
+        #[repr(C)]
+        pub struct VmodExports {
+            vmod_c_on_event: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __vp: *mut vmod_priv,
+                    __ev: VclEvent,
+                ) -> VCL_INT,
+            >,
+            vmod_c_per_tsk_val: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    tsk_vals: *mut vmod_priv,
+                    vcl_vals: *const vmod_priv,
+                ),
+            >,
+        }
+        pub static VMOD_EXPORTS: VmodExports = VmodExports {
+            vmod_c_on_event: Some(vmod_c_on_event),
+            vmod_c_per_tsk_val: Some(vmod_c_per_tsk_val),
+        };
+        #[allow(non_upper_case_globals)]
+        #[no_mangle]
+        pub static Vmod_tuple_Data: vmod_data = vmod_data {
+            vrt_major: 0,
+            vrt_minor: 0,
+            file_id: c"41c8f93b128c17e6327da85165e29dc663acf100bf5bfb80ffce76925121d6fe"
+                .as_ptr(),
+            name: c"tuple".as_ptr(),
+            func_name: c"Vmod_vmod_tuple_Func".as_ptr(),
+            func_len: ::std::mem::size_of::<VmodExports>() as c_int,
+            func: &VMOD_EXPORTS as *const _ as *const c_void,
+            abi: VMOD_ABI_Version.as_ptr(),
+            json: JSON.as_ptr(),
+            proto: null(),
+        };
+        const JSON: &CStr = c"VMOD_JSON_SPEC\u{2}\n[\n  [\n    \"$VMOD\",\n    \"1.0\",\n    \"tuple\",\n    \"Vmod_vmod_tuple_Func\",\n    \"41c8f93b128c17e6327da85165e29dc663acf100bf5bfb80ffce76925121d6fe\",\n    \"Varnish (version) (hash)\",\n    \"0\",\n    \"0\"\n  ],\n  [\n    \"$CPROTO\",\n    \"\\ntypedef VCL_VOID td_vmod_tuple_per_tsk_val(\\n    VRT_CTX,\\n    struct vmod_priv *,\\n    struct vmod_priv *\\n);\\n\\nstruct Vmod_vmod_tuple_Func {\\n  vmod_event_f *f_on_event;\\n  td_vmod_tuple_per_tsk_val *f_per_tsk_val;\\n};\\n\\nstatic struct Vmod_vmod_tuple_Func Vmod_vmod_tuple_Func;\"\n  ],\n  [\n    \"$EVENT\",\n    \"Vmod_vmod_tuple_Func.f_on_event\"\n  ],\n  [\n    \"$FUNC\",\n    \"per_tsk_val\",\n    [\n      [\n        \"VOID\"\n      ],\n      \"Vmod_vmod_tuple_Func.f_per_tsk_val\",\n      \"\",\n      [\n        \"PRIV_TASK\",\n        \"tsk_vals\"\n      ],\n      [\n        \"PRIV_VCL\",\n        \"vcl_vals\"\n      ]\n    ]\n  ]\n]\n\u{3}";
+    }
+    use super::{PerTask1, PerTask2, PerVcl1, PerVcl2};
+    pub fn on_event(vcl_vals: &mut Option<Box<(PerVcl1, PerVcl2)>>) {}
+    pub fn per_tsk_val(
+        tsk_vals: &mut Option<Box<(PerTask1, PerTask2)>>,
+        vcl_vals: Option<&(PerVcl1, PerVcl2)>,
+    ) {}
+}

@@ -568,8 +568,8 @@ pub const PTHREAD_ONCE_INIT: u32 = 0;
 pub const PTHREAD_BARRIER_SERIAL_THREAD: i32 = -1;
 pub const VRT_INTEGER_MAX: u64 = 999999999999999;
 pub const VRT_INTEGER_MIN: i64 = -999999999999999;
-pub const VRT_MAJOR_VERSION: u32 = 20;
-pub const VRT_MINOR_VERSION: u32 = 1;
+pub const VRT_MAJOR_VERSION: u32 = 21;
+pub const VRT_MINOR_VERSION: u32 = 0;
 pub const _STDINT_H: u32 = 1;
 pub const _BITS_WCHAR_H: u32 = 1;
 pub const _BITS_STDINT_UINTN_H: u32 = 1;
@@ -792,8 +792,6 @@ pub const OBJCORE_MAGIC: u32 = 1294996226;
 pub const BUSYOBJ_MAGIC: u32 = 599348583;
 pub const REQTOP_MAGIC: u32 = 1476123218;
 pub const REQ_MAGIC: u32 = 4215979885;
-pub const RES_ESI: u32 = 16;
-pub const RES_PIPE: u32 = 128;
 pub const SESS_MAGIC: u32 = 741317722;
 pub const HTTPH_R_PASS: u32 = 1;
 pub const HTTPH_R_FETCH: u32 = 2;
@@ -814,7 +812,7 @@ pub const VFP_CTX_MAGIC: u32 = 1641665509;
 pub const VDP_ENTRY_MAGIC: u32 = 893302657;
 pub const VDP_CTX_MAGIC: u32 = 3998227959;
 pub const VMOD_ABI_Version: &::std::ffi::CStr =
-    c"Varnish 7.6.1 c3d5882003eb87e5e93dc09fb9513ca96db3ca3c";
+    c"Varnish 7.7.0 bb7a918611ee85d17aefd07115fb8c66015151b5";
 pub const VSB_MAGIC: u32 = 1250090378;
 pub const VSB_FIXEDLEN: u32 = 0;
 pub const VSB_AUTOEXTEND: u32 = 1;
@@ -4503,10 +4501,12 @@ pub struct vmod_data {
     pub proto: *const ::std::ffi::c_char,
     pub json: *const ::std::ffi::c_char,
     pub abi: *const ::std::ffi::c_char,
+    pub vcs: *const ::std::ffi::c_char,
+    pub version: *const ::std::ffi::c_char,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of vmod_data"][::std::mem::size_of::<vmod_data>() - 72usize];
+    ["Size of vmod_data"][::std::mem::size_of::<vmod_data>() - 88usize];
     ["Alignment of vmod_data"][::std::mem::align_of::<vmod_data>() - 8usize];
     ["Offset of field: vmod_data::vrt_major"]
         [::std::mem::offset_of!(vmod_data, vrt_major) - 0usize];
@@ -4521,6 +4521,8 @@ const _: () = {
     ["Offset of field: vmod_data::proto"][::std::mem::offset_of!(vmod_data, proto) - 48usize];
     ["Offset of field: vmod_data::json"][::std::mem::offset_of!(vmod_data, json) - 56usize];
     ["Offset of field: vmod_data::abi"][::std::mem::offset_of!(vmod_data, abi) - 64usize];
+    ["Offset of field: vmod_data::vcs"][::std::mem::offset_of!(vmod_data, vcs) - 72usize];
+    ["Offset of field: vmod_data::version"][::std::mem::offset_of!(vmod_data, version) - 80usize];
 };
 impl Default for vmod_data {
     fn default() -> Self {
@@ -5854,7 +5856,6 @@ pub struct worker {
     pub vsl: *mut vsl_log,
     pub task: [pool_task; 1usize],
     pub lastused: vtim_real,
-    pub v1l: *mut v1l,
     pub cond: pthread_cond_t,
     pub aws: [ws; 1usize],
     pub cur_method: ::std::ffi::c_uint,
@@ -5863,7 +5864,7 @@ pub struct worker {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of worker"][::std::mem::size_of::<worker>() - 192usize];
+    ["Size of worker"][::std::mem::size_of::<worker>() - 184usize];
     ["Alignment of worker"][::std::mem::align_of::<worker>() - 8usize];
     ["Offset of field: worker::magic"][::std::mem::offset_of!(worker, magic) - 0usize];
     ["Offset of field: worker::strangelove"][::std::mem::offset_of!(worker, strangelove) - 4usize];
@@ -5873,13 +5874,12 @@ const _: () = {
     ["Offset of field: worker::vsl"][::std::mem::offset_of!(worker, vsl) - 32usize];
     ["Offset of field: worker::task"][::std::mem::offset_of!(worker, task) - 40usize];
     ["Offset of field: worker::lastused"][::std::mem::offset_of!(worker, lastused) - 72usize];
-    ["Offset of field: worker::v1l"][::std::mem::offset_of!(worker, v1l) - 80usize];
-    ["Offset of field: worker::cond"][::std::mem::offset_of!(worker, cond) - 88usize];
-    ["Offset of field: worker::aws"][::std::mem::offset_of!(worker, aws) - 136usize];
-    ["Offset of field: worker::cur_method"][::std::mem::offset_of!(worker, cur_method) - 176usize];
+    ["Offset of field: worker::cond"][::std::mem::offset_of!(worker, cond) - 80usize];
+    ["Offset of field: worker::aws"][::std::mem::offset_of!(worker, aws) - 128usize];
+    ["Offset of field: worker::cur_method"][::std::mem::offset_of!(worker, cur_method) - 168usize];
     ["Offset of field: worker::seen_methods"]
-        [::std::mem::offset_of!(worker, seen_methods) - 180usize];
-    ["Offset of field: worker::vpi"][::std::mem::offset_of!(worker, vpi) - 184usize];
+        [::std::mem::offset_of!(worker, seen_methods) - 172usize];
+    ["Offset of field: worker::vpi"][::std::mem::offset_of!(worker, vpi) - 176usize];
 };
 impl Default for worker {
     fn default() -> Self {
@@ -6165,12 +6165,14 @@ pub enum DirectorState {
 pub struct busyobj {
     pub magic: ::std::ffi::c_uint,
     pub end: *mut ::std::ffi::c_char,
+    pub max_retries: ::std::ffi::c_uint,
     pub retries: ::std::ffi::c_uint,
     pub req: *mut req,
     pub sp: *mut sess,
     pub wrk: *mut worker,
     pub vfc: *mut vfp_ctx,
     pub vfp_filter_list: *const ::std::ffi::c_char,
+    pub vdp_filter_list: *const ::std::ffi::c_char,
     pub ws: [ws; 1usize],
     pub ws_bo: usize,
     pub bereq0: *mut http,
@@ -6182,6 +6184,9 @@ pub struct busyobj {
     pub no_retry: *const ::std::ffi::c_char,
     pub htc: *mut http_conn,
     pub fetch_task: [pool_task; 1usize],
+    pub err_reason: *const ::std::ffi::c_char,
+    pub director_state: DirectorState,
+    pub err_code: u16,
     pub _bitfield_align_1: [u8; 0],
     pub _bitfield_1: __BindgenBitfieldUnit<[u8; 2usize]>,
     pub connect_timeout: vtim_dur,
@@ -6195,70 +6200,71 @@ pub struct busyobj {
     pub storage: *const stevedore,
     pub director_req: *const director,
     pub director_resp: *const director,
-    pub director_state: DirectorState,
     pub vcl: *mut vcl,
     pub vsl: [vsl_log; 1usize],
     pub digest: [u8; 32usize],
     pub privs: [vrt_privs; 1usize],
-    pub err_code: u16,
-    pub err_reason: *const ::std::ffi::c_char,
     pub client_identity: *const ::std::ffi::c_char,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of busyobj"][::std::mem::size_of::<busyobj>() - 448usize];
+    ["Size of busyobj"][::std::mem::size_of::<busyobj>() - 440usize];
     ["Alignment of busyobj"][::std::mem::align_of::<busyobj>() - 8usize];
     ["Offset of field: busyobj::magic"][::std::mem::offset_of!(busyobj, magic) - 0usize];
     ["Offset of field: busyobj::end"][::std::mem::offset_of!(busyobj, end) - 8usize];
-    ["Offset of field: busyobj::retries"][::std::mem::offset_of!(busyobj, retries) - 16usize];
+    ["Offset of field: busyobj::max_retries"]
+        [::std::mem::offset_of!(busyobj, max_retries) - 16usize];
+    ["Offset of field: busyobj::retries"][::std::mem::offset_of!(busyobj, retries) - 20usize];
     ["Offset of field: busyobj::req"][::std::mem::offset_of!(busyobj, req) - 24usize];
     ["Offset of field: busyobj::sp"][::std::mem::offset_of!(busyobj, sp) - 32usize];
     ["Offset of field: busyobj::wrk"][::std::mem::offset_of!(busyobj, wrk) - 40usize];
     ["Offset of field: busyobj::vfc"][::std::mem::offset_of!(busyobj, vfc) - 48usize];
     ["Offset of field: busyobj::vfp_filter_list"]
         [::std::mem::offset_of!(busyobj, vfp_filter_list) - 56usize];
-    ["Offset of field: busyobj::ws"][::std::mem::offset_of!(busyobj, ws) - 64usize];
-    ["Offset of field: busyobj::ws_bo"][::std::mem::offset_of!(busyobj, ws_bo) - 104usize];
-    ["Offset of field: busyobj::bereq0"][::std::mem::offset_of!(busyobj, bereq0) - 112usize];
-    ["Offset of field: busyobj::bereq"][::std::mem::offset_of!(busyobj, bereq) - 120usize];
-    ["Offset of field: busyobj::beresp"][::std::mem::offset_of!(busyobj, beresp) - 128usize];
+    ["Offset of field: busyobj::vdp_filter_list"]
+        [::std::mem::offset_of!(busyobj, vdp_filter_list) - 64usize];
+    ["Offset of field: busyobj::ws"][::std::mem::offset_of!(busyobj, ws) - 72usize];
+    ["Offset of field: busyobj::ws_bo"][::std::mem::offset_of!(busyobj, ws_bo) - 112usize];
+    ["Offset of field: busyobj::bereq0"][::std::mem::offset_of!(busyobj, bereq0) - 120usize];
+    ["Offset of field: busyobj::bereq"][::std::mem::offset_of!(busyobj, bereq) - 128usize];
+    ["Offset of field: busyobj::beresp"][::std::mem::offset_of!(busyobj, beresp) - 136usize];
     ["Offset of field: busyobj::bereq_body"]
-        [::std::mem::offset_of!(busyobj, bereq_body) - 136usize];
-    ["Offset of field: busyobj::stale_oc"][::std::mem::offset_of!(busyobj, stale_oc) - 144usize];
+        [::std::mem::offset_of!(busyobj, bereq_body) - 144usize];
+    ["Offset of field: busyobj::stale_oc"][::std::mem::offset_of!(busyobj, stale_oc) - 152usize];
     ["Offset of field: busyobj::fetch_objcore"]
-        [::std::mem::offset_of!(busyobj, fetch_objcore) - 152usize];
-    ["Offset of field: busyobj::no_retry"][::std::mem::offset_of!(busyobj, no_retry) - 160usize];
-    ["Offset of field: busyobj::htc"][::std::mem::offset_of!(busyobj, htc) - 168usize];
+        [::std::mem::offset_of!(busyobj, fetch_objcore) - 160usize];
+    ["Offset of field: busyobj::no_retry"][::std::mem::offset_of!(busyobj, no_retry) - 168usize];
+    ["Offset of field: busyobj::htc"][::std::mem::offset_of!(busyobj, htc) - 176usize];
     ["Offset of field: busyobj::fetch_task"]
-        [::std::mem::offset_of!(busyobj, fetch_task) - 176usize];
-    ["Offset of field: busyobj::connect_timeout"]
-        [::std::mem::offset_of!(busyobj, connect_timeout) - 216usize];
-    ["Offset of field: busyobj::first_byte_timeout"]
-        [::std::mem::offset_of!(busyobj, first_byte_timeout) - 224usize];
-    ["Offset of field: busyobj::between_bytes_timeout"]
-        [::std::mem::offset_of!(busyobj, between_bytes_timeout) - 232usize];
-    ["Offset of field: busyobj::task_deadline"]
-        [::std::mem::offset_of!(busyobj, task_deadline) - 240usize];
-    ["Offset of field: busyobj::t_first"][::std::mem::offset_of!(busyobj, t_first) - 248usize];
-    ["Offset of field: busyobj::t_resp"][::std::mem::offset_of!(busyobj, t_resp) - 256usize];
-    ["Offset of field: busyobj::t_prev"][::std::mem::offset_of!(busyobj, t_prev) - 264usize];
-    ["Offset of field: busyobj::acct"][::std::mem::offset_of!(busyobj, acct) - 272usize];
-    ["Offset of field: busyobj::storage"][::std::mem::offset_of!(busyobj, storage) - 304usize];
-    ["Offset of field: busyobj::director_req"]
-        [::std::mem::offset_of!(busyobj, director_req) - 312usize];
-    ["Offset of field: busyobj::director_resp"]
-        [::std::mem::offset_of!(busyobj, director_resp) - 320usize];
-    ["Offset of field: busyobj::director_state"]
-        [::std::mem::offset_of!(busyobj, director_state) - 328usize];
-    ["Offset of field: busyobj::vcl"][::std::mem::offset_of!(busyobj, vcl) - 336usize];
-    ["Offset of field: busyobj::vsl"][::std::mem::offset_of!(busyobj, vsl) - 344usize];
-    ["Offset of field: busyobj::digest"][::std::mem::offset_of!(busyobj, digest) - 384usize];
-    ["Offset of field: busyobj::privs"][::std::mem::offset_of!(busyobj, privs) - 416usize];
-    ["Offset of field: busyobj::err_code"][::std::mem::offset_of!(busyobj, err_code) - 424usize];
+        [::std::mem::offset_of!(busyobj, fetch_task) - 184usize];
     ["Offset of field: busyobj::err_reason"]
-        [::std::mem::offset_of!(busyobj, err_reason) - 432usize];
+        [::std::mem::offset_of!(busyobj, err_reason) - 216usize];
+    ["Offset of field: busyobj::director_state"]
+        [::std::mem::offset_of!(busyobj, director_state) - 224usize];
+    ["Offset of field: busyobj::err_code"][::std::mem::offset_of!(busyobj, err_code) - 228usize];
+    ["Offset of field: busyobj::connect_timeout"]
+        [::std::mem::offset_of!(busyobj, connect_timeout) - 232usize];
+    ["Offset of field: busyobj::first_byte_timeout"]
+        [::std::mem::offset_of!(busyobj, first_byte_timeout) - 240usize];
+    ["Offset of field: busyobj::between_bytes_timeout"]
+        [::std::mem::offset_of!(busyobj, between_bytes_timeout) - 248usize];
+    ["Offset of field: busyobj::task_deadline"]
+        [::std::mem::offset_of!(busyobj, task_deadline) - 256usize];
+    ["Offset of field: busyobj::t_first"][::std::mem::offset_of!(busyobj, t_first) - 264usize];
+    ["Offset of field: busyobj::t_resp"][::std::mem::offset_of!(busyobj, t_resp) - 272usize];
+    ["Offset of field: busyobj::t_prev"][::std::mem::offset_of!(busyobj, t_prev) - 280usize];
+    ["Offset of field: busyobj::acct"][::std::mem::offset_of!(busyobj, acct) - 288usize];
+    ["Offset of field: busyobj::storage"][::std::mem::offset_of!(busyobj, storage) - 320usize];
+    ["Offset of field: busyobj::director_req"]
+        [::std::mem::offset_of!(busyobj, director_req) - 328usize];
+    ["Offset of field: busyobj::director_resp"]
+        [::std::mem::offset_of!(busyobj, director_resp) - 336usize];
+    ["Offset of field: busyobj::vcl"][::std::mem::offset_of!(busyobj, vcl) - 344usize];
+    ["Offset of field: busyobj::vsl"][::std::mem::offset_of!(busyobj, vsl) - 352usize];
+    ["Offset of field: busyobj::digest"][::std::mem::offset_of!(busyobj, digest) - 392usize];
+    ["Offset of field: busyobj::privs"][::std::mem::offset_of!(busyobj, privs) - 424usize];
     ["Offset of field: busyobj::client_identity"]
-        [::std::mem::offset_of!(busyobj, client_identity) - 440usize];
+        [::std::mem::offset_of!(busyobj, client_identity) - 432usize];
 };
 impl Default for busyobj {
     fn default() -> Self {
@@ -6687,16 +6693,16 @@ impl Default for reqtop {
 #[derive(Debug, Copy, Clone)]
 pub struct req {
     pub magic: ::std::ffi::c_uint,
+    pub esi_level: ::std::ffi::c_uint,
     pub req_body_status: body_status_t,
     pub doclose: stream_close_t,
     pub restarts: ::std::ffi::c_uint,
-    pub esi_level: ::std::ffi::c_uint,
-    pub res_mode: ::std::ffi::c_uint,
+    pub max_restarts: ::std::ffi::c_uint,
     pub req_step: *const req_step,
     pub top: *mut reqtop,
+    pub err_code: u16,
     pub _bitfield_align_1: [u8; 0],
     pub _bitfield_1: __BindgenBitfieldUnit<[u8; 2usize]>,
-    pub err_code: u16,
     pub err_reason: *const ::std::ffi::c_char,
     pub sp: *mut sess,
     pub wrk: *mut worker,
@@ -6729,8 +6735,10 @@ pub struct req {
     pub ws: [ws; 1usize],
     pub objcore: *mut objcore,
     pub stale_oc: *mut objcore,
+    pub boc: *mut boc,
     pub vdc: *mut vdp_ctx,
     pub vdp_filter_list: *const ::std::ffi::c_char,
+    pub vfp_filter_list: *const ::std::ffi::c_char,
     pub vsl: [vsl_log; 1usize],
     pub acct: acct_req,
     pub privs: [vrt_privs; 1usize],
@@ -6762,59 +6770,62 @@ impl Default for req__bindgen_ty_1 {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of req"][::std::mem::size_of::<req>() - 512usize];
+    ["Size of req"][::std::mem::size_of::<req>() - 520usize];
     ["Alignment of req"][::std::mem::align_of::<req>() - 8usize];
     ["Offset of field: req::magic"][::std::mem::offset_of!(req, magic) - 0usize];
+    ["Offset of field: req::esi_level"][::std::mem::offset_of!(req, esi_level) - 4usize];
     ["Offset of field: req::req_body_status"]
         [::std::mem::offset_of!(req, req_body_status) - 8usize];
     ["Offset of field: req::doclose"][::std::mem::offset_of!(req, doclose) - 16usize];
     ["Offset of field: req::restarts"][::std::mem::offset_of!(req, restarts) - 24usize];
-    ["Offset of field: req::esi_level"][::std::mem::offset_of!(req, esi_level) - 28usize];
-    ["Offset of field: req::res_mode"][::std::mem::offset_of!(req, res_mode) - 32usize];
-    ["Offset of field: req::req_step"][::std::mem::offset_of!(req, req_step) - 40usize];
-    ["Offset of field: req::top"][::std::mem::offset_of!(req, top) - 48usize];
-    ["Offset of field: req::err_code"][::std::mem::offset_of!(req, err_code) - 58usize];
-    ["Offset of field: req::err_reason"][::std::mem::offset_of!(req, err_reason) - 64usize];
-    ["Offset of field: req::sp"][::std::mem::offset_of!(req, sp) - 72usize];
-    ["Offset of field: req::wrk"][::std::mem::offset_of!(req, wrk) - 80usize];
-    ["Offset of field: req::task"][::std::mem::offset_of!(req, task) - 88usize];
-    ["Offset of field: req::transport"][::std::mem::offset_of!(req, transport) - 120usize];
+    ["Offset of field: req::max_restarts"][::std::mem::offset_of!(req, max_restarts) - 28usize];
+    ["Offset of field: req::req_step"][::std::mem::offset_of!(req, req_step) - 32usize];
+    ["Offset of field: req::top"][::std::mem::offset_of!(req, top) - 40usize];
+    ["Offset of field: req::err_code"][::std::mem::offset_of!(req, err_code) - 48usize];
+    ["Offset of field: req::err_reason"][::std::mem::offset_of!(req, err_reason) - 56usize];
+    ["Offset of field: req::sp"][::std::mem::offset_of!(req, sp) - 64usize];
+    ["Offset of field: req::wrk"][::std::mem::offset_of!(req, wrk) - 72usize];
+    ["Offset of field: req::task"][::std::mem::offset_of!(req, task) - 80usize];
+    ["Offset of field: req::transport"][::std::mem::offset_of!(req, transport) - 112usize];
     ["Offset of field: req::transport_priv"]
-        [::std::mem::offset_of!(req, transport_priv) - 128usize];
-    ["Offset of field: req::w_list"][::std::mem::offset_of!(req, w_list) - 136usize];
-    ["Offset of field: req::body_oc"][::std::mem::offset_of!(req, body_oc) - 152usize];
-    ["Offset of field: req::hash_objhead"][::std::mem::offset_of!(req, hash_objhead) - 160usize];
-    ["Offset of field: req::vary_b"][::std::mem::offset_of!(req, vary_b) - 168usize];
-    ["Offset of field: req::vary_e"][::std::mem::offset_of!(req, vary_e) - 176usize];
-    ["Offset of field: req::digest"][::std::mem::offset_of!(req, digest) - 184usize];
-    ["Offset of field: req::d_ttl"][::std::mem::offset_of!(req, d_ttl) - 216usize];
-    ["Offset of field: req::d_grace"][::std::mem::offset_of!(req, d_grace) - 224usize];
-    ["Offset of field: req::storage"][::std::mem::offset_of!(req, storage) - 232usize];
-    ["Offset of field: req::director_hint"][::std::mem::offset_of!(req, director_hint) - 240usize];
-    ["Offset of field: req::vcl"][::std::mem::offset_of!(req, vcl) - 248usize];
-    ["Offset of field: req::ws_req"][::std::mem::offset_of!(req, ws_req) - 256usize];
-    ["Offset of field: req::t_first"][::std::mem::offset_of!(req, t_first) - 264usize];
-    ["Offset of field: req::t_prev"][::std::mem::offset_of!(req, t_prev) - 272usize];
-    ["Offset of field: req::t_req"][::std::mem::offset_of!(req, t_req) - 280usize];
-    ["Offset of field: req::t_resp"][::std::mem::offset_of!(req, t_resp) - 288usize];
-    ["Offset of field: req::htc"][::std::mem::offset_of!(req, htc) - 296usize];
-    ["Offset of field: req::vfc"][::std::mem::offset_of!(req, vfc) - 304usize];
+        [::std::mem::offset_of!(req, transport_priv) - 120usize];
+    ["Offset of field: req::w_list"][::std::mem::offset_of!(req, w_list) - 128usize];
+    ["Offset of field: req::body_oc"][::std::mem::offset_of!(req, body_oc) - 144usize];
+    ["Offset of field: req::hash_objhead"][::std::mem::offset_of!(req, hash_objhead) - 152usize];
+    ["Offset of field: req::vary_b"][::std::mem::offset_of!(req, vary_b) - 160usize];
+    ["Offset of field: req::vary_e"][::std::mem::offset_of!(req, vary_e) - 168usize];
+    ["Offset of field: req::digest"][::std::mem::offset_of!(req, digest) - 176usize];
+    ["Offset of field: req::d_ttl"][::std::mem::offset_of!(req, d_ttl) - 208usize];
+    ["Offset of field: req::d_grace"][::std::mem::offset_of!(req, d_grace) - 216usize];
+    ["Offset of field: req::storage"][::std::mem::offset_of!(req, storage) - 224usize];
+    ["Offset of field: req::director_hint"][::std::mem::offset_of!(req, director_hint) - 232usize];
+    ["Offset of field: req::vcl"][::std::mem::offset_of!(req, vcl) - 240usize];
+    ["Offset of field: req::ws_req"][::std::mem::offset_of!(req, ws_req) - 248usize];
+    ["Offset of field: req::t_first"][::std::mem::offset_of!(req, t_first) - 256usize];
+    ["Offset of field: req::t_prev"][::std::mem::offset_of!(req, t_prev) - 264usize];
+    ["Offset of field: req::t_req"][::std::mem::offset_of!(req, t_req) - 272usize];
+    ["Offset of field: req::t_resp"][::std::mem::offset_of!(req, t_resp) - 280usize];
+    ["Offset of field: req::htc"][::std::mem::offset_of!(req, htc) - 288usize];
+    ["Offset of field: req::vfc"][::std::mem::offset_of!(req, vfc) - 296usize];
     ["Offset of field: req::client_identity"]
-        [::std::mem::offset_of!(req, client_identity) - 312usize];
-    ["Offset of field: req::http"][::std::mem::offset_of!(req, http) - 320usize];
-    ["Offset of field: req::http0"][::std::mem::offset_of!(req, http0) - 328usize];
-    ["Offset of field: req::resp"][::std::mem::offset_of!(req, resp) - 336usize];
-    ["Offset of field: req::resp_len"][::std::mem::offset_of!(req, resp_len) - 344usize];
-    ["Offset of field: req::ws"][::std::mem::offset_of!(req, ws) - 352usize];
-    ["Offset of field: req::objcore"][::std::mem::offset_of!(req, objcore) - 392usize];
-    ["Offset of field: req::stale_oc"][::std::mem::offset_of!(req, stale_oc) - 400usize];
+        [::std::mem::offset_of!(req, client_identity) - 304usize];
+    ["Offset of field: req::http"][::std::mem::offset_of!(req, http) - 312usize];
+    ["Offset of field: req::http0"][::std::mem::offset_of!(req, http0) - 320usize];
+    ["Offset of field: req::resp"][::std::mem::offset_of!(req, resp) - 328usize];
+    ["Offset of field: req::resp_len"][::std::mem::offset_of!(req, resp_len) - 336usize];
+    ["Offset of field: req::ws"][::std::mem::offset_of!(req, ws) - 344usize];
+    ["Offset of field: req::objcore"][::std::mem::offset_of!(req, objcore) - 384usize];
+    ["Offset of field: req::stale_oc"][::std::mem::offset_of!(req, stale_oc) - 392usize];
+    ["Offset of field: req::boc"][::std::mem::offset_of!(req, boc) - 400usize];
     ["Offset of field: req::vdc"][::std::mem::offset_of!(req, vdc) - 408usize];
     ["Offset of field: req::vdp_filter_list"]
         [::std::mem::offset_of!(req, vdp_filter_list) - 416usize];
-    ["Offset of field: req::vsl"][::std::mem::offset_of!(req, vsl) - 424usize];
-    ["Offset of field: req::acct"][::std::mem::offset_of!(req, acct) - 464usize];
-    ["Offset of field: req::privs"][::std::mem::offset_of!(req, privs) - 496usize];
-    ["Offset of field: req::vcf"][::std::mem::offset_of!(req, vcf) - 504usize];
+    ["Offset of field: req::vfp_filter_list"]
+        [::std::mem::offset_of!(req, vfp_filter_list) - 424usize];
+    ["Offset of field: req::vsl"][::std::mem::offset_of!(req, vsl) - 432usize];
+    ["Offset of field: req::acct"][::std::mem::offset_of!(req, acct) - 472usize];
+    ["Offset of field: req::privs"][::std::mem::offset_of!(req, privs) - 504usize];
+    ["Offset of field: req::vcf"][::std::mem::offset_of!(req, vcf) - 512usize];
 };
 impl Default for req {
     fn default() -> Self {
@@ -7124,14 +7135,80 @@ impl req {
         }
     }
     #[inline]
-    pub fn is_hitmiss(&self) -> ::std::ffi::c_uint {
+    pub fn res_esi(&self) -> ::std::ffi::c_uint {
         unsafe { ::std::mem::transmute(self._bitfield_1.get(9usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_res_esi(&mut self, val: ::std::ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            self._bitfield_1.set(9usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn res_esi_raw(this: *const Self) -> ::std::ffi::c_uint {
+        unsafe {
+            ::std::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::std::ptr::addr_of!((*this)._bitfield_1),
+                9usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_res_esi_raw(this: *mut Self, val: ::std::ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::std::ptr::addr_of_mut!((*this)._bitfield_1),
+                9usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn res_pipe(&self) -> ::std::ffi::c_uint {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(10usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_res_pipe(&mut self, val: ::std::ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            self._bitfield_1.set(10usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn res_pipe_raw(this: *const Self) -> ::std::ffi::c_uint {
+        unsafe {
+            ::std::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::std::ptr::addr_of!((*this)._bitfield_1),
+                10usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_res_pipe_raw(this: *mut Self, val: ::std::ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::std::ptr::addr_of_mut!((*this)._bitfield_1),
+                10usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn is_hitmiss(&self) -> ::std::ffi::c_uint {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(11usize, 1u8) as u32) }
     }
     #[inline]
     pub fn set_is_hitmiss(&mut self, val: ::std::ffi::c_uint) {
         unsafe {
             let val: u32 = ::std::mem::transmute(val);
-            self._bitfield_1.set(9usize, 1u8, val as u64)
+            self._bitfield_1.set(11usize, 1u8, val as u64)
         }
     }
     #[inline]
@@ -7139,7 +7216,7 @@ impl req {
         unsafe {
             ::std::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
                 ::std::ptr::addr_of!((*this)._bitfield_1),
-                9usize,
+                11usize,
                 1u8,
             ) as u32)
         }
@@ -7150,7 +7227,7 @@ impl req {
             let val: u32 = ::std::mem::transmute(val);
             <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
                 ::std::ptr::addr_of_mut!((*this)._bitfield_1),
-                9usize,
+                11usize,
                 1u8,
                 val as u64,
             )
@@ -7158,13 +7235,13 @@ impl req {
     }
     #[inline]
     pub fn is_hitpass(&self) -> ::std::ffi::c_uint {
-        unsafe { ::std::mem::transmute(self._bitfield_1.get(10usize, 1u8) as u32) }
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(12usize, 1u8) as u32) }
     }
     #[inline]
     pub fn set_is_hitpass(&mut self, val: ::std::ffi::c_uint) {
         unsafe {
             let val: u32 = ::std::mem::transmute(val);
-            self._bitfield_1.set(10usize, 1u8, val as u64)
+            self._bitfield_1.set(12usize, 1u8, val as u64)
         }
     }
     #[inline]
@@ -7172,7 +7249,7 @@ impl req {
         unsafe {
             ::std::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
                 ::std::ptr::addr_of!((*this)._bitfield_1),
-                10usize,
+                12usize,
                 1u8,
             ) as u32)
         }
@@ -7183,7 +7260,7 @@ impl req {
             let val: u32 = ::std::mem::transmute(val);
             <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
                 ::std::ptr::addr_of_mut!((*this)._bitfield_1),
-                10usize,
+                12usize,
                 1u8,
                 val as u64,
             )
@@ -7191,13 +7268,13 @@ impl req {
     }
     #[inline]
     pub fn trace(&self) -> ::std::ffi::c_uint {
-        unsafe { ::std::mem::transmute(self._bitfield_1.get(11usize, 1u8) as u32) }
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(13usize, 1u8) as u32) }
     }
     #[inline]
     pub fn set_trace(&mut self, val: ::std::ffi::c_uint) {
         unsafe {
             let val: u32 = ::std::mem::transmute(val);
-            self._bitfield_1.set(11usize, 1u8, val as u64)
+            self._bitfield_1.set(13usize, 1u8, val as u64)
         }
     }
     #[inline]
@@ -7205,7 +7282,7 @@ impl req {
         unsafe {
             ::std::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
                 ::std::ptr::addr_of!((*this)._bitfield_1),
-                11usize,
+                13usize,
                 1u8,
             ) as u32)
         }
@@ -7216,7 +7293,7 @@ impl req {
             let val: u32 = ::std::mem::transmute(val);
             <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
                 ::std::ptr::addr_of_mut!((*this)._bitfield_1),
-                11usize,
+                13usize,
                 1u8,
                 val as u64,
             )
@@ -7233,6 +7310,8 @@ impl req {
         want100cont: ::std::ffi::c_uint,
         late100cont: ::std::ffi::c_uint,
         req_reset: ::std::ffi::c_uint,
+        res_esi: ::std::ffi::c_uint,
+        res_pipe: ::std::ffi::c_uint,
         is_hitmiss: ::std::ffi::c_uint,
         is_hitpass: ::std::ffi::c_uint,
         trace: ::std::ffi::c_uint,
@@ -7275,14 +7354,22 @@ impl req {
             req_reset as u64
         });
         __bindgen_bitfield_unit.set(9usize, 1u8, {
+            let res_esi: u32 = unsafe { ::std::mem::transmute(res_esi) };
+            res_esi as u64
+        });
+        __bindgen_bitfield_unit.set(10usize, 1u8, {
+            let res_pipe: u32 = unsafe { ::std::mem::transmute(res_pipe) };
+            res_pipe as u64
+        });
+        __bindgen_bitfield_unit.set(11usize, 1u8, {
             let is_hitmiss: u32 = unsafe { ::std::mem::transmute(is_hitmiss) };
             is_hitmiss as u64
         });
-        __bindgen_bitfield_unit.set(10usize, 1u8, {
+        __bindgen_bitfield_unit.set(12usize, 1u8, {
             let is_hitpass: u32 = unsafe { ::std::mem::transmute(is_hitpass) };
             is_hitpass as u64
         });
-        __bindgen_bitfield_unit.set(11usize, 1u8, {
+        __bindgen_bitfield_unit.set(13usize, 1u8, {
             let trace: u32 = unsafe { ::std::mem::transmute(trace) };
             trace as u64
         });
@@ -7827,6 +7914,9 @@ unsafe extern "C" {
     pub static mut lck_conn_pool: *mut VSC_lck;
 }
 unsafe extern "C" {
+    pub static mut lck_dead_pool: *mut VSC_lck;
+}
+unsafe extern "C" {
     pub static mut lck_vbe: *mut VSC_lck;
 }
 unsafe extern "C" {
@@ -8120,7 +8210,8 @@ pub struct vcldir {
     pub dir: *mut director,
     pub vcl: *mut vcl,
     pub methods: *const vdi_methods,
-    pub list: vcldir__bindgen_ty_1,
+    pub directors_list: vcldir__bindgen_ty_1,
+    pub resigning_list: vcldir__bindgen_ty_2,
     pub admin_health: *mut vdi_ahealth,
     pub health_changed: vtim_real,
     pub cli_name: *mut ::std::ffi::c_char,
@@ -8149,9 +8240,33 @@ impl Default for vcldir__bindgen_ty_1 {
         }
     }
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct vcldir__bindgen_ty_2 {
+    pub vtqe_next: *mut vcldir,
+    pub vtqe_prev: *mut *mut vcldir,
+}
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of vcldir"][::std::mem::size_of::<vcldir>() - 88usize];
+    ["Size of vcldir__bindgen_ty_2"][::std::mem::size_of::<vcldir__bindgen_ty_2>() - 16usize];
+    ["Alignment of vcldir__bindgen_ty_2"][::std::mem::align_of::<vcldir__bindgen_ty_2>() - 8usize];
+    ["Offset of field: vcldir__bindgen_ty_2::vtqe_next"]
+        [::std::mem::offset_of!(vcldir__bindgen_ty_2, vtqe_next) - 0usize];
+    ["Offset of field: vcldir__bindgen_ty_2::vtqe_prev"]
+        [::std::mem::offset_of!(vcldir__bindgen_ty_2, vtqe_prev) - 8usize];
+};
+impl Default for vcldir__bindgen_ty_2 {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of vcldir"][::std::mem::size_of::<vcldir>() - 104usize];
     ["Alignment of vcldir"][::std::mem::align_of::<vcldir>() - 8usize];
     ["Offset of field: vcldir::magic"][::std::mem::offset_of!(vcldir, magic) - 0usize];
     ["Offset of field: vcldir::refcnt"][::std::mem::offset_of!(vcldir, refcnt) - 4usize];
@@ -8160,12 +8275,15 @@ const _: () = {
     ["Offset of field: vcldir::dir"][::std::mem::offset_of!(vcldir, dir) - 24usize];
     ["Offset of field: vcldir::vcl"][::std::mem::offset_of!(vcldir, vcl) - 32usize];
     ["Offset of field: vcldir::methods"][::std::mem::offset_of!(vcldir, methods) - 40usize];
-    ["Offset of field: vcldir::list"][::std::mem::offset_of!(vcldir, list) - 48usize];
+    ["Offset of field: vcldir::directors_list"]
+        [::std::mem::offset_of!(vcldir, directors_list) - 48usize];
+    ["Offset of field: vcldir::resigning_list"]
+        [::std::mem::offset_of!(vcldir, resigning_list) - 64usize];
     ["Offset of field: vcldir::admin_health"]
-        [::std::mem::offset_of!(vcldir, admin_health) - 64usize];
+        [::std::mem::offset_of!(vcldir, admin_health) - 80usize];
     ["Offset of field: vcldir::health_changed"]
-        [::std::mem::offset_of!(vcldir, health_changed) - 72usize];
-    ["Offset of field: vcldir::cli_name"][::std::mem::offset_of!(vcldir, cli_name) - 80usize];
+        [::std::mem::offset_of!(vcldir, health_changed) - 88usize];
+    ["Offset of field: vcldir::cli_name"][::std::mem::offset_of!(vcldir, cli_name) - 96usize];
 };
 impl Default for vcldir {
     fn default() -> Self {
@@ -9090,11 +9208,6 @@ impl Default for __va_list_tag {
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct vrt_priv {
-    pub _address: u8,
-}
-#[repr(C)]
-#[derive(Debug, Default, Copy, Clone)]
-pub struct v1l {
     pub _address: u8,
 }
 #[repr(C)]
