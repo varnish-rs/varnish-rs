@@ -59,33 +59,21 @@ jobs:
         run: |
           rustup install nightly --profile minimal
           just test-publish
-
-  msrv:
-    name: Test MSRV
-    runs-on: ubuntu-latest
-    env:
-      RUST_BACKTRACE: 1
-      RUSTDOCFLAGS: -D warnings
-      RUSTFLAGS: -D warnings
-    steps:
-      - uses: taiki-e/install-action@v2
-        with: { tool: just }
-      - uses: actions/checkout@v4
-      - uses: Swatinem/rust-cache@v2
-        if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
-      - name: Read crate metadata
-        id: metadata
-        run: echo "rust-version=$(sed -ne 's/rust-version *= *\"\(.*\)\"/\1/p' Cargo.toml)" >> $GITHUB_OUTPUT
-      - name: Install Rust
+        #
+        # MSRV Test - should be done after all the regular tests with the latest Rust are done
+        #
+      - if: matrix.type == 'latest'
+        name: Read crate metadata
+        id: msrv
+        run: echo "value=$(sed -ne 's/rust-version *= *\"\(.*\)\"/\1/p' Cargo.toml)" >> $GITHUB_OUTPUT
+      - if: matrix.type == 'latest'
+        name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: ${{ steps.metadata.outputs.rust-version }}
+          toolchain: ${{ steps.msrv.outputs.value }}
           components: rustfmt
-      - name: install varnish-dev
-        run: |
-          curl -s https://packagecloud.io/install/repositories/varnishcache/varnish76/script.deb.sh | sudo bash
-          sudo apt-get install -y varnish-dev
-      - run: just -v ci-test-msrv
+      - if: matrix.type == 'latest'
+        run: just -v ci-test-msrv
 
   # Ensure that the docs can be built at docs.rs without varnish dependencies
   test-docs-rs:
