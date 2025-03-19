@@ -68,6 +68,8 @@ mod tuple {
             abi: VMOD_ABI_Version.as_ptr(),
             json: JSON.as_ptr(),
             proto: null(),
+            vcs: c"".as_ptr(),
+            version: c"".as_ptr(),
         };
         const JSON: &CStr = c"VMOD_JSON_SPEC\u{2}\n[\n  [\n    \"$VMOD\",\n    \"1.0\",\n    \"tuple\",\n    \"Vmod_vmod_tuple_Func\",\n    \"fd153c857e1a4787114cd9261faa83d258aa10401348fb167822ff1c1467c4f1\",\n    \"Varnish (version) (hash)\",\n    \"0\",\n    \"0\"\n  ],\n  [\n    \"$CPROTO\",\n    \"\\ntypedef VCL_STRING td_vmod_tuple_ref_to_slice_lifetime(\\n    VRT_CTX,\\n    struct vmod_priv *\\n);\\n\\nstruct Vmod_vmod_tuple_Func {\\n  td_vmod_tuple_ref_to_slice_lifetime *f_ref_to_slice_lifetime;\\n};\\n\\nstatic struct Vmod_vmod_tuple_Func Vmod_vmod_tuple_Func;\"\n  ],\n  [\n    \"$FUNC\",\n    \"ref_to_slice_lifetime\",\n    [\n      [\n        \"STRING\"\n      ],\n      \"Vmod_vmod_tuple_Func.f_ref_to_slice_lifetime\",\n      \"\",\n      [\n        \"PRIV_TASK\",\n        \"tsk_vals\"\n      ]\n    ]\n  ]\n]\n\u{3}";
     }

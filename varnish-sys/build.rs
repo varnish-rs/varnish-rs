@@ -5,7 +5,7 @@ use bindgen_helpers as bindgen;
 use bindgen_helpers::{rename_enum, Renamer};
 
 static BINDINGS_FILE: &str = "bindings.for-docs";
-static BINDINGS_FILE_VER: &str = "7.6.1";
+static BINDINGS_FILE_VER: &str = "7.7.0";
 
 fn main() {
     // All varnishsys_* flags are used to enable some features that are not available in all versions.

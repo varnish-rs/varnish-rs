@@ -102,7 +102,6 @@ pub mod varnishtest;
 
 mod metrics_reader;
 pub use metrics_reader::{Metric, MetricFormat, MetricsReader, MetricsReaderBuilder, Semantics};
-
 pub use varnish_macros::vmod;
 
 /// Run all VTC tests using `varnishtest` utility.

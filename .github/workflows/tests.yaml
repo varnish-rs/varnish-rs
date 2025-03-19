@@ -17,8 +17,9 @@ jobs:
       matrix:
         include:
           # default version is also used in the semver check step
-          - setup: varnish76
+          - setup: varnish77
             type: latest
+          - setup: varnish76
           - setup: varnish75
           - setup: varnish60lts
 

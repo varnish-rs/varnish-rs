@@ -89,6 +89,8 @@ mod tuple {
             abi: VMOD_ABI_Version.as_ptr(),
             json: JSON.as_ptr(),
             proto: null(),
+            vcs: c"".as_ptr(),
+            version: c"".as_ptr(),
         };
         const JSON: &CStr = c"VMOD_JSON_SPEC\u{2}\n[\n  [\n    \"$VMOD\",\n    \"1.0\",\n    \"tuple\",\n    \"Vmod_vmod_tuple_Func\",\n    \"41c8f93b128c17e6327da85165e29dc663acf100bf5bfb80ffce76925121d6fe\",\n    \"Varnish (version) (hash)\",\n    \"0\",\n    \"0\"\n  ],\n  [\n    \"$CPROTO\",\n    \"\\ntypedef VCL_VOID td_vmod_tuple_per_tsk_val(\\n    VRT_CTX,\\n    struct vmod_priv *,\\n    struct vmod_priv *\\n);\\n\\nstruct Vmod_vmod_tuple_Func {\\n  vmod_event_f *f_on_event;\\n  td_vmod_tuple_per_tsk_val *f_per_tsk_val;\\n};\\n\\nstatic struct Vmod_vmod_tuple_Func Vmod_vmod_tuple_Func;\"\n  ],\n  [\n    \"$EVENT\",\n    \"Vmod_vmod_tuple_Func.f_on_event\"\n  ],\n  [\n    \"$FUNC\",\n    \"per_tsk_val\",\n    [\n      [\n        \"VOID\"\n      ],\n      \"Vmod_vmod_tuple_Func.f_per_tsk_val\",\n      \"\",\n      [\n        \"PRIV_TASK\",\n        \"tsk_vals\"\n      ],\n      [\n        \"PRIV_VCL\",\n        \"vcl_vals\"\n      ]\n    ]\n  ]\n]\n\u{3}";
     }

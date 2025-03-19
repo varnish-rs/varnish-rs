@@ -188,6 +188,7 @@ docker-run-ver VERSION *ARGS:
         -v "$PWD/docker/.cache/{{VERSION}}/.bash_history:/home/user/.bash_history" \
         varnish-img-{{VERSION}} {{ARGS}}
 
+docker-run-77 *ARGS: (docker-build-ver "77") (docker-run-ver "77" ARGS)
 docker-run-76 *ARGS: (docker-build-ver "76") (docker-run-ver "76" ARGS)
 docker-run-75 *ARGS: (docker-build-ver "75") (docker-run-ver "75" ARGS)
 docker-run-74 *ARGS: (docker-build-ver "74") (docker-run-ver "74" ARGS)
