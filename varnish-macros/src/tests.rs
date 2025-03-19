@@ -54,7 +54,13 @@ fn run_parse_tests(path: &str) {
 }
 
 fn test(name: &str, args: TokenStream, mut item_mod: ItemMod) {
-    let version = if cfg!(varnishsys_6) { "_v6" } else { "" };
+    let version = if cfg!(varnishsys_6) {
+        "_v6"
+    } else if cfg!(varnishsys_77_vmod_data) {
+        ""
+    } else {
+        "_v76"
+    };
     let snapshot_path = format!("../../varnish/snapshots{version}");
     with_settings!({ snapshot_path => snapshot_path, omit_expression => true, prepend_module_to_snapshot => false }, {
         let Ok(info) = tokens_to_model(args, &mut item_mod).map_err(|err| {

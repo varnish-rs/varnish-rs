@@ -9,15 +9,13 @@ source: varnish-macros/src/tests.rs
    It will be automatically updated on each build.
 
 -->
-# Varnish Module (VMOD) `tuple`
+# Varnish Module (VMOD) `event`
 
 ```vcl
 // Place import statement at the top of your VCL file
 // This loads vmod from a standard location
-import tuple;
+import event;
 
 // Or load vmod from a specific file
-import tuple from "path/to/libtuple.so";
+import event from "path/to/libevent.so";
 ```
-
-### Function `STRING tuple.ref_to_slice_lifetime()`
