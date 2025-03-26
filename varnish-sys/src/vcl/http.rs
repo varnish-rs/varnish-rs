@@ -126,19 +126,26 @@ impl HttpHeaders<'_> {
             if idx >= self.raw.nhd {
                 None
             } else {
-                self.raw.hd.offset(idx as isize).as_ref().unwrap().to_slice()
+                self.raw
+                    .hd
+                    .offset(idx as isize)
+                    .as_ref()
+                    .unwrap()
+                    .to_slice()
             }
         }
     }
 
     /// Method of an HTTP request, `None` for a response
     pub fn method(&self) -> Option<&str> {
-        self.field(HDR_METHOD).map(|buf| std::str::from_utf8(buf).expect("method must be ascii"))
+        self.field(HDR_METHOD)
+            .map(|buf| std::str::from_utf8(buf).expect("method must be ascii"))
     }
 
     /// URL of an HTTP request, `None` for a response
     pub fn url(&self) -> Option<&str> {
-        self.field(HDR_URL).map(|buf| std::str::from_utf8(buf).expect("method must be UTF-8"))
+        self.field(HDR_URL)
+            .map(|buf| std::str::from_utf8(buf).expect("method must be UTF-8"))
     }
 
     /// Protocol of an object
@@ -146,7 +153,8 @@ impl HttpHeaders<'_> {
     /// It should exist for both requests and responses, but the `Option` is maintained for
     /// consistency.
     pub fn proto(&self) -> Option<&str> {
-        self.field(HDR_PROTO).map(|buf| std::str::from_utf8(buf).expect("protocol must be ascii"))
+        self.field(HDR_PROTO)
+            .map(|buf| std::str::from_utf8(buf).expect("protocol must be ascii"))
     }
 
     /// Set prototype
@@ -163,7 +171,8 @@ impl HttpHeaders<'_> {
 
     /// Response status, `None` for a request
     pub fn status(&self) -> Option<&str> {
-        self.field(HDR_STATUS).map(|buf| std::str::from_utf8(buf).expect("status must be ascii"))
+        self.field(HDR_STATUS)
+            .map(|buf| std::str::from_utf8(buf).expect("status must be ascii"))
     }
 
     /// Set the response status, it will also set the reason
@@ -180,7 +189,8 @@ impl HttpHeaders<'_> {
 
     /// Response reason, `None` for a request
     pub fn reason(&self) -> Option<&str> {
-        self.field(HDR_REASON).map(|buf| std::str::from_utf8(buf).expect("reason must be ascii"))
+        self.field(HDR_REASON)
+            .map(|buf| std::str::from_utf8(buf).expect("reason must be ascii"))
     }
 
     /// Set reason

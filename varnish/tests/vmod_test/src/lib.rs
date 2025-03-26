@@ -142,7 +142,11 @@ mod rustest {
 
     pub fn merge_all_names(ctx: &Ctx) -> String {
         let mut s = String::new();
-        for (k, _) in ctx.http_req.as_ref().expect("merge_all_names is only available in a client context") {
+        for (k, _) in ctx
+            .http_req
+            .as_ref()
+            .expect("merge_all_names is only available in a client context")
+        {
             s += k;
         }
         s

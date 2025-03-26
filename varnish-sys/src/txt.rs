@@ -51,7 +51,10 @@ impl txt {
         // We expect varnishd to always given us a string with a ':' in it
         // If it's not the case, blow up as it might be a sign of a bigger problem.
         let slice = self.to_slice()?;
-        let index = slice.iter().position(|c| *c == b':').expect("headers should always have a :");
+        let index = slice
+            .iter()
+            .position(|c| *c == b':')
+            .expect("headers should always have a :");
         let (key_slice, value_slice) = slice.split_at(index);
 
         let key = from_utf8(key_slice).expect("header names must be UTF-8");
