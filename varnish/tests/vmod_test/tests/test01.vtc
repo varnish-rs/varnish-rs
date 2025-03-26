@@ -5,6 +5,7 @@ server s1 {
 	expect req.http.foo == "bar_replaced"
 	expect req.http.baz == "qux"
 	expect req.http.quxx == <undef>
+	expect req.http.all == "quxxHostUser-AgentX-Forwarded-ForVia"
 	txresp
 } -start
 
@@ -12,6 +13,7 @@ varnish v1 -vcl+backend {
 	import rustest from "${vmod}";
 
 	sub vcl_recv {
+		set req.http.all = rustest.merge_all_names();
 		rustest.set_hdr("foo", "bar_replaced");
 		rustest.set_hdr("baz", "qux");
 		rustest.unset_hdr("quxx");
@@ -22,4 +24,14 @@ client c1 {
 	txreq -hdr "quxx: quz"
 	rxresp
 	expect resp.status == 200
+
+
+	# make sure rustest.merge_all_names() doesn't panic on non-utf-8
+	send "GET / HTTP/1.1\r\n"
+        send "foo: "
+        sendhex "A7"
+        send "\r\n"
+        send "\r\n"
+
+        rxresp
 } -run

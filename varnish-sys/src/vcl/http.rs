@@ -121,24 +121,24 @@ impl HttpHeaders<'_> {
     }
 
     /// Return header at a specific position
-    fn field(&self, idx: u16) -> Option<&str> {
+    fn field(&self, idx: u16) -> Option<&[u8]> {
         unsafe {
             if idx >= self.raw.nhd {
                 None
             } else {
-                self.raw.hd.offset(idx as isize).as_ref().unwrap().to_str()
+                self.raw.hd.offset(idx as isize).as_ref().unwrap().to_slice()
             }
         }
     }
 
     /// Method of an HTTP request, `None` for a response
     pub fn method(&self) -> Option<&str> {
-        self.field(HDR_METHOD)
+        self.field(HDR_METHOD).map(|buf| std::str::from_utf8(buf).expect("method must be ascii"))
     }
 
     /// URL of an HTTP request, `None` for a response
     pub fn url(&self) -> Option<&str> {
-        self.field(HDR_URL)
+        self.field(HDR_URL).map(|buf| std::str::from_utf8(buf).expect("method must be UTF-8"))
     }
 
     /// Protocol of an object
@@ -146,7 +146,7 @@ impl HttpHeaders<'_> {
     /// It should exist for both requests and responses, but the `Option` is maintained for
     /// consistency.
     pub fn proto(&self) -> Option<&str> {
-        self.field(HDR_PROTO)
+        self.field(HDR_PROTO).map(|buf| std::str::from_utf8(buf).expect("protocol must be ascii"))
     }
 
     /// Set prototype
@@ -163,7 +163,7 @@ impl HttpHeaders<'_> {
 
     /// Response status, `None` for a request
     pub fn status(&self) -> Option<&str> {
-        self.field(HDR_STATUS)
+        self.field(HDR_STATUS).map(|buf| std::str::from_utf8(buf).expect("status must be ascii"))
     }
 
     /// Set the response status, it will also set the reason
@@ -180,7 +180,7 @@ impl HttpHeaders<'_> {
 
     /// Response reason, `None` for a request
     pub fn reason(&self) -> Option<&str> {
-        self.field(HDR_REASON)
+        self.field(HDR_REASON).map(|buf| std::str::from_utf8(buf).expect("reason must be ascii"))
     }
 
     /// Set reason
@@ -191,7 +191,7 @@ impl HttpHeaders<'_> {
     /// Returns the value of a header based on its name
     ///
     /// The header names are compared in a case-insensitive manner
-    pub fn header(&self, name: &str) -> Option<&str> {
+    pub fn header(&self, name: &str) -> Option<&[u8]> {
         self.iter()
             .find(|hdr| name.eq_ignore_ascii_case(hdr.0))
             .map(|hdr| hdr.1)
@@ -206,7 +206,7 @@ impl HttpHeaders<'_> {
 }
 
 impl<'a> IntoIterator for &'a HttpHeaders<'a> {
-    type Item = (&'a str, &'a str);
+    type Item = (&'a str, &'a [u8]);
     type IntoIter = HttpHeadersIter<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -221,7 +221,7 @@ pub struct HttpHeadersIter<'a> {
 }
 
 impl<'a> Iterator for HttpHeadersIter<'a> {
-    type Item = (&'a str, &'a str);
+    type Item = (&'a str, &'a [u8]);
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
