@@ -45,18 +45,19 @@ impl txt {
         }
     }
 
-    /// Convert the `txt` struct to a `&str`.  Will panic if the string is not valid UTF-8.
+    /// Convert the `txt` struct to a `&str`.
+    /// Returns None if the string is not valid UTF-8.
+    /// Use [Self::to_slice] to handle raw bytes.
     #[expect(clippy::wrong_self_convention)] // TODO: drop Copy trait for txt?
     pub fn to_str<'a>(&self) -> Option<&'a str> {
-        self.to_slice().map(|s| from_utf8(s).unwrap())
+        self.to_slice().and_then(|s| from_utf8(s).ok())
     }
 
     /// Parse the `txt` struct as a header, returning a tuple with the key and value,
-    /// trimming the value of leading whitespace.
+    /// trimming the value of leading whitespace. Returns None in case of any issues.
+    /// Use [Self::to_slice] to handle raw bytes, e.g. if the header is not UTF-8.
     pub fn parse_header<'a>(&self) -> Option<(&'a str, &'a str)> {
-        // We expect varnishd to always given us a string with a ':' in it
-        // If it's not the case, blow up as it might be a sign of a bigger problem.
-        let (key, value) = self.to_str()?.split_once(':').unwrap();
+        let (key, value) = self.to_str()?.split_once(':')?;
         // FIXME: Consider `.trim_ascii_start()` if unicode is not a concern
         Some((key, value.trim_start()))
     }
