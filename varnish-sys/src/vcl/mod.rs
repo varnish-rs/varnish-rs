@@ -7,6 +7,7 @@ mod http;
 mod probe;
 #[cfg(not(varnishsys_6))]
 mod processor;
+mod str_or_bytes;
 mod vsb;
 mod ws;
 mod ws_str_buffer;
@@ -20,6 +21,7 @@ pub use http::*;
 pub use probe::*;
 #[cfg(not(varnishsys_6))]
 pub use processor::*;
+pub use str_or_bytes::*;
 pub use vsb::*;
 pub use ws::*;
 pub use ws_str_buffer::WsStrBuffer;

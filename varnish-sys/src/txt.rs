@@ -3,6 +3,7 @@ use std::slice::from_raw_parts;
 use std::str::from_utf8;
 
 use crate::ffi::txt;
+use crate::vcl::StrOrBytes;
 
 impl txt {
     /// Internal helper to create a `txt` struct from a byte slice.
@@ -45,20 +46,28 @@ impl txt {
         }
     }
 
-    /// Convert the `txt` struct to a `&str`.
-    /// Returns None if the string is not valid UTF-8.
-    /// Use [Self::to_slice] to handle raw bytes.
+    /// Convert the `txt` struct to a `StrOrBytes` enum.
     #[expect(clippy::wrong_self_convention)] // TODO: drop Copy trait for txt?
-    pub fn to_str<'a>(&self) -> Option<&'a str> {
-        self.to_slice().and_then(|s| from_utf8(s).ok())
+    pub fn to_str<'a>(&self) -> Option<StrOrBytes<'_>> {
+        self.to_slice().map(StrOrBytes::from)
     }
 
     /// Parse the `txt` struct as a header, returning a tuple with the key and value,
-    /// trimming the value of leading whitespace. Returns None in case of any issues.
-    /// Use [Self::to_slice] to handle raw bytes, e.g. if the header is not UTF-8.
-    pub fn parse_header<'a>(&self) -> Option<(&'a str, &'a str)> {
-        let (key, value) = self.to_str()?.split_once(':')?;
-        // FIXME: Consider `.trim_ascii_start()` if unicode is not a concern
-        Some((key, value.trim_start()))
+    /// trimming the value of leading whitespace.
+    pub fn parse_header<'a>(&self) -> Option<(&'a str, StrOrBytes<'_>)> {
+        // We expect varnishd to always given us a string with a ':' in it
+        // If it's not the case, blow up as it might be a sign of a bigger problem.
+        let slice = self.to_slice()?;
+        let index = slice
+            .iter()
+            .position(|c| *c == b':')
+            .expect("headers should always have a :");
+
+        let (key_slice, value_slice) = slice.split_at(index);
+
+        Some((
+            from_utf8(key_slice).expect("header names must be UTF-8"),
+            value_slice[1..].trim_ascii_start().into(),
+        ))
     }
 }
