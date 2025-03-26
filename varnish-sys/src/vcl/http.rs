@@ -67,6 +67,7 @@ impl HttpHeaders<'_> {
 
         let idx = self.raw.nhd;
         self.raw.nhd += 1;
+        // FIXME: optimize this to avoid allocating a temporary string
         let res = self.change_header(idx, &format!("{name}: {value}"));
         if res.is_ok() {
             unsafe {
