@@ -30,7 +30,7 @@ impl txt {
     /// Convert the `txt` struct to a `&[u8]`.
     /// We want to explicitly differentiate between empty (`None`) and null (`Some([])`) strings.
     #[expect(clippy::wrong_self_convention)] // TODO: drop Copy trait for txt?
-    pub fn to_slice<'a>(&self) -> Option<&'a [u8]> {
+    pub fn to_slice(&self) -> Option<&[u8]> {
         if self.b.is_null() {
             None
         } else {
@@ -48,13 +48,13 @@ impl txt {
 
     /// Convert the `txt` struct to a `StrOrBytes` enum.
     #[expect(clippy::wrong_self_convention)] // TODO: drop Copy trait for txt?
-    pub fn to_str<'a>(&self) -> Option<StrOrBytes<'_>> {
+    pub fn to_str(&self) -> Option<StrOrBytes<'_>> {
         self.to_slice().map(StrOrBytes::from)
     }
 
     /// Parse the `txt` struct as a header, returning a tuple with the key and value,
     /// trimming the value of leading whitespace.
-    pub fn parse_header<'a>(&self) -> Option<(&'a str, StrOrBytes<'_>)> {
+    pub fn parse_header(&self) -> Option<(&str, StrOrBytes<'_>)> {
         // We expect varnishd to always given us a string with a ':' in it
         // If it's not the case, blow up as it might be a sign of a bigger problem.
         let slice = self.to_slice()?;

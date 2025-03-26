@@ -20,13 +20,11 @@ impl<'a> From<&'a String> for StrOrBytes<'a> {
 
 impl<'a> From<&'a [u8]> for StrOrBytes<'a> {
     fn from(value: &'a [u8]) -> Self {
-        from_utf8(value)
-            .map(StrOrBytes::Utf8)
-            .unwrap_or_else(|_| StrOrBytes::Bytes(value))
+        from_utf8(value).map_or_else(|_| StrOrBytes::Bytes(value), StrOrBytes::Utf8)
     }
 }
 
-impl<'a> AsRef<[u8]> for StrOrBytes<'a> {
+impl AsRef<[u8]> for StrOrBytes<'_> {
     fn as_ref(&self) -> &[u8] {
         match self {
             StrOrBytes::Utf8(s) => s.as_bytes(),
