@@ -129,16 +129,19 @@ check-git-status:
         exit 1
     fi
 
+# Check that the current version of the crate is not the same as the one published on crates.io
+check-all-if-published: \
+    (check-if-published 'varnish') \
+    (check-if-published 'varnish-macros') \
+    (check-if-published 'varnish-sys')
 
 # Verify that the current version of the crate is not the same as the one published on crates.io
-check-if-published:
+check-if-published CRATE_NAME="varnish":
     #!/usr/bin/env bash
     set -euo pipefail
-    LOCAL_VERSION="$(grep '^version =' Cargo.toml | sed -E 's/version = "([^"]*)".*/\1/')"
-    echo "Detected crate version:  $LOCAL_VERSION"
-    CRATE_NAME="$(grep '^name =' Cargo.toml | head -1 | sed -E 's/name = "(.*)"/\1/')"
-    echo "Detected crate name:     $CRATE_NAME"
-    PUBLISHED_VERSION="$(cargo search ${CRATE_NAME} | grep "^${CRATE_NAME} =" | sed -E 's/.* = "(.*)".*/\1/')"
+    LOCAL_VERSION="$(cargo metadata --format-version 1 | jq -r --arg CRATE_NAME {{quote(CRATE_NAME)}}  '.packages | map(select(.name == $CRATE_NAME)) | first | .version')"
+    echo "Detected crate {{CRATE_NAME}} version:  $LOCAL_VERSION"
+    PUBLISHED_VERSION="$(cargo search --quiet {{quote(CRATE_NAME)}} | grep "^{{CRATE_NAME}} =" | sed -E 's/.* = "(.*)".*/\1/')"
     echo "Published crate version: $PUBLISHED_VERSION"
     if [ "$LOCAL_VERSION" = "$PUBLISHED_VERSION" ]; then
         echo "ERROR: The current crate version has already been published."
