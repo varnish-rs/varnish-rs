@@ -1,12 +1,12 @@
 name: Dependabot auto-merge
 on: pull_request
 
-permissions: write-all
-
 jobs:
   dependabot:
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
+    permissions:
+      pull-requests: write
     steps:
       - name: Dependabot metadata
         id: metadata
