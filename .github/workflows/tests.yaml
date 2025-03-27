@@ -31,11 +31,11 @@ jobs:
       - uses: taiki-e/install-action@v2
         with: { tool: just }
       - uses: actions/checkout@v4
-      - name: Ensure this crate has not yet been published (on release)
-        if: github.event_name == 'release' && matrix.type == 'latest'
+      - if: github.event_name == 'release' && matrix.type == 'latest'
+        name: Ensure this crate has not yet been published (on release)
         run: just check-if-published
-      - uses: Swatinem/rust-cache@v2
-        if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+      - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+        uses: Swatinem/rust-cache@v2
       - name: install varnish-dev
         run: |
           # These steps should be the same as in the Dockerfile
@@ -46,16 +46,16 @@ jobs:
           sudo apt-cache policy varnish
           sudo apt-get install -y varnish varnish-dev
       - run: just -v ci-test
-      - name: Test for latest Varnish version
-        if: matrix.type == 'latest'
+      - if: matrix.type == 'latest'
+        name: Test for latest Varnish version
         run: just ci-test-extras
-      - name: Check semver
-        if: matrix.type == 'latest'
+      - if: matrix.type == 'latest'
+        name: Check semver
         uses: obi1kenobi/cargo-semver-checks-action@v2
         with:
           exclude: varnish-sys  # GitHub CI has somehow generates a different output
-      - name: Test packaging for publish
-        if: matrix.type == 'latest'
+      - if: matrix.type == 'latest'
+        name: Test packaging for publish
         run: |
           rustup install nightly --profile minimal
           just clean test-publish
@@ -79,14 +79,23 @@ jobs:
   test-docs-rs:
     runs-on: ubuntu-latest
     steps:
+      - uses: taiki-e/install-action@v2
+        with: { tool: just }
       - uses: actions/checkout@v4
-      - name: rust-info
-        run: rustc --version && cargo --version
-      - uses: Swatinem/rust-cache@v2
-        if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+      - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+        uses: Swatinem/rust-cache@v2
       - name: Ensure docs can be built at docs.rs without varnish dependencies
-        run: cargo doc --no-deps
+        run: just ci-test-docs-rs
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [ test, test-docs-rs ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: taiki-e/install-action@v2
+        with: { tool: just }
+      - uses: actions/checkout@v4
+      - name: Publish to crates.io
+        run: just publish
         env:
-          # Pretend to be on docs.rs
-          # See https://docs.rs/about/builds#detecting-docsrs
-          DOCS_RS: 1
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

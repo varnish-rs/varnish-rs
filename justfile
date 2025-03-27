@@ -112,6 +112,12 @@ ci-test: rust-info test-fmt build-all-features clippy test check-git-status
 # Run minimal subset of tests to ensure compatibility with MSRV
 ci-test-msrv: rust-info test
 
+# Test if docs would build in the docs.rs environment
+ci-test-docs-rs: rust-info
+    # Pretend to be on docs.rs
+    # See https://docs.rs/about/builds#detecting-docsrs
+    DOCS_RS=1 cargo doc --no-deps
+
 # Check that the git repository is clean
 check-git-status:
     #!/usr/bin/env bash
