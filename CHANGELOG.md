@@ -13,6 +13,7 @@
 - Rename `Stat` &rarr; `Metrics`, `Stats` &rarr; `MetricsReader`, `StatsBuilder` &rarr; `MetricsReaderBuilder`, and `Format` &rarr; `MetricsFormat`
 - `MetricsReaderBuilder::patience` now returns `Self`
 - For backends, rename `Serve` &rarr; `vcl::VclBackend`, `Transfer` &rarr; `vcl::VclResponse`
+- Fix #167
 
 # 0.3.0 (2024-12-12)
 
