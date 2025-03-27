@@ -2,7 +2,8 @@
 // #![allow(warnings)]
 
 use errors::Errors;
-use syn::{parse_macro_input, ItemMod};
+use quote::quote;
+use syn::{parse_macro_input, DeriveInput, ItemMod};
 use {proc_macro as pm, proc_macro2 as pm2};
 
 use crate::gen_docs::generate_docs;
@@ -19,6 +20,7 @@ mod names;
 mod parser;
 mod parser_args;
 mod parser_utils;
+mod stats;
 
 pub(crate) type ProcResult<T> = Result<T, Errors>;
 
@@ -63,4 +65,37 @@ pub fn vmod(args: pm::TokenStream, input: pm::TokenStream) -> pm::TokenStream {
     generate_docs(&info);
 
     result.into()
+}
+
+/// Handle the `#[derive(VscMetric)]` macro. This can only be applied to a struct.
+/// The struct must have only fields of type `AtomicU64`.
+/// - `#[counter]` attribute on a field will export it as a counter.
+/// - `#[gauge]` attribute on a field will export it as a gauge.
+#[proc_macro_derive(VscMetric, attributes(counter, gauge))]
+pub fn vsc_metric(input: pm::TokenStream) -> pm::TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    let name = &input.ident;
+
+    if !stats::has_repr_c(&input) {
+        return syn::Error::new(
+            name.span(),
+            "VSC structs must be marked with #[repr(C)] for correct memory layout",
+        )
+        .into_compile_error()
+        .into();
+    }
+
+    let fields = stats::get_struct_fields(&input.data);
+    stats::validate_fields(fields);
+
+    let metadata_json = stats::generate_metadata_json(&name.to_string(), fields);
+
+    quote! {
+        unsafe impl varnish::vsc_wrapper::VscMetric for #name {
+            fn get_metadata() -> &'static str {
+                #metadata_json
+            }
+        }
+    }
+    .into()
 }
