@@ -15,12 +15,12 @@ mod gen_docs;
 mod gen_func;
 mod gen_objects;
 mod generator;
+mod metrics;
 mod model;
 mod names;
 mod parser;
 mod parser_args;
 mod parser_utils;
-mod stats;
 
 pub(crate) type ProcResult<T> = Result<T, Errors>;
 
@@ -76,7 +76,7 @@ pub fn vsc_metric(input: pm::TokenStream) -> pm::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = &input.ident;
 
-    if !stats::has_repr_c(&input) {
+    if !metrics::has_repr_c(&input) {
         return syn::Error::new(
             name.span(),
             "VSC structs must be marked with #[repr(C)] for correct memory layout",
@@ -85,13 +85,13 @@ pub fn vsc_metric(input: pm::TokenStream) -> pm::TokenStream {
         .into();
     }
 
-    let fields = stats::get_struct_fields(&input.data);
-    stats::validate_fields(fields);
+    let fields = metrics::get_struct_fields(&input.data);
+    metrics::validate_fields(fields);
 
-    let metadata_json = stats::generate_metadata_json(&name.to_string(), fields);
+    let metadata_json = metrics::generate_metadata_json(&name.to_string(), fields);
 
     quote! {
-        unsafe impl varnish::vsc_wrapper::VscMetric for #name {
+        unsafe impl varnish::VscMetric for #name {
             fn get_metadata() -> &'static str {
                 #metadata_json
             }
