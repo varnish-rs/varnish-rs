@@ -32,6 +32,7 @@ mod stats {
     use super::{test, VariousStats};
 
     impl test {
+        #[allow(clippy::new_without_default)]
         pub fn new() -> Self {
             let stats = Vsc::<VariousStats>::new("mystats", "default");
             Self { stats }
