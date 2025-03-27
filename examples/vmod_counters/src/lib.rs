@@ -1,6 +1,6 @@
 use std::sync::atomic::AtomicU64;
 
-use varnish::VscMetric;
+use varnish::{Vsc, VscMetric};
 
 #[derive(VscMetric)]
 #[repr(C)] // required for correct memory layout
@@ -27,7 +27,7 @@ pub struct test {
 
 #[varnish::vmod(docs = "README.md")]
 mod stats {
-    use varnish::vsc_wrapper::Vsc;
+    use varnish::Vsc;
 
     use super::{test, VariousStats};
 
