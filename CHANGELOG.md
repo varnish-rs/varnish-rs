@@ -1,4 +1,6 @@
 # Unpublished
+
+# 0.4.0 (2025-03-26)
 - In probe support, renamed `Request::URL` to `Request::Url`
 - Refactored Workspace API:
   - Introduce `Workspace::vcl_string_builder`, `vcl_blob_builder`, and `slice_builder` instead of `reserve`
