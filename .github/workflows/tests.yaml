@@ -16,9 +16,8 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          # default version is also used in the semver check step
-          - setup: varnish77
-            type: latest
+          # default version is set in the justfile. If setup is blank, will use default
+          - type: latest
           - setup: varnish76
           - setup: varnish75
           - setup: varnish60lts
@@ -31,19 +30,12 @@ jobs:
       - uses: taiki-e/install-action@v2
         with: { tool: just }
       - uses: actions/checkout@v4
-      - name: Ensure this crate has not yet been published (on release)
+      - if: matrix.type == 'latest'
+        name: Ensure this crate has not yet been published (on release)
         run: just check-all-if-published
       - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
         uses: Swatinem/rust-cache@v2
-      - name: install varnish-dev
-        run: |
-          # These steps should be the same as in the Dockerfile
-          set -ex
-          curl -sSf "https://packagecloud.io/install/repositories/varnishcache/${{ matrix.setup }}/script.deb.sh" | sudo bash
-          echo -e 'Package: varnish varnish-dev\nPin: origin "packagecloud.io"\nPin-Priority: 1001' | sudo tee /etc/apt/preferences.d/varnish
-          cat /etc/apt/preferences.d/varnish
-          sudo apt-cache policy varnish
-          sudo apt-get install -y varnish varnish-dev
+      - run: just install-varnish ${{ matrix.setup }}
       - run: just -v ci-test
       - if: matrix.type == 'latest'
         name: Test for latest Varnish version
@@ -94,6 +86,7 @@ jobs:
       - uses: taiki-e/install-action@v2
         with: { tool: just }
       - uses: actions/checkout@v4
+      - run: just install-varnish
       - name: Publish to crates.io
         run: just publish
         env:

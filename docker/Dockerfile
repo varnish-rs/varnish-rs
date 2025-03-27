@@ -15,15 +15,16 @@ RUN    apt-get update \
         sudo `# allows dev to install more packages without switching to root or rebuilding container` \
     && : # end of the RUN cmd - easier to keep a colon at the end of the list, than to keep the backslashes in check
 
-# Pass in the VARNISH_VERSION build arg to specify the version of Varnish to install
-ARG VARNISH_VERSION=76
-# These steps should be the same as in the CI workflow
-RUN set -ex; \
-    curl -sSf "https://packagecloud.io/install/repositories/varnishcache/varnish${VARNISH_VERSION}/script.deb.sh" | sudo bash; \
-    echo 'Package: varnish varnish-dev\nPin: origin "packagecloud.io"\nPin-Priority: 1001' > /etc/apt/preferences.d/varnish; \
-    cat /etc/apt/preferences.d/varnish; \
-    apt-cache policy varnish; \
-    sudo apt-get install -y varnish varnish-dev;
+RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /bin
+
+# Pass in the VARNISH_VERSION_TAG build arg to specify the version of Varnish to install
+ARG VARNISH_VERSION_TAG=""
+
+# We need to copy justfile to a temporary directory to install Varnish.
+# Note that during the regular usage, we use justfile mapped from the host machine.
+RUN mkdir -p /init-tmp
+COPY ./justfile /init-tmp
+RUN cd init-tmp && just install-varnish ${VARNISH_VERSION_TAG}
 
 ARG USERNAME=user
 ARG USER_UID=1000
@@ -46,7 +47,7 @@ ENV RUSTUP_HOME=/home/$USERNAME/.cache/.rustup \
 
 # As the very last step, copy the startup script
 USER root
-COPY startup.sh /usr/local/bin/startup.sh
+COPY docker/startup.sh /usr/local/bin/startup.sh
 RUN chmod +x /usr/local/bin/startup.sh
 USER $USERNAME
 
