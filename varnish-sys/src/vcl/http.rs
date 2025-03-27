@@ -16,6 +16,7 @@ use std::slice::from_raw_parts_mut;
 
 use crate::ffi;
 use crate::ffi::VslTag;
+use crate::vcl::str_or_bytes::StrOrBytes;
 use crate::vcl::{VclResult, Workspace};
 
 // C constants pop up as u32, but header indexing uses u16, redefine
@@ -42,14 +43,14 @@ impl HttpHeaders<'_> {
         })
     }
 
-    fn change_header(&mut self, idx: u16, value: &str) -> VclResult<()> {
+    fn change_header<'a>(&mut self, idx: u16, value: impl Into<StrOrBytes<'a>>) -> VclResult<()> {
         assert!(idx < self.raw.nhd);
 
         /* XXX: aliasing warning, it's the same pointer as the one in Ctx */
         let mut ws = Workspace::from_ptr(self.raw.ws);
         unsafe {
             let hd = self.raw.hd.offset(idx as isize).as_mut().unwrap();
-            *hd = ws.copy_bytes_with_null(value)?;
+            *hd = ws.copy_bytes_with_null(value.into())?;
             let hdf = self.raw.hdf.offset(idx as isize).as_mut().unwrap();
             *hdf = 0;
         }
@@ -66,6 +67,7 @@ impl HttpHeaders<'_> {
 
         let idx = self.raw.nhd;
         self.raw.nhd += 1;
+        // FIXME: optimize this to avoid allocating a temporary string
         let res = self.change_header(idx, &format!("{name}: {value}"));
         if res.is_ok() {
             unsafe {
@@ -121,23 +123,29 @@ impl HttpHeaders<'_> {
     }
 
     /// Return header at a specific position
-    fn field(&self, idx: u16) -> Option<&str> {
+    fn field(&self, idx: u16) -> Option<StrOrBytes<'_>> {
         unsafe {
             if idx >= self.raw.nhd {
                 None
             } else {
-                self.raw.hd.offset(idx as isize).as_ref().unwrap().to_str()
+                self.raw
+                    .hd
+                    .offset(idx as isize)
+                    .as_ref()
+                    .unwrap()
+                    .to_slice()
+                    .map(StrOrBytes::from)
             }
         }
     }
 
     /// Method of an HTTP request, `None` for a response
-    pub fn method(&self) -> Option<&str> {
+    pub fn method(&self) -> Option<StrOrBytes<'_>> {
         self.field(HDR_METHOD)
     }
 
     /// URL of an HTTP request, `None` for a response
-    pub fn url(&self) -> Option<&str> {
+    pub fn url(&self) -> Option<StrOrBytes<'_>> {
         self.field(HDR_URL)
     }
 
@@ -145,7 +153,7 @@ impl HttpHeaders<'_> {
     ///
     /// It should exist for both requests and responses, but the `Option` is maintained for
     /// consistency.
-    pub fn proto(&self) -> Option<&str> {
+    pub fn proto(&self) -> Option<StrOrBytes<'_>> {
         self.field(HDR_PROTO)
     }
 
@@ -162,7 +170,7 @@ impl HttpHeaders<'_> {
     }
 
     /// Response status, `None` for a request
-    pub fn status(&self) -> Option<&str> {
+    pub fn status(&self) -> Option<StrOrBytes<'_>> {
         self.field(HDR_STATUS)
     }
 
@@ -179,7 +187,7 @@ impl HttpHeaders<'_> {
     }
 
     /// Response reason, `None` for a request
-    pub fn reason(&self) -> Option<&str> {
+    pub fn reason(&self) -> Option<StrOrBytes<'_>> {
         self.field(HDR_REASON)
     }
 
@@ -191,7 +199,7 @@ impl HttpHeaders<'_> {
     /// Returns the value of a header based on its name
     ///
     /// The header names are compared in a case-insensitive manner
-    pub fn header(&self, name: &str) -> Option<&str> {
+    pub fn header(&self, name: &str) -> Option<StrOrBytes<'_>> {
         self.iter()
             .find(|hdr| name.eq_ignore_ascii_case(hdr.0))
             .map(|hdr| hdr.1)
@@ -206,7 +214,7 @@ impl HttpHeaders<'_> {
 }
 
 impl<'a> IntoIterator for &'a HttpHeaders<'a> {
-    type Item = (&'a str, &'a str);
+    type Item = (&'a str, StrOrBytes<'a>);
     type IntoIter = HttpHeadersIter<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -221,7 +229,7 @@ pub struct HttpHeadersIter<'a> {
 }
 
 impl<'a> Iterator for HttpHeadersIter<'a> {
-    type Item = (&'a str, &'a str);
+    type Item = (&'a str, StrOrBytes<'a>);
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
