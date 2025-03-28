@@ -36,3 +36,10 @@ struct http_conn {
         vtim_dur                between_bytes_timeout;
 };
 #endif
+
+#ifdef VARNISH_RS_ALLOC_VARIADIC
+void *
+VRT_VSC_AllocVariadic(struct vsmw_cluster *vc, struct vsc_seg **sg,
+    const char *nm, size_t sd,
+    const unsigned char *jp, size_t sj, const char *fmt, ...);
+#endif

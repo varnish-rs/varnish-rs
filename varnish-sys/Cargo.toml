@@ -20,6 +20,7 @@ version = "7.6"
 
 [build-dependencies]
 bindgen_helpers.workspace = true
+cc.workspace = true
 pkg-config.workspace = true
 
 [dependencies]
