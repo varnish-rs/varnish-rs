@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 use std::{env, fs};
 
@@ -7,7 +8,59 @@ use bindgen_helpers::{rename_enum, Renamer};
 static BINDINGS_FILE: &str = "bindings.for-docs";
 static BINDINGS_FILE_VER: &str = "7.7.0";
 
+struct VarnishInfo {
+    bindings: PathBuf,
+    varnish_paths: Vec<PathBuf>,
+    version: String,
+    defines: Vec<&'static str>,
+}
+
+impl VarnishInfo {
+    fn parse(bindings: PathBuf, varnish_paths: Vec<PathBuf>, version: String) -> Self {
+        let (major, minor) = parse_version(&version);
+
+        if major == 7 && minor < 6 {
+            println!("cargo::rustc-cfg=varnishsys_7_5_objcore_init");
+        }
+        if major < 7 {
+            println!("cargo::rustc-cfg=varnishsys_6");
+        }
+
+        if major < 6 || major > 7 {
+            println!(
+                "cargo::warning=Varnish {version} is not supported and may not work with this crate"
+            );
+        }
+
+        let mut defines = vec![];
+        if major < 7 {
+            defines.push("VARNISH_RS_6_0");
+        } else {
+            defines.push("VARNISH_RS_HTTP_CONN");
+        }
+
+        Self {
+            bindings,
+            varnish_paths,
+            version,
+            defines,
+        }
+    }
+}
+
+impl Display for VarnishInfo {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.version)
+    }
+}
+
 fn main() {
+    if let Some(info) = &detect_varnish() {
+        generate_bindings(info);
+    }
+}
+
+fn detect_varnish() -> Option<VarnishInfo> {
     // All varnishsys_* flags are used to enable some features that are not available in all versions.
     // The crate must compile for the latest supported version with none of these flags enabled.
     // By convention, the version number is the last version where the feature was available.
@@ -17,27 +70,17 @@ fn main() {
     // 6.0 support
     println!("cargo::rustc-check-cfg=cfg(varnishsys_6)");
 
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap()).join("bindings.rs");
+    let bindings = PathBuf::from(env::var("OUT_DIR").unwrap()).join("bindings.rs");
 
     println!("cargo:rerun-if-env-changed=VARNISH_INCLUDE_PATHS");
-    let Some((varnish_paths, varnish_ver)) = find_include_dir(&out_path) else {
-        return;
-    };
+    let (varnish_paths, version) = find_include_dir(&bindings)?;
 
-    println!("cargo::metadata=version_number={varnish_ver}");
-    let (major, minor) = parse_version(&varnish_ver);
+    println!("cargo::metadata=version_number={version}");
 
-    if major == 7 && minor < 6 {
-        println!("cargo::rustc-cfg=varnishsys_7_5_objcore_init");
-    }
-    if major < 7 {
-        println!("cargo::rustc-cfg=varnishsys_6");
-    }
+    Some(VarnishInfo::parse(bindings, varnish_paths, version))
+}
 
-    if major < 6 || major > 7 {
-        println!("cargo::warning=Varnish v{varnish_ver} is not supported and may not work with this crate");
-    }
-
+fn generate_bindings(info: &VarnishInfo) {
     let mut ren = Renamer::default();
     rename_enum!(ren, "VSL_tag_e" => "VslTag", remove: "SLT_"); // SLT_Debug
     rename_enum!(ren, "boc_state_e" => "BocState", remove: "BOS_"); // BOS_INVALID
@@ -54,14 +97,14 @@ fn main() {
     rename_enum!(ren, "vfp_status" => "VfpStatus", remove: "VFP_"); // VFP_ERROR
 
     println!("cargo:rustc-link-lib=varnishapi");
-    println!("cargo:rerun-if-changed=src/wrapper.h");
+    println!("cargo:rerun-if-changed=c_code/wrapper.h");
     let mut bindings_builder = bindgen::Builder::default()
-        .header("src/wrapper.h")
+        .header("c_code/wrapper.h")
         .blocklist_item("FP_.*")
         .blocklist_item("FILE")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .clang_args(
-            varnish_paths
+            info.varnish_paths
                 .iter()
                 .map(|i| format!("-I{}", i.to_str().unwrap())),
         )
@@ -82,30 +125,31 @@ fn main() {
         .rustified_non_exhaustive_enum(ren.get_regex_str())
         .parse_callbacks(Box::new(ren));
 
-    if major == 6 {
-        bindings_builder = bindings_builder.clang_args(&["-D", "VARNISH_RS_6_0"]);
+    for define in &info.defines {
+        bindings_builder = bindings_builder.clang_args(&["-D", define]);
     }
+
     let bindings = bindings_builder
         .generate()
         .expect("Unable to generate bindings");
 
     // Write the bindings to the $OUT_DIR/bindings.rs file.
     bindings
-        .write_to_file(&out_path)
+        .write_to_file(&info.bindings)
         .expect("Couldn't write bindings!");
 
-    // Compare generated `out_path` file to the checked-in `bindings.for-docs` file,
+    // Compare generated file to the checked-in `bindings.for-docs` file,
     // and if they differ, raise a warning.
-    let generated = fs::read_to_string(&out_path).unwrap();
+    let generated = fs::read_to_string(&info.bindings).unwrap();
     let checked_in = fs::read_to_string(BINDINGS_FILE).unwrap_or_default();
     if generated != checked_in {
         println!(
-            "cargo::warning=Generated bindings from Varnish {varnish_ver} differ from checked-in {BINDINGS_FILE}. Update with   cp {} varnish-sys/{BINDINGS_FILE}",
-            out_path.display()
+            "cargo::warning=Generated bindings from Varnish {info} differ from checked-in {BINDINGS_FILE}. Update with   cp {} varnish-sys/{BINDINGS_FILE}",
+            info.bindings.display()
         );
-    } else if BINDINGS_FILE_VER != varnish_ver {
+    } else if BINDINGS_FILE_VER != info.version {
         println!(
-            r#"cargo::warning=Generated bindings **version** from Varnish {varnish_ver} differ from checked-in {BINDINGS_FILE}. Update `build.rs` file with   BINDINGS_FILE_VER = "{varnish_ver}""#
+            r#"cargo::warning=Generated bindings **version** from Varnish {info} differ from checked-in {BINDINGS_FILE}. Update `build.rs` file with   BINDINGS_FILE_VER = "{info}""#
         );
     }
 }

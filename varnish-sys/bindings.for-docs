@@ -9116,6 +9116,9 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn VSC_IsRaw(arg1: *const vsc) -> ::std::ffi::c_uint;
 }
+unsafe extern "C" {
+    pub fn VFP_Push(arg1: *mut vfp_ctx, arg2: *const vfp) -> *mut vfp_entry;
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct http_conn {
@@ -9165,9 +9168,6 @@ impl Default for http_conn {
             s.assume_init()
         }
     }
-}
-unsafe extern "C" {
-    pub fn VFP_Push(arg1: *mut vfp_ctx, arg2: *const vfp) -> *mut vfp_entry;
 }
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
