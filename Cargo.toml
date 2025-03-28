@@ -32,6 +32,8 @@ varnish-sys = { path = "./varnish-sys", version = "0.4.1" }
 bindgen_helpers = "0.3.0"
 darling = "0.20.10"
 glob = "0.3.1"
+http0 = { package = "http", version = "0" }  # Support for older v0.*.*
+http1 = { package = "http", version = "1" }
 insta = "1"
 memchr = "2.7.4"
 pkg-config = "0.3.30"
