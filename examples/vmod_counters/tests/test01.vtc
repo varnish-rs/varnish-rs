@@ -21,7 +21,8 @@ varnish v1 -vcl+backend {
 
 		# Update temperature from header if present
 		if (req.http.x-temperature) {
-			c.update_temperature(std.integer(req.http.x-temperature));
+		    # std.integer() before v7 requires a fallback parameter
+			c.update_temperature(std.integer(req.http.x-temperature, 0));
 		}
 
 		set resp.http.x-foo = c.get_foo();
