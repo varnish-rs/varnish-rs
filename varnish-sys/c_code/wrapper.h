@@ -14,7 +14,9 @@
 #include "vapi/vsm.h"
 #include "vapi/vsc.h"
 
-#ifndef VARNISH_RS_6_0
+struct vfp_entry *VFP_Push(struct vfp_ctx *, const struct vfp *);
+
+#ifdef VARNISH_RS_HTTP_CONN
 struct http_conn {
         unsigned                magic;
 #define HTTP_CONN_MAGIC         0x3e19edd1
@@ -34,5 +36,3 @@ struct http_conn {
         vtim_dur                between_bytes_timeout;
 };
 #endif
-
-struct vfp_entry *VFP_Push(struct vfp_ctx *, const struct vfp *);
