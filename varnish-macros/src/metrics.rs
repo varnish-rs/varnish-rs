@@ -1,12 +1,16 @@
 use std::collections::HashMap;
 use std::mem::size_of;
+use std::str::FromStr;
 use std::sync::atomic::AtomicU64;
 
+use proc_macro2::{Literal, TokenStream};
+use quote::quote;
 use serde::Serialize;
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
-use syn::{Data, Field, Fields, Type};
+use syn::{Data, DeriveInput, Field, Fields, Type};
 
+use crate::errors::Errors;
 use crate::parser_utils::{find_attr, has_attr, parse_doc_str};
 
 type FieldList = Punctuated<Field, Comma>;
@@ -83,6 +87,38 @@ struct VscMetadata {
     docs: String,
     elements: usize,
     elem: HashMap<String, VscMetricDef>,
+}
+
+pub fn derive_vsc_metric(input: &DeriveInput) -> Result<TokenStream, Errors> {
+    let name = &input.ident;
+
+    if !has_repr_c(input) {
+        return Err(syn::Error::new(
+            name.span(),
+            "VSC structs must be marked with #[repr(C)] for correct memory layout",
+        )
+        .into());
+    }
+
+    let fields = get_struct_fields(&input.data);
+    validate_fields(fields);
+
+    let metadata = generate_metadata_json(&name.to_string(), fields);
+    let hashes = metadata
+        .split('"')
+        .skip(1) // Skip the first part which is before the first quote
+        .map(|s| s.chars().take_while(|&c| c == '#').count() + 1)
+        .max()
+        .unwrap_or_default();
+    let hashes = "#".repeat(hashes);
+    let metadata = Literal::from_str(&format!("r{hashes}\"{metadata}\"{hashes}")).unwrap();
+    Ok(quote! {
+        unsafe impl varnish::VscMetric for #name {
+            fn get_metadata() -> &'static str {
+                #metadata
+            }
+        }
+    })
 }
 
 pub fn get_struct_fields(data: &Data) -> &FieldList {
@@ -215,7 +251,7 @@ fn parse_metric_attributes(field: &Field, metric_type: &str) -> (Level, Format) 
     (level, format)
 }
 
-pub fn has_repr_c(input: &syn::DeriveInput) -> bool {
+pub fn has_repr_c(input: &DeriveInput) -> bool {
     input.attrs.iter().any(|attr| {
         if !attr.path().is_ident("repr") {
             return false;
