@@ -26,8 +26,6 @@ if ! command -v cargo-binstall; then
   curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
 fi
 
-cargo binstall --no-confirm just ripgrep cargo-expand
-
 if ! grep -q "alias j=" ~/.bashrc; then
   echo "alias j='just'" >> ~/.bashrc
 fi

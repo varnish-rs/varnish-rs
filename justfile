@@ -185,7 +185,14 @@ get-varnish-version $required_version="":
 
 [private]
 docker-build-ver VERSION:
-    docker build --progress=plain -t varnish-img-{{VERSION}} --build-arg VARNISH_VERSION={{VERSION}} --build-arg USER_UID=$(id -u) --build-arg USER_GID=$(id -g) -f docker/Dockerfile docker
+    docker build \
+           --progress=plain \
+           -t "varnish-img-{{VERSION}}" \
+           {{ if VERSION == "latest" { "" } else { "--build-arg VARNISH_VERSION_TAG=varnish" + VERSION } }} \
+           --build-arg USER_UID=$(id -u) \
+           --build-arg USER_GID=$(id -g) \
+           -f docker/Dockerfile \
+           .
 
 [private]
 docker-run-ver VERSION *ARGS:
@@ -197,8 +204,20 @@ docker-run-ver VERSION *ARGS:
         -v "$PWD/docker/.cache/{{VERSION}}/.bash_history:/home/user/.bash_history" \
         varnish-img-{{VERSION}} {{ARGS}}
 
+docker-run-latest *ARGS: (docker-build-ver "latest") (docker-run-ver "latest" ARGS)
 docker-run-77 *ARGS: (docker-build-ver "77") (docker-run-ver "77" ARGS)
 docker-run-76 *ARGS: (docker-build-ver "76") (docker-run-ver "76" ARGS)
 docker-run-75 *ARGS: (docker-build-ver "75") (docker-run-ver "75" ARGS)
 docker-run-74 *ARGS: (docker-build-ver "74") (docker-run-ver "74" ARGS)
 docker-run-60 *ARGS: (docker-build-ver "60lts") (docker-run-ver "60lts" ARGS)
+
+# Install Varnish from packagecloud.io. This could be damaging to your system - use with caution.
+[private]
+install-varnish TAG="varnish77":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    curl -sSf "https://packagecloud.io/install/repositories/varnishcache/{{TAG}}/script.deb.sh" | sudo bash
+    echo -e 'Package: varnish varnish-dev\nPin: origin "packagecloud.io"\nPin-Priority: 1001' | sudo tee /etc/apt/preferences.d/varnish
+    cat /etc/apt/preferences.d/varnish
+    sudo apt-cache policy varnish
+    sudo apt-get install -y varnish varnish-dev
