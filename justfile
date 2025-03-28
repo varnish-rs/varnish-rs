@@ -72,19 +72,9 @@ grcov:
 
 # Publish crates to crates.io in the right order
 publish:
-    #!/usr/bin/env bash
-    set -euo pipefail
     cargo publish -p varnish-sys
     cargo publish -p varnish-macros
     cargo publish -p varnish
-    LOCAL_VERSION="$(grep '^version =' Cargo.toml | sed -E 's/version = "([^"]*)".*/\1/')"
-    git tag -a "v$LOCAL_VERSION" -m "Release v$LOCAL_VERSION"
-    echo "A new tag v$LOCAL_VERSION has been created.  Please push it to the repository:"
-    if git remote get-url upstream > /dev/null 2> /dev/null ; then
-        echo "   git push upstream tag v$LOCAL_VERSION"
-    else
-        echo "   git push origin tag v$LOCAL_VERSION"
-    fi
 
 # Use the experimental workspace publishing with --dry-run. Requires nightly Rust.
 test-publish:
