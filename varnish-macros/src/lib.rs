@@ -1,13 +1,10 @@
-// Uncomment the following line to disable warnings for the entire crate, e.g. during debugging.
-// #![allow(warnings)]
-
 use errors::Errors;
-use quote::quote;
 use syn::{parse_macro_input, DeriveInput, ItemMod};
 use {proc_macro as pm, proc_macro2 as pm2};
 
 use crate::gen_docs::generate_docs;
 use crate::generator::render_model;
+use crate::metrics::derive_vsc_metric;
 use crate::parser::tokens_to_model;
 
 mod errors;
@@ -74,28 +71,7 @@ pub fn vmod(args: pm::TokenStream, input: pm::TokenStream) -> pm::TokenStream {
 #[proc_macro_derive(VscMetric, attributes(counter, gauge))]
 pub fn vsc_metric(input: pm::TokenStream) -> pm::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
-    let name = &input.ident;
-
-    if !metrics::has_repr_c(&input) {
-        return syn::Error::new(
-            name.span(),
-            "VSC structs must be marked with #[repr(C)] for correct memory layout",
-        )
-        .into_compile_error()
-        .into();
-    }
-
-    let fields = metrics::get_struct_fields(&input.data);
-    metrics::validate_fields(fields);
-
-    let metadata_json = metrics::generate_metadata_json(&name.to_string(), fields);
-
-    quote! {
-        unsafe impl varnish::VscMetric for #name {
-            fn get_metadata() -> &'static str {
-                #metadata_json
-            }
-        }
-    }
-    .into()
+    derive_vsc_metric(&input)
+        .unwrap_or_else(Errors::into_compile_error)
+        .into()
 }
