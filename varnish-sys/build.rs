@@ -39,6 +39,10 @@ impl VarnishInfo {
             defines.push("VARNISH_RS_HTTP_CONN");
         }
 
+        // TODO: This should become conditional once this PR merges, and we know its version
+        //     https://github.com/varnishcache/varnish-cache/pull/4303 merges
+        defines.push("VARNISH_RS_ALLOC_VARIADIC");
+
         Self {
             bindings,
             varnish_paths,
@@ -57,6 +61,7 @@ impl Display for VarnishInfo {
 fn main() {
     if let Some(info) = &detect_varnish() {
         generate_bindings(info);
+        build_c_wrapper(info);
     }
 }
 
@@ -152,6 +157,17 @@ fn generate_bindings(info: &VarnishInfo) {
             r#"cargo::warning=Generated bindings **version** from Varnish {info} differ from checked-in {BINDINGS_FILE}. Update `build.rs` file with   BINDINGS_FILE_VER = "{info}""#
         );
     }
+}
+
+fn build_c_wrapper(info: &VarnishInfo) {
+    let mut builder = cc::Build::new();
+    for define in &info.defines {
+        builder.define(define, None);
+    }
+    builder
+        .file("c_code/wrapper.c")
+        .includes(&info.varnish_paths)
+        .compile("varnish_wrapper");
 }
 
 fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
