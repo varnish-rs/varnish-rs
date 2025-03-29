@@ -4,6 +4,6 @@ snapshot_kind: text
 ---
 unsafe impl varnish::VscMetric for VariousStats {
     fn get_metadata() -> &'static str {
-        r#"{"version":"1","name":"VariousStats","oneliner":"VariousStats statistics","order":100,"docs":"","elements":3,"elem":{"foo":{"name":"foo","type":"counter","ctype":"uint64_t","level":"info","oneliner":"Some arbitrary counter","format":"integer","docs":"","index":0},"temperature":{"name":"temperature","type":"gauge","ctype":"uint64_t","level":"info","oneliner":"Some arbitrary gauge","format":"integer","docs":"","index":8},"memory":{"name":"memory","type":"gauge","ctype":"uint64_t","level":"debug","oneliner":"An arbitrary gauge with a longer description","format":"bytes","docs":"A more detailed description than the above oneliner could go here.","index":16}}}"#
+        r#"{"version":"1","name":"VariousStats","oneliner":"VariousStats statistics","order":100,"docs":"","elements":3,"elem":{"foo":{"name":"foo","type":"counter","ctype":"uint64_t","level":"info","oneliner":"Some arbitrary counter","format":"integer","docs":"","index":0},"memory":{"name":"memory","type":"gauge","ctype":"uint64_t","level":"debug","oneliner":"An arbitrary gauge with a longer description","format":"bytes","docs":"A more detailed description than the above oneliner could go here.","index":16},"temperature":{"name":"temperature","type":"gauge","ctype":"uint64_t","level":"info","oneliner":"Some arbitrary gauge","format":"integer","docs":"","index":8}}}"#
     }
 }

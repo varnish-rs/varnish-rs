@@ -1,3 +1,6 @@
+// Uncomment the following line to disable warnings for the entire crate, e.g. during debugging.
+// #![allow(warnings)]
+
 use errors::Errors;
 use syn::{parse_macro_input, DeriveInput, ItemMod};
 use {proc_macro as pm, proc_macro2 as pm2};

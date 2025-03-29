@@ -1,17 +1,21 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
+use std::fmt::Display;
 use std::mem::size_of;
 use std::str::FromStr;
 use std::sync::atomic::AtomicU64;
 
-use proc_macro2::{Literal, TokenStream};
+use proc_macro2::{Ident, Literal, TokenStream};
 use quote::quote;
 use serde::Serialize;
+use syn::meta::ParseNestedMeta;
 use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
 use syn::token::Comma;
 use syn::{Data, DeriveInput, Field, Fields, Type};
 
 use crate::errors::Errors;
 use crate::parser_utils::{find_attr, has_attr, parse_doc_str};
+use crate::ProcResult;
 
 type FieldList = Punctuated<Field, Comma>;
 
@@ -36,32 +40,60 @@ enum MetricType {
     Gauge,
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, Default)]
 #[serde(rename_all = "lowercase")]
 enum Level {
+    #[default]
     Info,
     Diag,
     Debug,
 }
 
-impl Default for Level {
-    fn default() -> Self {
-        Self::Info
+impl FromStr for Level {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // TODO: do we really need to compare with ignore_ascii_case?
+        // TODO: consider using strum::FromRepr crate instead?
+        if s.eq_ignore_ascii_case("info") {
+            Ok(Level::Info)
+        } else if s.eq_ignore_ascii_case("diag") {
+            Ok(Level::Diag)
+        } else if s.eq_ignore_ascii_case("debug") {
+            Ok(Level::Debug)
+        } else {
+            Err(format!(
+                // TODO: can s come from an untrusted source? If so, we should not include it
+                "Invalid level value '{s}'. Must be one of: info, diag, debug"
+            ))
+        }
     }
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, Default)]
 #[serde(rename_all = "lowercase")]
 enum Format {
+    #[default]
     Integer,
     Bitmap,
     Duration,
     Bytes,
 }
 
-impl Default for Format {
-    fn default() -> Self {
-        Self::Integer
+impl FromStr for Format {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "integer" => Ok(Format::Integer),
+            "bitmap" => Ok(Format::Bitmap),
+            "duration" => Ok(Format::Duration),
+            "bytes" => Ok(Format::Bytes),
+            _ => Err(format!(
+                // TODO: can s come from an untrusted source? If so, we should not include it
+                "Invalid format value '{s}'. Must be one of: integer, bitmap, duration, bytes"
+            )),
+        }
     }
 }
 
@@ -86,10 +118,11 @@ struct VscMetadata {
     order: u32,
     docs: String,
     elements: usize,
-    elem: HashMap<String, VscMetricDef>,
+    // Using BTreeMap to ensure the order of elements
+    elem: BTreeMap<String, VscMetricDef>,
 }
 
-pub fn derive_vsc_metric(input: &DeriveInput) -> Result<TokenStream, Errors> {
+pub fn derive_vsc_metric(input: &DeriveInput) -> ProcResult<TokenStream> {
     let name = &input.ident;
 
     if !has_repr_c(input) {
@@ -101,9 +134,9 @@ pub fn derive_vsc_metric(input: &DeriveInput) -> Result<TokenStream, Errors> {
     }
 
     let fields = get_struct_fields(&input.data);
-    validate_fields(fields);
+    validate_fields(fields)?;
 
-    let metadata = generate_metadata_json(&name.to_string(), fields);
+    let metadata = generate_metadata_json(name, fields)?;
     let hashes = metadata
         .split('"')
         .skip(1) // Skip the first part which is before the first quote
@@ -122,6 +155,7 @@ pub fn derive_vsc_metric(input: &DeriveInput) -> Result<TokenStream, Errors> {
 }
 
 pub fn get_struct_fields(data: &Data) -> &FieldList {
+    // FIXME: use errors collection
     match data {
         Data::Struct(data) => match &data.fields {
             Fields::Named(fields) => &fields.named,
@@ -131,7 +165,8 @@ pub fn get_struct_fields(data: &Data) -> &FieldList {
     }
 }
 
-pub fn validate_fields(fields: &FieldList) {
+pub fn validate_fields(fields: &FieldList) -> ProcResult<()> {
+    let mut errors = Errors::new();
     for field in fields {
         match &field.ty {
             Type::Path(path) => {
@@ -142,49 +177,66 @@ pub fn validate_fields(fields: &FieldList) {
                     .is_some_and(|seg| seg.ident == "AtomicU64");
 
                 if !is_atomic_u64 {
-                    let field_name = field.ident.as_ref().unwrap();
-                    panic!("Field {field_name} must be of type AtomicU64");
+                    let field_name = field.ident.as_ref().map(ToString::to_string).unwrap();
+                    errors.push(syn::Error::new(
+                        Spanned::span(field),
+                        format!("Field {field_name} must be of type AtomicU64"),
+                    ));
                 }
             }
-            _ => panic!("Field types must be AtomicU64"),
+            _ => {
+                errors.push(syn::Error::new(
+                    Spanned::span(field),
+                    "Field types must be of type AtomicU64",
+                ));
+            }
         }
     }
+    Ok(errors.into_result()?)
 }
 
-fn generate_metrics(fields: &FieldList) -> HashMap<String, VscMetricDef> {
+fn generate_metrics(fields: &FieldList) -> ProcResult<BTreeMap<String, VscMetricDef>> {
     let mut offset = 0;
-    fields
-        .iter()
-        .map(|field| {
-            let name = field.ident.as_ref().unwrap().to_string();
+    let mut result = BTreeMap::new();
 
-            let metric_type = if has_attr(&field.attrs, "counter") {
-                MetricType::Counter
-            } else if has_attr(&field.attrs, "gauge") {
-                MetricType::Gauge
-            } else {
-                panic!("Field {name} must have either #[counter] or #[gauge] attribute")
-            };
+    for field in fields {
+        let name = field.ident.as_ref().unwrap().to_string();
 
-            let doc_str = parse_doc_str(&field.attrs);
-            let mut doc_lines = doc_str.split('\n').filter(|s| !s.is_empty());
-            let oneliner = doc_lines.next().unwrap_or_default().to_string();
-            let docs = doc_lines.next().unwrap_or_default().to_string();
+        let has_counter = has_attr(&field.attrs, "counter");
+        let has_gauge = has_attr(&field.attrs, "gauge");
+        let metric_type = if has_counter && has_gauge {
+            // FIXME: use errors collection
+            panic!("Field {name} cannot have both #[counter] and #[gauge] attributes");
+        } else if has_counter {
+            MetricType::Counter
+        } else if has_gauge {
+            MetricType::Gauge
+        } else {
+            // FIXME: use errors collection
+            panic!("Field {name} must have either #[counter] or #[gauge] attribute")
+        };
 
-            let (level, format) = parse_metric_attributes(
-                field,
-                match metric_type {
-                    MetricType::Counter => "counter",
-                    MetricType::Gauge => "gauge",
-                },
-            );
+        let doc_str = parse_doc_str(&field.attrs);
+        let mut doc_lines = doc_str.split('\n').filter(|s| !s.is_empty());
+        let oneliner = doc_lines.next().unwrap_or_default().to_string();
+        let docs = doc_lines.next().unwrap_or_default().to_string();
 
-            let ctype = CType::Uint64;
-            let index = Some(offset);
-            offset += ctype.size();
+        let (level, format) = parse_metric_attributes(
+            field,
+            match metric_type {
+                MetricType::Counter => "counter",
+                MetricType::Gauge => "gauge",
+            },
+        )?;
 
-            let metric = VscMetricDef {
-                name: name.clone(),
+        let ctype = CType::Uint64;
+        let index = Some(offset);
+        offset += ctype.size();
+
+        result.insert(
+            name.clone(),
+            VscMetricDef {
+                name,
                 metric_type,
                 ctype,
                 level,
@@ -192,15 +244,15 @@ fn generate_metrics(fields: &FieldList) -> HashMap<String, VscMetricDef> {
                 format,
                 docs,
                 index,
-            };
+            },
+        );
+    }
 
-            (name, metric)
-        })
-        .collect()
+    Ok(result)
 }
 
-pub fn generate_metadata_json(name: &str, fields: &FieldList) -> String {
-    let metrics = generate_metrics(fields);
+pub fn generate_metadata_json(name: &Ident, fields: &FieldList) -> ProcResult<String> {
+    let metrics = generate_metrics(fields)?;
 
     let metadata = VscMetadata {
         version: "1",
@@ -212,43 +264,46 @@ pub fn generate_metadata_json(name: &str, fields: &FieldList) -> String {
         elem: metrics,
     };
 
-    serde_json::to_string(&metadata).unwrap()
+    Ok(
+        serde_json::to_string(&metadata)
+            .map_err(|e| syn::Error::new(name.span(), e.to_string()))?,
+    )
 }
 
-fn parse_metric_attributes(field: &Field, metric_type: &str) -> (Level, Format) {
+#[expect(clippy::unnecessary_wraps)]
+fn parse_metric_attributes(field: &Field, metric_type: &str) -> ProcResult<(Level, Format)> {
+    /// Helper function to parse the attribute value
+    fn parse<T: FromStr>(id: &Ident, meta: &ParseNestedMeta, field: &Field) -> Result<T, syn::Error>
+    where
+        <T as FromStr>::Err: Display,
+    {
+        let value = meta.value()?.parse::<syn::LitStr>()?.value();
+        T::from_str(&value).map_err(|e| {
+            meta.error(format!(
+                "Invalid {id} value for field {}: {e}",
+                field.ident.as_ref().unwrap()
+            ))
+        })
+    }
+
     let mut level = Level::default();
     let mut format = Format::default();
-
     if let Some(attrs) = find_attr(&field.attrs, metric_type) {
+        // FIXME: parse_nested_meta() returns an error:
+        //     "expected attribute arguments in parentheses ..."
+        //   ignoring seems to work, but that's a strange approach and needs fixing
         let _ = attrs.parse_nested_meta(|meta| {
-            match meta.path.get_ident().map(ToString::to_string).as_deref() {
-                Some("level") => {
-                    let level_str = meta.value()?.parse::<syn::LitStr>()?.value();
-                    level = match level_str.as_str() {
-                        "info" => Level::Info,
-                        "diag" => Level::Diag,
-                        "debug" => Level::Debug,
-                        _ => panic!("Invalid level value for field {}. Must be one of: info, diag, debug",
-                            field.ident.as_ref().unwrap()),
-                    };
+            if let Some(ident) = meta.path.get_ident() {
+                if ident == "level" {
+                    level = parse(ident, &meta, field)?;
+                } else if ident == "format" {
+                    format = parse(ident, &meta, field)?;
                 }
-                Some("format") => {
-                    let format_str = meta.value()?.parse::<syn::LitStr>()?.value();
-                    format = match format_str.as_str() {
-                        "integer" => Format::Integer,
-                        "bitmap" => Format::Bitmap,
-                        "duration" => Format::Duration,
-                        "bytes" => Format::Bytes,
-                        _ => panic!("Invalid format value for field {}. Must be one of: integer, bitmap, duration, bytes",
-                            field.ident.as_ref().unwrap()),
-                    };
-                }
-                _ => {}
             }
             Ok(())
         });
     }
-    (level, format)
+    Ok((level, format))
 }
 
 pub fn has_repr_c(input: &DeriveInput) -> bool {
