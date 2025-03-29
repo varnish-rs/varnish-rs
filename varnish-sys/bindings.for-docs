@@ -9169,6 +9169,18 @@ impl Default for http_conn {
         }
     }
 }
+unsafe extern "C" {
+    pub fn VRT_VSC_AllocVariadic(
+        vc: *mut vsmw_cluster,
+        sg: *mut *mut vsc_seg,
+        nm: *const ::std::ffi::c_char,
+        sd: usize,
+        jp: *const ::std::ffi::c_uchar,
+        sj: usize,
+        fmt: *const ::std::ffi::c_char,
+        ...
+    ) -> *mut ::std::ffi::c_void;
+}
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct __locale_data {

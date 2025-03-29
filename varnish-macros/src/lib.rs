@@ -2,11 +2,12 @@
 // #![allow(warnings)]
 
 use errors::Errors;
-use syn::{parse_macro_input, ItemMod};
+use syn::{parse_macro_input, DeriveInput, ItemMod};
 use {proc_macro as pm, proc_macro2 as pm2};
 
 use crate::gen_docs::generate_docs;
 use crate::generator::render_model;
+use crate::metrics::derive_vsc_metric;
 use crate::parser::tokens_to_model;
 
 mod errors;
@@ -14,6 +15,7 @@ mod gen_docs;
 mod gen_func;
 mod gen_objects;
 mod generator;
+mod metrics;
 mod model;
 mod names;
 mod parser;
@@ -63,4 +65,16 @@ pub fn vmod(args: pm::TokenStream, input: pm::TokenStream) -> pm::TokenStream {
     generate_docs(&info);
 
     result.into()
+}
+
+/// Handle the `#[derive(VscMetric)]` macro. This can only be applied to a struct.
+/// The struct must have only fields of type `AtomicU64`.
+/// - `#[counter]` attribute on a field will export it as a counter.
+/// - `#[gauge]` attribute on a field will export it as a gauge.
+#[proc_macro_derive(VscMetric, attributes(counter, gauge))]
+pub fn vsc_metric(input: pm::TokenStream) -> pm::TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    derive_vsc_metric(&input)
+        .unwrap_or_else(Errors::into_compile_error)
+        .into()
 }
