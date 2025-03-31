@@ -213,9 +213,6 @@ pub trait VclBackend<T: VclResponse> {
     /// Convenience function for the implementors to call if they don't have a probe. This one is
     /// not used by Varnish directly.
     fn list_without_probe(&self, ctx: &mut Ctx, vsb: &mut Buffer, detailed: bool, json: bool) {
-        if detailed {
-            return;
-        }
         let state = if self.healthy(ctx).0 {
             "healthy"
         } else {
@@ -226,6 +223,9 @@ pub trait VclBackend<T: VclResponse> {
             vsb.write(&state).unwrap();
             vsb.write(&"]").unwrap();
         } else {
+            if detailed {
+                return
+            }
             vsb.write(&"0/0\t").unwrap();
             vsb.write(&state).unwrap();
         }
