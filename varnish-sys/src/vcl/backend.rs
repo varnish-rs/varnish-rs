@@ -224,7 +224,7 @@ pub trait VclBackend<T: VclResponse> {
             vsb.write(&"]").unwrap();
         } else {
             if detailed {
-                return
+                return;
             }
             vsb.write(&"0/0\t").unwrap();
             vsb.write(&state).unwrap();
