@@ -6,6 +6,8 @@
 [![crates.io version](https://img.shields.io/crates/l/varnish.svg)](https://github.com/gquintard/varnish-rs/blob/main/LICENSE)
 [![CI build](https://github.com/gquintard/varnish-rs/actions/workflows/tests.yaml/badge.svg)](https://github.com/gquintard/varnish-rs/actions)
 
+![Varnish Logo](./logo.svg)
+
 The `varnish` crate provides a safe and idiomatic interface to the [Varnish](https://varnish-cache.org/intro/index.html) C API, allowing you to write Varnish modules (VMODs) in Rust. See the [crate API](https://docs.rs/varnish) for more details.
 
 Some VMODs that use this library:
