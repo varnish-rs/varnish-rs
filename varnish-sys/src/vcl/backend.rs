@@ -428,7 +428,7 @@ unsafe extern "C" fn wrap_gethdrs<S: VclBackend<T>, T: VclResponse>(
                             htc.body_status = ffi::BS_LENGTH.as_ptr();
                             htc.content_length = l as isize;
                         }
-                    };
+                    }
                     htc.priv_ = Box::into_raw(Box::new(transfer)).cast::<c_void>();
                     // build a vfp to wrap the VclResponse object if there's something to push
                     if htc.body_status != ffi::BS_NONE.as_ptr() {

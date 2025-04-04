@@ -328,7 +328,7 @@ impl FuncProcessor {
                 self.args_json.push(json);
                 self.add_cproto_arg(func_info, pi.ty_info.to_c_type(), &arg_info.ident);
             }
-        };
+        }
     }
 
     /// Access to the input value, either from the args struct or directly
