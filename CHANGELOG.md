@@ -1,5 +1,8 @@
 # Unpublished
 
+# 0.4.1 (2025-04-11)
+- Allow VMODs to publish VSC metrics
+
 # 0.4.0 (2025-03-26)
 - In probe support, renamed `Request::URL` to `Request::Url`
 - Refactored Workspace API:
