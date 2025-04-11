@@ -36,6 +36,8 @@ client c1 {
 	expect resp.http.x-foo == "2"
 	expect resp.http.x-temperature == "17"
 } -run
+varnish v1 -expect mystats.default.foo == 2
+varnish v1 -expect mystats.default.temperature == 17
 
 # Counter values should be persisted across requests
 client c2 {
@@ -44,6 +46,8 @@ client c2 {
 	expect resp.http.x-foo == "2"
 	expect resp.http.x-temperature == "17"
 } -run
+varnish v1 -expect mystats.default.foo == 2
+varnish v1 -expect mystats.default.temperature == 17
 
 # Send another request with different temperature
 client c3 {

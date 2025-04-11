@@ -53,19 +53,13 @@ impl FromStr for Level {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // TODO: do we really need to compare with ignore_ascii_case?
-        // TODO: consider using strum::FromRepr crate instead?
-        if s.eq_ignore_ascii_case("info") {
-            Ok(Level::Info)
-        } else if s.eq_ignore_ascii_case("diag") {
-            Ok(Level::Diag)
-        } else if s.eq_ignore_ascii_case("debug") {
-            Ok(Level::Debug)
-        } else {
-            Err(format!(
-                // TODO: can s come from an untrusted source? If so, we should not include it
+        match s {
+            "info" => Ok(Level::Info),
+            "diag" => Ok(Level::Diag),
+            "debug" => Ok(Level::Debug),
+            _ => Err(format!(
                 "Invalid level value '{s}'. Must be one of: info, diag, debug"
-            ))
+            )),
         }
     }
 }
