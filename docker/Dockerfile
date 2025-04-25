@@ -13,6 +13,7 @@ RUN    apt-get update \
         llvm \
         pkg-config \
         sudo `# allows dev to install more packages without switching to root or rebuilding container` \
+        libssl-dev `# some vmod projects may use this` \
     && : # end of the RUN cmd - easier to keep a colon at the end of the list, than to keep the backslashes in check
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /bin
