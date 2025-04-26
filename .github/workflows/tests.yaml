@@ -21,7 +21,6 @@ jobs:
           - setup: varnish76
           - setup: varnish75
           - setup: varnish60lts
-
     env:
       RUST_BACKTRACE: 1
       RUSTDOCFLAGS: -D warnings
