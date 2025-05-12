@@ -115,7 +115,12 @@ impl Generator {
     }
 
     fn gen_json(&self) -> String {
-        let mut header: Vec<Value> = vec!["$VMOD".into(), "1.0".into()];
+        let mut version = "2.0";
+        if cfg!(varnishsys_vmod_meta_1_0) {
+            version = "1.0";
+        }
+
+        let mut header: Vec<Value> = vec!["$VMOD".into(), version.into()];
         if !cfg!(varnishsys_6) {
             header.extend(vec![
                 self.names.mod_name().into(),
