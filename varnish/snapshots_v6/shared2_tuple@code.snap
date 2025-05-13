@@ -85,7 +85,7 @@ mod tuple {
             json: JSON.as_ptr(),
             proto: cproto.as_ptr(),
         };
-        const JSON: &CStr = c"[\n  [\n    \"$VMOD\",\n    \"1.0\"\n  ],\n  [\n    \"$EVENT\",\n    \"Vmod_tuple_Func.f_on_event\"\n  ],\n  [\n    \"$FUNC\",\n    \"per_tsk_val\",\n    [\n      [\n        \"VOID\"\n      ],\n      \"Vmod_tuple_Func.f_per_tsk_val\",\n      \"\",\n      [\n        \"PRIV_TASK\",\n        \"tsk_vals\"\n      ],\n      [\n        \"PRIV_VCL\",\n        \"vcl_vals\"\n      ]\n    ]\n  ]\n]";
+        const JSON: &CStr = c"(moved to @json.snap files)";
         const cproto: &CStr = c"\ntypedef VCL_VOID td_vmod_tuple_per_tsk_val(\n    VRT_CTX,\n    struct vmod_priv *,\n    struct vmod_priv *\n);\n\nstruct Vmod_tuple_Func {\n  vmod_event_f *f_on_event;\n  td_vmod_tuple_per_tsk_val *f_per_tsk_val;\n};\n\nstatic struct Vmod_tuple_Func Vmod_tuple_Func;";
     }
     use super::{PerTask1, PerTask2, PerVcl1, PerVcl2};

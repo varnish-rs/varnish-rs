@@ -5,7 +5,7 @@ VMOD_JSON_SPEC
 [
   [
     "$VMOD",
-    "2.0",
+    "1.0",
     "obj",
     "Vmod_vmod_obj_Func",
     "e4dde1367a8785e0bb9e3b32a6a53880156eb4050d20f22573df4b5ea5f44461",
@@ -140,7 +140,6 @@ static struct Vmod_vmod_obj_Func Vmod_vmod_obj_Func;"
         [
           "INT",
           "cap",
-          "cap",
           null,
           null,
           true
@@ -168,12 +167,10 @@ static struct Vmod_vmod_obj_Func Vmod_vmod_obj_Func;"
         "",
         [
           "STRING",
-          "key",
           "key"
         ],
         [
           "STRING",
-          "value",
           "value"
         ]
       ]
@@ -189,7 +186,6 @@ static struct Vmod_vmod_obj_Func Vmod_vmod_obj_Func;"
         "",
         [
           "STRING",
-          "key",
           "key"
         ]
       ]
@@ -212,7 +208,6 @@ static struct Vmod_vmod_obj_Func Vmod_vmod_obj_Func;"
         "struct arg_vmod_obj_kv2__init",
         [
           "INT",
-          "cap",
           "cap",
           null,
           null,
@@ -241,12 +236,10 @@ static struct Vmod_vmod_obj_Func Vmod_vmod_obj_Func;"
         "struct arg_vmod_obj_kv2_set",
         [
           "STRING",
-          "key",
           "key"
         ],
         [
           "STRING",
-          "value",
           "value",
           null,
           null,
@@ -272,7 +265,6 @@ static struct Vmod_vmod_obj_Func Vmod_vmod_obj_Func;"
         "struct arg_vmod_obj_kv3__init",
         [
           "INT",
-          "cap",
           "cap",
           null,
           null,
@@ -301,12 +293,10 @@ static struct Vmod_vmod_obj_Func Vmod_vmod_obj_Func;"
         "struct arg_vmod_obj_kv3_set",
         [
           "STRING",
-          "key",
           "key"
         ],
         [
           "STRING",
-          "value",
           "value",
           null,
           null,

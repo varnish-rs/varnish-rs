@@ -5,7 +5,7 @@ VMOD_JSON_SPEC
 [
   [
     "$VMOD",
-    "2.0",
+    "1.0",
     "tuple",
     "Vmod_vmod_tuple_Func",
     "fd153c857e1a4787114cd9261faa83d258aa10401348fb167822ff1c1467c4f1",
@@ -38,7 +38,6 @@ static struct Vmod_vmod_tuple_Func Vmod_vmod_tuple_Func;"
       "",
       [
         "PRIV_TASK",
-        "tsk_vals",
         "tsk_vals"
       ]
     ]

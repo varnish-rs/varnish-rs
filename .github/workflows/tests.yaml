@@ -16,7 +16,7 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          # default version is set in the justfile. If setup is blank, will use default
+          # The default version is set in the justfile. If setup is blank, will use default.
           - type: latest
           - setup: varnish76
           - setup: varnish75
@@ -43,7 +43,7 @@ jobs:
         name: Check semver
         uses: obi1kenobi/cargo-semver-checks-action@v2
         with:
-          exclude: varnish-sys  # GitHub CI has somehow generates a different output
+          exclude: varnish-sys  # GitHub CI somehow generated a different output
       - if: matrix.type == 'latest'
         name: Test packaging for publish
         run: |

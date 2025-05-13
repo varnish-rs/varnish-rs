@@ -5,7 +5,7 @@ VMOD_JSON_SPEC
 [
   [
     "$VMOD",
-    "2.0",
+    "1.0",
     "vcl_returns",
     "Vmod_vmod_vcl_returns_Func",
     "a6876b707a04e5bc7badd29339d22abb0b7ae46d62d946fbfbc5882f6d37eeed",

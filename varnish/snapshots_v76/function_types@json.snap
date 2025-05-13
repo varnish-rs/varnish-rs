@@ -5,7 +5,7 @@ VMOD_JSON_SPEC
 [
   [
     "$VMOD",
-    "2.0",
+    "1.0",
     "types",
     "Vmod_vmod_types_Func",
     "52017119c74321c7fb095e6e0334165ad142d83cfb72627ad44b471f228c1652",
@@ -473,7 +473,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "BOOL",
-        "_v",
         "_v"
       ]
     ]
@@ -490,7 +489,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       [
         "BOOL",
         "_v",
-        "_v",
         "1"
       ]
     ]
@@ -506,7 +504,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "struct arg_vmod_types_opt_bool",
       [
         "BOOL",
-        "_v",
         "_v",
         null,
         null,
@@ -547,7 +544,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "STRING",
-        "_v",
         "_v"
       ]
     ]
@@ -563,7 +559,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "struct arg_vmod_types_opt_cstr",
       [
         "STRING",
-        "_v",
         "_v",
         null,
         null,
@@ -582,7 +577,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "STRING",
-        "_v",
         "_v"
       ]
     ]
@@ -598,7 +592,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "STRING",
-        "_v",
         "_v",
         "\"baz\""
       ]
@@ -616,7 +609,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       [
         "STRING",
         "_v",
-        "_v",
         "\"baz\""
       ]
     ]
@@ -632,7 +624,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "struct arg_vmod_types_opt_cstr_dflt",
       [
         "STRING",
-        "_v",
         "_v",
         "\"baz\"",
         null,
@@ -651,7 +642,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "STRING",
-        "_v",
         "_v",
         "\"baz\""
       ]
@@ -701,7 +691,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "DURATION",
-        "_v",
         "_v"
       ]
     ]
@@ -717,7 +706,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "struct arg_vmod_types_opt_duration",
       [
         "DURATION",
-        "_v",
         "_v",
         null,
         null,
@@ -758,7 +746,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "REAL",
-        "_v",
         "_v"
       ]
     ]
@@ -775,7 +762,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       [
         "REAL",
         "_v",
-        "_v",
         "42.3"
       ]
     ]
@@ -791,7 +777,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "struct arg_vmod_types_opt_f64",
       [
         "REAL",
-        "_v",
         "_v",
         null,
         null,
@@ -832,7 +817,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "INT",
-        "_v",
         "_v"
       ]
     ]
@@ -849,7 +833,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       [
         "INT",
         "_v",
-        "_v",
         "10"
       ]
     ]
@@ -865,7 +848,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "struct arg_vmod_types_opt_i64",
       [
         "INT",
-        "_v",
         "_v",
         null,
         null,
@@ -906,7 +888,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "STRING",
-        "_v",
         "_v"
       ]
     ]
@@ -922,7 +903,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "struct arg_vmod_types_opt_str",
       [
         "STRING",
-        "_v",
         "_v",
         null,
         null,
@@ -941,7 +921,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "STRING",
-        "_v",
         "_v"
       ]
     ]
@@ -958,7 +937,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       [
         "STRING",
         "_v",
-        "_v",
         "\"baz\""
       ]
     ]
@@ -974,7 +952,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "struct arg_vmod_types_opt_str_dflt",
       [
         "STRING",
-        "_v",
         "_v",
         "\"baz\"",
         null,
@@ -1060,7 +1037,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       [
         "PROBE",
         "_v",
-        "_v",
         null,
         null,
         true
@@ -1078,7 +1054,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "PROBE",
-        "_v",
         "_v"
       ]
     ]
@@ -1117,7 +1092,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       [
         "PROBE",
         "_v",
-        "_v",
         null,
         null,
         true
@@ -1135,7 +1109,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "PROBE",
-        "_v",
         "_v"
       ]
     ]
@@ -1174,7 +1147,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       [
         "IP",
         "_v",
-        "_v",
         null,
         null,
         true
@@ -1192,7 +1164,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "IP",
-        "_v",
         "_v"
       ]
     ]
@@ -1252,12 +1223,10 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "struct arg_vmod_types_opt_i64_opt_i64",
       [
         "INT",
-        "a1",
         "a1"
       ],
       [
         "INT",
-        "a2",
         "a2",
         null,
         null,
@@ -1265,7 +1234,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       ],
       [
         "INT",
-        "a3",
         "a3"
       ]
     ]

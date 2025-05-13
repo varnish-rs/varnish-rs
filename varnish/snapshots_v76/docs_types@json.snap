@@ -5,7 +5,7 @@ VMOD_JSON_SPEC
 [
   [
     "$VMOD",
-    "2.0",
+    "1.0",
     "types",
     "Vmod_vmod_types_Func",
     "84444b833e86e8a67f59228fa2634183f81f58c50e684ec4152fd478ab9875fe",
@@ -104,12 +104,10 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "INT",
-        "_no_docs",
         "_no_docs"
       ],
       [
         "INT",
-        "_v",
         "_v"
       ]
     ]
@@ -125,7 +123,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       "",
       [
         "INT",
-        "_v",
         "_v"
       ]
     ]
@@ -147,7 +144,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
         "struct arg_vmod_types_DocStruct__init",
         [
           "INT",
-          "cap",
           "cap",
           null,
           null,
@@ -176,7 +172,6 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
         "",
         [
           "STRING",
-          "key",
           "key"
         ]
       ]

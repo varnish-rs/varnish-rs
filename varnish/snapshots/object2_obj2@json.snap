@@ -5,7 +5,7 @@ VMOD_JSON_SPEC
 [
   [
     "$VMOD",
-    "2.0",
+    "1.0",
     "obj2",
     "Vmod_vmod_obj2_Func",
     "0cd5a7608f16067dbb42bb21d157e185290d63e1a33e73c3715eee45ee3fc2b6",
@@ -112,12 +112,10 @@ static struct Vmod_vmod_obj2_Func Vmod_vmod_obj2_Func;"
         "struct arg_vmod_obj2_Obj1__init",
         [
           "PRIV_VCL",
-          "__vp",
           "__vp"
         ],
         [
           "INT",
-          "val",
           "val",
           null,
           null,
@@ -153,12 +151,10 @@ static struct Vmod_vmod_obj2_Func Vmod_vmod_obj2_Func;"
         "",
         [
           "PRIV_VCL",
-          "__vp",
           "__vp"
         ],
         [
           "INT",
-          "val",
           "val"
         ]
       ]
@@ -191,12 +187,10 @@ static struct Vmod_vmod_obj2_Func Vmod_vmod_obj2_Func;"
         "struct arg_vmod_obj2_Obj3__init",
         [
           "PRIV_VCL",
-          "__vp",
           "__vp"
         ],
         [
           "INT",
-          "val",
           "val",
           null,
           null,
@@ -232,12 +226,10 @@ static struct Vmod_vmod_obj2_Func Vmod_vmod_obj2_Func;"
         "",
         [
           "PRIV_VCL",
-          "__vp",
           "__vp"
         ],
         [
           "INT",
-          "val",
           "val"
         ]
       ]
