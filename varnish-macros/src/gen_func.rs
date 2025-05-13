@@ -1,4 +1,3 @@
-
 //! Generates functions, methods, and events code for the Varnish VMOD.
 
 use std::fmt::Write as _;
@@ -374,22 +373,14 @@ impl FuncProcessor {
             default = default.to_string().into();
         }
 
-        let mut json_arg: Vec<Value> = if cfg!(varnishsys_vmod_meta_1_0) {
-            vec![
-                vcc_type.into(),
-                arg_name.into(),
-                default,
-                Value::Null, // spec param is not used at this point
-            ]
-        } else {
-            vec![
-                vcc_type.into(),
-                arg_name.clone().into(),
-                arg_name.into(),
-                default,
-                Value::Null, // spec param is not used at this point
-            ]
-        };
+        let mut json_arg: Vec<Value> = vec![
+            vcc_type.into(),
+            #[cfg(not(varnishsys_vmod_meta_1_0))]
+            arg_name.clone().into(),
+            arg_name.into(),
+            default,
+            Value::Null, // spec param is not used at this point
+        ];
 
         if is_optional_arg {
             json_arg.push(true.into());
