@@ -14,7 +14,10 @@ fn main() {
         println!("cargo::rustc-cfg=varnishsys_77_vmod_data");
     }
 
-    if (major == 7 && minor == 7 && patch < 1) || (major == 7 && minor == 6 && patch < 3) {
+    if major <= 6
+        || (major == 7 && minor == 7 && patch < 1)
+        || (major == 7 && minor == 6 && patch < 3)
+    {
         println!("cargo::rustc-cfg=varnishsys_vmod_meta_1_0");
     }
 }
