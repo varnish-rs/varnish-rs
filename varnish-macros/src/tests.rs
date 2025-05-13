@@ -20,6 +20,11 @@ static RE_VARNISH_VER: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"Varnish \d+\.[-+. 0-9a-z]+").unwrap()
 });
 
+static RE_JSON_BLOB: LazyLock<Regex> = LazyLock::new(|| {
+    // Use regex to remove "const JSON: &CStr = c\"...\";"
+    Regex::new(r#"const JSON: &CStr = c"([^\n]+)";\n"#).unwrap()
+});
+
 /// Read content of the ../../varnish/tests/pass directory that should also pass full compilation tests,
 /// parse them and create snapshots of the model and the generated code.
 #[test]
@@ -148,20 +153,27 @@ fn test(name: &str, args: TokenStream, mut item_mod: ItemMod) {
     let file = render_model(item_mod, &info).to_string();
     let generated = parse_gen_code(name, &file);
 
-    let code = RE_VARNISH_VER.replace_all(&generated, "Varnish (version) (hash)");
-    with_settings!({ snapshot_suffix => "code" }, { assert_snapshot!(name, code) });
+    let mut code = RE_VARNISH_VER
+        .replace_all(&generated, "Varnish (version) (hash)")
+        .to_string();
 
-    // Extract JSON string
-    let pat = "const JSON: &CStr = c\"";
-    let json = if let Some(pos) = code.find(pat) {
-        let json = &code[pos + pat.len()..];
-        json.split("\";\n").next()
+    // Extract a JSON string and remove it from the original to avoid recording it twice
+    let json = if let Some(v) = RE_JSON_BLOB.captures(code.as_ref()) {
+        let res = v.get(1).unwrap().as_str().to_string();
+        code = RE_JSON_BLOB
+            .replace(
+                code.as_ref(),
+                "const JSON: &CStr = c\"(moved to @json.snap files)\";\n",
+            )
+            .to_string();
+        res
     } else {
-        None
+        String::new()
     };
 
+    with_settings!({ snapshot_suffix => "code" }, { assert_snapshot!(name, code) });
+
     let json = &json
-        .unwrap_or("")
         .replace("\\\"", "\"")
         .replace("\\u{2}", "\u{2}")
         .replace("\\u{3}", "\u{3}")

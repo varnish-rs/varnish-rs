@@ -58,7 +58,7 @@ mod event2 {
             json: JSON.as_ptr(),
             proto: cproto.as_ptr(),
         };
-        const JSON: &CStr = c"[\n  [\n    \"$VMOD\",\n    \"1.0\"\n  ],\n  [\n    \"$EVENT\",\n    \"Vmod_event2_Func.f_on_event\"\n  ]\n]";
+        const JSON: &CStr = c"(moved to @json.snap files)";
         const cproto: &CStr = c"\nstruct Vmod_event2_Func {\n  vmod_event_f *f_on_event;\n};\n\nstatic struct Vmod_event2_Func Vmod_event2_Func;";
     }
     use varnish::vcl::{Ctx, Event};
