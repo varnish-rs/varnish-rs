@@ -1,4 +1,3 @@
-
 //! Generates functions, methods, and events code for the Varnish VMOD.
 
 use std::fmt::Write as _;
