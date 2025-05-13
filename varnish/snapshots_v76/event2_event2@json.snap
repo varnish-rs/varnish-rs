@@ -5,7 +5,7 @@ VMOD_JSON_SPEC
 [
   [
     "$VMOD",
-    "1.0",
+    "2.0",
     "event2",
     "Vmod_vmod_event2_Func",
     "12c0145150bdb078f1e8f5f2186f8beaf799d5163796db1e68583cf35e74472e",

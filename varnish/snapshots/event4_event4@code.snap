@@ -64,7 +64,7 @@ mod event4 {
             vcs: c"".as_ptr(),
             version: c"".as_ptr(),
         };
-        const JSON: &CStr = c"VMOD_JSON_SPEC\u{2}\n[\n  [\n    \"$VMOD\",\n    \"1.0\",\n    \"event4\",\n    \"Vmod_vmod_event4_Func\",\n    \"884770a967ac851537a1caf26f304aed02fb682067f9b5bfc63423ef05cb4e02\",\n    \"Varnish (version) (hash)\",\n    \"0\",\n    \"0\"\n  ],\n  [\n    \"$CPROTO\",\n    \"\\nstruct Vmod_vmod_event4_Func {\\n  vmod_event_f *f_on_event;\\n};\\n\\nstatic struct Vmod_vmod_event4_Func Vmod_vmod_event4_Func;\"\n  ],\n  [\n    \"$EVENT\",\n    \"Vmod_vmod_event4_Func.f_on_event\"\n  ]\n]\n\u{3}";
+        const JSON: &CStr = c"VMOD_JSON_SPEC\u{2}\n[\n  [\n    \"$VMOD\",\n    \"2.0\",\n    \"event4\",\n    \"Vmod_vmod_event4_Func\",\n    \"884770a967ac851537a1caf26f304aed02fb682067f9b5bfc63423ef05cb4e02\",\n    \"Varnish (version) (hash)\",\n    \"0\",\n    \"0\"\n  ],\n  [\n    \"$CPROTO\",\n    \"\\nstruct Vmod_vmod_event4_Func {\\n  vmod_event_f *f_on_event;\\n};\\n\\nstatic struct Vmod_vmod_event4_Func Vmod_vmod_event4_Func;\"\n  ],\n  [\n    \"$EVENT\",\n    \"Vmod_vmod_event4_Func.f_on_event\"\n  ]\n]\n\u{3}";
     }
     use varnish::vcl::DeliveryFilters;
     pub fn on_event(vdp: &mut DeliveryFilters) {}

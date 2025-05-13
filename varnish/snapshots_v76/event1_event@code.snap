@@ -51,7 +51,7 @@ mod event {
             json: JSON.as_ptr(),
             proto: null(),
         };
-        const JSON: &CStr = c"VMOD_JSON_SPEC\u{2}\n[\n  [\n    \"$VMOD\",\n    \"1.0\",\n    \"event\",\n    \"Vmod_vmod_event_Func\",\n    \"4d1200f410ef454f543f699d77aaa0ff7e3c4d4fdc8395b6771c294c71d409a2\",\n    \"Varnish (version) (hash)\",\n    \"0\",\n    \"0\"\n  ],\n  [\n    \"$CPROTO\",\n    \"\\nstruct Vmod_vmod_event_Func {\\n  vmod_event_f *f_on_event;\\n};\\n\\nstatic struct Vmod_vmod_event_Func Vmod_vmod_event_Func;\"\n  ],\n  [\n    \"$EVENT\",\n    \"Vmod_vmod_event_Func.f_on_event\"\n  ]\n]\n\u{3}";
+        const JSON: &CStr = c"VMOD_JSON_SPEC\u{2}\n[\n  [\n    \"$VMOD\",\n    \"2.0\",\n    \"event\",\n    \"Vmod_vmod_event_Func\",\n    \"4d1200f410ef454f543f699d77aaa0ff7e3c4d4fdc8395b6771c294c71d409a2\",\n    \"Varnish (version) (hash)\",\n    \"0\",\n    \"0\"\n  ],\n  [\n    \"$CPROTO\",\n    \"\\nstruct Vmod_vmod_event_Func {\\n  vmod_event_f *f_on_event;\\n};\\n\\nstatic struct Vmod_vmod_event_Func Vmod_vmod_event_Func;\"\n  ],\n  [\n    \"$EVENT\",\n    \"Vmod_vmod_event_Func.f_on_event\"\n  ]\n]\n\u{3}";
     }
     use varnish::vcl::Event;
     /// Event function - the comment is ignored
