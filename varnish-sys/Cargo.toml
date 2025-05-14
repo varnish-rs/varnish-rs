@@ -15,10 +15,6 @@ readme.workspace = true
 [lib]
 name = "varnish_sys"
 
-[package.metadata.libvarnishapi]
-# FIXME: which version should be set here, and what uses it?
-version = "7.6"
-
 [build-dependencies]
 bindgen_helpers.workspace = true
 cc.workspace = true

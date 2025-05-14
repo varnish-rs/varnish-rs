@@ -1,4 +1,5 @@
 # Unpublished
+- Removed `package.metadata.libvarnishapi.version` from `varnish-sys` metadata. Use `DEP_VARNISHAPI_VERSION_NUMBER` env var available in your `build.rs` instead. In some cases you may want to save this version into some build output dir for subsequent use by the packaging scripts.
 
 # 0.4.1 (2025-04-11)
 - Allow VMODs to publish VSC metrics
