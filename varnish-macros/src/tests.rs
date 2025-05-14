@@ -25,7 +25,7 @@ static RE_JSON_BLOB: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r#"const JSON: &CStr = c"([^\n]+)";\n"#).unwrap()
 });
 
-/// Read content of the ../../varnish/tests/pass directory that should also pass full compilation tests,
+/// Read the content of the `../../varnish/tests/pass` directory that should also pass full compilation tests,
 /// parse them and create snapshots of the model and the generated code.
 #[test]
 fn parse_pass_tests() {
@@ -38,13 +38,7 @@ fn parse_pass_ffi_tests() {
 }
 
 fn run_parse_tests(path: &str) {
-    let version = if cfg!(varnishsys_6) {
-        "_v6"
-    } else if cfg!(varnishsys_77_vmod_data) {
-        ""
-    } else {
-        "_v76"
-    };
+    let version = env!("VARNISHAPI_VERSION_NUMBER");
     let snapshot_path = format!("../../varnish/snapshots{version}");
     with_settings!({ snapshot_path => snapshot_path, omit_expression => true, prepend_module_to_snapshot => false }, {
         let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(path);

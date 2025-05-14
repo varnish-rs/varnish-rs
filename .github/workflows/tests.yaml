@@ -17,6 +17,7 @@ jobs:
       matrix:
         include:
           # The default version is set in the justfile. If setup is blank, will use default.
+          # To update tests for all versions, run `just bless-all`
           - type: latest
           - setup: varnish76
           - setup: varnish75

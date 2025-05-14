@@ -84,6 +84,13 @@ test-publish:
 bless:
     TRYBUILD=overwrite cargo insta test -p varnish-macros -p varnish --accept
 
+# Run tests on all targets listed in CI, and accept their results
+bless-all: \
+        (docker-run-latest "just bless") \
+        (docker-run-76 "just bless") \
+        (docker-run-75 "just bless") \
+        (docker-run-60 "just bless")
+
 # Test documentation
 test-doc:
     cargo test --doc

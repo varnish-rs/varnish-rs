@@ -6,7 +6,7 @@ use bindgen_helpers as bindgen;
 use bindgen_helpers::{rename_enum, Renamer};
 
 static BINDINGS_FILE: &str = "bindings.for-docs";
-static BINDINGS_FILE_VER: &str = "7.7.0";
+static BINDINGS_FILE_VER: &str = "7.7.1";
 
 struct VarnishInfo {
     bindings: PathBuf,
