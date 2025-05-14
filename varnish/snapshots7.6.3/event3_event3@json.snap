@@ -5,7 +5,7 @@ VMOD_JSON_SPEC
 [
   [
     "$VMOD",
-    "1.0",
+    "2.0",
     "event3",
     "Vmod_vmod_event3_Func",
     "65b49085a4dba9c1b453b7e82d61d20a705b516d4ab88c0875ecb5eb7807fbb6",
@@ -86,6 +86,7 @@ static struct Vmod_vmod_event3_Func Vmod_vmod_event3_Func;"
       "",
       [
         "PRIV_VCL",
+        "vcl",
         "vcl"
       ]
     ]
@@ -107,6 +108,7 @@ static struct Vmod_vmod_event3_Func Vmod_vmod_event3_Func;"
         "",
         [
           "PRIV_VCL",
+          "__vp",
           "__vp"
         ]
       ]
@@ -132,6 +134,7 @@ static struct Vmod_vmod_event3_Func Vmod_vmod_event3_Func;"
         "",
         [
           "PRIV_VCL",
+          "vcl",
           "vcl"
         ]
       ]
@@ -154,6 +157,7 @@ static struct Vmod_vmod_event3_Func Vmod_vmod_event3_Func;"
         "",
         [
           "PRIV_VCL",
+          "__vp",
           "__vp"
         ]
       ]

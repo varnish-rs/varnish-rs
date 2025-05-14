@@ -5,10 +5,10 @@ VMOD_JSON_SPEC
 [
   [
     "$VMOD",
-    "1.0",
+    "2.0",
     "tuple",
     "Vmod_vmod_tuple_Func",
-    "41c8f93b128c17e6327da85165e29dc663acf100bf5bfb80ffce76925121d6fe",
+    "fd153c857e1a4787114cd9261faa83d258aa10401348fb167822ff1c1467c4f1",
     "Varnish (version) (hash)",
     "0",
     "0"
@@ -16,39 +16,30 @@ VMOD_JSON_SPEC
   [
     "$CPROTO",
     "
-typedef VCL_VOID td_vmod_tuple_per_tsk_val(
+typedef VCL_STRING td_vmod_tuple_ref_to_slice_lifetime(
     VRT_CTX,
-    struct vmod_priv *,
     struct vmod_priv *
 );
 
 struct Vmod_vmod_tuple_Func {
-  vmod_event_f *f_on_event;
-  td_vmod_tuple_per_tsk_val *f_per_tsk_val;
+  td_vmod_tuple_ref_to_slice_lifetime *f_ref_to_slice_lifetime;
 };
 
 static struct Vmod_vmod_tuple_Func Vmod_vmod_tuple_Func;"
   ],
   [
-    "$EVENT",
-    "Vmod_vmod_tuple_Func.f_on_event"
-  ],
-  [
     "$FUNC",
-    "per_tsk_val",
+    "ref_to_slice_lifetime",
     [
       [
-        "VOID"
+        "STRING"
       ],
-      "Vmod_vmod_tuple_Func.f_per_tsk_val",
+      "Vmod_vmod_tuple_Func.f_ref_to_slice_lifetime",
       "",
       [
         "PRIV_TASK",
+        "tsk_vals",
         "tsk_vals"
-      ],
-      [
-        "PRIV_VCL",
-        "vcl_vals"
       ]
     ]
   ]

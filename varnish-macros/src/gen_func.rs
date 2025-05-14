@@ -372,8 +372,11 @@ impl FuncProcessor {
             // This ensures the string is properly escaped and surrounded by quotes
             default = default.to_string().into();
         }
+
         let mut json_arg: Vec<Value> = vec![
             vcc_type.into(),
+            #[cfg(not(varnishsys_vmod_meta_1_0))]
+            arg_name.clone().into(),
             arg_name.into(),
             default,
             Value::Null, // spec param is not used at this point
