@@ -1,6 +1,5 @@
 ---
 source: varnish-macros/src/tests.rs
-snapshot_kind: text
 ---
 unsafe impl varnish::VscMetric for VariousStats {
     fn get_metadata() -> &'static str {
