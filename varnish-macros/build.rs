@@ -6,7 +6,7 @@ fn main() {
 
     let ver = std::env::var("DEP_VARNISHAPI_VERSION_NUMBER");
     let (major, minor, patch) = parse_version(&ver.expect("DEP_VARNISHAPI_VERSION_NUMBER not set"));
-    println!("cargo:rustc-env=VARNISHAPI_VERSION_NUMBER={major}.{minor}.{patch}");
+    println!("cargo::rustc-env=VARNISHAPI_VERSION_NUMBER={major}.{minor}.{patch}");
 
     if major < 7 {
         println!("cargo::rustc-cfg=varnishsys_6");
