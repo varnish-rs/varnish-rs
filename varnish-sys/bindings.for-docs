@@ -812,7 +812,7 @@ pub const VFP_CTX_MAGIC: u32 = 1641665509;
 pub const VDP_ENTRY_MAGIC: u32 = 893302657;
 pub const VDP_CTX_MAGIC: u32 = 3998227959;
 pub const VMOD_ABI_Version: &::std::ffi::CStr =
-    c"Varnish 7.7.0 bb7a918611ee85d17aefd07115fb8c66015151b5";
+    c"Varnish 7.7.1 2e8180f788715e5bc44df08479d60c9435d79bdd";
 pub const VSB_MAGIC: u32 = 1250090378;
 pub const VSB_FIXEDLEN: u32 = 0;
 pub const VSB_AUTOEXTEND: u32 = 1;
