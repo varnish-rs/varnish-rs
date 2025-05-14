@@ -19,6 +19,7 @@ impl VarnishInfo {
     fn parse(bindings: PathBuf, varnish_paths: Vec<PathBuf>, version: String) -> Self {
         let (major, minor) = parse_version(&version);
 
+        // >= 7.0 .. < 7.6
         if major == 7 && minor < 6 {
             println!("cargo::rustc-cfg=varnishsys_7_5_objcore_init");
         }
@@ -101,8 +102,8 @@ fn generate_bindings(info: &VarnishInfo) {
     rename_enum!(ren, "vdp_action" => "VdpAction", remove: "VDP_"); // VDP_NULL
     rename_enum!(ren, "vfp_status" => "VfpStatus", remove: "VFP_"); // VFP_ERROR
 
-    println!("cargo:rustc-link-lib=varnishapi");
-    println!("cargo:rerun-if-changed=c_code/wrapper.h");
+    println!("cargo::rustc-link-lib=varnishapi");
+    println!("cargo::rerun-if-changed=c_code/wrapper.h");
     let mut bindings_builder = bindgen::Builder::default()
         .header("c_code/wrapper.h")
         .blocklist_item("FP_.*")
