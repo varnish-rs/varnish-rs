@@ -26,9 +26,7 @@ jobs:
       - name: Ensure this crate has not yet been published (on release)
         run: just check-all-if-published
       - run: just install-varnish
-      - run: just -v ci-test
-      - name: Test for latest Varnish version
-        run: just ci-test-extras
+      - run: just ci-test-latest
       - name: Check semver
         uses: obi1kenobi/cargo-semver-checks-action@v2
         with:
@@ -56,7 +54,7 @@ jobs:
       - uses: taiki-e/install-action@v2
         with: { tool: just }
       - run: just install-varnish ${{ matrix.ver }}
-      - run: just -v ci-test
+      - run: just ci-test
 
   test-msrv:
     name: Test MSRV
@@ -88,7 +86,7 @@ jobs:
       - uses: taiki-e/install-action@v2
         with: { tool: just }
       - name: Ensure docs can be built at docs.rs without varnish dependencies
-        run: just ci-test-docs-rs
+        run: just test-doc-build
 
   # This job checks if any of the previous jobs failed or were canceled.
   # This approach also allows some jobs to be skipped if they are not needed.

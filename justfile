@@ -25,7 +25,7 @@ bless-all:
     rm -rf varnish/snapshots*
     for ver in {{supported_varnish_vers}}; do \
         echo "--------- Updating test results for Varnish $ver" ;\
-        {{just_executable()}} docker-run $ver ;\
+        {{just_executable()}} docker-run $ver "just bless" ;\
     done
 
 # Build the project
@@ -68,10 +68,10 @@ ci-coverage: env-info && \
     mkdir -p target/llvm-cov
 
 # Run all tests as expected by CI
-ci-test: env-info test-fmt build-all-features clippy test test-doc && assert-git-is-clean
+ci-test: env-info test-fmt build-all-features clippy test test-doc-build test-doc && assert-git-is-clean
 
 # Run tests only relevant to the latest Varnish version
-ci-test-extras: test-doc
+ci-test-latest: ci-test test-doc
 
 # Run minimal subset of tests to ensure compatibility with MSRV
 ci-test-msrv: env-info test
@@ -176,6 +176,9 @@ test *args: build
 # Test documentation
 test-doc:
     cargo test --doc --workspace
+
+# Test doc building on docs.rs
+test-doc-build:
     DOCS_RS=1 cargo doc --no-deps --workspace
 
 # Test code formatting
