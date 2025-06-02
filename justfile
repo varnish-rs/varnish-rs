@@ -200,7 +200,7 @@ update:
 
 # Ensure version is valid and convert it to an apt package search string. Assumes all version parts are one digit. Two digits are treated as (major.minor).
 @version-to-apt-pattern version=default_varnish_ver:
-    {{ if replace_regex(version, '^(\d\d|\d(\.\d){0,2}?)$', '') != '' { error('Invalid version "' + version + '"') } else {''} }}
+    {{ if replace_regex(version, '^(\d\d|\d(\.\d){0,2})$', '') != '' { error('Invalid version "' + version + '"') } else {''} }}
     echo "{{ \
         replace_regex(replace_regex(replace_regex(version, \
               '^(\d)(\d)$', '$1.$2') \
@@ -210,7 +210,7 @@ update:
 
 # Ensure version is valid and convert it to a tag name, e.g. 60 or 6.0 -> varnish60lts and 7.1 -> varnish71. Assumes all parts are one digit. Two digits are treated as (major.minor).
 @version-to-tag version=default_varnish_ver:
-    {{ if replace_regex(version, '^(\d\d|\d(\.\d){0,2}?)$', '') != '' { error('Invalid version "' + version + '"') } else {''} }}
+    {{ if replace_regex(version, '^(\d\d|\d(\.\d){0,2})$', '') != '' { error('Invalid version "' + version + '"') } else {''} }}
     echo "{{ \
         'varnish' + replace_regex(replace_regex(replace_regex(replace_regex(replace_regex(version, \
               '^(\d)(\d)$', '$1.$2') \
