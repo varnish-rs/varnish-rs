@@ -9,7 +9,7 @@ members = ["varnish", "varnish-macros", "varnish-sys", "varnish/tests/vmod_test"
 #
 #
 # !STOP!  Update the version in the varnish dependencies below!!!
-version = "0.5.0"  ## <<<----- ! STOP !!!
+version = "0.5.1"  ## <<<----- ! STOP !!!
 # !STOP!  Update the version in the varnish dependencies below!!!
 #
 #
