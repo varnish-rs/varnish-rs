@@ -31,4 +31,4 @@ Delete the top 2 lines with `mod try_to_build {` and the last `}`,  and reformat
 
 # Using Docker
 
-Docker allows multiple Varnish versions on the same machine.  To use it, run `just docker-run-76` or any other version (run `just` to see a list).  On the first run, it will build the image, install needed dependencies, and then it will start the container.  The container will have the git root directory mounted as `/app`, so you can run `cargo build` and `cargo test` as usual. All work is preserved in the `docker/.cache/<version>`, so restarting container would not need re-install everything.
+Docker allows multiple Varnish versions on the same machine.  To use it, run `just docker-run` with an optional version number.  On the first run, it will build the image, install necessary dependencies, and start the container.  The container will have the git root directory mounted as `/app`, so you can run `cargo build` and `cargo test` as usual. All work is preserved in the `docker/.cache/<version>`, so restarting container would not need re-install everything.
