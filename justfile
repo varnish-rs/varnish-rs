@@ -68,10 +68,10 @@ ci-coverage: env-info && \
     mkdir -p target/llvm-cov
 
 # Run all tests as expected by CI
-ci-test: env-info test-fmt build-all-features clippy test test-doc-build test-doc && assert-git-is-clean
+ci-test: env-info test-fmt build-all-features clippy test && assert-git-is-clean
 
 # Run tests only relevant to the latest Varnish version
-ci-test-latest: ci-test test-doc
+ci-test-latest: ci-test test-doc test-doc-build
 
 # Run minimal subset of tests to ensure compatibility with MSRV
 ci-test-msrv: env-info test
