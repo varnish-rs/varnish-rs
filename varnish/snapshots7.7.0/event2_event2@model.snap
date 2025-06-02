@@ -1,0 +1,39 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VmodInfo {
+    params: VmodParams {
+        docs: None,
+    },
+    ident: "event2",
+    docs: "",
+    funcs: [
+        FuncInfo {
+            func_type: Event,
+            ident: "on_event",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "ctx",
+                    docs: "",
+                    ty: Context {
+                        is_mut: false,
+                    },
+                },
+                ParamTypeInfo {
+                    ident: "event",
+                    docs: "",
+                    ty: Event,
+                },
+            ],
+            output_ty: Default,
+            out_result: true,
+        },
+    ],
+    objects: [],
+    shared_types: SharedTypes {
+        shared_per_task_ty: None,
+        shared_per_vcl_ty: None,
+    },
+}

@@ -44,6 +44,7 @@ jobs:
       matrix:
         include:
           # This list must match the justfile list for supported_varnish_vers var without the latest version
+          - ver: 7.7.0
           - ver: 7.6
           - ver: 7.5
           - ver: 6.0

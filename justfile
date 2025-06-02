@@ -2,7 +2,7 @@
 
 main_crate := 'varnish'
 default_varnish_ver := '7.7'  # which version of Varnish to install by default
-supported_varnish_vers := '7.7  7.6  7.5  6.0'  # Make sure to update CI with the changes
+supported_varnish_vers := default_varnish_ver + '  7.7.0  7.6  7.5  6.0'  # Make sure to update CI with the changes
 
 # if running in CI, treat warnings as errors by setting RUSTFLAGS and RUSTDOCFLAGS to '-D warnings' unless they are already set
 # Use `CI=true just ci-test` to run the same tests as in GitHub CI.
