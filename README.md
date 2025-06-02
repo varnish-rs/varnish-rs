@@ -4,7 +4,7 @@
 [![crates.io version](https://img.shields.io/crates/v/varnish.svg)](https://crates.io/crates/varnish)
 [![docs.rs docs](https://docs.rs/varnish/badge.svg)](https://docs.rs/varnish)
 [![crates.io version](https://img.shields.io/crates/l/varnish.svg)](https://github.com/gquintard/varnish-rs/blob/main/LICENSE)
-[![CI build](https://github.com/gquintard/varnish-rs/actions/workflows/tests.yaml/badge.svg)](https://github.com/gquintard/varnish-rs/actions)
+[![CI build](https://github.com/gquintard/varnish-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/gquintard/varnish-rs/actions)
 
 ![Varnish Logo](./logo.svg)
 
@@ -26,6 +26,7 @@ Before v0.1.0, this library relied on a specific version of `libvarnish`. Since 
 
 | varnish-rs (Rust) | libvarnish (C) |
 |:-----------------:|:--------------:|
+|       0.4+        |  6.0lts, 7.5+  |
 |   0.1.0 - 0.2.0   |   7.4 - 7.6    |
 |  0.0.18 - 0.0.19  |      7.5       |
 |      0.0.17       |      7.4       |
