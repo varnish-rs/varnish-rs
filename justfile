@@ -216,4 +216,4 @@ install-varnish TAG="varnish77" VERSION="*":
     echo -e 'Package: varnish varnish-dev\nPin: origin "packagecloud.io"\nPin-Priority: 1001' | sudo tee /etc/apt/preferences.d/varnish
     cat /etc/apt/preferences.d/varnish
     sudo apt-cache policy varnish
-    sudo apt-get install -y 'varnish={{VERSION}} varnish-dev={{VERSION}}
+    sudo apt-get install -y 'varnish={{VERSION}}' 'varnish-dev={{VERSION}}'
