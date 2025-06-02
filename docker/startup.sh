@@ -3,7 +3,7 @@
 if [ ! -d /app/.github ] || [ ! -d ~/.cache ]; then
     echo " "
     echo "ERROR: Docker container was not started properly."
-    echo "       Use   just docker-run-76  or another version."
+    echo "       Use   just docker-run [VERSION]"
     exit 1
 fi
 

@@ -9,7 +9,7 @@ members = ["varnish", "varnish-macros", "varnish-sys", "varnish/tests/vmod_test"
 #
 #
 # !STOP!  Update the version in the varnish dependencies below!!!
-version = "0.5.0"  ## <<<----- ! STOP !!!
+version = "0.5.1"  ## <<<----- ! STOP !!!
 # !STOP!  Update the version in the varnish dependencies below!!!
 #
 #
@@ -24,9 +24,9 @@ readme = "README.md"
 
 [workspace.dependencies]
 # These versions must match the one in the [workspace.package] section above
-varnish = { path = "./varnish", version = "0.5.0" }
-varnish-macros = { path = "./varnish-macros", version = "0.5.0" }
-varnish-sys = { path = "./varnish-sys", version = "0.5.0" }
+varnish = { path = "./varnish", version = "0.5.1" }
+varnish-macros = { path = "./varnish-macros", version = "0.5.1" }
+varnish-sys = { path = "./varnish-sys", version = "0.5.1" }
 #
 # These dependencies are used by one or more crates, and easier to maintain in one place.
 bindgen_helpers = "0.4.1"

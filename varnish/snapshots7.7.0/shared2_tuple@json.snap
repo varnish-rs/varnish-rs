@@ -1,0 +1,56 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VMOD_JSON_SPEC
+[
+  [
+    "$VMOD",
+    "1.0",
+    "tuple",
+    "Vmod_vmod_tuple_Func",
+    "41c8f93b128c17e6327da85165e29dc663acf100bf5bfb80ffce76925121d6fe",
+    "Varnish (version) (hash)",
+    "0",
+    "0"
+  ],
+  [
+    "$CPROTO",
+    "
+typedef VCL_VOID td_vmod_tuple_per_tsk_val(
+    VRT_CTX,
+    struct vmod_priv *,
+    struct vmod_priv *
+);
+
+struct Vmod_vmod_tuple_Func {
+  vmod_event_f *f_on_event;
+  td_vmod_tuple_per_tsk_val *f_per_tsk_val;
+};
+
+static struct Vmod_vmod_tuple_Func Vmod_vmod_tuple_Func;"
+  ],
+  [
+    "$EVENT",
+    "Vmod_vmod_tuple_Func.f_on_event"
+  ],
+  [
+    "$FUNC",
+    "per_tsk_val",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_tuple_Func.f_per_tsk_val",
+      "",
+      [
+        "PRIV_TASK",
+        "tsk_vals"
+      ],
+      [
+        "PRIV_VCL",
+        "vcl_vals"
+      ]
+    ]
+  ]
+]
+

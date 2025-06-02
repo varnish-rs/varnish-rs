@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main", "feature-*" ]
+  pull_request:
+    branches: [ "main", "feature-*" ]
+  release:
+    types: [ published ]
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    name: Test Varnish latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+        uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with: { tool: just }
+      - name: Ensure this crate has not yet been published (on release)
+        run: just check-all-if-published
+      - run: just install-varnish
+      - run: just ci-test-latest
+      - name: Check semver
+        uses: obi1kenobi/cargo-semver-checks-action@v2
+        with:
+          exclude: varnish-sys  # GitHub CI somehow generated a different output
+      - name: Test packaging for publish
+        run: |
+          rustup install nightly --profile minimal
+          just clean test-publish
+
+  test-older:
+    name: Test Varnish ${{ matrix.ver }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          # This list must match the justfile list for supported_varnish_vers var without the latest version
+          - ver: 7.7.0
+          - ver: 7.6
+          - ver: 7.5
+          - ver: 6.0
+    steps:
+      - uses: actions/checkout@v4
+      - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+        uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with: { tool: just }
+      - run: just install-varnish ${{ matrix.ver }}
+      - run: just ci-test
+
+  test-msrv:
+    name: Test MSRV
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+        uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with: { tool: just }
+      - name: Read MSRV
+        id: msrv
+        run: echo "value=$(just get-msrv)" >> $GITHUB_OUTPUT
+      - name: Install MSRV Rust ${{ steps.msrv.outputs.value }}
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ steps.msrv.outputs.value }}
+          components: rustfmt
+      - run: just install-varnish
+      - run: just ci_mode=0 ci-test-msrv  # Ignore warnings in MSRV
+
+  # Ensure that the docs can be built at docs.rs without varnish dependencies
+  test-docs-rs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+        uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with: { tool: just }
+      - name: Ensure docs can be built at docs.rs without varnish dependencies
+        run: just test-doc-build
+
+  # This job checks if any of the previous jobs failed or were canceled.
+  # This approach also allows some jobs to be skipped if they are not needed.
+  ci-passed:
+    if: always()
+    needs: [ test, test-older, test-msrv, test-docs-rs ]
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
+
+  release:
+    # Some dependencies of the `ci-passed` job might be skipped, but we still want to run if the `ci-passed` job succeeded.
+    if: always() && startsWith(github.ref, 'refs/tags/') && needs.ci-passed.result == 'success'
+    name: Publish to crates.io
+    needs: [ ci-passed ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@v2
+        with: { tool: just }
+      - run: just install-varnish
+      - name: Publish to crates.io
+        run: just publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

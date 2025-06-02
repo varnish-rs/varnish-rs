@@ -1,0 +1,1006 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VmodInfo {
+    params: VmodParams {
+        docs: None,
+    },
+    ident: "types",
+    docs: "",
+    funcs: [
+        FuncInfo {
+            func_type: Function,
+            ident: "to_void",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_void_err",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: Default,
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_str_err",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: Default,
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_box_err",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: Default,
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_bool",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: Bool,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_bool_dflt",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Number(1),
+                            ty_info: Bool,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "opt_bool",
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: Null,
+                            ty_info: Bool,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_bool",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                Bool,
+            ),
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_bool",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                Bool,
+            ),
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_cstr",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: CStr,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "opt_cstr",
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: Null,
+                            ty_info: CStr,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "opt_cstr_req",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Required,
+                            default: Null,
+                            ty_info: CStr,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_cstr_dflt",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: String("baz"),
+                            ty_info: CStr,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_cstr_dflt2",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: String("baz"),
+                            ty_info: CStr,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "opt_cstr_dflt",
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: String("baz"),
+                            ty_info: CStr,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "opt_cstr_dflt2",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: String("baz"),
+                            ty_info: CStr,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_cstr",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                CStr,
+            ),
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_cstr",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                CStr,
+            ),
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_cstr_err",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                CStr,
+            ),
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_duration",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: Duration,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "opt_duration",
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: Null,
+                            ty_info: Duration,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_duration",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                Duration,
+            ),
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_duration",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                Duration,
+            ),
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_f64",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: F64,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_f64_dflt",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Number(42.3),
+                            ty_info: F64,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "opt_f64",
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: Null,
+                            ty_info: F64,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_f64",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                F64,
+            ),
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_f64",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                F64,
+            ),
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_i64",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: I64,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_i64_dflt",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Number(10),
+                            ty_info: I64,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "opt_i64",
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: Null,
+                            ty_info: I64,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_i64",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                I64,
+            ),
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_i64",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                I64,
+            ),
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_str",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: Str,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "opt_str",
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: Null,
+                            ty_info: Str,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "opt_str_req",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Required,
+                            default: Null,
+                            ty_info: Str,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_str_dflt",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: String("baz"),
+                            ty_info: Str,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "opt_str_dflt",
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: String("baz"),
+                            ty_info: Str,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_str",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                Str,
+            ),
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_str",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                Str,
+            ),
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_string",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: String,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_opt_string",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: String,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_string",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: String,
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_opt_string",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: String,
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_probe",
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: Null,
+                            ty_info: Probe,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_probe_req",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Required,
+                            default: Null,
+                            ty_info: Probe,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_probe",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                Probe,
+            ),
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_probe",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                Probe,
+            ),
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_cow_probe",
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: Null,
+                            ty_info: ProbeCow,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_cow_probe_req",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Required,
+                            default: Null,
+                            ty_info: ProbeCow,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_cow_probe",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                ProbeCow,
+            ),
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_cow_probe",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                ProbeCow,
+            ),
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_ip",
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: Null,
+                            ty_info: SocketAddr,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "type_ip_req",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Required,
+                            default: Null,
+                            ty_info: SocketAddr,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_ip",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                SocketAddr,
+            ),
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_ip",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                SocketAddr,
+            ),
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_vcl_string",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: VclType(
+                "VCL_STRING",
+            ),
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_vcl_string",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: VclType(
+                "VCL_STRING",
+            ),
+            out_result: true,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "opt_i64_opt_i64",
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "a1",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: I64,
+                        },
+                    ),
+                },
+                ParamTypeInfo {
+                    ident: "a2",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: Null,
+                            ty_info: I64,
+                        },
+                    ),
+                },
+                ParamTypeInfo {
+                    ident: "a3",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: I64,
+                        },
+                    ),
+                },
+            ],
+            output_ty: String,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "get_ws_mut",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "ws",
+                    docs: "",
+                    ty: Workspace {
+                        is_mut: true,
+                    },
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "get_ws_ref",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "ws",
+                    docs: "",
+                    ty: Workspace {
+                        is_mut: false,
+                    },
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+    ],
+    objects: [],
+    shared_types: SharedTypes {
+        shared_per_task_ty: None,
+        shared_per_vcl_ty: None,
+    },
+}
