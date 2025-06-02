@@ -20,8 +20,9 @@ jobs:
           # To update tests for all versions, run `just bless-all`
           - type: latest
           - setup: varnish76
-          - setup: varnish75
+            version: "7.6.3-*"
           - setup: varnish60lts
+            version: "6.0.14-*"
     env:
       RUST_BACKTRACE: 1
       RUSTDOCFLAGS: -D warnings
@@ -35,7 +36,7 @@ jobs:
         run: just check-all-if-published
       - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
         uses: Swatinem/rust-cache@v2
-      - run: just install-varnish ${{ matrix.setup }}
+      - run: just install-varnish ${{ matrix.setup }} ${{ matrix.version }}
       - run: just -v ci-test
       - if: matrix.type == 'latest'
         name: Test for latest Varnish version

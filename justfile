@@ -209,11 +209,11 @@ get-package-exclude-args:
 
 # Install Varnish from packagecloud.io. This could be damaging to your system - use with caution.
 [private]
-install-varnish TAG="varnish77":
+install-varnish TAG="varnish77" VERSION="*":
     #!/usr/bin/env bash
     set -euo pipefail
     curl -sSf "https://packagecloud.io/install/repositories/varnishcache/{{TAG}}/script.deb.sh" | sudo bash
     echo -e 'Package: varnish varnish-dev\nPin: origin "packagecloud.io"\nPin-Priority: 1001' | sudo tee /etc/apt/preferences.d/varnish
     cat /etc/apt/preferences.d/varnish
     sudo apt-cache policy varnish
-    sudo apt-get install -y varnish varnish-dev
+    sudo apt-get install -y 'varnish={{VERSION}} varnish-dev={{VERSION}}
