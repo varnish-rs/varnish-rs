@@ -87,7 +87,7 @@ jobs:
       - uses: taiki-e/install-action@v2
         with: { tool: just }
       - name: Ensure docs can be built at docs.rs without varnish dependencies
-        run: just test-doc-build
+        run: just test-doc
 
   # This job checks if any of the previous jobs failed or were canceled.
   # This approach also allows some jobs to be skipped if they are not needed.
