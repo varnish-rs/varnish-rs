@@ -1,10 +1,10 @@
 # varnish-rs
 
-[![GitHub](https://img.shields.io/badge/github-varnish-8da0cb?logo=github)](https://github.com/varnish-rs/varnish-rs)
+[![GitHub repo](https://img.shields.io/badge/github-varnish-8da0cb?logo=github)](https://github.com/varnish-rs/varnish-rs)
 [![crates.io version](https://img.shields.io/crates/v/varnish.svg)](https://crates.io/crates/varnish)
-[![docs.rs docs](https://docs.rs/varnish/badge.svg)](https://docs.rs/varnish)
-[![crates.io version](https://img.shields.io/crates/l/varnish.svg)](https://github.com/varnish-rs/varnish-rs/blob/main/LICENSE)
-[![CI build](https://github.com/varnish-rs/varnish-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/varnish-rs/varnish-rs/actions)
+[![docs.rs status](https://img.shields.io/docsrs/varnish)](https://docs.rs/varnish)
+[![crates.io license](https://img.shields.io/crates/l/varnish)](https://github.com/varnish-rs/varnish-rs/blob/main/LICENSE)
+[![CI build status](https://github.com/varnish-rs/varnish-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/varnish-rs/varnish-rs/actions)
 <!-- [![Codecov](https://img.shields.io/codecov/c/github/varnish-rs/varnish-rs)](https://app.codecov.io/gh/varnish-rs/varnish-rs) -->
 
 ![Varnish Logo](./logo.svg)

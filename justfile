@@ -37,7 +37,7 @@ build:
 build-all-features:
     cargo build --workspace --all-targets {{features_flag}} $({{just_executable()}} get-package-exclude-args) --features "ffi"
 
-# Quick compile
+# Quick compile without building a binary
 check:
     cargo check --workspace --all-targets {{features_flag}} $({{just_executable()}} get-package-exclude-args)
 
@@ -48,10 +48,10 @@ check-all-if-published: \
     (check-if-published 'varnish-sys')
 
 # Verify that the current version of the crate is not the same as the one published on crates.io
-check-if-published package=main_crate:  (assert-cmd 'jq')
+check-if-published package=main_crate:
     #!/usr/bin/env bash
     set -euo pipefail
-    LOCAL_VERSION="$({{just_executable()}} get-crate-field version package)"
+    LOCAL_VERSION="$({{just_executable()}} get-crate-field version {{package}})"
     echo "Detected crate {{package}} version:  '$LOCAL_VERSION'"
     PUBLISHED_VERSION="$(cargo search --quiet {{package}} | grep "^{{package}} =" | sed -E 's/.* = "(.*)".*/\1/')"
     echo "Published crate version: '$PUBLISHED_VERSION'"
@@ -131,8 +131,8 @@ fmt:
     fi
 
 # Get any package's field from the metadata
-get-crate-field field package=main_crate:
-    cargo metadata --format-version 1 | jq -r '.packages | map(select(.name == "{{package}}")) | first | .{{field}}'
+get-crate-field field package=main_crate:  (assert-cmd 'jq')
+    cargo metadata --format-version 1 | jq -e -r '.packages | map(select(.name == "{{package}}")) | first | .{{field}} | select(. != null)'
 
 # Get the minimum supported Rust version (MSRV) for the crate
 get-msrv package=main_crate:  (get-crate-field 'rust_version' package)
@@ -170,7 +170,7 @@ publish:
 semver *args:  (cargo-install 'cargo-semver-checks')
     cargo semver-checks {{features_flag}} {{args}}
 
-# Run all tests
+# Run all unit and integration tests
 test *args: build
     cargo test --workspace --all-targets {{features_flag}} $({{just_executable()}} get-package-exclude-args) {{args}}
     cargo test --workspace --doc {{features_flag}}

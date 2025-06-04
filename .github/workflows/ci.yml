@@ -23,7 +23,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@v2
         with: { tool: just }
-      - name: Ensure this crate has not yet been published (on release)
+      - name: Ensure this crate has not yet been published
         run: just check-all-if-published
       - run: just install-varnish
       - run: just ci-test-latest
