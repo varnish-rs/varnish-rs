@@ -70,6 +70,7 @@ varnish v1 -vcl {
 	} -run
 
 	# wait until we actually see the line
+	logexpect l1 -wait
 
 	# same with the other error
 	logexpect l1 -v v1 -d 1 -g raw {
@@ -99,6 +100,7 @@ varnish v1 -vcl {
 	} -run
 
 	# wait until we actually see the line
+	logexpect l1 -wait
 
 	# same with the other error
 	logexpect l1 -v v1 -d 1 -g raw {
