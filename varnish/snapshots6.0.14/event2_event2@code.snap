@@ -59,7 +59,7 @@ mod event2 {
             proto: cproto.as_ptr(),
         };
         const JSON: &CStr = c"(moved to @json.snap files)";
-        const cproto: &CStr = c"\nstruct Vmod_event2_Func {\n  vmod_event_f *f_on_event;\n};\n\nstatic struct Vmod_event2_Func Vmod_event2_Func;";
+        const cproto: &CStr = c"(moved to @cproto.snap files)";
     }
     use varnish::vcl::{Ctx, Event};
     pub fn on_event(ctx: &Ctx, event: Event) -> Result<(), &'static str> {

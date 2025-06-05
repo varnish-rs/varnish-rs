@@ -1,0 +1,404 @@
+---
+source: varnish-macros/src/tests.rs
+---
+typedef VCL_VOID td_vmod_types_to_void(
+    VRT_CTX
+);
+
+typedef VCL_VOID td_vmod_types_to_res_void_err(
+    VRT_CTX
+);
+
+typedef VCL_VOID td_vmod_types_to_res_str_err(
+    VRT_CTX
+);
+
+typedef VCL_VOID td_vmod_types_to_res_box_err(
+    VRT_CTX
+);
+
+typedef VCL_VOID td_vmod_types_type_bool(
+    VRT_CTX,
+    VCL_BOOL
+);
+
+typedef VCL_VOID td_vmod_types_type_bool_dflt(
+    VRT_CTX,
+    VCL_BOOL
+);
+
+struct arg_vmod_types_opt_bool {
+  char valid__v;
+  VCL_BOOL _v;
+};
+
+typedef VCL_VOID td_vmod_types_opt_bool(
+    VRT_CTX,
+    struct arg_vmod_types_opt_bool *
+);
+
+typedef VCL_BOOL td_vmod_types_to_bool(
+    VRT_CTX
+);
+
+typedef VCL_BOOL td_vmod_types_to_res_bool(
+    VRT_CTX
+);
+
+typedef VCL_VOID td_vmod_types_type_cstr(
+    VRT_CTX,
+    VCL_STRING
+);
+
+struct arg_vmod_types_opt_cstr {
+  char valid__v;
+  VCL_STRING _v;
+};
+
+typedef VCL_VOID td_vmod_types_opt_cstr(
+    VRT_CTX,
+    struct arg_vmod_types_opt_cstr *
+);
+
+typedef VCL_VOID td_vmod_types_opt_cstr_req(
+    VRT_CTX,
+    VCL_STRING
+);
+
+typedef VCL_VOID td_vmod_types_type_cstr_dflt(
+    VRT_CTX,
+    VCL_STRING
+);
+
+typedef VCL_VOID td_vmod_types_type_cstr_dflt2(
+    VRT_CTX,
+    VCL_STRING
+);
+
+struct arg_vmod_types_opt_cstr_dflt {
+  char valid__v;
+  VCL_STRING _v;
+};
+
+typedef VCL_VOID td_vmod_types_opt_cstr_dflt(
+    VRT_CTX,
+    struct arg_vmod_types_opt_cstr_dflt *
+);
+
+typedef VCL_VOID td_vmod_types_opt_cstr_dflt2(
+    VRT_CTX,
+    VCL_STRING
+);
+
+typedef VCL_STRING td_vmod_types_to_cstr(
+    VRT_CTX
+);
+
+typedef VCL_STRING td_vmod_types_to_res_cstr(
+    VRT_CTX
+);
+
+typedef VCL_STRING td_vmod_types_to_res_cstr_err(
+    VRT_CTX
+);
+
+typedef VCL_VOID td_vmod_types_type_duration(
+    VRT_CTX,
+    VCL_DURATION
+);
+
+struct arg_vmod_types_opt_duration {
+  char valid__v;
+  VCL_DURATION _v;
+};
+
+typedef VCL_VOID td_vmod_types_opt_duration(
+    VRT_CTX,
+    struct arg_vmod_types_opt_duration *
+);
+
+typedef VCL_DURATION td_vmod_types_to_duration(
+    VRT_CTX
+);
+
+typedef VCL_DURATION td_vmod_types_to_res_duration(
+    VRT_CTX
+);
+
+typedef VCL_VOID td_vmod_types_type_f64(
+    VRT_CTX,
+    VCL_REAL
+);
+
+typedef VCL_VOID td_vmod_types_type_f64_dflt(
+    VRT_CTX,
+    VCL_REAL
+);
+
+struct arg_vmod_types_opt_f64 {
+  char valid__v;
+  VCL_REAL _v;
+};
+
+typedef VCL_VOID td_vmod_types_opt_f64(
+    VRT_CTX,
+    struct arg_vmod_types_opt_f64 *
+);
+
+typedef VCL_REAL td_vmod_types_to_f64(
+    VRT_CTX
+);
+
+typedef VCL_REAL td_vmod_types_to_res_f64(
+    VRT_CTX
+);
+
+typedef VCL_VOID td_vmod_types_type_i64(
+    VRT_CTX,
+    VCL_INT
+);
+
+typedef VCL_VOID td_vmod_types_type_i64_dflt(
+    VRT_CTX,
+    VCL_INT
+);
+
+struct arg_vmod_types_opt_i64 {
+  char valid__v;
+  VCL_INT _v;
+};
+
+typedef VCL_VOID td_vmod_types_opt_i64(
+    VRT_CTX,
+    struct arg_vmod_types_opt_i64 *
+);
+
+typedef VCL_INT td_vmod_types_to_i64(
+    VRT_CTX
+);
+
+typedef VCL_INT td_vmod_types_to_res_i64(
+    VRT_CTX
+);
+
+typedef VCL_VOID td_vmod_types_type_str(
+    VRT_CTX,
+    VCL_STRING
+);
+
+struct arg_vmod_types_opt_str {
+  char valid__v;
+  VCL_STRING _v;
+};
+
+typedef VCL_VOID td_vmod_types_opt_str(
+    VRT_CTX,
+    struct arg_vmod_types_opt_str *
+);
+
+typedef VCL_VOID td_vmod_types_opt_str_req(
+    VRT_CTX,
+    VCL_STRING
+);
+
+typedef VCL_VOID td_vmod_types_type_str_dflt(
+    VRT_CTX,
+    VCL_STRING
+);
+
+struct arg_vmod_types_opt_str_dflt {
+  char valid__v;
+  VCL_STRING _v;
+};
+
+typedef VCL_VOID td_vmod_types_opt_str_dflt(
+    VRT_CTX,
+    struct arg_vmod_types_opt_str_dflt *
+);
+
+typedef VCL_STRING td_vmod_types_to_str(
+    VRT_CTX
+);
+
+typedef VCL_STRING td_vmod_types_to_res_str(
+    VRT_CTX
+);
+
+typedef VCL_STRING td_vmod_types_to_string(
+    VRT_CTX
+);
+
+typedef VCL_STRING td_vmod_types_to_opt_string(
+    VRT_CTX
+);
+
+typedef VCL_STRING td_vmod_types_to_res_string(
+    VRT_CTX
+);
+
+typedef VCL_STRING td_vmod_types_to_res_opt_string(
+    VRT_CTX
+);
+
+struct arg_vmod_types_type_probe {
+  char valid__v;
+  VCL_PROBE _v;
+};
+
+typedef VCL_VOID td_vmod_types_type_probe(
+    VRT_CTX,
+    struct arg_vmod_types_type_probe *
+);
+
+typedef VCL_VOID td_vmod_types_type_probe_req(
+    VRT_CTX,
+    VCL_PROBE
+);
+
+typedef VCL_PROBE td_vmod_types_to_probe(
+    VRT_CTX
+);
+
+typedef VCL_PROBE td_vmod_types_to_res_probe(
+    VRT_CTX
+);
+
+struct arg_vmod_types_type_cow_probe {
+  char valid__v;
+  VCL_PROBE _v;
+};
+
+typedef VCL_VOID td_vmod_types_type_cow_probe(
+    VRT_CTX,
+    struct arg_vmod_types_type_cow_probe *
+);
+
+typedef VCL_VOID td_vmod_types_type_cow_probe_req(
+    VRT_CTX,
+    VCL_PROBE
+);
+
+typedef VCL_PROBE td_vmod_types_to_cow_probe(
+    VRT_CTX
+);
+
+typedef VCL_PROBE td_vmod_types_to_res_cow_probe(
+    VRT_CTX
+);
+
+struct arg_vmod_types_type_ip {
+  char valid__v;
+  VCL_IP _v;
+};
+
+typedef VCL_VOID td_vmod_types_type_ip(
+    VRT_CTX,
+    struct arg_vmod_types_type_ip *
+);
+
+typedef VCL_VOID td_vmod_types_type_ip_req(
+    VRT_CTX,
+    VCL_IP
+);
+
+typedef VCL_IP td_vmod_types_to_ip(
+    VRT_CTX
+);
+
+typedef VCL_IP td_vmod_types_to_res_ip(
+    VRT_CTX
+);
+
+typedef VCL_STRING td_vmod_types_to_vcl_string(
+    VRT_CTX
+);
+
+typedef VCL_STRING td_vmod_types_to_res_vcl_string(
+    VRT_CTX
+);
+
+struct arg_vmod_types_opt_i64_opt_i64 {
+  VCL_INT a1;
+  char valid_a2;
+  VCL_INT a2;
+  VCL_INT a3;
+};
+
+typedef VCL_STRING td_vmod_types_opt_i64_opt_i64(
+    VRT_CTX,
+    struct arg_vmod_types_opt_i64_opt_i64 *
+);
+
+typedef VCL_VOID td_vmod_types_get_ws_mut(
+    VRT_CTX
+);
+
+typedef VCL_VOID td_vmod_types_get_ws_ref(
+    VRT_CTX
+);
+
+struct Vmod_types_Func {
+  td_vmod_types_to_void *f_to_void;
+  td_vmod_types_to_res_void_err *f_to_res_void_err;
+  td_vmod_types_to_res_str_err *f_to_res_str_err;
+  td_vmod_types_to_res_box_err *f_to_res_box_err;
+  td_vmod_types_type_bool *f_type_bool;
+  td_vmod_types_type_bool_dflt *f_type_bool_dflt;
+  td_vmod_types_opt_bool *f_opt_bool;
+  td_vmod_types_to_bool *f_to_bool;
+  td_vmod_types_to_res_bool *f_to_res_bool;
+  td_vmod_types_type_cstr *f_type_cstr;
+  td_vmod_types_opt_cstr *f_opt_cstr;
+  td_vmod_types_opt_cstr_req *f_opt_cstr_req;
+  td_vmod_types_type_cstr_dflt *f_type_cstr_dflt;
+  td_vmod_types_type_cstr_dflt2 *f_type_cstr_dflt2;
+  td_vmod_types_opt_cstr_dflt *f_opt_cstr_dflt;
+  td_vmod_types_opt_cstr_dflt2 *f_opt_cstr_dflt2;
+  td_vmod_types_to_cstr *f_to_cstr;
+  td_vmod_types_to_res_cstr *f_to_res_cstr;
+  td_vmod_types_to_res_cstr_err *f_to_res_cstr_err;
+  td_vmod_types_type_duration *f_type_duration;
+  td_vmod_types_opt_duration *f_opt_duration;
+  td_vmod_types_to_duration *f_to_duration;
+  td_vmod_types_to_res_duration *f_to_res_duration;
+  td_vmod_types_type_f64 *f_type_f64;
+  td_vmod_types_type_f64_dflt *f_type_f64_dflt;
+  td_vmod_types_opt_f64 *f_opt_f64;
+  td_vmod_types_to_f64 *f_to_f64;
+  td_vmod_types_to_res_f64 *f_to_res_f64;
+  td_vmod_types_type_i64 *f_type_i64;
+  td_vmod_types_type_i64_dflt *f_type_i64_dflt;
+  td_vmod_types_opt_i64 *f_opt_i64;
+  td_vmod_types_to_i64 *f_to_i64;
+  td_vmod_types_to_res_i64 *f_to_res_i64;
+  td_vmod_types_type_str *f_type_str;
+  td_vmod_types_opt_str *f_opt_str;
+  td_vmod_types_opt_str_req *f_opt_str_req;
+  td_vmod_types_type_str_dflt *f_type_str_dflt;
+  td_vmod_types_opt_str_dflt *f_opt_str_dflt;
+  td_vmod_types_to_str *f_to_str;
+  td_vmod_types_to_res_str *f_to_res_str;
+  td_vmod_types_to_string *f_to_string;
+  td_vmod_types_to_opt_string *f_to_opt_string;
+  td_vmod_types_to_res_string *f_to_res_string;
+  td_vmod_types_to_res_opt_string *f_to_res_opt_string;
+  td_vmod_types_type_probe *f_type_probe;
+  td_vmod_types_type_probe_req *f_type_probe_req;
+  td_vmod_types_to_probe *f_to_probe;
+  td_vmod_types_to_res_probe *f_to_res_probe;
+  td_vmod_types_type_cow_probe *f_type_cow_probe;
+  td_vmod_types_type_cow_probe_req *f_type_cow_probe_req;
+  td_vmod_types_to_cow_probe *f_to_cow_probe;
+  td_vmod_types_to_res_cow_probe *f_to_res_cow_probe;
+  td_vmod_types_type_ip *f_type_ip;
+  td_vmod_types_type_ip_req *f_type_ip_req;
+  td_vmod_types_to_ip *f_to_ip;
+  td_vmod_types_to_res_ip *f_to_res_ip;
+  td_vmod_types_to_vcl_string *f_to_vcl_string;
+  td_vmod_types_to_res_vcl_string *f_to_res_vcl_string;
+  td_vmod_types_opt_i64_opt_i64 *f_opt_i64_opt_i64;
+  td_vmod_types_get_ws_mut *f_get_ws_mut;
+  td_vmod_types_get_ws_ref *f_get_ws_ref;
+};
+
+static struct Vmod_types_Func Vmod_types_Func;

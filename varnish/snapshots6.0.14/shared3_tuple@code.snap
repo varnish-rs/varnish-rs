@@ -67,7 +67,7 @@ mod tuple {
             proto: cproto.as_ptr(),
         };
         const JSON: &CStr = c"(moved to @json.snap files)";
-        const cproto: &CStr = c"\ntypedef VCL_STRING td_vmod_tuple_ref_to_slice_lifetime(\n    VRT_CTX,\n    struct vmod_priv *\n);\n\nstruct Vmod_tuple_Func {\n  td_vmod_tuple_ref_to_slice_lifetime *f_ref_to_slice_lifetime;\n};\n\nstatic struct Vmod_tuple_Func Vmod_tuple_Func;";
+        const cproto: &CStr = c"(moved to @cproto.snap files)";
     }
     use super::PerTask;
     pub fn ref_to_slice_lifetime<'a>(
