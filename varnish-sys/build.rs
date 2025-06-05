@@ -9,7 +9,7 @@ static BINDINGS_FILE: &str = "bindings.for-docs";
 static BINDINGS_FILE_VER: &str = "7.7.1";
 
 struct VarnishInfo {
-    bindings: PathBuf,
+	bindings: PathBuf,
     varnish_paths: Vec<PathBuf>,
     version: String,
     defines: Vec<&'static str>,
