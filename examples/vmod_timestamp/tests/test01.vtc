@@ -3,23 +3,23 @@ varnishtest "timestamp()"
 server s1 {} -start
 
 varnish v1 -vcl+backend {
-	import timestamp from "${vmod}";
-	import std;
-	import vtc;
+    import timestamp from "${vmod}";
+    import std;
+    import vtc;
 
-	sub vcl_recv {
-		timestamp.timestamp();
-		vtc.sleep(1.5s);
-		return (synth(200));
-	}
+    sub vcl_recv {
+        timestamp.timestamp();
+        vtc.sleep(1.5s);
+        return (synth(200));
+    }
 
-	sub vcl_synth {
-		set resp.http.timestamp = timestamp.timestamp();
-	}
+    sub vcl_synth {
+        set resp.http.timestamp = timestamp.timestamp();
+    }
 } -start
 
 client c1 {
-	txreq
-	rxresp
-	expect resp.http.timestamp >= 1.5
+    txreq
+    rxresp
+    expect resp.http.timestamp >= 1.5
 } -run

@@ -1,29 +1,29 @@
 varnishtest "probe conversion"
 
 varnish v1 -vcl {
-	import rustest from "${vmod}";
+    import rustest from "${vmod}";
 
-	probe p1 {
-		.url = "foo";
-		.threshold = 0;
-		.timeout = 1s;
-		.interval = 2s;
-		.initial = 3;
-		.window = 4;
-	}
-	backend be none;
+    probe p1 {
+        .url = "foo";
+        .threshold = 0;
+        .timeout = 1s;
+        .interval = 2s;
+        .initial = 3;
+        .window = 4;
+    }
+    backend be none;
 
-	sub vcl_recv {
-		return (synth(200));
-	}
+    sub vcl_recv {
+        return (synth(200));
+    }
 
-	sub vcl_synth {
-		set resp.http.props = rustest.probe_prop(p1);
-	}
+    sub vcl_synth {
+        set resp.http.props = rustest.probe_prop(p1);
+    }
 } -start
 
 client c1 {
-	txreq
-	rxresp
-	expect resp.http.props == "url:foo-0-1-2-3-4"
+    txreq
+    rxresp
+    expect resp.http.props == "url:foo-0-1-2-3-4"
 } -run

@@ -1,60 +1,60 @@
 varnishtest "Test counter vmod"
 
 server s1 {
-	rxreq
-	txresp
+    rxreq
+    txresp
 } -start
 
 varnish v1 -vcl+backend {
-	import stats from "${vmod}";
-	import std;
+    import stats from "${vmod}";
+    import std;
 
-	sub vcl_init {
-		new c = stats.test();
-	}
+    sub vcl_init {
+        new c = stats.test();
+    }
 
-	sub vcl_deliver {
-		if (req.http.x-increment-foo-twice) {
-			c.increment_foo();
-			c.increment_foo();
-		}
+    sub vcl_deliver {
+        if (req.http.x-increment-foo-twice) {
+            c.increment_foo();
+            c.increment_foo();
+        }
 
-		# Update temperature from header if present
-		if (req.http.x-temperature) {
-		    # std.integer() before v7 requires a fallback parameter
-			c.update_temperature(std.integer(req.http.x-temperature, 0));
-		}
+        # Update temperature from header if present
+        if (req.http.x-temperature) {
+            # std.integer() before v7 requires a fallback parameter
+            c.update_temperature(std.integer(req.http.x-temperature, 0));
+        }
 
-		set resp.http.x-foo = c.get_foo();
-		set resp.http.x-temperature = c.get_temperature();
-	}
+        set resp.http.x-foo = c.get_foo();
+        set resp.http.x-temperature = c.get_temperature();
+    }
 } -start
 
 client c1 {
-	txreq -hdr "X-Temperature: 17" -hdr "X-Increment-Foo-Twice: yes"
-	rxresp
-	expect resp.http.x-foo == "2"
-	expect resp.http.x-temperature == "17"
+    txreq -hdr "X-Temperature: 17" -hdr "X-Increment-Foo-Twice: yes"
+    rxresp
+    expect resp.http.x-foo == "2"
+    expect resp.http.x-temperature == "17"
 } -run
 varnish v1 -expect mystats.default.foo == 2
 varnish v1 -expect mystats.default.temperature == 17
 
 # Counter values should be persisted across requests
 client c2 {
-	txreq
-	rxresp
-	expect resp.http.x-foo == "2"
-	expect resp.http.x-temperature == "17"
+    txreq
+    rxresp
+    expect resp.http.x-foo == "2"
+    expect resp.http.x-temperature == "17"
 } -run
 varnish v1 -expect mystats.default.foo == 2
 varnish v1 -expect mystats.default.temperature == 17
 
 # Send another request with different temperature
 client c3 {
-	txreq -hdr "X-Temperature: 22" -hdr "X-Increment-Foo-Twice: yes"
-	rxresp
-	expect resp.http.x-foo == "4"
-	expect resp.http.x-temperature == "22"
+    txreq -hdr "X-Temperature: 22" -hdr "X-Increment-Foo-Twice: yes"
+    rxresp
+    expect resp.http.x-foo == "4"
+    expect resp.http.x-temperature == "22"
 } -run
 
 # Assert on the VSC counter values

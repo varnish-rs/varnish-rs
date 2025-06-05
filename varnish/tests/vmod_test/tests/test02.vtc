@@ -1,23 +1,23 @@
 varnishtest "workspace reservation"
 
 server s1 {
-	rxreq
-	expect req.http.foo == "bar bar bar"
-	expect req.http.bar == "foo foo foo"
-	txresp
+    rxreq
+    expect req.http.foo == "bar bar bar"
+    expect req.http.bar == "foo foo foo"
+    txresp
 } -start
 
 varnish v1 -vcl+backend {
-	import rustest from "${vmod}";
+    import rustest from "${vmod}";
 
-	sub vcl_recv {
-		set req.http.foo = rustest.ws_reserve("bar");
-		set req.http.bar = rustest.ws_reserve("foo");
-	}
+    sub vcl_recv {
+        set req.http.foo = rustest.ws_reserve("bar");
+        set req.http.bar = rustest.ws_reserve("foo");
+    }
 } -start
 
 client c1 {
-	txreq
-	rxresp
-	expect resp.status == 200
+    txreq
+    rxresp
+    expect resp.status == 200
 } -run
