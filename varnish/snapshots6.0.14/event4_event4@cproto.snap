@@ -1,0 +1,8 @@
+---
+source: varnish-macros/src/tests.rs
+---
+struct Vmod_event4_Func {
+  vmod_event_f *f_on_event;
+};
+
+static struct Vmod_event4_Func Vmod_event4_Func;

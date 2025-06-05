@@ -5,7 +5,7 @@ use std::sync::LazyLock;
 use insta::{assert_snapshot, with_settings};
 use proc_macro2::TokenStream;
 use quote::quote;
-use regex::Regex;
+use regex::{Captures, Regex};
 use syn::{Data, DeriveInput, ItemMod, ItemStruct};
 
 use crate::gen_docs::gen_doc_content;
@@ -20,9 +20,9 @@ static RE_VARNISH_VER: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"Varnish \d+\.[-+. 0-9a-z]+").unwrap()
 });
 
-static RE_JSON_BLOB: LazyLock<Regex> = LazyLock::new(|| {
-    // Use regex to remove "const JSON: &CStr = c\"...\";"
-    Regex::new(r#"const JSON: &CStr = c"([^\n]+)";\n"#).unwrap()
+static RE_STR_BLOB: LazyLock<Regex> = LazyLock::new(|| {
+    // Use regex to remove "const JSON: &CStr = c\"...\";"  and  "const cproto: &CStr = c\"...\";"
+    Regex::new(r#"const ([a-zA-Z0-9_]+): &CStr = c"([^\n]+)";\n"#).unwrap()
 });
 
 /// Read the content of the `../../varnish/tests/pass` directory that should also pass full compilation tests,
@@ -151,31 +151,30 @@ fn test(name: &str, args: TokenStream, mut item_mod: ItemMod) {
         .replace_all(&generated, "Varnish (version) (hash)")
         .to_string();
 
-    // Extract a JSON string and remove it from the original to avoid recording it twice
-    let json = if let Some(v) = RE_JSON_BLOB.captures(code.as_ref()) {
-        let res = v.get(1).unwrap().as_str().to_string();
-        code = RE_JSON_BLOB
-            .replace(
-                code.as_ref(),
-                "const JSON: &CStr = c\"(moved to @json.snap files)\";\n",
-            )
-            .to_string();
-        res
-    } else {
-        String::new()
+    // Extract a JSON and cproto strings, and remove them from the original to avoid recording it twice
+    let replacement = |caps: &Captures| -> String {
+        let func = caps.get(1).unwrap().as_str().to_string();
+        let value = caps.get(2).unwrap().as_str().to_string();
+
+        let value = &value
+            .replace("\\\"", "\"")
+            .replace("\\u{2}", "\u{2}")
+            .replace("\\u{3}", "\u{3}")
+            .replace("\\\\", "\\")
+            // this is a bit of a hack because the double-escaping gets somewhat incorrectly parsed
+            .replace("\\n", "\n");
+
+        let func_lower = func.to_lowercase();
+        with_settings!({ snapshot_suffix => &func_lower }, { assert_snapshot!(name, value) });
+
+        format!("const {func}: &CStr = c\"(moved to @{func_lower}.snap files)\";\n")
     };
 
+    code = RE_STR_BLOB
+        .replace_all(code.as_str(), &replacement)
+        .to_string();
+
     with_settings!({ snapshot_suffix => "code" }, { assert_snapshot!(name, code) });
-
-    let json = &json
-        .replace("\\\"", "\"")
-        .replace("\\u{2}", "\u{2}")
-        .replace("\\u{3}", "\u{3}")
-        .replace("\\\\", "\\")
-        // this is a bit of a hack because the double-escaping gets somewhat incorrectly parsed
-        .replace("\\n", "\n");
-
-    with_settings!({ snapshot_suffix => "json" }, { assert_snapshot!(name, json) });
 }
 
 fn parse_gen_code(name: &str, file: &str) -> String {

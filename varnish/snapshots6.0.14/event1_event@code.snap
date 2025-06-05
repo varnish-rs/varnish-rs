@@ -51,7 +51,7 @@ mod event {
             proto: cproto.as_ptr(),
         };
         const JSON: &CStr = c"(moved to @json.snap files)";
-        const cproto: &CStr = c"\nstruct Vmod_event_Func {\n  vmod_event_f *f_on_event;\n};\n\nstatic struct Vmod_event_Func Vmod_event_Func;";
+        const cproto: &CStr = c"(moved to @cproto.snap files)";
     }
     use varnish::vcl::Event;
     /// Event function - the comment is ignored
