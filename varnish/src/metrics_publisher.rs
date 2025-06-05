@@ -1,4 +1,4 @@
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 use std::mem::size_of;
 use std::ops::{Deref, DerefMut};
 use std::ptr::null_mut;
@@ -6,7 +6,7 @@ use std::ptr::null_mut;
 use varnish_sys::ffi::{vsc_seg, VRT_VSC_AllocVariadic, VRT_VSC_Destroy};
 
 pub unsafe trait VscMetric {
-    fn get_metadata() -> &'static str;
+    fn get_metadata() -> &'static CStr;
 }
 
 pub struct Vsc<T: VscMetric> {
@@ -30,8 +30,8 @@ impl<T: VscMetric> Vsc<T> {
                 &mut seg,
                 name.as_ptr(),
                 size_of::<T>(),
-                metadata_json.as_ptr(),
-                metadata_json.len(),
+                metadata_json.as_ptr().cast::<std::os::raw::c_uchar>(),
+                metadata_json.to_bytes().len(),
                 format.as_ptr(),
             )
             .cast::<T>()

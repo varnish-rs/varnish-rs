@@ -138,10 +138,10 @@ pub fn derive_vsc_metric(input: &DeriveInput) -> ProcResult<TokenStream> {
         .max()
         .unwrap_or_default();
     let hashes = "#".repeat(hashes);
-    let metadata = Literal::from_str(&format!("r{hashes}\"{metadata}\"{hashes}")).unwrap();
+    let metadata = Literal::from_str(&format!("cr{hashes}\"{metadata}\"{hashes}")).unwrap();
     Ok(quote! {
         unsafe impl varnish::VscMetric for #name {
-            fn get_metadata() -> &'static str {
+            fn get_metadata() -> &'static std::ffi::CStr {
                 #metadata
             }
         }
