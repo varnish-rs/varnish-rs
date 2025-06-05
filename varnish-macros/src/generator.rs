@@ -240,7 +240,7 @@ impl Generator {
             cproto_def = quote! {};
         }
 
-        let vmod_data_extras = if cfg!(varnishsys_77_vmod_data) {
+        let mut vmod_data_extras = if cfg!(varnishsys_77_vmod_data) {
             quote! {
                 vcs: c"".as_ptr(),  // FIXME: value?
                 version: c"".as_ptr(),  // FIXME: value?
@@ -248,6 +248,10 @@ impl Generator {
         } else {
             quote! {}
         };
+
+        if cfg!(varnishsys_6plus_vmod_data_priv) {
+            vmod_data_extras.append_all(quote![ priv_: 0, ]);
+        }
 
         quote!(
             #[allow(

@@ -1,0 +1,24 @@
+---
+source: varnish-macros/src/tests.rs
+---
+[
+  [
+    "$VMOD",
+    "1.0"
+  ],
+  [
+    "$FUNC",
+    "ref_to_slice_lifetime",
+    [
+      [
+        "STRING"
+      ],
+      "Vmod_tuple_Func.f_ref_to_slice_lifetime",
+      "",
+      [
+        "PRIV_TASK",
+        "tsk_vals"
+      ]
+    ]
+  ]
+]

@@ -3,7 +3,9 @@
 main_crate := 'varnish'
 features_flag := '--all-features'
 default_varnish_ver := '7.7'  # which version of Varnish to install by default
-supported_varnish_vers := default_varnish_ver + '  7.7.0  7.6  7.5  6.0'  # Make sure to update CI with the changes
+default_varnishplus_ver := '6.0.14r3'  # which version of Varnish Plus to install by default
+supported_varnish_vers := default_varnish_ver + ' ' + default_varnishplus_ver + ' 7.7.0  7.6  7.5  6.0'  # Make sure to update CI with the changes
+
 
 # if running in CI, treat warnings as errors by setting RUSTFLAGS and RUSTDOCFLAGS to '-D warnings' unless they are already set
 # Use `CI=true just ci-test` to run the same tests as in GitHub CI.
@@ -142,6 +144,10 @@ get-varnish-version $required_version='':
     #!/usr/bin/env bash
     set -euo pipefail
     VARNISH_VER=$(dpkg-query -W -f='${source:Upstream-Version}\n' varnish-dev || echo "unknown")
+    # try with varnish-plus-dev
+    if [ -z "$VARNISH_VER" ]; then
+        VARNISH_VER=$(dpkg-query -W -f='${source:Upstream-Version}\n' varnish-plus-dev || echo "unknown")
+    fi
     if [ -n "$required_version" ]; then
         if [ "$(printf "$required_version\n$VARNISH_VER" | sort -V | head -n1)" != "$required_version" ]; then
             echo "ERROR: Varnish version $required_version is required, but $VARNISH_VER is installed."
@@ -149,7 +155,7 @@ get-varnish-version $required_version='':
         else
             echo "Found varnish-dev package v$VARNISH_VER >= $required_version"
         fi
-    elif [ "$VARNISH_VER" = "unknown" ]; then
+    elif [ "$VARNISH_VER" = "unknown" -o -z "$VARNISH_VER" ]; then
         echo "ERROR: varnish-dev package was not found"
         exit 1
     else
@@ -274,6 +280,7 @@ docker-run-ver version *args:
         -v "$PWD/docker/.cache/{{version}}/.bash_history:/home/user/.bash_history" \
         varnish-img-{{version}} {{args}}
 
+
 # Get the `--exclude <SPEC>` parameter for the cargo build/test/... command, depending on the installed version of Varnish
 [private]
 get-package-exclude-args:
@@ -300,3 +307,11 @@ install-varnish version=default_varnish_ver:
     cat /etc/apt/preferences.d/varnish
     sudo apt-cache policy varnish
     sudo apt-get install -y "varnish=$PATTERN" "varnish-dev=$PATTERN"
+
+# Install Varnish Plus from packagecloud.io. This could be damaging to your system - use with caution.
+[private]
+install-varnish-plus version=default_varnishplus_ver:
+    echo "Installing Varnish '{{version}}' from packagecloud.io"
+    curl -sSf "https://packagecloud.io/install/repositories/varnishplus/60-enterprise/script.deb.sh" | sudo bash
+    sudo apt-cache policy varnish-plus
+    sudo apt-get install -y "varnish-plus={{version}}*" "varnish-plus-dev={{version}}*"
