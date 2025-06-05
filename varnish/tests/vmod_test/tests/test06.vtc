@@ -1,36 +1,36 @@
 varnishtest "ip conversion"
 
 varnish v1 -vcl {
-	import std;
-	import rustest from "${vmod}";
+    import std;
+    import rustest from "${vmod}";
 
-	backend default none;
+    backend default none;
 
-	sub vcl_recv {
-		return (synth(200));
-	}
+    sub vcl_recv {
+        return (synth(200));
+    }
 
-	sub vcl_synth {
-		set resp.http.ipv4_addr = rustest.build_ip4();
-		set resp.http.ipv4_port = std.port(rustest.build_ip4());
+    sub vcl_synth {
+        set resp.http.ipv4_addr = rustest.build_ip4();
+        set resp.http.ipv4_port = std.port(rustest.build_ip4());
 
-		set resp.http.ipv6_addr = rustest.build_ip6();
-		set resp.http.ipv6_port = std.port(rustest.build_ip6());
+        set resp.http.ipv6_addr = rustest.build_ip6();
+        set resp.http.ipv6_port = std.port(rustest.build_ip6());
 
-		set resp.http.print4 = rustest.print_ip(rustest.build_ip4());
-		set resp.http.print6 = rustest.print_ip(rustest.build_ip6());
-	}
+        set resp.http.print4 = rustest.print_ip(rustest.build_ip4());
+        set resp.http.print6 = rustest.print_ip(rustest.build_ip6());
+    }
 } -start
 
 client c1 {
-	txreq
-	rxresp
-	expect resp.http.ipv4_addr == "12.34.56.78"
-	expect resp.http.ipv4_port == "9012"
+    txreq
+    rxresp
+    expect resp.http.ipv4_addr == "12.34.56.78"
+    expect resp.http.ipv4_port == "9012"
 
-	expect resp.http.ipv6_addr == "1234:5678:9012:3456:7890:1111:2222:3333"
-	expect resp.http.ipv6_port == "4444"
+    expect resp.http.ipv6_addr == "1234:5678:9012:3456:7890:1111:2222:3333"
+    expect resp.http.ipv6_port == "4444"
 
-	expect resp.http.print4 == "12.34.56.78:9012"
-	expect resp.http.print6 == "[1234:5678:9012:3456:7890:1111:2222:3333]:4444"
+    expect resp.http.print4 == "12.34.56.78:9012"
+    expect resp.http.print6 == "[1234:5678:9012:3456:7890:1111:2222:3333]:4444"
 } -run

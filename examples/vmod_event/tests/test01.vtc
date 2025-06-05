@@ -4,20 +4,20 @@ server s1 {} -start
 
 # first vcl, which will be automatically be named "vcl1" by varnishtest
 varnish v1 -vcl+backend {
-	import event from "${vmod}";
+    import event from "${vmod}";
 
-	sub vcl_recv {
-		return (synth(200));
-	}
-	sub vcl_synth {
-		set resp.http.loaded = event.loaded();
-	}
+    sub vcl_recv {
+        return (synth(200));
+    }
+    sub vcl_synth {
+        set resp.http.loaded = event.loaded();
+    }
 } -start
 
 client c1 {
-	txreq
-	rxresp
-	expect resp.http.loaded == 1
+    txreq
+    rxresp
+    expect resp.http.loaded == 1
 } -run
 
 # we can load a VCL without vmod_event
@@ -28,27 +28,27 @@ varnish v1 -errvcl "second load always fail" {vcl 4.1; import event from "${vmod
 
 # the third one will work though
 varnish v1 -vcl+backend {
-	import event from "${vmod}";
+    import event from "${vmod}";
 
-	sub vcl_recv {
-		return (synth(200));
-	}
-	sub vcl_synth {
-		set resp.http.loaded = event.loaded();
-	}
+    sub vcl_recv {
+        return (synth(200));
+    }
+    sub vcl_synth {
+        set resp.http.loaded = event.loaded();
+    }
 }
 
 client c1 {
-	txreq
-	rxresp
-	expect resp.http.loaded == 3
+    txreq
+    rxresp
+    expect resp.http.loaded == 3
 } -run
 
 # reload the first vcl, check that `loaded()` returns the right number
 varnish v1 -cliok "vcl.use vcl1"
 
 client c1 {
-	txreq
-	rxresp
-	expect resp.http.loaded == 1
+    txreq
+    rxresp
+    expect resp.http.loaded == 1
 } -run

@@ -4,44 +4,44 @@ varnishtest "testing .is_even() and .captain_obvious()"
 # describe what the server should receive and send back
 # "man vtc" is your friend here
 server s1 {
-	rxreq
-	expect req.url == "/first"
-	expect req.http.even == "true"
-	expect req.http.cap == "I was given 17 as argument"
-	txresp
+    rxreq
+    expect req.url == "/first"
+    expect req.http.even == "true"
+    expect req.http.cap == "I was given 17 as argument"
+    txresp
 
-	rxreq
-	expect req.url == "/second"
-	expect req.http.even == "false"
-	expect req.http.cap == "I was called without an argument"
-	txresp
+    rxreq
+    expect req.url == "/second"
+    expect req.http.even == "false"
+    expect req.http.cap == "I was called without an argument"
+    txresp
 } -start
 
 # set up the varnish server with our custom logic
 varnish v1 -vcl+backend {
-	import example from "${vmod}";
+    import example from "${vmod}";
 
-	sub vcl_recv {
-		# modify the request here and the changes will be carried on
-		# to the backend
-		if (req.url == "/first") {
-			set req.http.even = example.is_even(8);
-			set req.http.cap = example.captain_obvious(17);
-		} else {
-			set req.http.even = example.is_even(3);
-			set req.http.cap = example.captain_obvious();
-		}
-	}
+    sub vcl_recv {
+        # modify the request here and the changes will be carried on
+        # to the backend
+        if (req.url == "/first") {
+            set req.http.even = example.is_even(8);
+            set req.http.cap = example.captain_obvious(17);
+        } else {
+            set req.http.even = example.is_even(3);
+            set req.http.cap = example.captain_obvious();
+        }
+    }
 } -start
 
 # finally, run the client, if something goes wrong, the server
 # will complain, and we won't receive a response back
 client c1 {
-	txreq -url "/first"
-	rxresp
-	expect resp.status == 200
+    txreq -url "/first"
+    rxresp
+    expect resp.status == 200
 
-	txreq -url "/second"
-	rxresp
-	expect resp.status == 200
+    txreq -url "/second"
+    rxresp
+    expect resp.status == 200
 } -run

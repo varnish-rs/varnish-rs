@@ -1,26 +1,26 @@
 varnishtest "vfp crash during fini"
 
 server s1 {
-	rxreq
-	txresp -body "0123456789"
+    rxreq
+    txresp -body "0123456789"
 } -start
 
 
 
 varnish v1 -vcl+backend {
-	import rustest from "${vmod}";
+    import rustest from "${vmod}";
 
-	sub vcl_backend_response {
-		set beresp.filters = "vfptest";
-	}
+    sub vcl_backend_response {
+        set beresp.filters = "vfptest";
+    }
 
-	sub vcl_backend_error {
-		set beresp.status = 200;
-	}
+    sub vcl_backend_error {
+        set beresp.status = 200;
+    }
 } -start
 
 client c1 {
-	txreq -url "/"
-	rxresp
-	expect resp.status == 200
+    txreq -url "/"
+    rxresp
+    expect resp.status == 200
 } -run

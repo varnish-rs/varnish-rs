@@ -3,20 +3,20 @@ varnishtest "req body manipulation"
 server s1 {} -start
 
 varnish v1 -vcl+backend {
-	import std;
-	import rustest from "${vmod}";
+    import std;
+    import rustest from "${vmod}";
 
-	sub vcl_recv {
-		std.cache_req_body(50b);
-		return (synth(200));
-	}
-	sub vcl_synth {
-		set resp.http.body = rustest.req_body();
-	}
+    sub vcl_recv {
+        std.cache_req_body(50b);
+        return (synth(200));
+    }
+    sub vcl_synth {
+        set resp.http.body = rustest.req_body();
+    }
 } -start
 
 client c1 {
-	txreq -body "foo bar baz"
-	rxresp
-	expect resp.http.body == "foo bar baz"
+    txreq -body "foo bar baz"
+    rxresp
+    expect resp.http.body == "foo bar baz"
 } -run
