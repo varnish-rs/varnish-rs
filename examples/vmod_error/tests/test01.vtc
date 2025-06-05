@@ -1,6 +1,6 @@
 varnishtest "error()"
 
-feature cmd { varnishd -V 2>&1 | head -n 1 | grep -v varnish-6.0. }
+feature cmd { varnishd -V 2>&1 | head -n 1 | grep -E -v "varnish(-plus)?-6\.0\." }
 
 # create the files we'll use in the tests
 shell {

@@ -24,7 +24,13 @@ ARG VARNISH_VERSION=""
 # Note that during the regular usage, we use justfile mapped from the host machine.
 RUN mkdir -p /init-tmp
 COPY ./justfile /init-tmp
-RUN cd /init-tmp && just install-varnish "${VARNISH_VERSION}"
+RUN set -ex; \
+    cd /init-tmp; \
+    if echo "${VARNISH_VERSION}" | grep -q "r"; then \
+        just install-varnish-plus "${VARNISH_VERSION}"; \
+    else \
+        just install-varnish "${VARNISH_VERSION}"; \
+    fi
 
 ARG USERNAME=user
 ARG USER_UID=1000

@@ -1,0 +1,159 @@
+---
+source: varnish-macros/src/tests.rs
+---
+/// main docs
+/// # Big header
+/// ## sub header
+/// foo bar
+mod types {
+    /*! Multiline
+     * comment per https://github.com/rust-lang/rust/issues/32088
+     *
+     * The end
+     */
+    #[allow(non_snake_case, unused_imports, unused_qualifications, unused_variables)]
+    #[allow(clippy::needless_question_mark, clippy::new_without_default)]
+    #[automatically_derived]
+    mod varnish_generated {
+        use std::ffi::{c_char, c_int, c_uint, c_void, CStr};
+        use std::ptr::null;
+        use varnish::ffi::{
+            VCL_BACKEND, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE, VCL_REAL,
+            VCL_STRING, VCL_VOID, VMOD_ABI_Version, VclEvent, vmod_data, vmod_priv,
+            vrt_ctx, vmod_priv_free_f,
+        };
+        use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
+        use super::*;
+        unsafe extern "C" fn vmod_c_with_docs(__ctx: *mut vrt_ctx) {
+            super::with_docs()
+        }
+        unsafe extern "C" fn vmod_c_no_docs(__ctx: *mut vrt_ctx) {
+            super::no_docs()
+        }
+        unsafe extern "C" fn vmod_c_doctest(
+            __ctx: *mut vrt_ctx,
+            _no_docs: VCL_INT,
+            _v: VCL_INT,
+        ) {
+            super::doctest(_no_docs.into(), _v.into())
+        }
+        unsafe extern "C" fn vmod_c_arg_only(__ctx: *mut vrt_ctx, _v: VCL_INT) {
+            super::arg_only(_v.into())
+        }
+        #[repr(C)]
+        struct arg_vmod_types_DocStruct__init {
+            valid_cap: c_char,
+            cap: VCL_INT,
+        }
+        unsafe extern "C" fn vmod_c_DocStruct__init(
+            __ctx: *mut vrt_ctx,
+            __objp: *mut *mut DocStruct,
+            __vcl_name: *const c_char,
+            __args: *const arg_vmod_types_DocStruct__init,
+        ) {
+            let __args = __args.as_ref().unwrap();
+            let __result = Box::new(
+                super::DocStruct::new(
+                    if __args.valid_cap != 0 { __args.cap.into() } else { None },
+                ),
+            );
+            *__objp = Box::into_raw(__result);
+        }
+        unsafe extern "C" fn vmod_c_DocStruct__fini(__objp: *mut *mut DocStruct) {
+            drop(Box::from_raw(*__objp));
+            *__objp = ::std::ptr::null_mut();
+        }
+        unsafe extern "C" fn vmod_c_DocStruct_function(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::DocStruct,
+            key: VCL_STRING,
+        ) {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __obj = __obj.as_ref().unwrap();
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(__obj.function(key.try_into()?))
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                })
+        }
+        #[repr(C)]
+        pub struct VmodExports {
+            vmod_c_with_docs: Option<unsafe extern "C" fn(__ctx: *mut vrt_ctx)>,
+            vmod_c_no_docs: Option<unsafe extern "C" fn(__ctx: *mut vrt_ctx)>,
+            vmod_c_doctest: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, _no_docs: VCL_INT, _v: VCL_INT),
+            >,
+            vmod_c_arg_only: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, _v: VCL_INT),
+            >,
+            vmod_c_DocStruct__init: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __objp: *mut *mut DocStruct,
+                    __vcl_name: *const c_char,
+                    __args: *const arg_vmod_types_DocStruct__init,
+                ),
+            >,
+            vmod_c_DocStruct__fini: Option<
+                unsafe extern "C" fn(__objp: *mut *mut DocStruct),
+            >,
+            vmod_c_DocStruct_function: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::DocStruct,
+                    key: VCL_STRING,
+                ),
+            >,
+        }
+        pub static VMOD_EXPORTS: VmodExports = VmodExports {
+            vmod_c_with_docs: Some(vmod_c_with_docs),
+            vmod_c_no_docs: Some(vmod_c_no_docs),
+            vmod_c_doctest: Some(vmod_c_doctest),
+            vmod_c_arg_only: Some(vmod_c_arg_only),
+            vmod_c_DocStruct__init: Some(vmod_c_DocStruct__init),
+            vmod_c_DocStruct__fini: Some(vmod_c_DocStruct__fini),
+            vmod_c_DocStruct_function: Some(vmod_c_DocStruct_function),
+        };
+        #[allow(non_upper_case_globals)]
+        #[no_mangle]
+        pub static Vmod_types_Data: vmod_data = vmod_data {
+            vrt_major: 0,
+            vrt_minor: 0,
+            file_id: c"84444b833e86e8a67f59228fa2634183f81f58c50e684ec4152fd478ab9875fe"
+                .as_ptr(),
+            name: c"types".as_ptr(),
+            func_len: ::std::mem::size_of::<VmodExports>() as c_int,
+            func: &VMOD_EXPORTS as *const _ as *const c_void,
+            abi: VMOD_ABI_Version.as_ptr(),
+            json: JSON.as_ptr(),
+            proto: cproto.as_ptr(),
+            priv_: 0,
+        };
+        const JSON: &CStr = c"(moved to @json.snap files)";
+        const cproto: &CStr = c"(moved to @cproto.snap files)";
+    }
+    use super::DocStruct;
+    /// doctest on a function
+    /// with multiple lines
+    /// # Big header
+    /// ## sub header
+    /// * foo
+    /// * bar
+    pub fn with_docs() {}
+    pub fn no_docs() {}
+    /// doctest on a function
+    pub fn doctest(_no_docs: i64, _v: i64) {}
+    pub fn arg_only(_v: i64) {}
+    /// doctest for `DocStruct` implementation
+    impl DocStruct {
+        /// doctest for `new`
+        pub fn new(cap: Option<i64>) -> Self {
+            Self
+        }
+        /// doctest for the object function
+        #[rustfmt::skip]
+        pub fn function(&self, key: &str) {}
+    }
+}
