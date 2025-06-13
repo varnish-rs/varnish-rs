@@ -104,7 +104,7 @@ jobs:
   # This job checks if any of the previous jobs failed or were canceled.
   # This approach also allows some jobs to be skipped if they are not needed.
   ci-passed:
-    needs: [ test, test-older, test-msrv, test-docs-rs ]
+    needs: [ test, test-older, test-plus, test-msrv, test-docs-rs ]
     if: always()
     runs-on: ubuntu-latest
     steps:
