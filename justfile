@@ -43,27 +43,6 @@ build-all-features:
 check:
     cargo check --workspace --all-targets {{features_flag}} $({{just_executable()}} get-package-exclude-args)
 
-# Check that the current version of the crate is not the same as the one published on crates.io
-check-all-if-published: \
-    (check-if-published 'varnish') \
-    (check-if-published 'varnish-macros') \
-    (check-if-published 'varnish-sys')
-
-# Verify that the current version of the crate is not the same as the one published on crates.io
-check-if-published package=main_crate:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    LOCAL_VERSION="$({{just_executable()}} get-crate-field version {{package}})"
-    echo "Detected crate {{package}} version:  '$LOCAL_VERSION'"
-    PUBLISHED_VERSION="$(cargo search --quiet {{package}} | grep "^{{package}} =" | sed -E 's/.* = "(.*)".*/\1/')"
-    echo "Published crate version: '$PUBLISHED_VERSION'"
-    if [ "$LOCAL_VERSION" = "$PUBLISHED_VERSION" ]; then
-        echo "ERROR: The current crate version has already been published."
-        exit 1
-    else
-        echo "The current crate version has not yet been published."
-    fi
-
 # Generate code coverage report to upload to codecov.io
 ci-coverage: env-info && \
             (coverage '--codecov --output-path target/llvm-cov/codecov.info')
@@ -119,6 +98,7 @@ env-info:
     rustup --version
     @echo "RUSTFLAGS='$RUSTFLAGS'"
     @echo "RUSTDOCFLAGS='$RUSTDOCFLAGS'"
+    @echo "RUST_BACKTRACE='$RUST_BACKTRACE'"
 
 # Reformat all code `cargo fmt`. If nightly is available, use it for better results
 fmt:
@@ -166,11 +146,8 @@ get-varnish-version $required_version='':
 msrv:  (cargo-install 'cargo-msrv')
     cargo msrv find --write-msrv --ignore-lockfile {{features_flag}} --min 1.77 --component rustfmt -- {{just_executable()}} ci-test-msrv
 
-# Publish crates to crates.io in the right order
-publish:
-    cargo publish -p varnish-sys
-    cargo publish -p varnish-macros
-    cargo publish -p varnish
+release *args='':  (cargo-install 'release-plz')
+    release-plz {{args}}
 
 # Check semver compatibility with prior published version. Install it with `cargo install cargo-semver-checks`
 semver *args:  (cargo-install 'cargo-semver-checks')
@@ -187,10 +164,6 @@ test-doc:  (docs '')
 # Test code formatting
 test-fmt:
     cargo fmt --all -- --check
-
-# Use the experimental workspace publishing with --dry-run. Requires nightly Rust.
-test-publish:
-    cargo +nightly -Z package-workspace publish --dry-run
 
 # Find unused dependencies. Install it with `cargo install cargo-udeps`
 udeps:  (cargo-install 'cargo-udeps')
@@ -279,7 +252,6 @@ docker-run-ver version *args:
         -v "$PWD/docker/.cache/{{version}}:/home/user/.cache" \
         -v "$PWD/docker/.cache/{{version}}/.bash_history:/home/user/.bash_history" \
         varnish-img-{{version}} {{args}}
-
 
 # Get the `--exclude <SPEC>` parameter for the cargo build/test/... command, depending on the installed version of Varnish
 [private]
