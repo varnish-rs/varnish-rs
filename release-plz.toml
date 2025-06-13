@@ -1,0 +1,5 @@
+[workspace]
+changelog_path = "./CHANGELOG.md"
+dependencies_update = true
+git_release_name = "v{{ version }}"
+git_tag_name = "v{{ version }}"
