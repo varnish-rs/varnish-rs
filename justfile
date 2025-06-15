@@ -2,10 +2,12 @@
 
 main_crate := 'varnish'
 features_flag := '--all-features'
-default_varnish_ver := '7.7'  # which version of Varnish to install by default
-default_varnishplus_ver := '6.0.14r3'  # which version of Varnish Plus to install by default
-supported_varnish_vers := default_varnish_ver + ' ' + default_varnishplus_ver + ' 7.7.0  7.6  7.5  6.0'  # Make sure to update CI with the changes
 
+# which version of Varnish to install by default. Update the `supported_varnish_vers` variable below.
+default_varnish_ver := '7.7'
+
+# Make sure to update CI with the changes.  The versions with 'r' suffix are Varnish Plus versions - must have all 4 numbers.
+supported_varnish_vers := '7.7  7.7.0  7.6  7.5  6.0  6.0.14r3'
 
 # if running in CI, treat warnings as errors by setting RUSTFLAGS and RUSTDOCFLAGS to '-D warnings' unless they are already set
 # Use `CI=true just ci-test` to run the same tests as in GitHub CI.
@@ -62,6 +64,11 @@ ci-test-msrv: env-info test
 clean:
     cargo clean
     rm -f Cargo.lock
+
+# Clean all build artifacts and docker cache
+clean-all: clean
+    rm -rf docker/.cache/*
+    touch docker/.cache/empty_file
 
 # Run cargo clippy to lint the code
 clippy *args:
@@ -174,28 +181,6 @@ update:
     cargo +nightly -Z unstable-options update --breaking
     cargo update
 
-# Ensure version is valid and convert it to an apt package search string. Assumes all version parts are one digit. Two digits are treated as (major.minor).
-@version-to-apt-pattern version=default_varnish_ver:
-    {{ if replace_regex(version, '^(\d\d|\d(\.\d){0,2})$', '') != '' { error('Invalid version "' + version + '"') } else {''} }}
-    echo "{{ \
-        replace_regex(replace_regex(replace_regex(version, \
-              '^(\d)(\d)$', '$1.$2') \
-            , '^(\d\.\d\.\d)$', '$1-*') \
-            , '^(\d(\.\d)*)$', '$1.*') \
-    }}"
-
-# Ensure version is valid and convert it to a tag name, e.g. 60 or 6.0 -> varnish60lts and 7.1 -> varnish71. Assumes all parts are one digit. Two digits are treated as (major.minor).
-@version-to-tag version=default_varnish_ver:
-    {{ if replace_regex(version, '^(\d\d|\d(\.\d){0,2})$', '') != '' { error('Invalid version "' + version + '"') } else {''} }}
-    echo "{{ \
-        'varnish' + replace_regex(replace_regex(replace_regex(replace_regex(replace_regex(version, \
-              '^(\d)(\d)$', '$1.$2') \
-            , '^(\d\.\d)(\..*)$', '$1') \
-            , '^(\d)$', '$1.0') \
-            , '^(\d)\.(\d)$', '$1$2') \
-            , '^60$', '60lts') \
-    }}"
-
 # Ensure that a certain command is available
 [private]
 assert-cmd command:
@@ -266,24 +251,55 @@ get-package-exclude-args:
         echo "$EXCLUDE"
     fi
 
-# Install Varnish from packagecloud.io. This could be damaging to your system - use with caution.
+# Install Varnish from packagecloud.io. This could be damaging to your system - use with caution. Pass non-empty `debug` argument to skip the installation.
 [private]
-install-varnish version=default_varnish_ver:
+install-varnish version=default_varnish_ver debug='':
     #!/usr/bin/env bash
     set -euo pipefail
-    TAG="$({{just_executable()}} version-to-tag {{quote(version)}})"
-    PATTERN="$({{just_executable()}} version-to-apt-pattern {{quote(version)}})"
-    echo "Installing Varnish '{{version}}' (tag='$TAG', pattern='$PATTERN') from packagecloud.io"
-    curl -sSf "https://packagecloud.io/install/repositories/varnishcache/$TAG/script.deb.sh" | sudo bash
-    echo -e 'Package: varnish varnish-dev\nPin: origin "packagecloud.io"\nPin-Priority: 1001' | sudo tee /etc/apt/preferences.d/varnish
-    cat /etc/apt/preferences.d/varnish
-    sudo apt-cache policy varnish
-    sudo apt-get install -y "varnish=$PATTERN" "varnish-dev=$PATTERN"
 
-# Install Varnish Plus from packagecloud.io. This could be damaging to your system - use with caution.
-[private]
-install-varnish-plus version=default_varnishplus_ver:
-    echo "Installing Varnish '{{version}}' from packagecloud.io"
-    curl -sSf "https://packagecloud.io/install/repositories/varnishplus/60-enterprise/script.deb.sh" | sudo bash
-    sudo apt-cache policy varnish-plus
-    sudo apt-get install -y "varnish-plus={{version}}*" "varnish-plus-dev={{version}}*"
+    # Assumes major and minor are one digit each. Two digits without dots are treated as (major.minor).
+    #  60 or 6.0 -> varnishcache/varnish60lts
+    #        7.1 -> varnishcache/varnish71
+    #   6.0.14r3 -> varnishplus/60-enterprise
+
+    # Convert version to a tag name used as URL portion
+    URL_REPO='{{ if version =~ '^\d\.\d\.\d+r\d+$' { \
+        'varnishplus/' + replace_regex(version, '^(\d)\.(\d)\..*$', '$1$2') + '-enterprise' \
+    } else if version =~ '^(\d\d|\d(\.\d(\.\d+)?)?)$' { \
+        'varnishcache/varnish' + replace_regex(replace_regex(replace_regex(replace_regex(replace_regex(version, \
+        '^(\d)(\d)$', '$1.$2') \
+        , '^(\d\.\d)(\..*)$', '$1') \
+        , '^(\d)$', '$1.0') \
+        , '^(\d)\.(\d)$', '$1$2') \
+        , '^60$', '60lts') \
+    } else { \
+      error('Invalid version "' + version + '"') \
+    } }}'
+
+    # Policy name is either 'varnish' or 'varnish-plus'
+    POLICY='{{ if version =~ '^\d\.\d\.\d+r\d+$' { 'varnish-plus' } else { 'varnish' } }}'
+
+    # Ensure version is valid and convert it to an apt package search string. Assumes major and minor parts are one digit. Two digits are treated as (major.minor).
+    PATTERN='{{ if version =~ '^\d\.\d\.\d+r\d+$' { \
+        version + '*' \
+    } else { \
+        replace_regex(replace_regex(replace_regex(version, \
+              '^(\d)(\d)$', '$1.$2') \
+            , '^(\d\.\d\.\d)$', '$1-') \
+            , '^(\d(\.\d)*)$', '$1.') \
+        + '*' \
+    } }}'
+
+    echo "Installing Varnish '{{version}}' (url_repo='$URL_REPO', pattern='$PATTERN') from packagecloud.io"
+    {{ if debug != '' {'exit 0'} else {''} }}
+
+    set -x
+    curl -sSf "https://packagecloud.io/install/repositories/$URL_REPO/script.deb.sh" | sudo bash
+
+    {{ if version =~ '^\d\.\d\.\d+r\d+$' {''} else { '''
+        echo -e 'Package: varnish varnish-dev\nPin: origin "packagecloud.io"\nPin-Priority: 1001' | sudo tee /etc/apt/preferences.d/varnish
+        cat /etc/apt/preferences.d/varnish
+    ''' } }}
+
+    sudo apt-cache policy "${POLICY}"
+    sudo apt-get install -y "${POLICY}=$PATTERN" "${POLICY}-dev=$PATTERN"
