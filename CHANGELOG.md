@@ -1,3 +1,17 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.5.2](https://github.com/varnish-rs/varnish-rs/compare/v0.5.1...v0.5.2) - 2025-06-15
+
+### Other
+
+- automate publishing with Release-plz ([#212](https://github.com/varnish-rs/varnish-rs/pull/212))
 # 0.5.0 (2025-06-02)
 - Removed `package.metadata.libvarnishapi.version` from `varnish-sys` metadata. Use `DEP_VARNISHAPI_VERSION_NUMBER` env var available in your `build.rs` instead. In some cases you may want to save this version into some build output dir for subsequent use by the packaging scripts.
 
