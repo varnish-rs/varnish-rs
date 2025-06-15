@@ -5,7 +5,7 @@ members = ["varnish", "varnish-macros", "varnish-sys", "varnish/tests/vmod_test"
 
 [workspace.package]
 # These fields are used by multiple crates, so it's defined here.
-version = "0.5.1"
+version = "0.5.2"
 repository = "https://github.com/gquintard/varnish-rs"
 edition = "2021"
 rust-version = "1.82.0"
