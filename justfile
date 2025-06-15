@@ -33,13 +33,10 @@ bless-all:
         {{just_executable()}} docker-run $ver "just bless" ;\
     done
 
-# Build the project
+# Build the project with just the default and all features
 build:
+    cargo build --workspace --all-targets $({{just_executable()}} get-package-exclude-args)
     cargo build --workspace --all-targets {{features_flag}} $({{just_executable()}} get-package-exclude-args)
-
-# build all
-build-all-features:
-    cargo build --workspace --all-targets {{features_flag}} $({{just_executable()}} get-package-exclude-args) --features "ffi"
 
 # Quick compile without building a binary
 check:
@@ -52,7 +49,7 @@ ci-coverage: env-info && \
     mkdir -p target/llvm-cov
 
 # Run all tests as expected by CI
-ci-test: env-info test-fmt build-all-features clippy test && assert-git-is-clean
+ci-test: env-info test-fmt build clippy test && assert-git-is-clean
 
 # Run tests only relevant to the latest Varnish version
 ci-test-latest: ci-test test-doc
