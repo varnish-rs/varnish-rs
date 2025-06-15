@@ -22,21 +22,15 @@ ARG VARNISH_VERSION=""
 
 # We need to copy justfile to a temporary directory to install Varnish.
 # Note that during the regular usage, we use justfile mapped from the host machine.
-RUN mkdir -p /init-tmp
+WORKDIR /init-tmp
 COPY ./justfile /init-tmp
-RUN set -ex; \
-    cd /init-tmp; \
-    if echo "${VARNISH_VERSION}" | grep -q "r"; then \
-        just install-varnish-plus "${VARNISH_VERSION}"; \
-    else \
-        just install-varnish "${VARNISH_VERSION}"; \
-    fi
+RUN just install-varnish ${VARNISH_VERSION}
 
 ARG USERNAME=user
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
-# Create docker user wuth sudo rights as passed in by the build command
+# Create docker user with sudo rights as passed in by the build command
 # This was modeled on https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user
 # On a Mac, USER_GID might already exist, so ignore it if it fails (--force)
 RUN groupadd --force --gid $USER_GID $USERNAME \
