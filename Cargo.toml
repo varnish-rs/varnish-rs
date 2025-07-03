@@ -16,9 +16,10 @@ categories = ["api-bindings"]
 readme = "README.md"
 
 [workspace.dependencies]
-varnish = { path = "./varnish" }
-varnish-macros = { path = "./varnish-macros" }
-varnish-sys = { path = "./varnish-sys" }
+# These versions should match the package.version above, and will be updated by release-plz.
+varnish = { path = "./varnish", version = "0.5.2" }
+varnish-macros = { path = "./varnish-macros", version = "0.5.2" }
+varnish-sys = { path = "./varnish-sys", version = "0.5.2" }
 #
 # These dependencies are used by one or more crates, and easier to maintain in one place.
 bindgen_helpers = "0.5.0"
