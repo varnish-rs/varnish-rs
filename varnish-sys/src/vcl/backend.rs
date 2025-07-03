@@ -13,7 +13,7 @@
 //!   transfer-encoding for you.
 //!
 //! Note: You can check out the [example/vmod_be
-//! code](https://github.com/gquintard/varnish-rs/blob/main/examples/vmod_be/src/lib.rs) for a
+//! code](https://github.com/varnish-rs/varnish-rs/blob/main/examples/vmod_be/src/lib.rs) for a
 //! fully commented vmod.
 //!
 //! For a very simple example, let's build a backend that just replies with 'A' a predetermined
