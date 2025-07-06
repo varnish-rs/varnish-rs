@@ -5,7 +5,7 @@ members = ["varnish", "varnish-macros", "varnish-sys", "varnish/tests/vmod_test"
 
 [workspace.package]
 # These fields are used by multiple crates, so it's defined here.
-version = "0.5.3"
+version = "0.5.4"
 repository = "https://github.com/varnish-rs/varnish-rs"
 edition = "2021"
 rust-version = "1.82.0"
@@ -17,9 +17,9 @@ readme = "README.md"
 
 [workspace.dependencies]
 # These versions should match the package.version above, and will be updated by release-plz.
-varnish = { path = "./varnish", version = "0.5.3" }
-varnish-macros = { path = "./varnish-macros", version = "0.5.3" }
-varnish-sys = { path = "./varnish-sys", version = "0.5.3" }
+varnish = { path = "./varnish", version = "0.5.4" }
+varnish-macros = { path = "./varnish-macros", version = "0.5.4" }
+varnish-sys = { path = "./varnish-sys", version = "0.5.4" }
 #
 # These dependencies are used by one or more crates, and easier to maintain in one place.
 bindgen_helpers = "0.5.0"
