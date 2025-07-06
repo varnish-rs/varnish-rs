@@ -14,6 +14,7 @@
 #include "vapi/vsm.h"
 #include "vapi/vsc.h"
 
+
 struct vfp_entry *VFP_Push(struct vfp_ctx *, const struct vfp *);
 
 #ifdef VARNISH_RS_HTTP_CONN
