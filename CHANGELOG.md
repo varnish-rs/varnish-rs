@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Other
 
-- test release process
+- fix release process
 
 ## [0.5.3](https://github.com/varnish-rs/varnish-rs/compare/v0.5.2...v0.5.3) - 2025-07-03
 
