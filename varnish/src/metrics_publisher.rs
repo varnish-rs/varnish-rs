@@ -27,7 +27,7 @@ impl<T: VscMetric> Vsc<T> {
         let metric = unsafe {
             VRT_VSC_AllocVariadic(
                 null_mut(),
-                &mut seg,
+                &raw mut seg,
                 name.as_ptr(),
                 size_of::<T>(),
                 metadata_json.as_ptr().cast::<std::os::raw::c_uchar>(),
