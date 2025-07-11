@@ -146,7 +146,7 @@ impl<S: VclBackend<T>, T: VclResponse> Backend<S, T> {
         let bep = unsafe {
             ffi::VRT_AddDirector(
                 ctx.raw,
-                &*methods,
+                &raw const *methods,
                 ptr::from_mut::<S>(&mut *inner).cast::<c_void>(),
                 c"%.*s".as_ptr(),
                 cname.as_bytes().len(),
@@ -409,7 +409,7 @@ unsafe extern "C" fn wrap_gethdrs<S: VclBackend<T>, T: VclResponse>(
                 return -1;
             };
             htc.magic = ffi::HTTP_CONN_MAGIC;
-            htc.doclose = &ffi::SC_REM_CLOSE[0];
+            htc.doclose = &raw const ffi::SC_REM_CLOSE[0];
             htc.content_length = 0;
             match res {
                 None => {
@@ -527,8 +527,8 @@ unsafe extern "C" fn wrap_finish<S: VclBackend<T>, T: VclResponse>(
     let bo = ctx.bo.as_mut().unwrap();
 
     // drop the VclResponse
-    if let Some(htc) = ptr::replace(&mut bo.htc, null_mut()).as_mut() {
-        if let Some(val) = ptr::replace(&mut htc.priv_, null_mut())
+    if let Some(htc) = ptr::replace(&raw mut bo.htc, null_mut()).as_mut() {
+        if let Some(val) = ptr::replace(&raw mut htc.priv_, null_mut())
             .cast::<T>()
             .as_mut()
         {
@@ -543,7 +543,7 @@ unsafe extern "C" fn wrap_finish<S: VclBackend<T>, T: VclResponse>(
 impl<S: VclBackend<T>, T: VclResponse> Drop for Backend<S, T> {
     fn drop(&mut self) {
         unsafe {
-            ffi::VRT_DelDirector(&mut self.bep);
+            ffi::VRT_DelDirector(&raw mut self.bep);
         };
     }
 }

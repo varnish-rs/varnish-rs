@@ -200,7 +200,7 @@ impl From<VCL_IP> for Option<SocketAddr> {
         }
         unsafe {
             let mut ptr = null();
-            let fam = VSA_GetPtr(value, &mut ptr) as u32;
+            let fam = VSA_GetPtr(value, &raw mut ptr) as u32;
             let port = VSA_Port(value) as u16;
 
             match fam {
