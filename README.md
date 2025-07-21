@@ -13,9 +13,9 @@ The `varnish` crate provides a safe and idiomatic interface to the [Varnish](htt
 
 Some VMODs that use this library:
 
-- [vmod-reqwest](https://github.com/varnish-rs/vmod_reqwest): issue HTTP calls from VCL, use dynamic, HTTPS backends (support HTTP2)
-- [vmod-rers](https://github.com/varnish-rs/vmod_rers): support for dynamic regex, including response body manipulation
-- [vmod-fileserver](https://github.com/varnish-rs/vmod_fileserver): serve files directly from disk, without the need for an HTTP backend
+- [vmod-reqwest](https://github.com/varnish-rs/vmod-reqwest): issue HTTP calls from VCL, use dynamic, HTTPS backends (support HTTP2)
+- [vmod-rers](https://github.com/varnish-rs/vmod-rers): support for dynamic regex, including response body manipulation
+- [vmod-fileserver](https://github.com/varnish-rs/vmod-fileserver): serve files directly from disk, without the need for an HTTP backend
 
 Don't hesitate to open GitHub issues if something is unclear or impractical. You can also join us on [discord](https://discord.com/invite/EuwdvbZR6d).
 
