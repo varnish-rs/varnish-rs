@@ -335,7 +335,7 @@ impl MetricsReader<'_> {
     ///
     /// The C API guarantees we can access all the `Stat` in the `HashMap`, until the next `update`
     /// call, so the `rust` API mirrors this here.
-    pub fn stats(&self) -> &HashMap<usize, Metric> {
+    pub fn stats(&self) -> &HashMap<usize, Metric<'_>> {
         &self.internal.points
     }
 

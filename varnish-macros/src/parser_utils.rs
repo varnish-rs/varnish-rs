@@ -32,7 +32,7 @@ impl<'a> Iterator for ObjFuncIter<'a> {
 }
 
 impl ObjInfo {
-    pub fn iter(&self) -> ObjFuncIter {
+    pub fn iter(&self) -> ObjFuncIter<'_> {
         ObjFuncIter { obj: self, idx: 0 }
     }
 }
