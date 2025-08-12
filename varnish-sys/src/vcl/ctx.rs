@@ -149,7 +149,7 @@ impl TestCtx {
         test_ctx
     }
 
-    pub fn ctx(&mut self) -> Ctx {
+    pub fn ctx(&mut self) -> Ctx<'_> {
         Ctx::from_ref(&mut self.vrt_ctx)
     }
 }

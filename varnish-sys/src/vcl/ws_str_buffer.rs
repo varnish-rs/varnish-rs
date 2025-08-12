@@ -272,7 +272,7 @@ mod tests {
     }
 
     #[cfg(not(varnishsys_6))]
-    fn buf_to_vec(buf: WsBlobBuffer) -> &[u8] {
+    fn buf_to_vec(buf: WsBlobBuffer<'_>) -> &'_ [u8] {
         let data = buf.finish();
         let vrt_blob { blob, len, .. } = unsafe { *(data.0) };
         unsafe { std::slice::from_raw_parts(blob.cast::<u8>(), len) }
