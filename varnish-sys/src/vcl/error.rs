@@ -37,7 +37,7 @@ impl VclError {
         Self::String(s)
     }
 
-    pub fn as_str(&self) -> Cow<str> {
+    pub fn as_str(&self) -> Cow<'_, str> {
         match self {
             Self::String(s) => Cow::Borrowed(s.as_str()),
             Self::Utf8Error(e) => Cow::Owned(e.to_string()),

@@ -321,7 +321,7 @@ impl TestWS {
     }
 
     /// build a `Workspace`
-    pub fn workspace(&mut self) -> Workspace {
+    pub fn workspace(&mut self) -> Workspace<'_> {
         Workspace::from_ptr(self.as_ptr())
     }
 }
