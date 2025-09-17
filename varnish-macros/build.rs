@@ -16,7 +16,7 @@ fn main() {
     if major < 7 {
         println!("cargo::rustc-cfg=varnishsys_6");
         println!("cargo::rustc-cfg=varnishsys_6_priv_free_f");
-    } else if (major >= 7 && minor >= 7) || major >= 8 {
+    } else if (major == 7 && minor >= 7) || major >= 8 {
         println!("cargo::rustc-cfg=varnishsys_77_vmod_data");
     }
 
