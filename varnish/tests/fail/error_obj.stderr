@@ -2,13 +2,13 @@ error: Expected a simple type for object. If the object is defined elsewhere, us
   --> tests/fail/error_obj.rs:12:10
    |
 12 |     impl super::Obj {}
-   |          ^^^^^
+   |          ^^^^^^^^^^
 
 error: Object must have a constructor called `new`
   --> tests/fail/error_obj.rs:12:10
    |
 12 |     impl super::Obj {}
-   |          ^^^^^
+   |          ^^^^^^^^^^
 
 error: Generics are not supported for object impls
   --> tests/fail/error_obj.rs:13:10
@@ -20,19 +20,19 @@ error: Object must have a constructor called `new`
   --> tests/fail/error_obj.rs:13:13
    |
 13 |     impl<T> ObjGen<T> {}
-   |             ^^^^^^
+   |             ^^^^^^^^^
 
 error: Only public functions and impl blocks are allowed inside a `mod` tagged with `#[varnish::vmod]`. Add `pub` or move this function outside of this mod.
   --> tests/fail/error_obj.rs:16:9
    |
 16 |         fn non_public() {}
-   |         ^^
+   |         ^^^^^^^^^^^^^^^
 
 error: async functions are not supported
   --> tests/fail/error_obj.rs:18:13
    |
 18 |         pub async fn async_fn() {}
-   |             ^^^^^
+   |             ^^^^^^^^^^^^^^^^^^^
 
 error: Event functions are not supported for object methods
   --> tests/fail/error_obj.rs:20:11
@@ -50,7 +50,7 @@ error: #[vcl_name] params must be declared as `&str` or `&CStr`
   --> tests/fail/error_obj.rs:25:32
    |
 25 |         pub fn new(#[vcl_name] a: String) {}
-   |                                ^
+   |                                ^^^^^^^^^
 
 error: Object must have a constructor called `new`
   --> tests/fail/error_obj.rs:24:10
@@ -62,7 +62,7 @@ error: #[vcl_name] param is allowed only once in a function args list
   --> tests/fail/error_obj.rs:29:53
    |
 29 |         pub fn new(#[vcl_name] a: &str, #[vcl_name] b: &str) {}
-   |                                                     ^
+   |                                                     ^^^^^^^
 
 error: Object must have a constructor called `new`
   --> tests/fail/error_obj.rs:28:10

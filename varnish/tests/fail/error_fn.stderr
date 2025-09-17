@@ -10,22 +10,22 @@ error: Only public functions and impl blocks are allowed inside a `mod` tagged w
  --> tests/fail/error_fn.rs:6:5
   |
 6 |     fn non_public() {}
-  |     ^^
+  |     ^^^^^^^^^^^^^^^
 
 error: async functions are not supported
  --> tests/fail/error_fn.rs:7:9
   |
 7 |     pub async fn async_fn() {}
-  |         ^^^^^
+  |         ^^^^^^^^^^^^^^^^^^^
 
 error: functions and methods must not be tagged as `unsafe` unless they return a VCL_* type
  --> tests/fail/error_fn.rs:8:9
   |
 8 |     pub unsafe fn unsafe_fn() {}
-  |         ^^^^^^
+  |         ^^^^^^^^^^^^^^^^^^^^^
 
 error: functions and methods that return a VCL_* type must be tagged as `unsafe`
  --> tests/fail/error_fn.rs:9:9
   |
 9 |     pub fn ret_vcl() -> Result<VCL_STRING, &'static str> {
-  |         ^^
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

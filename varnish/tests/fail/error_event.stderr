@@ -1,5 +1,10 @@
 error: More than one event handler found. Only one event handler is allowed
  --> tests/fail/error_event.rs:2:1
   |
-2 | mod event_dup {
-  | ^^^
+2 | / mod event_dup {
+3 | |     #[event]
+4 | |     pub fn event_fn1() {}
+... |
+7 | |     pub fn event_fn2() {}
+8 | | }
+  | |_^

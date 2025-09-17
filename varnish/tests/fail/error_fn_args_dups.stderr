@@ -2,34 +2,34 @@ error: Context or Workspace param is allowed only once in a function args list
  --> tests/fail/error_fn_args_dups.rs:3:39
   |
 3 |     pub fn dup_ctx(ctx: &Ctx, i: i64, ctx2: &Ctx) {}
-  |                                       ^^^^
+  |                                       ^^^^^^^^^^
 
 error: Context or Workspace param is allowed only once in a function args list
  --> tests/fail/error_fn_args_dups.rs:4:40
   |
 4 |     pub fn dup_ctx2(ctx: &Ctx, i: i64, ctx2: &mut Ctx) {}
-  |                                        ^^^^
+  |                                        ^^^^^^^^^^^^^^
 
 error: #[shared_per_vcl] param is allowed only once in a function args list
  --> tests/fail/error_fn_args_dups.rs:5:80
   |
 5 |     pub fn dup_shared_vcl(#[shared_per_vcl] a: Option<&i64>, #[shared_per_vcl] b: Option<&i64>) {}
-  |                                                                                ^
+  |                                                                                ^^^^^^^^^^^^^^^
 
 error: This params must be declared as `&mut Option<Box<...>>`
  --> tests/fail/error_fn_args_dups.rs:7:31
   |
 7 |         #[shared_per_task] a: Option<Box<i64>>,
-  |                               ^^^^^^
+  |                               ^^^^^^^^^^^^^^^^
 
 error: This params must be declared as `&mut Option<Box<...>>`
  --> tests/fail/error_fn_args_dups.rs:8:31
   |
 8 |         #[shared_per_task] b: Option<Box<i64>>,
-  |                               ^^^^^^
+  |                               ^^^^^^^^^^^^^^^^
 
 error: Event param is allowed only once in a function args list
   --> tests/fail/error_fn_args_dups.rs:12:32
    |
 12 |     pub fn dup_event(a: Event, b: Event) {}
-   |                                ^
+   |                                ^^^^^^^^
