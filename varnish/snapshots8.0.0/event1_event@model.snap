@@ -1,0 +1,32 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VmodInfo {
+    params: VmodParams {
+        docs: None,
+    },
+    ident: "event",
+    docs: "",
+    funcs: [
+        FuncInfo {
+            func_type: Event,
+            ident: "on_event",
+            docs: "Event function - the comment is ignored",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "event",
+                    docs: "Event argument - the comment is ignored",
+                    ty: Event,
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+    ],
+    objects: [],
+    shared_types: SharedTypes {
+        shared_per_task_ty: None,
+        shared_per_vcl_ty: None,
+    },
+}
