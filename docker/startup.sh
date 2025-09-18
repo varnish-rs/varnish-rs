@@ -31,6 +31,10 @@ if ! grep -q "alias j=" ~/.bashrc; then
 fi
 
 echo "##################################################"
+
+just env-info
+
+echo "##################################################"
 echo "##  Welcome to the Varnish development container"
 echo "##  Use 'just' to see the available commands."
 echo "##################################################"

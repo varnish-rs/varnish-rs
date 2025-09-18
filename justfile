@@ -99,7 +99,7 @@ docs *args='--open':
     DOCS_RS=1 cargo doc --no-deps {{args}} {{packages}}
 
 # Print environment info
-env-info: && get-varnish-version
+env-info: && env-varnish-version
     @echo "Running for '{{main_crate}}' crate {{if ci_mode == '1' {'in CI mode'} else {'in dev mode'} }} on {{os()}} / {{arch()}}"
     @echo "PWD $(pwd)"
     {{just_executable()}} --version
@@ -109,6 +109,21 @@ env-info: && get-varnish-version
     @echo "RUSTFLAGS='$RUSTFLAGS'"
     @echo "RUSTDOCFLAGS='$RUSTDOCFLAGS'"
     @echo "RUST_BACKTRACE='$RUST_BACKTRACE'"
+
+env-varnish-version:  get-varnish-version
+    #!/usr/bin/env bash
+    set -euo pipefail
+    SNAPSHOT_DIR="varnish/snapshots$({{just_executable()}} get-varnish-version print)"
+    if [ -d "$SNAPSHOT_DIR" ]; then
+        echo "Using snapshots from $SNAPSHOT_DIR"
+    else
+        >&2 echo "#################### ATTENTION ####################"
+        >&2 echo "WARNING: No snapshots found at $SNAPSHOT_DIR"
+        >&2 echo "Consider running 'just bless' to re-generate them."
+        >&2 echo "If an older patch snapshot version exists,"
+        >&2 echo "consider symlinking to it with something like this:"
+        >&2 echo "    cd varnish  &&  ln -s -r snapshots7.7.1 snapshots7.7.2"
+    fi
 
 # Reformat all code `cargo fmt`. If nightly is available, use it for better results
 fmt:
@@ -129,7 +144,7 @@ get-crate-field field package=main_crate:  (assert-cmd 'jq')
 # Get the minimum supported Rust version (MSRV) for the crate
 get-msrv package=main_crate:  (get-crate-field 'rust_version' package)
 
-# Get the version of Varnish installed on the system. If a version arg is provided, check that the installed version is at least that version.
+# Get the version of Varnish installed on the system. If a version arg is provided, check that the installed version is at least that version. If param is 'print', just print the installed version.
 get-varnish-version $required_version='':
     #!/usr/bin/env bash
     set -euo pipefail
@@ -138,16 +153,18 @@ get-varnish-version $required_version='':
     if [ -z "$VARNISH_VER" ]; then
         VARNISH_VER=$(dpkg-query -W -f='${source:Upstream-Version}\n' varnish-plus-dev || echo "unknown")
     fi
-    if [ -n "$required_version" ]; then
+    if [ "$VARNISH_VER" = "unknown" -o -z "$VARNISH_VER" ]; then
+        echo "ERROR: varnish-dev package was not found"
+        exit 1
+    elif [ "$required_version" = 'print' ]; then
+        echo "$VARNISH_VER"
+    elif [ -n "$required_version" ]; then
         if [ "$(printf "$required_version\n$VARNISH_VER" | sort -V | head -n1)" != "$required_version" ]; then
             echo "ERROR: Varnish version $required_version is required, but $VARNISH_VER is installed."
             exit 1
         else
             echo "Found varnish-dev package v$VARNISH_VER >= $required_version"
         fi
-    elif [ "$VARNISH_VER" = "unknown" -o -z "$VARNISH_VER" ]; then
-        echo "ERROR: varnish-dev package was not found"
-        exit 1
     else
         echo "Found varnish-dev package v$VARNISH_VER"
     fi
