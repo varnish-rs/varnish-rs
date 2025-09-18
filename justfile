@@ -32,10 +32,16 @@ export RUST_BACKTRACE := env('RUST_BACKTRACE', if ci_mode == '1' {'1'} else {''}
 
 # Run tests on all targets listed in CI, and accept their results
 bless-all:
-    rm -rf varnish/snapshots*
-    for ver in {{supported_varnish_vers}}; do \
-        echo "--------- Updating test results for Varnish $ver" ;\
-        {{just_executable()}} docker-run $ver "just bless" ;\
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # delete content of snapshots*/ dirs, but not the directories themselves
+    for dir in varnish/snapshots*; do
+        [ -d "$dir" ] || continue
+        (cd "$dir" && rm -rf *)
+    done
+    for ver in {{supported_varnish_vers}}; do
+        echo "--------- Updating test results for Varnish $ver"
+        {{just_executable()}} docker-run $ver "just bless"
     done
 
 # Build the project with just the default and all features
