@@ -1,5 +1,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <string.h>
 
 #ifdef VARNISH_RS_6_0
 #define FILE void *

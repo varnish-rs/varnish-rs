@@ -115,7 +115,7 @@ pub unsafe extern "C" fn gen_vdp_push<T: DeliveryProcessor>(
     }
 }
 
-/// Create a `ffi::vdp` that can be fed to `ffi::VRT_AddVDP`
+/// Create a `ffi::vdp` that can be fed to `ffi::VRT_AddFilter`
 pub fn new_vdp<T: DeliveryProcessor>() -> ffi::vdp {
     ffi::vdp {
         name: T::name().as_ptr(),
@@ -123,6 +123,14 @@ pub fn new_vdp<T: DeliveryProcessor>() -> ffi::vdp {
         bytes: Some(gen_vdp_push::<T>),
         fini: Some(gen_vdp_fini::<T>),
         priv1: ptr::null(),
+        #[cfg(varnishsys_80_io_vdp)]
+        io_init: None,
+        #[cfg(varnishsys_80_io_vdp)]
+        io_upgrade: None,
+        #[cfg(varnishsys_80_io_vdp)]
+        io_lease: None,
+        #[cfg(varnishsys_80_io_vdp)]
+        io_fini: None,
     }
 }
 
@@ -231,7 +239,7 @@ pub unsafe extern "C" fn wrap_vfp_fini<T: FetchProcessor>(
     }
 }
 
-/// Create a `ffi::vfp` that can be fed to `ffi::VRT_AddVFP`
+/// Create a `ffi::vfp` that can be fed to `ffi::VRT_AddFilter`
 pub fn new_vfp<T: FetchProcessor>() -> ffi::vfp {
     ffi::vfp {
         name: T::name().as_ptr(),
@@ -310,7 +318,7 @@ impl<'c, 'f> FetchFilters<'c, 'f> {
         if self.find_position::<T>().is_none() {
             let instance = Box::new(new_vfp::<T>());
             unsafe {
-                ffi::VRT_AddVFP(self.ctx, instance.as_ref());
+                ffi::VRT_AddFilter(self.ctx, instance.as_ref(), ptr::null());
             }
             self.filters.push(instance);
             true
@@ -323,7 +331,7 @@ impl<'c, 'f> FetchFilters<'c, 'f> {
         if let Some(pos) = self.find_position::<T>() {
             let filter = self.filters.swap_remove(pos);
             unsafe {
-                ffi::VRT_RemoveVFP(self.ctx, filter.as_ref());
+                ffi::VRT_RemoveFilter(self.ctx, filter.as_ref(), ptr::null());
             }
             true
         } else {
@@ -333,7 +341,7 @@ impl<'c, 'f> FetchFilters<'c, 'f> {
 
     pub fn unregister_all(&mut self) {
         for filter in self.filters.drain(..) {
-            unsafe { ffi::VRT_RemoveVFP(self.ctx, filter.as_ref()) }
+            unsafe { ffi::VRT_RemoveFilter(self.ctx, filter.as_ref(), ptr::null()) }
         }
     }
 }
@@ -362,7 +370,7 @@ impl<'c, 'f> DeliveryFilters<'c, 'f> {
         if self.find_position::<T>().is_none() {
             let instance = Box::new(new_vdp::<T>());
             unsafe {
-                ffi::VRT_AddVDP(self.ctx, instance.as_ref());
+                ffi::VRT_AddFilter(self.ctx, ptr::null(), instance.as_ref());
             }
             self.filters.push(instance);
             true
@@ -375,7 +383,7 @@ impl<'c, 'f> DeliveryFilters<'c, 'f> {
         if let Some(pos) = self.find_position::<T>() {
             let filter = self.filters.swap_remove(pos);
             unsafe {
-                ffi::VRT_RemoveVDP(self.ctx, filter.as_ref());
+                ffi::VRT_RemoveFilter(self.ctx, ptr::null(), filter.as_ref());
             }
             true
         } else {
@@ -385,7 +393,7 @@ impl<'c, 'f> DeliveryFilters<'c, 'f> {
 
     pub fn unregister_all(&mut self) {
         for filter in self.filters.drain(..) {
-            unsafe { ffi::VRT_RemoveVDP(self.ctx, filter.as_ref()) }
+            unsafe { ffi::VRT_RemoveFilter(self.ctx, ptr::null(), filter.as_ref()) }
         }
     }
 }

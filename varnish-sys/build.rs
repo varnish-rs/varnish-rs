@@ -19,6 +19,11 @@ impl VarnishInfo {
     fn parse(bindings: PathBuf, varnish_paths: Vec<PathBuf>, version: String) -> Self {
         let (major, minor) = parse_version(&version);
 
+        // >= 8.0
+        if major >= 8 {
+            println!("cargo::rustc-cfg=varnishsys_80_io_vdp");
+        }
+
         // >= 7.0 .. < 7.6
         if major == 7 && minor < 6 {
             println!("cargo::rustc-cfg=varnishsys_7_5_objcore_init");
@@ -27,7 +32,7 @@ impl VarnishInfo {
             println!("cargo::rustc-cfg=varnishsys_6");
         }
 
-        if major < 6 || major > 7 {
+        if major < 6 || major > 8 {
             println!(
                 "cargo::warning=Varnish {version} is not supported and may not work with this crate"
             );
@@ -71,6 +76,8 @@ fn detect_varnish() -> Option<VarnishInfo> {
     // The crate must compile for the latest supported version with none of these flags enabled.
     // By convention, the version number is the last version where the feature was available.
 
+    // 8.0 adds a few fields to the vdp struct
+    println!("cargo::rustc-check-cfg=cfg(varnishsys_80_io_vdp)");
     // 7.0..=7.5 passed *objcore in vdp_init_f as the 4th param
     println!("cargo::rustc-check-cfg=cfg(varnishsys_7_5_objcore_init)");
     // 6.0 support
