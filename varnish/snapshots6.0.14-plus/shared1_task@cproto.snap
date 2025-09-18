@@ -1,0 +1,90 @@
+---
+source: varnish-macros/src/tests.rs
+---
+struct vmod_task_PerVcl;
+
+typedef VCL_VOID td_vmod_task_per_vcl_val(
+    VRT_CTX,
+    struct vmod_priv *
+);
+
+struct arg_vmod_task_per_vcl_opt {
+  struct vmod_priv * vcl;
+  char valid_op;
+  VCL_INT op;
+};
+
+typedef VCL_VOID td_vmod_task_per_vcl_opt(
+    VRT_CTX,
+    struct arg_vmod_task_per_vcl_opt *
+);
+
+typedef VCL_VOID td_vmod_task_per_tsk_val(
+    VRT_CTX,
+    struct vmod_priv *
+);
+
+struct arg_vmod_task_per_tsk_opt {
+  struct vmod_priv * tsk;
+  char valid_op;
+  VCL_INT op;
+};
+
+typedef VCL_VOID td_vmod_task_per_tsk_opt(
+    VRT_CTX,
+    struct arg_vmod_task_per_tsk_opt *
+);
+
+typedef VCL_VOID td_vmod_task_PerVcl__init(
+    VRT_CTX,
+    struct vmod_task_PerVcl **,
+    const char *,
+    struct vmod_priv *
+);
+
+typedef VCL_VOID td_vmod_task_PerVcl__fini(
+    struct vmod_task_PerVcl **
+);
+
+typedef VCL_VOID td_vmod_task_PerVcl_both(
+    VRT_CTX,
+    struct vmod_task_PerVcl *,
+    struct vmod_priv *,
+    struct vmod_priv *
+);
+
+typedef VCL_VOID td_vmod_task_PerVcl_both_pos(
+    VRT_CTX,
+    struct vmod_task_PerVcl *,
+    struct vmod_priv *,
+    struct vmod_priv *,
+    VCL_INT
+);
+
+struct arg_vmod_task_PerVcl_both_opt {
+  struct vmod_priv * tsk;
+  struct vmod_priv * vcl;
+  char valid_opt;
+  VCL_INT opt;
+};
+
+typedef VCL_VOID td_vmod_task_PerVcl_both_opt(
+    VRT_CTX,
+    struct vmod_task_PerVcl *,
+    struct arg_vmod_task_PerVcl_both_opt *
+);
+
+struct Vmod_task_Func {
+  vmod_event_f *f_on_event;
+  td_vmod_task_per_vcl_val *f_per_vcl_val;
+  td_vmod_task_per_vcl_opt *f_per_vcl_opt;
+  td_vmod_task_per_tsk_val *f_per_tsk_val;
+  td_vmod_task_per_tsk_opt *f_per_tsk_opt;
+  td_vmod_task_PerVcl__init *f_PerVcl__init;
+  td_vmod_task_PerVcl__fini *f_PerVcl__fini;
+  td_vmod_task_PerVcl_both *f_PerVcl_both;
+  td_vmod_task_PerVcl_both_pos *f_PerVcl_both_pos;
+  td_vmod_task_PerVcl_both_opt *f_PerVcl_both_opt;
+};
+
+static struct Vmod_task_Func Vmod_task_Func;

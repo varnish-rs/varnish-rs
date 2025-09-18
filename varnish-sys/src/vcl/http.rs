@@ -9,7 +9,7 @@
 //!
 //! **Note:** at this stage, headers are assumed to be utf8, and you will get a panic if it's not
 //! the case. Future work needs to sanitize the headers to make this safer to use. It is tracked in
-//! this [issue](https://github.com/gquintard/varnish-rs/issues/4).
+//! this [issue](https://github.com/varnish-rs/varnish-rs/issues/4).
 
 use std::mem::transmute;
 use std::slice::from_raw_parts_mut;

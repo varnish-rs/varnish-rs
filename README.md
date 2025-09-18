@@ -1,18 +1,21 @@
 # varnish-rs
 
-[![GitHub](https://img.shields.io/badge/github-varnish-8da0cb?logo=github)](https://github.com/gquintard/varnish-rs)
+[![GitHub repo](https://img.shields.io/badge/github-varnish-8da0cb?logo=github)](https://github.com/varnish-rs/varnish-rs)
 [![crates.io version](https://img.shields.io/crates/v/varnish.svg)](https://crates.io/crates/varnish)
-[![docs.rs docs](https://docs.rs/varnish/badge.svg)](https://docs.rs/varnish)
-[![crates.io version](https://img.shields.io/crates/l/varnish.svg)](https://github.com/gquintard/varnish-rs/blob/main/LICENSE)
-[![CI build](https://github.com/gquintard/varnish-rs/actions/workflows/tests.yaml/badge.svg)](https://github.com/gquintard/varnish-rs/actions)
+[![docs.rs status](https://img.shields.io/docsrs/varnish)](https://docs.rs/varnish)
+[![crates.io license](https://img.shields.io/crates/l/varnish)](https://github.com/varnish-rs/varnish-rs/blob/main/LICENSE)
+[![CI build status](https://github.com/varnish-rs/varnish-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/varnish-rs/varnish-rs/actions)
+<!-- [![Codecov](https://img.shields.io/codecov/c/github/varnish-rs/varnish-rs)](https://app.codecov.io/gh/varnish-rs/varnish-rs) -->
+
+![Varnish Logo](./logo.svg)
 
 The `varnish` crate provides a safe and idiomatic interface to the [Varnish](https://varnish-cache.org/intro/index.html) C API, allowing you to write Varnish modules (VMODs) in Rust. See the [crate API](https://docs.rs/varnish) for more details.
 
 Some VMODs that use this library:
 
-- [vmod-reqwest](https://github.com/gquintard/vmod_reqwest): issue HTTP calls from VCL, use dynamic, HTTPS backends (support HTTP2)
-- [vmod-rers](https://github.com/gquintard/vmod_rers): support for dynamic regex, including response body manipulation
-- [vmod-fileserver](https://github.com/gquintard/vmod_fileserver): serve files directly from disk, without the need for an HTTP backend
+- [vmod-reqwest](https://github.com/varnish-rs/vmod-reqwest): issue HTTP calls from VCL, use dynamic, HTTPS backends (support HTTP2)
+- [vmod-rers](https://github.com/varnish-rs/vmod-rers): support for dynamic regex, including response body manipulation
+- [vmod-fileserver](https://github.com/varnish-rs/vmod-fileserver): serve files directly from disk, without the need for an HTTP backend
 
 Don't hesitate to open GitHub issues if something is unclear or impractical. You can also join us on [discord](https://discord.com/invite/EuwdvbZR6d).
 
@@ -24,6 +27,7 @@ Before v0.1.0, this library relied on a specific version of `libvarnish`. Since 
 
 | varnish-rs (Rust) | libvarnish (C) |
 |:-----------------:|:--------------:|
+|       0.4+        |  6.0lts, 7.5+  |
 |   0.1.0 - 0.2.0   |   7.4 - 7.6    |
 |  0.0.18 - 0.0.19  |      7.5       |
 |      0.0.17       |      7.4       |

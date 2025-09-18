@@ -1,0 +1,151 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VmodInfo {
+    params: VmodParams {
+        docs: None,
+    },
+    ident: "types",
+    docs: "main docs\n# Big header\n## sub header\nfoo bar\nMultiline\n* comment per https://github.com/rust-lang/rust/issues/32088\n*\n* The end",
+    funcs: [
+        FuncInfo {
+            func_type: Function,
+            ident: "with_docs",
+            docs: "doctest on a function\nwith multiple lines\n# Big header\n## sub header\n* foo\n* bar",
+            has_optional_args: false,
+            args: [],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "no_docs",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "doctest",
+            docs: "doctest on a function",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_no_docs",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: I64,
+                        },
+                    ),
+                },
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "doc comment on *function arguments* are invalid in Rust,\nbut they are parsed by macros.\nwe can generate documentation for param `_v` here.\n\n## Example\nThis comment is multi-lined to ensure multiple `#[doc]` are parsed correctly.",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: I64,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "arg_only",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "doc comment for `arg_only`",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: I64,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+    ],
+    objects: [
+        ObjInfo {
+            ident: "DocStruct",
+            docs: "doctest for `DocStruct` implementation",
+            constructor: FuncInfo {
+                func_type: Constructor,
+                ident: "new",
+                docs: "doctest for `new`",
+                has_optional_args: true,
+                args: [
+                    ParamTypeInfo {
+                        ident: "cap",
+                        docs: "doc comment for `cap`",
+                        ty: Value(
+                            ParamInfo {
+                                kind: Optional,
+                                default: Null,
+                                ty_info: I64,
+                            },
+                        ),
+                    },
+                ],
+                output_ty: SelfType,
+                out_result: false,
+            },
+            destructor: FuncInfo {
+                func_type: Destructor,
+                ident: "_fini",
+                docs: "",
+                has_optional_args: false,
+                args: [],
+                output_ty: Default,
+                out_result: false,
+            },
+            funcs: [
+                FuncInfo {
+                    func_type: Method,
+                    ident: "function",
+                    docs: "doctest for the object function",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "self",
+                            docs: "self docs - note that `rustfmt` will put `&self` right after this comment\non the same line, effectively removing the code!\nWe cannot really document it anyway, so we parse it but skip it later.",
+                            ty: SelfType,
+                        },
+                        ParamTypeInfo {
+                            ident: "key",
+                            docs: "param docs",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Regular,
+                                    default: Null,
+                                    ty_info: Str,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: Default,
+                    out_result: false,
+                },
+            ],
+        },
+    ],
+    shared_types: SharedTypes {
+        shared_per_task_ty: None,
+        shared_per_vcl_ty: None,
+    },
+}

@@ -1,103 +1,105 @@
 varnishtest "error()"
 
-feature cmd { varnishd -V 2>&1 | head -n 1 | grep varnish-6.0. }
+feature cmd { varnishd -V 2>&1 | head -n 1 | grep -E "varnish(-plus)?-6\.0\." }
 
 # create the files we'll use in the tests
 shell {
-	echo -n 123456 > ${tmpdir}/good_file
-	echo -n not a number > ${tmpdir}/bad_file
+    echo -n 123456 > ${tmpdir}/good_file
+    echo -n not a number > ${tmpdir}/bad_file
 }
 
 # VCL, no backend needed
 varnish v1 -vcl {
-	import error from "${vmod}";
-	import std;
+    import error from "${vmod}";
+    import std;
 
-	backend s1 none;
+    backend s1 none;
 
-	sub vcl_recv {
-		return (synth(200));
-	}
+    sub vcl_recv {
+        return (synth(200));
+    }
 
-	sub vcl_synth {
-		if (req.http.func == "cannot") {
-			set resp.http.cannot = error.cannot_fail(req.url);
-		} else if (req.http.func == "manual") {
-			set resp.http.manual = error.manual_fail(req.url);
-		} else if (req.http.func == "result") {
-			set resp.http.result = error.result_fail(req.url);
-		} else {
-			set resp.http.cannot = error.cannot_fail(req.url);
-			set resp.http.result = error.result_fail(req.url);
-			set resp.http.manual = error.manual_fail(req.url);
-		}
-	}
+    sub vcl_synth {
+        if (req.http.func == "cannot") {
+            set resp.http.cannot = error.cannot_fail(req.url);
+        } else if (req.http.func == "manual") {
+            set resp.http.manual = error.manual_fail(req.url);
+        } else if (req.http.func == "result") {
+            set resp.http.result = error.result_fail(req.url);
+        } else {
+            set resp.http.cannot = error.cannot_fail(req.url);
+            set resp.http.result = error.result_fail(req.url);
+            set resp.http.manual = error.manual_fail(req.url);
+        }
+    }
 } -start
 
 # this should work for all
-	client c1 {
-		txreq -url ${tmpdir}/good_file
-		rxresp
-		expect resp.http.cannot == 123456
-		expect resp.http.manual == 123456
-		#expect resp.http.result == 123456
-	} -run
+    client c1 {
+        txreq -url ${tmpdir}/good_file
+        rxresp
+        expect resp.http.cannot == 123456
+        expect resp.http.manual == 123456
+        #expect resp.http.result == 123456
+    } -run
 
 # can't fail, we get 0
-	client c1 {
-		txreq -url ${tmpdir}/no_file -hdr "func: cannot"
-		rxresp
-		expect resp.status == 200
-		expect resp.http.cannot == 0
+    client c1 {
+        txreq -url ${tmpdir}/no_file -hdr "func: cannot"
+        rxresp
+        expect resp.status == 200
+        expect resp.http.cannot == 0
 
-		txreq -url ${tmpdir}/bad_file -hdr "func: cannot"
-		rxresp
-		expect resp.status == 200
-		expect resp.http.cannot == 0
-	} -run
+        txreq -url ${tmpdir}/bad_file -hdr "func: cannot"
+        rxresp
+        expect resp.status == 200
+        expect resp.http.cannot == 0
+    } -run
 
 # manual fail, we get <undef>, and a 503 response code
-	# the error message should be in the logs, make sure it popped up
-	logexpect l1 -v v1 -d 1 -g raw {
-		expect * *   VCL_Error "manual_fail: couldn't read file into string"
-	} -start
+    # the error message should be in the logs, make sure it popped up
+    logexpect l1 -v v1 -d 1 -g raw {
+        expect * *   VCL_Error "manual_fail: couldn't read file into string"
+    } -start
 
-	client c1 {
-		txreq -url ${tmpdir}/no_file -hdr "func: manual"
-	} -run
+    client c1 {
+        txreq -url ${tmpdir}/no_file -hdr "func: manual"
+    } -run
 
-	# wait until we actually see the line
+    # wait until we actually see the line
+    logexpect l1 -wait
 
-	# same with the other error
-	logexpect l1 -v v1 -d 1 -g raw {
-		expect * *   VCL_Error "manual_fail: conversion failed"
-	} -start
+    # same with the other error
+    logexpect l1 -v v1 -d 1 -g raw {
+        expect * *   VCL_Error "manual_fail: conversion failed"
+    } -start
 
-	client c1 {
-		txreq -url ${tmpdir}/bad_file -hdr "func: manual"
-	} -run
+    client c1 {
+        txreq -url ${tmpdir}/bad_file -hdr "func: manual"
+    } -run
 
-	logexpect l1 -wait
+    logexpect l1 -wait
 
 # exact same for result_fail
-	# the error message should be in the logs, make sure it popped up
-	logexpect l1 -v v1 -d 1 -g raw {
-		expect * *   VCL_Error {result_fail: No such file or directory}
-	} -start
+    # the error message should be in the logs, make sure it popped up
+    logexpect l1 -v v1 -d 1 -g raw {
+        expect * *   VCL_Error {result_fail: No such file or directory}
+    } -start
 
-	client c1 {
-		txreq -url ${tmpdir}/no_file -hdr "func: result"
-	} -run
+    client c1 {
+        txreq -url ${tmpdir}/no_file -hdr "func: result"
+    } -run
 
-	# wait until we actually see the line
+    # wait until we actually see the line
+    logexpect l1 -wait
 
-	# same with the other error
-	logexpect l1 -v v1 -d 1 -g raw {
-		expect * *   VCL_Error {result_fail: invalid digit}
-	} -start
+    # same with the other error
+    logexpect l1 -v v1 -d 1 -g raw {
+        expect * *   VCL_Error {result_fail: invalid digit}
+    } -start
 
-	client c1 {
-		txreq -url ${tmpdir}/bad_file -hdr "func: result"
-	} -run
+    client c1 {
+        txreq -url ${tmpdir}/bad_file -hdr "func: result"
+    } -run
 
-	logexpect l1 -wait
+    logexpect l1 -wait

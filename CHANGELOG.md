@@ -1,4 +1,36 @@
-# Unpublished
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.5.4](https://github.com/varnish-rs/varnish-rs/compare/varnish-sys-v0.5.3...varnish-sys-v0.5.4) - 2025-07-06
+
+### Other
+
+- fix release process
+
+## [0.5.3](https://github.com/varnish-rs/varnish-rs/compare/v0.5.2...v0.5.3) - 2025-07-03
+
+### Other
+
+- fix URLs to point to correct github org ([#216](https://github.com/varnish-rs/varnish-rs/pull/216))
+
+## [0.5.2](https://github.com/varnish-rs/varnish-rs/compare/v0.5.1...v0.5.2) - 2025-06-15
+
+### Other
+
+- automate publishing with Release-plz ([#212](https://github.com/varnish-rs/varnish-rs/pull/212))
+- consolidate varnish-plus installation ([#215](https://github.com/varnish-rs/varnish-rs/pull/215))
+
+# 0.5.0 (2025-06-02)
+- Removed `package.metadata.libvarnishapi.version` from `varnish-sys` metadata. Use `DEP_VARNISHAPI_VERSION_NUMBER` env var available in your `build.rs` instead. In some cases you may want to save this version into some build output dir for subsequent use by the packaging scripts.
+
+# 0.4.1 (2025-04-11)
+- Allow VMODs to publish VSC metrics
 
 # 0.4.0 (2025-03-26)
 - In probe support, renamed `Request::URL` to `Request::Url`
@@ -50,7 +82,7 @@
   - The macro will generate all the boilerplate code for a Varnish VMOD
   - The macro attribute must be used on a `mod` block that contains the VMOD functions
   - The macro can generate a markdown file, e.g. `#[varnish(docs = "README.md")]`
-  - All examples have been [updated](https://github.com/gquintard/varnish-rs/commit/f0f0120d3fddbdad491ff80fccbfdd1930d24dc6) to use the new system
+  - All examples have been [updated](https://github.com/varnish-rs/varnish-rs/commit/f0f0120d3fddbdad491ff80fccbfdd1930d24dc6) to use the new system
   - See [crate documentation](https://docs.rs/varnish/latest/varnish/) for more details
 - `vtc!` macro has been replaced with `run_vtc_tests!("tests/*.vtc")`:
   - supports glob patterns

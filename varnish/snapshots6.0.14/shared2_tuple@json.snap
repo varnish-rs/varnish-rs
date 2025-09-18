@@ -1,0 +1,32 @@
+---
+source: varnish-macros/src/tests.rs
+---
+[
+  [
+    "$VMOD",
+    "1.0"
+  ],
+  [
+    "$EVENT",
+    "Vmod_tuple_Func.f_on_event"
+  ],
+  [
+    "$FUNC",
+    "per_tsk_val",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_tuple_Func.f_per_tsk_val",
+      "",
+      [
+        "PRIV_TASK",
+        "tsk_vals"
+      ],
+      [
+        "PRIV_VCL",
+        "vcl_vals"
+      ]
+    ]
+  ]
+]

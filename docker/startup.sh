@@ -3,7 +3,7 @@
 if [ ! -d /app/.github ] || [ ! -d ~/.cache ]; then
     echo " "
     echo "ERROR: Docker container was not started properly."
-    echo "       Use   just docker-run-76  or another version."
+    echo "       Use   just docker-run [VERSION]"
     exit 1
 fi
 
@@ -29,6 +29,10 @@ fi
 if ! grep -q "alias j=" ~/.bashrc; then
   echo "alias j='just'" >> ~/.bashrc
 fi
+
+echo "##################################################"
+
+just env-info
 
 echo "##################################################"
 echo "##  Welcome to the Varnish development container"

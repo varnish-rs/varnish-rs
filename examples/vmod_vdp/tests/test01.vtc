@@ -1,31 +1,31 @@
 varnishtest "vdp"
 
 server s1 {
-	rxreq
-	txresp -body "0123456789"
+    rxreq
+    txresp -body "0123456789"
 
-	rxreq
-	txresp -body "abcdef"
+    rxreq
+    txresp -body "abcdef"
 } -start
 
 varnish v1 -vcl+backend {
-	import vdp from "${vmod}";
+    import vdp from "${vmod}";
 
-	sub vcl_deliver {
-		set resp.filters = "flipper";
-	}
+    sub vcl_deliver {
+        set resp.filters = "flipper";
+    }
 } -start
 
 client c1 {
-	txreq -url "/1"
-	rxresp
-	expect resp.body == "9876543210"
+    txreq -url "/1"
+    rxresp
+    expect resp.body == "9876543210"
 
-	txreq -url "/1"
-	rxresp
-	expect resp.body == "9876543210"
+    txreq -url "/1"
+    rxresp
+    expect resp.body == "9876543210"
 
-	txreq -url "/2"
-	rxresp
-	expect resp.body == "fedcba"
+    txreq -url "/2"
+    rxresp
+    expect resp.body == "fedcba"
 } -run

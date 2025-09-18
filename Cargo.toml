@@ -5,15 +5,8 @@ members = ["varnish", "varnish-macros", "varnish-sys", "varnish/tests/vmod_test"
 
 [workspace.package]
 # These fields are used by multiple crates, so it's defined here.
-# Version must also be updated in the `varnish-macros` dependency below.
-#
-#
-# ! STOP !  Update the version in dependencies below!!!
-version = "0.4.1"  ## <<<----- ! STOP !!!
-# ! STOP !  Update the version in dependencies below!!!
-#
-#
-repository = "https://github.com/gquintard/varnish-rs"
+version = "0.5.4"
+repository = "https://github.com/varnish-rs/varnish-rs"
 edition = "2021"
 rust-version = "1.82.0"
 license = "BSD-3-Clause"
@@ -23,14 +16,15 @@ categories = ["api-bindings"]
 readme = "README.md"
 
 [workspace.dependencies]
-# These versions must match the one in the [workspace.package] section above
-varnish = { path = "./varnish", version = "0.4.1" }
-varnish-macros = { path = "./varnish-macros", version = "0.4.1" }
-varnish-sys = { path = "./varnish-sys", version = "0.4.1" }
+# These versions should match the package.version above, and will be updated by release-plz.
+varnish = { path = "./varnish", version = "0.5.4" }
+varnish-macros = { path = "./varnish-macros", version = "0.5.4" }
+varnish-sys = { path = "./varnish-sys", version = "0.5.4" }
 #
 # These dependencies are used by one or more crates, and easier to maintain in one place.
-bindgen_helpers = "0.3.0"
-darling = "0.20.10"
+bindgen_helpers = "0.5.0"
+cc = "1.2.17"
+darling = "0.21.0"
 glob = "0.3.1"
 insta = "1"
 memchr = "2.7.4"

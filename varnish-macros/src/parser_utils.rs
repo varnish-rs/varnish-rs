@@ -32,7 +32,7 @@ impl<'a> Iterator for ObjFuncIter<'a> {
 }
 
 impl ObjInfo {
-    pub fn iter(&self) -> ObjFuncIter {
+    pub fn iter(&self) -> ObjFuncIter<'_> {
         ObjFuncIter { obj: self, idx: 0 }
     }
 }
@@ -43,6 +43,16 @@ pub fn remove_attr(attrs: &mut Vec<Attribute>, name: &str) -> Option<Attribute> 
         .iter()
         .position(|attr| attr.path().is_ident(name))
         .map(|idx| attrs.swap_remove(idx))
+}
+
+/// Check if a field has a specific attribute
+pub fn has_attr(attrs: &[Attribute], name: &str) -> bool {
+    attrs.iter().any(|attr| attr.path().is_ident(name))
+}
+
+/// Find an attribute by name
+pub fn find_attr<'a>(attrs: &'a [Attribute], name: &str) -> Option<&'a Attribute> {
+    attrs.iter().find(|attr| attr.path().is_ident(name))
 }
 
 /// Try to get the inner types of the `Result<Ok, Err>` type, or return None if it's not a `Result<Ok, Err>`.

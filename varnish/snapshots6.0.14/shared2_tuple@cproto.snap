@@ -1,0 +1,15 @@
+---
+source: varnish-macros/src/tests.rs
+---
+typedef VCL_VOID td_vmod_tuple_per_tsk_val(
+    VRT_CTX,
+    struct vmod_priv *,
+    struct vmod_priv *
+);
+
+struct Vmod_tuple_Func {
+  vmod_event_f *f_on_event;
+  td_vmod_tuple_per_tsk_val *f_per_tsk_val;
+};
+
+static struct Vmod_tuple_Func Vmod_tuple_Func;

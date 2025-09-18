@@ -3,27 +3,27 @@ varnishtest "reset() on the client side"
 server s1 {} -start
 
 varnish v1 -vcl+backend {
-	import std;
+    import std;
 
-	import infiniteloop from "${vmod}";
+    import infiniteloop from "${vmod}";
 
-	sub vcl_recv {
-		if (std.integer(req.http.r, 0) < 10) {
-			set req.http.r = std.integer(req.http.r, 0) + 1;
-			infiniteloop.reset();
-			return (restart);
-		} else {
-			return (synth(200));
-		}
-	}
+    sub vcl_recv {
+        if (std.integer(req.http.r, 0) < 10) {
+            set req.http.r = std.integer(req.http.r, 0) + 1;
+            infiniteloop.reset();
+            return (restart);
+        } else {
+            return (synth(200));
+        }
+    }
 
-	sub vcl_synth {
-		set resp.http.r = req.http.r;
-	}
+    sub vcl_synth {
+        set resp.http.r = req.http.r;
+    }
 } -start
 
 client c1 {
-	txreq
-	rxresp
-	expect resp.http.r == 10
+    txreq
+    rxresp
+    expect resp.http.r == 10
 } -run
