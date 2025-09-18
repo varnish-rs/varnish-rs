@@ -13,6 +13,8 @@ readme.workspace = true
 
 [features]
 default = []
+http0 = ["varnish-sys/http0"]
+http1 = ["varnish-sys/http1"]
 ffi = []
 
 [dependencies]
