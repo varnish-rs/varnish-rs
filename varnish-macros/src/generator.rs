@@ -115,7 +115,14 @@ impl Generator {
     }
 
     fn gen_json(&self) -> String {
-        let mut header: Vec<Value> = vec!["$VMOD".into(), "1.0".into()];
+        let version = if cfg!(varnishsys_vmod_meta_1_0) {
+            "1.0"
+        } else {
+            "2.0"
+        };
+
+        let mut header: Vec<Value> = vec!["$VMOD".into(), version.into()];
+
         if !cfg!(varnishsys_6) {
             header.extend(vec![
                 self.names.mod_name().into(),
@@ -233,7 +240,7 @@ impl Generator {
             cproto_def = quote! {};
         }
 
-        let vmod_data_extras = if cfg!(varnishsys_77_vmod_data) {
+        let mut vmod_data_extras = if cfg!(varnishsys_77_vmod_data) {
             quote! {
                 vcs: c"".as_ptr(),  // FIXME: value?
                 version: c"".as_ptr(),  // FIXME: value?
@@ -241,6 +248,10 @@ impl Generator {
         } else {
             quote! {}
         };
+
+        if cfg!(varnishsys_6plus_vmod_data_priv) {
+            vmod_data_extras.append_all(quote![ priv_: 0, ]);
+        }
 
         quote!(
             #[allow(

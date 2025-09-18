@@ -226,7 +226,7 @@ pub unsafe extern "C" fn wrap_vfp_fini<T: FetchProcessor>(
     validate_vfp_ctx(ctxp);
     let vfe = validate_vfp_entry(vfep);
     if !vfe.priv1.is_null() {
-        let p = ptr::replace(&mut vfe.priv1, ptr::null_mut());
+        let p = ptr::replace(&raw mut vfe.priv1, ptr::null_mut());
         drop(Box::from_raw(p.cast::<T>()));
     }
 }
@@ -265,7 +265,7 @@ impl FetchProcCtx<'_> {
         let mut len = buf.len() as isize;
         let max_len = len;
 
-        match unsafe { ffi::VFP_Suck(self.raw, buf.as_ptr() as *mut c_void, &mut len) } {
+        match unsafe { ffi::VFP_Suck(self.raw, buf.as_ptr() as *mut c_void, &raw mut len) } {
             VfpStatus::Ok => {
                 assert!(len <= max_len);
                 assert!(len >= 0);

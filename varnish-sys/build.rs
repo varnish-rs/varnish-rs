@@ -6,7 +6,7 @@ use bindgen_helpers as bindgen;
 use bindgen_helpers::{rename_enum, Renamer};
 
 static BINDINGS_FILE: &str = "bindings.for-docs";
-static BINDINGS_FILE_VER: &str = "7.7.0";
+static BINDINGS_FILE_VER: &str = "7.7.1";
 
 struct VarnishInfo {
     bindings: PathBuf,
@@ -19,6 +19,7 @@ impl VarnishInfo {
     fn parse(bindings: PathBuf, varnish_paths: Vec<PathBuf>, version: String) -> Self {
         let (major, minor) = parse_version(&version);
 
+        // >= 7.0 .. < 7.6
         if major == 7 && minor < 6 {
             println!("cargo::rustc-cfg=varnishsys_7_5_objcore_init");
         }
@@ -39,6 +40,10 @@ impl VarnishInfo {
             defines.push("VARNISH_RS_HTTP_CONN");
         }
 
+        // TODO: This should become conditional once this PR merges, and we know its version
+        //     https://github.com/varnishcache/varnish-cache/pull/4303 merges
+        defines.push("VARNISH_RS_ALLOC_VARIADIC");
+
         Self {
             bindings,
             varnish_paths,
@@ -57,6 +62,7 @@ impl Display for VarnishInfo {
 fn main() {
     if let Some(info) = &detect_varnish() {
         generate_bindings(info);
+        build_c_wrapper(info);
     }
 }
 
@@ -96,8 +102,8 @@ fn generate_bindings(info: &VarnishInfo) {
     rename_enum!(ren, "vdp_action" => "VdpAction", remove: "VDP_"); // VDP_NULL
     rename_enum!(ren, "vfp_status" => "VfpStatus", remove: "VFP_"); // VFP_ERROR
 
-    println!("cargo:rustc-link-lib=varnishapi");
-    println!("cargo:rerun-if-changed=c_code/wrapper.h");
+    println!("cargo::rustc-link-lib=varnishapi");
+    println!("cargo::rerun-if-changed=c_code/wrapper.h");
     let mut bindings_builder = bindgen::Builder::default()
         .header("c_code/wrapper.h")
         .blocklist_item("FP_.*")
@@ -152,6 +158,17 @@ fn generate_bindings(info: &VarnishInfo) {
             r#"cargo::warning=Generated bindings **version** from Varnish {info} differ from checked-in {BINDINGS_FILE}. Update `build.rs` file with   BINDINGS_FILE_VER = "{info}""#
         );
     }
+}
+
+fn build_c_wrapper(info: &VarnishInfo) {
+    let mut builder = cc::Build::new();
+    for define in &info.defines {
+        builder.define(define, None);
+    }
+    builder
+        .file("c_code/wrapper.c")
+        .includes(&info.varnish_paths)
+        .compile("varnish_wrapper");
 }
 
 fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {

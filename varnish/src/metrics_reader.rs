@@ -169,7 +169,7 @@ impl Drop for MetricsReaderBuilder<'_> {
         );
         if !self.vsc.is_null() {
             unsafe {
-                ffi::VSC_Destroy(&mut self.vsc, self.vsm);
+                ffi::VSC_Destroy(&raw mut self.vsc, self.vsm);
             }
         }
     }
@@ -178,7 +178,7 @@ impl Drop for MetricsReaderBuilder<'_> {
 impl Drop for MetricsReader<'_> {
     fn drop(&mut self) {
         unsafe {
-            ffi::VSC_Destroy(&mut self.vsc, self.vsm);
+            ffi::VSC_Destroy(&raw mut self.vsc, self.vsm);
         }
     }
 }
@@ -335,7 +335,7 @@ impl MetricsReader<'_> {
     ///
     /// The C API guarantees we can access all the `Stat` in the `HashMap`, until the next `update`
     /// call, so the `rust` API mirrors this here.
-    pub fn stats(&self) -> &HashMap<usize, Metric> {
+    pub fn stats(&self) -> &HashMap<usize, Metric<'_>> {
         &self.internal.points
     }
 

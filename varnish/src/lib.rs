@@ -1,18 +1,15 @@
 //! # Varnish bindings
 //!
 //! This module provides access to various [Varnish](http://varnish-cache.org/) facilities, notably those needed to create
-//! pure-rust vmods (check out examples [here](https://github.com/gquintard/varnish-rs/tree/main/examples)).
+//! pure-rust vmods (check out examples [here](https://github.com/varnish-rs/varnish-rs/tree/main/examples)).
 //! Note that it doesn't aim to be a 1-to-1 mirror of the C API, as Rust allows for better
 //! ergonomics than what the C code can provide (notably around strings and buffer handling).
-//!
-//! **WARNING:** This crate is pre-1.0 and under active development so expect things to move around. There's also a lot of unsafe code and a few "shortcuts" that will be cleaned later on.
-//! In short: **see this as a tech-preview, and don't run it in production.**
 //!
 //! # Building a VMOD
 //!
 //! The main idea for this crate is to make the building framework as light as possible for the
 //! vmod writer, here's a checklist, but you can also just check the [source
-//! code](https://github.com/gquintard/varnish-rs/tree/main/examples/vmod_example).
+//! code](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_example).
 //!
 //! The general structure of your code should look like this:
 //!
@@ -31,7 +28,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! varnish = "0.2.0"
+//! varnish = "..."
 //! ```
 //!
 //! ## src/lib.rs
@@ -102,7 +99,10 @@ pub mod varnishtest;
 
 mod metrics_reader;
 pub use metrics_reader::{Metric, MetricFormat, MetricsReader, MetricsReaderBuilder, Semantics};
-pub use varnish_macros::vmod;
+
+mod metrics_publisher;
+pub use metrics_publisher::{Vsc, VscMetric};
+pub use varnish_macros::{vmod, VscMetric};
 
 /// Run all VTC tests using `varnishtest` utility.
 ///
@@ -114,10 +114,10 @@ pub use varnish_macros::vmod;
 /// varnish::run_vtc_tests!("tests/*.vtc");
 /// ```
 ///
-/// This will create all the needed code to run `varnishtest` alongside your unit
+/// This will create all the necessary code to run `varnishtest` alongside your unit
 /// tests when you run `cargo test`.
 ///
-/// **Important note:** you need to first build your vmod (i.e. with `cargo build`) before the tests can be run,
+/// **Important note:** you need to first build your vmod (i.e., with `cargo build`) before the tests can be run,
 /// otherwise you'll get a panic.
 ///
 /// Tests will automatically time out after 5s. To override, set `VARNISHTEST_DURATION` env var.

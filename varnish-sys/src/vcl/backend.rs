@@ -13,7 +13,7 @@
 //!   transfer-encoding for you.
 //!
 //! Note: You can check out the [example/vmod_be
-//! code](https://github.com/gquintard/varnish-rs/blob/main/examples/vmod_be/src/lib.rs) for a
+//! code](https://github.com/varnish-rs/varnish-rs/blob/main/examples/vmod_be/src/lib.rs) for a
 //! fully commented vmod.
 //!
 //! For a very simple example, let's build a backend that just replies with 'A' a predetermined
@@ -146,7 +146,7 @@ impl<S: VclBackend<T>, T: VclResponse> Backend<S, T> {
         let bep = unsafe {
             ffi::VRT_AddDirector(
                 ctx.raw,
-                &*methods,
+                &raw const *methods,
                 ptr::from_mut::<S>(&mut *inner).cast::<c_void>(),
                 c"%.*s".as_ptr(),
                 cname.as_bytes().len(),
@@ -409,7 +409,7 @@ unsafe extern "C" fn wrap_gethdrs<S: VclBackend<T>, T: VclResponse>(
                 return -1;
             };
             htc.magic = ffi::HTTP_CONN_MAGIC;
-            htc.doclose = &ffi::SC_REM_CLOSE[0];
+            htc.doclose = &raw const ffi::SC_REM_CLOSE[0];
             htc.content_length = 0;
             match res {
                 None => {
@@ -428,7 +428,7 @@ unsafe extern "C" fn wrap_gethdrs<S: VclBackend<T>, T: VclResponse>(
                             htc.body_status = ffi::BS_LENGTH.as_ptr();
                             htc.content_length = l as isize;
                         }
-                    };
+                    }
                     htc.priv_ = Box::into_raw(Box::new(transfer)).cast::<c_void>();
                     // build a vfp to wrap the VclResponse object if there's something to push
                     if htc.body_status != ffi::BS_NONE.as_ptr() {
@@ -527,8 +527,8 @@ unsafe extern "C" fn wrap_finish<S: VclBackend<T>, T: VclResponse>(
     let bo = ctx.bo.as_mut().unwrap();
 
     // drop the VclResponse
-    if let Some(htc) = ptr::replace(&mut bo.htc, null_mut()).as_mut() {
-        if let Some(val) = ptr::replace(&mut htc.priv_, null_mut())
+    if let Some(htc) = ptr::replace(&raw mut bo.htc, null_mut()).as_mut() {
+        if let Some(val) = ptr::replace(&raw mut htc.priv_, null_mut())
             .cast::<T>()
             .as_mut()
         {
@@ -543,7 +543,7 @@ unsafe extern "C" fn wrap_finish<S: VclBackend<T>, T: VclResponse>(
 impl<S: VclBackend<T>, T: VclResponse> Drop for Backend<S, T> {
     fn drop(&mut self) {
         unsafe {
-            ffi::VRT_DelDirector(&mut self.bep);
+            ffi::VRT_DelDirector(&raw mut self.bep);
         };
     }
 }

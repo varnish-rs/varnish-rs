@@ -1,0 +1,13 @@
+---
+source: varnish-macros/src/tests.rs
+---
+typedef VCL_STRING td_vmod_tuple_ref_to_slice_lifetime(
+    VRT_CTX,
+    struct vmod_priv *
+);
+
+struct Vmod_tuple_Func {
+  td_vmod_tuple_ref_to_slice_lifetime *f_ref_to_slice_lifetime;
+};
+
+static struct Vmod_tuple_Func Vmod_tuple_Func;

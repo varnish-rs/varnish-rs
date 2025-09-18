@@ -3,42 +3,42 @@ varnishtest "kv"
 server s1 {} -start
 
 varnish v1 -vcl+backend {
-	import object from "${vmod}";
-	import std;
+    import object from "${vmod}";
+    import std;
 
-	sub vcl_init {
-		new kv = object.kv();
-	}
+    sub vcl_init {
+        new kv = object.kv();
+    }
 
-	sub vcl_recv {
-		return (synth(200));
-	}
+    sub vcl_recv {
+        return (synth(200));
+    }
 
-	sub vcl_synth {
-		if (req.http.method == "SET") {
-			kv.set(req.http.key, req.http.value);
-		} else {
-			set resp.http.value = kv.get(req.http.key);
-		}
-	}
+    sub vcl_synth {
+        if (req.http.method == "SET") {
+            kv.set(req.http.key, req.http.value);
+        } else {
+            set resp.http.value = kv.get(req.http.key);
+        }
+    }
 } -start
 
 client c1 {
-	txreq -hdr "key: key1"
-	rxresp
-	expect resp.http.value == ""
+    txreq -hdr "key: key1"
+    rxresp
+    expect resp.http.value == ""
 
-	txreq -hdr "method: SET" -hdr "key: key1" -hdr "value: value1"
-	rxresp
+    txreq -hdr "method: SET" -hdr "key: key1" -hdr "value: value1"
+    rxresp
 
-	txreq  -hdr "method: SET" -hdr "key: key2" -hdr "value: value2"
-	rxresp
+    txreq  -hdr "method: SET" -hdr "key: key2" -hdr "value: value2"
+    rxresp
 
-	txreq -hdr "key: key1"
-	rxresp
-	expect resp.http.value == "value1"
+    txreq -hdr "key: key1"
+    rxresp
+    expect resp.http.value == "value1"
 
-	txreq -hdr "key: key2"
-	rxresp
-	expect resp.http.value == "value2"
+    txreq -hdr "key: key2"
+    rxresp
+    expect resp.http.value == "value2"
 } -run

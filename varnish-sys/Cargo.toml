@@ -20,11 +20,9 @@ http1 = ["dep:http1"]
 [lib]
 name = "varnish_sys"
 
-[package.metadata.libvarnishapi]
-version = "7.6"
-
 [build-dependencies]
 bindgen_helpers.workspace = true
+cc.workspace = true
 pkg-config.workspace = true
 
 [dependencies]

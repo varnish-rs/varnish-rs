@@ -3,7 +3,7 @@ varnish::run_vtc_tests!("tests/*.vtc");
 /// Parse files into numbers
 ///
 /// This is a simple example of how to handle errors in a Varnish VMOD.
-/// All three functions will do the same thing: read a file and try to parse its content into a VCL_INT.
+/// All three functions will do the same thing: read a file and try to parse its content into a `VCL_INT`.
 /// However, they will handle failure (file not found, permission issue, unparsable content, etc.) differently.
 #[varnish::vmod(docs = "README.md")]
 mod error {

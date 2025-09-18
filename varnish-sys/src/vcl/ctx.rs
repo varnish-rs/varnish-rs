@@ -109,7 +109,7 @@ impl<'a> Ctx<'a> {
             }
         }
         let mut v: Box<Vec<&'a [u8]>> = Box::default();
-        let p: *mut Vec<&'a [u8]> = &mut *v;
+        let p: *mut Vec<&'a [u8]> = &raw mut *v;
         match unsafe {
             ffi::VRB_Iterate(
                 req.wrk,
@@ -149,7 +149,7 @@ impl TestCtx {
         test_ctx
     }
 
-    pub fn ctx(&mut self) -> Ctx {
+    pub fn ctx(&mut self) -> Ctx<'_> {
         Ctx::from_ref(&mut self.vrt_ctx)
     }
 }

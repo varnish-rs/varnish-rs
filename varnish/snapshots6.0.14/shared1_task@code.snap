@@ -1,0 +1,301 @@
+---
+source: varnish-macros/src/tests.rs
+---
+mod task {
+    #[allow(non_snake_case, unused_imports, unused_qualifications, unused_variables)]
+    #[allow(clippy::needless_question_mark, clippy::new_without_default)]
+    #[automatically_derived]
+    mod varnish_generated {
+        use std::ffi::{c_char, c_int, c_uint, c_void, CStr};
+        use std::ptr::null;
+        use varnish::ffi::{
+            VCL_BACKEND, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE, VCL_REAL,
+            VCL_STRING, VCL_VOID, VMOD_ABI_Version, VclEvent, vmod_data, vmod_priv,
+            vrt_ctx, vmod_priv_free_f,
+        };
+        use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
+        use super::*;
+        static PRIV_TASK_METHODS: vmod_priv_free_f = Some(vmod_priv::on_fini::<PerTask>);
+        static PRIV_VCL_METHODS: vmod_priv_free_f = Some(
+            vmod_priv::on_fini_per_vcl::<PerVcl>,
+        );
+        unsafe extern "C" fn vmod_c_on_event(
+            __ctx: *mut vrt_ctx,
+            __vp: *mut vmod_priv,
+            __ev: VclEvent,
+        ) -> VCL_INT {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let mut __obj_per_vcl = (*__vp).take_per_vcl::<PerVcl>();
+            super::on_event(__ev, &mut __ctx, &mut __obj_per_vcl.user_data);
+            let __result = VCL_INT(0);
+            (*__vp).put(__obj_per_vcl, PRIV_VCL_METHODS);
+            __result
+        }
+        unsafe extern "C" fn vmod_c_per_vcl_val(
+            __ctx: *mut vrt_ctx,
+            vcl: *const vmod_priv,
+        ) {
+            super::per_vcl_val(
+                vcl
+                    .as_ref()
+                    .and_then::<&PerVclState<_>, _>(|v| v.get_ref())
+                    .and_then(|v| v.get_user_data()),
+            )
+        }
+        #[repr(C)]
+        struct arg_vmod_task_per_vcl_opt {
+            vcl: *const vmod_priv,
+            valid_op: c_char,
+            op: VCL_INT,
+        }
+        unsafe extern "C" fn vmod_c_per_vcl_opt(
+            __ctx: *mut vrt_ctx,
+            __args: *const arg_vmod_task_per_vcl_opt,
+        ) {
+            let __args = __args.as_ref().unwrap();
+            super::per_vcl_opt(
+                __args
+                    .vcl
+                    .as_ref()
+                    .and_then::<&PerVclState<_>, _>(|v| v.get_ref())
+                    .and_then(|v| v.get_user_data()),
+                if __args.valid_op != 0 { __args.op.into() } else { None },
+            )
+        }
+        unsafe extern "C" fn vmod_c_per_tsk_val(
+            __ctx: *mut vrt_ctx,
+            tsk: *mut vmod_priv,
+        ) {
+            let mut __obj_per_task = (*tsk).take();
+            let __result = super::per_tsk_val(&mut __obj_per_task);
+            if let Some(obj) = __obj_per_task {
+                (*tsk).put(obj, PRIV_TASK_METHODS);
+            }
+            __result
+        }
+        #[repr(C)]
+        struct arg_vmod_task_per_tsk_opt {
+            tsk: *mut vmod_priv,
+            valid_op: c_char,
+            op: VCL_INT,
+        }
+        unsafe extern "C" fn vmod_c_per_tsk_opt(
+            __ctx: *mut vrt_ctx,
+            __args: *const arg_vmod_task_per_tsk_opt,
+        ) {
+            let __args = __args.as_ref().unwrap();
+            let mut __obj_per_task = (*__args.tsk).take();
+            let __result = super::per_tsk_opt(
+                &mut __obj_per_task,
+                if __args.valid_op != 0 { __args.op.into() } else { None },
+            );
+            if let Some(obj) = __obj_per_task {
+                (*__args.tsk).put(obj, PRIV_TASK_METHODS);
+            }
+            __result
+        }
+        unsafe extern "C" fn vmod_c_PerVcl__init(
+            __ctx: *mut vrt_ctx,
+            __objp: *mut *mut PerVcl,
+            __vcl_name: *const c_char,
+            __vp: *mut vmod_priv,
+        ) {
+            let mut __obj_per_vcl = (*__vp).take_per_vcl::<PerVcl>();
+            let __result = Box::new(super::PerVcl::new(&mut __obj_per_vcl.user_data));
+            *__objp = Box::into_raw(__result);
+            (*__vp).put(__obj_per_vcl, PRIV_VCL_METHODS);
+        }
+        unsafe extern "C" fn vmod_c_PerVcl__fini(__objp: *mut *mut PerVcl) {
+            drop(Box::from_raw(*__objp));
+            *__objp = ::std::ptr::null_mut();
+        }
+        unsafe extern "C" fn vmod_c_PerVcl_both(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::PerVcl,
+            tsk: *mut vmod_priv,
+            vcl: *const vmod_priv,
+        ) {
+            let __obj = __obj.as_ref().unwrap();
+            let mut __obj_per_task = (*tsk).take();
+            let __result = __obj
+                .both(
+                    &mut __obj_per_task,
+                    vcl
+                        .as_ref()
+                        .and_then::<&PerVclState<_>, _>(|v| v.get_ref())
+                        .and_then(|v| v.get_user_data()),
+                );
+            if let Some(obj) = __obj_per_task {
+                (*tsk).put(obj, PRIV_TASK_METHODS);
+            }
+            __result
+        }
+        unsafe extern "C" fn vmod_c_PerVcl_both_pos(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::PerVcl,
+            tsk: *mut vmod_priv,
+            vcl: *const vmod_priv,
+            val: VCL_INT,
+        ) {
+            let __obj = __obj.as_ref().unwrap();
+            let mut __obj_per_task = (*tsk).take();
+            let __result = __obj
+                .both_pos(
+                    &mut __obj_per_task,
+                    vcl
+                        .as_ref()
+                        .and_then::<&PerVclState<_>, _>(|v| v.get_ref())
+                        .and_then(|v| v.get_user_data()),
+                    val.into(),
+                );
+            if let Some(obj) = __obj_per_task {
+                (*tsk).put(obj, PRIV_TASK_METHODS);
+            }
+            __result
+        }
+        #[repr(C)]
+        struct arg_vmod_task_PerVcl_both_opt {
+            tsk: *mut vmod_priv,
+            vcl: *const vmod_priv,
+            valid_opt: c_char,
+            opt: VCL_INT,
+        }
+        unsafe extern "C" fn vmod_c_PerVcl_both_opt(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::PerVcl,
+            __args: *const arg_vmod_task_PerVcl_both_opt,
+        ) {
+            let __args = __args.as_ref().unwrap();
+            let __obj = __obj.as_ref().unwrap();
+            let mut __obj_per_task = (*__args.tsk).take();
+            let __result = __obj
+                .both_opt(
+                    &mut __obj_per_task,
+                    __args
+                        .vcl
+                        .as_ref()
+                        .and_then::<&PerVclState<_>, _>(|v| v.get_ref())
+                        .and_then(|v| v.get_user_data()),
+                    if __args.valid_opt != 0 { __args.opt.into() } else { None },
+                );
+            if let Some(obj) = __obj_per_task {
+                (*__args.tsk).put(obj, PRIV_TASK_METHODS);
+            }
+            __result
+        }
+        #[repr(C)]
+        pub struct VmodExports {
+            vmod_c_on_event: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __vp: *mut vmod_priv,
+                    __ev: VclEvent,
+                ) -> VCL_INT,
+            >,
+            vmod_c_per_vcl_val: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, vcl: *const vmod_priv),
+            >,
+            vmod_c_per_vcl_opt: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __args: *const arg_vmod_task_per_vcl_opt,
+                ),
+            >,
+            vmod_c_per_tsk_val: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, tsk: *mut vmod_priv),
+            >,
+            vmod_c_per_tsk_opt: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __args: *const arg_vmod_task_per_tsk_opt,
+                ),
+            >,
+            vmod_c_PerVcl__init: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __objp: *mut *mut PerVcl,
+                    __vcl_name: *const c_char,
+                    __vp: *mut vmod_priv,
+                ),
+            >,
+            vmod_c_PerVcl__fini: Option<unsafe extern "C" fn(__objp: *mut *mut PerVcl)>,
+            vmod_c_PerVcl_both: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::PerVcl,
+                    tsk: *mut vmod_priv,
+                    vcl: *const vmod_priv,
+                ),
+            >,
+            vmod_c_PerVcl_both_pos: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::PerVcl,
+                    tsk: *mut vmod_priv,
+                    vcl: *const vmod_priv,
+                    val: VCL_INT,
+                ),
+            >,
+            vmod_c_PerVcl_both_opt: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::PerVcl,
+                    __args: *const arg_vmod_task_PerVcl_both_opt,
+                ),
+            >,
+        }
+        pub static VMOD_EXPORTS: VmodExports = VmodExports {
+            vmod_c_on_event: Some(vmod_c_on_event),
+            vmod_c_per_vcl_val: Some(vmod_c_per_vcl_val),
+            vmod_c_per_vcl_opt: Some(vmod_c_per_vcl_opt),
+            vmod_c_per_tsk_val: Some(vmod_c_per_tsk_val),
+            vmod_c_per_tsk_opt: Some(vmod_c_per_tsk_opt),
+            vmod_c_PerVcl__init: Some(vmod_c_PerVcl__init),
+            vmod_c_PerVcl__fini: Some(vmod_c_PerVcl__fini),
+            vmod_c_PerVcl_both: Some(vmod_c_PerVcl_both),
+            vmod_c_PerVcl_both_pos: Some(vmod_c_PerVcl_both_pos),
+            vmod_c_PerVcl_both_opt: Some(vmod_c_PerVcl_both_opt),
+        };
+        #[allow(non_upper_case_globals)]
+        #[no_mangle]
+        pub static Vmod_task_Data: vmod_data = vmod_data {
+            vrt_major: 0,
+            vrt_minor: 0,
+            file_id: c"d3254ccf9860c2c9a8db4e739800906db26805bc168f4b8f497e3685770707e1"
+                .as_ptr(),
+            name: c"task".as_ptr(),
+            func_len: ::std::mem::size_of::<VmodExports>() as c_int,
+            func: &VMOD_EXPORTS as *const _ as *const c_void,
+            abi: VMOD_ABI_Version.as_ptr(),
+            json: JSON.as_ptr(),
+            proto: cproto.as_ptr(),
+        };
+        const JSON: &CStr = c"(moved to @json.snap files)";
+        const cproto: &CStr = c"(moved to @cproto.snap files)";
+    }
+    use super::{PerTask, PerVcl};
+    use varnish::vcl::{Ctx, Event};
+    pub fn on_event(evt: Event, ctx: &mut Ctx, vcl: &mut Option<Box<PerVcl>>) {}
+    pub fn per_vcl_val(vcl: Option<&PerVcl>) {}
+    pub fn per_vcl_opt(vcl: Option<&PerVcl>, op: Option<i64>) {}
+    impl PerVcl {
+        pub fn new(vcl: &mut Option<Box<PerVcl>>) -> Self {
+            Self
+        }
+        pub fn both(&self, tsk: &mut Option<Box<PerTask>>, vcl: Option<&PerVcl>) {}
+        pub fn both_pos(
+            &self,
+            tsk: &mut Option<Box<PerTask>>,
+            vcl: Option<&PerVcl>,
+            val: i64,
+        ) {}
+        pub fn both_opt(
+            &self,
+            tsk: &mut Option<Box<PerTask>>,
+            vcl: Option<&PerVcl>,
+            opt: Option<i64>,
+        ) {}
+    }
+    pub fn per_tsk_val(tsk: &mut Option<Box<PerTask>>) {}
+    pub fn per_tsk_opt(tsk: &mut Option<Box<PerTask>>, op: Option<i64>) {}
+}

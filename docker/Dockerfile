@@ -17,20 +17,20 @@ RUN    apt-get update \
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /bin
 
-# Pass in the VARNISH_VERSION_TAG build arg to specify the version of Varnish to install
-ARG VARNISH_VERSION_TAG=""
+# Pass in the VARNISH_VERSION build arg to specify the version of Varnish to install
+ARG VARNISH_VERSION=""
 
 # We need to copy justfile to a temporary directory to install Varnish.
 # Note that during the regular usage, we use justfile mapped from the host machine.
-RUN mkdir -p /init-tmp
+WORKDIR /init-tmp
 COPY ./justfile /init-tmp
-RUN cd init-tmp && just install-varnish ${VARNISH_VERSION_TAG}
+RUN just install-varnish ${VARNISH_VERSION}
 
 ARG USERNAME=user
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
-# Create docker user wuth sudo rights as passed in by the build command
+# Create docker user with sudo rights as passed in by the build command
 # This was modeled on https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user
 # On a Mac, USER_GID might already exist, so ignore it if it fails (--force)
 RUN groupadd --force --gid $USER_GID $USERNAME \

@@ -1,23 +1,23 @@
 varnishtest "test default argument"
 
 varnish v1 -vcl {
-	import rustest from "${vmod}";
+    import rustest from "${vmod}";
 
-	backend be none;
+    backend be none;
 
-	sub vcl_recv {
-		return (synth(200));
-	}
+    sub vcl_recv {
+        return (synth(200));
+    }
 
-	sub vcl_synth {
-		set resp.http.foo = rustest.default_arg();
-		set resp.http.bar = rustest.default_arg("bar");
-	}
+    sub vcl_synth {
+        set resp.http.foo = rustest.default_arg();
+        set resp.http.bar = rustest.default_arg("bar");
+    }
 } -start
 
 client c1 {
-	txreq
-	rxresp
-	expect resp.http.foo == "foo"
-	expect resp.http.bar == "bar"
+    txreq
+    rxresp
+    expect resp.http.foo == "foo"
+    expect resp.http.bar == "bar"
 } -run

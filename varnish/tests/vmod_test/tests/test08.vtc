@@ -4,14 +4,14 @@ server s1 {
 } -start
 
 varnish v1 -vcl+backend {
-	import rustest from "${vmod}";
+    import rustest from "${vmod}";
 
-	sub vcl_recv {
-		rustest.ws_tests();
-	}
+    sub vcl_recv {
+        rustest.ws_tests();
+    }
 } -start
 
 client c1 {
-	txreq
-	rxresp
+    txreq
+    rxresp
 } -run

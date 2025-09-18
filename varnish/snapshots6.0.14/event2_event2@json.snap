@@ -1,0 +1,13 @@
+---
+source: varnish-macros/src/tests.rs
+---
+[
+  [
+    "$VMOD",
+    "1.0"
+  ],
+  [
+    "$EVENT",
+    "Vmod_event2_Func.f_on_event"
+  ]
+]

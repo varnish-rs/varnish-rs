@@ -3,20 +3,20 @@ varnishtest "parrot"
 server s1 {} -start
 
 varnish v1 -vcl+backend {
-	import be from "${vmod}";
+    import be from "${vmod}";
 
-	sub vcl_init {
-		new polly = be.parrot("I'll repeat this on and on");
-	}
+    sub vcl_init {
+        new polly = be.parrot("I'll repeat this on and on");
+    }
 
-	sub vcl_recv {
-		set req.backend_hint = polly.backend();
-		return (pass);
-	}
+    sub vcl_recv {
+        set req.backend_hint = polly.backend();
+        return (pass);
+    }
 } -start
 
 client c1 {
-	txreq
-	rxresp
-	expect resp.body == "I'll repeat this on and on"
+    txreq
+    rxresp
+    expect resp.body == "I'll repeat this on and on"
 } -run

@@ -1,27 +1,27 @@
 varnishtest "vfp"
 
 server s1 {
-	rxreq
-	txresp -body "0123456789"
+    rxreq
+    txresp -body "0123456789"
 
-	rxreq
-	txresp -body "ABCDEF"
+    rxreq
+    txresp -body "ABCDEF"
 } -start
 
 varnish v1 -vcl+backend {
-	import vfp from "${vmod}";
+    import vfp from "${vmod}";
 
-	sub vcl_backend_response {
-		set beresp.filters = "lower";
-	}
+    sub vcl_backend_response {
+        set beresp.filters = "lower";
+    }
 } -start
 
 client c1 {
-	txreq -url "/1"
-	rxresp
-	expect resp.body == "0123456789"
+    txreq -url "/1"
+    rxresp
+    expect resp.body == "0123456789"
 
-	txreq -url "/2"
-	rxresp
-	expect resp.body == "abcdef"
+    txreq -url "/2"
+    rxresp
+    expect resp.body == "abcdef"
 } -run
