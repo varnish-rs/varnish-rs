@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.5](https://github.com/varnish-rs/varnish-rs/compare/varnish-sys-v0.5.4...varnish-sys-v0.5.5) - 2025-09-18
+
+### Other
+
+- be clearer about lifetime elisions ([#226](https://github.com/varnish-rs/varnish-rs/pull/226))
+- fix readme vmod example links ([#224](https://github.com/varnish-rs/varnish-rs/pull/224))
+- CI fixes
+
 ## [0.5.4](https://github.com/varnish-rs/varnish-rs/compare/varnish-sys-v0.5.3...varnish-sys-v0.5.4) - 2025-07-06
 
 ### Other
