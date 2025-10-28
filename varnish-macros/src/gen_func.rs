@@ -7,7 +7,7 @@ use quote::{format_ident, quote};
 use serde_json::{json, Value};
 use syn::Type;
 
-use crate::model::FuncType::{Constructor, Destructor, Event, Function, Method};
+use crate::model::FuncType::{Constructor, Destructor, Event, FallbackEvent, Function, Method};
 use crate::model::{FuncInfo, OutputTy, ParamKind, ParamTy, ParamType, ParamTypeInfo, SharedTypes};
 use crate::names::{Names, ToIdent};
 
@@ -200,7 +200,7 @@ impl FuncProcessor {
 
                 (self.names.typedef_name(), decl)
             }
-            Event => ("vmod_event_f".to_string(), String::new()),
+            Event | FallbackEvent => ("vmod_event_f".to_string(), String::new()),
         };
 
         (format!("  {td_name} *{};\n", self.names.f_fn_name()), decl)
@@ -436,13 +436,14 @@ impl FuncProcessor {
             Constructor | Destructor => {
                 json! { [ info.func_type.to_vcc_type(), decl ] }
             }
-            Event => {
+            Event | FallbackEvent => {
                 json! { [ info.func_type.to_vcc_type(), callback_fn ] }
             }
         }
     }
 
     /// Generate an extern "C" wrapper function that calls user's Rust function
+    #[expect(clippy::too_many_lines)]
     fn gen_callback_fn(&self, info: &FuncInfo) -> TokenStream {
         let opt_param_struct = self.gen_opt_param_struct(info);
         let signature = self.get_wrapper_fn_sig(true);
@@ -452,6 +453,18 @@ impl FuncProcessor {
 
         let is_void = self.output_hdr == "VCL_VOID";
         let mut func_steps = Vec::new();
+
+        let set_panic_hook = quote! { ::varnish::panic::set_vas_hook_once() };
+
+        if matches!(info.func_type, FallbackEvent) {
+            // Minimal event function for the panic hook
+            return quote! {
+                #signature {
+                    #set_panic_hook;
+                    VCL_INT(0)
+                }
+            };
+        }
 
         let mut result_stmt = if matches!(info.func_type, Destructor) {
             quote! {}
@@ -466,6 +479,7 @@ impl FuncProcessor {
 
             if matches!(info.func_type, Event) {
                 // Ignore the result of the event function, override it with 0
+                func_steps.push(quote! { #set_panic_hook; });
                 func_steps.push(quote! { #func_call; });
                 func_call = quote! { VCL_INT(0) }
             } else if !is_void && !matches!(info.output_ty, OutputTy::VclType(_)) {

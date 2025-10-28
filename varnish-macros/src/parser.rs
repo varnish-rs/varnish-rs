@@ -106,7 +106,7 @@ impl VmodInfo {
                 }
             }
         }
-        let info = Self {
+        let mut info = Self {
             params,
             ident: item.ident.to_string(),
             docs: parser_utils::parse_doc_str(&item.attrs),
@@ -116,6 +116,19 @@ impl VmodInfo {
         };
         info.validate(item, &mut errors);
         errors.into_result()?;
+
+        if info.count_funcs(|v| matches!(v.func_type, FuncType::Event)) == 0 {
+            info.funcs.push(FuncInfo {
+                func_type: FuncType::FallbackEvent,
+                ident: "_event".to_string(),
+                docs: String::new(),
+                has_optional_args: false,
+                args: Vec::<ParamTypeInfo>::new(),
+                output_ty: OutputTy::VclType("VCL_INT".to_string()),
+                out_result: false,
+            });
+        }
+
         Ok(info)
     }
 

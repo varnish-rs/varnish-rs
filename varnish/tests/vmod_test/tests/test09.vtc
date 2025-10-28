@@ -19,4 +19,5 @@ client c1 {
 } -run
 
 varnish v1 -cliexpect "Wrong turn at " panic.show
+varnish v1 -cliexpect "rust panic" panic.show
 varnish v1 -cliok panic.clear

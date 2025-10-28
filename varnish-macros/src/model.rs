@@ -91,6 +91,7 @@ pub enum FuncType {
     Destructor,
     Method,
     Event,
+    FallbackEvent,
 }
 
 impl FuncType {
@@ -100,7 +101,7 @@ impl FuncType {
             Self::Constructor => "$INIT",
             Self::Destructor => "$FINI",
             Self::Method => "$METHOD",
-            Self::Event => "$EVENT",
+            Self::Event | Self::FallbackEvent => "$EVENT",
         }
     }
 }
