@@ -38,6 +38,7 @@ impl CType {
 enum MetricType {
     Counter,
     Gauge,
+    Bitmap,
 }
 
 #[derive(Serialize, Clone, Default)]
@@ -198,16 +199,19 @@ fn generate_metrics(fields: &FieldList) -> ProcResult<BTreeMap<String, VscMetric
 
         let has_counter = has_attr(&field.attrs, "counter");
         let has_gauge = has_attr(&field.attrs, "gauge");
-        let metric_type = if has_counter && has_gauge {
-            // FIXME: use errors collection
-            panic!("Field {name} cannot have both #[counter] and #[gauge] attributes");
-        } else if has_counter {
-            MetricType::Counter
-        } else if has_gauge {
-            MetricType::Gauge
-        } else {
-            // FIXME: use errors collection
-            panic!("Field {name} must have either #[counter] or #[gauge] attribute")
+        let has_bitmap = has_attr(&field.attrs, "bitmap");
+        let metric_type = match (has_counter, has_gauge, has_bitmap) {
+            (true, false, false) => MetricType::Counter,
+            (false, true, false) => MetricType::Gauge,
+            (false, false, true) => MetricType::Bitmap,
+            (false, false, false) => {
+                // FIXME: use errors collection
+                panic!("Field {name} must have either #[counter], #[gauge], or #[bitmap] attribute")
+            }
+            _ => {
+                // FIXME: use errors collection
+                panic!("Field {name} cannot have multiple metric type attributes (#[counter], #[gauge], #[bitmap])")
+            }
         };
 
         let doc_str = parse_doc_str(&field.attrs);
@@ -220,6 +224,7 @@ fn generate_metrics(fields: &FieldList) -> ProcResult<BTreeMap<String, VscMetric
             match metric_type {
                 MetricType::Counter => "counter",
                 MetricType::Gauge => "gauge",
+                MetricType::Bitmap => "bitmap",
             },
         )?;
 
