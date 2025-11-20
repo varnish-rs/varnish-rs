@@ -286,7 +286,11 @@ fn parse_metric_attributes(field: &Field, metric_type: &str) -> ProcResult<(Leve
     }
 
     let mut level = Level::default();
-    let mut format = Format::default();
+    let mut format = if metric_type == "bitmap" {
+        Format::Bitmap
+    } else {
+        Format::default()
+    };
     if let Some(attrs) = find_attr(&field.attrs, metric_type) {
         // FIXME: parse_nested_meta() returns an error:
         //     "expected attribute arguments in parentheses ..."

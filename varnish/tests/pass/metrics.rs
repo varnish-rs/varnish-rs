@@ -24,7 +24,7 @@ pub struct VariousStats {
     #[bitmap]
     flags: AtomicU64,
 
-    /// A bitmap with format specified
-    #[bitmap(format = "bitmap")]
+    /// A bitmap with integer format override
+    #[bitmap(format = "integer")]
     status_bits: AtomicU64,
 }
