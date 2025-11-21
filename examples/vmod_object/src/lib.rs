@@ -44,7 +44,7 @@ mod object {
                 .get(key) // look for key
                 // If not found, create a new empty string (no memory allocation, so can use without lambda)
                 // If found, convert the &str to a String
-                .map_or(String::new(), |v| v.value().to_string())
+                .map_or(String::new(), |v| v.value().clone())
         }
 
         /// Insert a key-value pair into the store.
