@@ -22,10 +22,6 @@ pub struct VariousStats {
     /// Some arbitrary bitmap
     #[bitmap]
     flags: AtomicU64,
-
-    /// A bitmap with integer format override
-    #[bitmap(format = "integer")]
-    status_bits: AtomicU64,
 }
 
 #[allow(non_camel_case_types)]
@@ -107,28 +103,6 @@ mod stats {
         pub fn get_flags(&self) -> i64 {
             self.stats
                 .flags
-                .load(std::sync::atomic::Ordering::Relaxed)
-                .try_into()
-                .unwrap()
-        }
-
-        pub fn set_status_bit(&self, bit: i64) {
-            let mask = 1u64 << bit;
-            self.stats
-                .status_bits
-                .fetch_or(mask, std::sync::atomic::Ordering::Relaxed);
-        }
-
-        pub fn clear_status_bit(&self, bit: i64) {
-            let mask = !(1u64 << bit);
-            self.stats
-                .status_bits
-                .fetch_and(mask, std::sync::atomic::Ordering::Relaxed);
-        }
-
-        pub fn get_status_bits(&self) -> i64 {
-            self.stats
-                .status_bits
                 .load(std::sync::atomic::Ordering::Relaxed)
                 .try_into()
                 .unwrap()
