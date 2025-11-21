@@ -18,6 +18,14 @@ pub struct VariousStats {
     /// A more detailed description than the above oneliner could go here.
     #[gauge(level = "debug", format = "bytes")]
     memory: AtomicU64,
+
+    /// Some arbitrary bitmap
+    #[bitmap]
+    flags: AtomicU64,
+
+    /// A bitmap with integer format override
+    #[bitmap(format = "integer")]
+    status_bits: AtomicU64,
 }
 
 #[allow(non_camel_case_types)]
@@ -80,6 +88,50 @@ mod stats {
                 value.try_into().unwrap(),
                 std::sync::atomic::Ordering::Relaxed,
             );
+        }
+
+        pub fn set_flag(&self, bit: i64) {
+            let mask = 1u64 << bit;
+            self.stats
+                .flags
+                .fetch_or(mask, std::sync::atomic::Ordering::Relaxed);
+        }
+
+        pub fn clear_flag(&self, bit: i64) {
+            let mask = !(1u64 << bit);
+            self.stats
+                .flags
+                .fetch_and(mask, std::sync::atomic::Ordering::Relaxed);
+        }
+
+        pub fn get_flags(&self) -> i64 {
+            self.stats
+                .flags
+                .load(std::sync::atomic::Ordering::Relaxed)
+                .try_into()
+                .unwrap()
+        }
+
+        pub fn set_status_bit(&self, bit: i64) {
+            let mask = 1u64 << bit;
+            self.stats
+                .status_bits
+                .fetch_or(mask, std::sync::atomic::Ordering::Relaxed);
+        }
+
+        pub fn clear_status_bit(&self, bit: i64) {
+            let mask = !(1u64 << bit);
+            self.stats
+                .status_bits
+                .fetch_and(mask, std::sync::atomic::Ordering::Relaxed);
+        }
+
+        pub fn get_status_bits(&self) -> i64 {
+            self.stats
+                .status_bits
+                .load(std::sync::atomic::Ordering::Relaxed)
+                .try_into()
+                .unwrap()
         }
     }
 }

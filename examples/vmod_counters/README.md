@@ -30,3 +30,15 @@ import stats from "path/to/libstats.so";
 #### Method `INT <object>.get_memory()`
 
 #### Method `VOID <object>.update_memory(INT value)`
+
+#### Method `VOID <object>.set_flag(INT bit)`
+
+#### Method `VOID <object>.clear_flag(INT bit)`
+
+#### Method `INT <object>.get_flags()`
+
+#### Method `VOID <object>.set_status_bit(INT bit)`
+
+#### Method `VOID <object>.clear_status_bit(INT bit)`
+
+#### Method `INT <object>.get_status_bits()`
