@@ -300,6 +300,12 @@ fn parse_metric_attributes(field: &Field, metric_type: &str) -> ProcResult<(Leve
                 if ident == "level" {
                     level = parse(ident, &meta, field)?;
                 } else if ident == "format" {
+                    if metric_type == "bitmap" {
+                        let field_name = field.ident.as_ref().unwrap();
+                        return Err(meta.error(format!(
+                            "Field {field_name}: #[bitmap] does not support format attribute (always uses 'bitmap' format)"
+                        )));
+                    }
                     format = parse(ident, &meta, field)?;
                 }
             }
