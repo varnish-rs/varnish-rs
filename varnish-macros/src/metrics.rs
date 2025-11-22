@@ -81,12 +81,11 @@ impl FromStr for Format {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "integer" => Ok(Format::Integer),
-            "bitmap" => Ok(Format::Bitmap),
             "duration" => Ok(Format::Duration),
             "bytes" => Ok(Format::Bytes),
             _ => Err(format!(
                 // TODO: can s come from an untrusted source? If so, we should not include it
-                "Invalid format value '{s}'. Must be one of: integer, bitmap, duration, bytes"
+                "Invalid format value '{s}'. Must be one of: integer, duration, bytes"
             )),
         }
     }
