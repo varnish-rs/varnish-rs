@@ -1,0 +1,69 @@
+varnishtest "Test bitmap metrics"
+
+server s1 {
+    rxreq
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import stats from "${vmod}";
+    import std;
+
+    sub vcl_init {
+        new c = stats.test();
+    }
+
+    sub vcl_deliver {
+        # Set individual flag bits
+        if (req.http.x-set-flag) {
+            c.set_flag(std.integer(req.http.x-set-flag, 0));
+        }
+
+        # Clear individual flag bits
+        if (req.http.x-clear-flag) {
+            c.clear_flag(std.integer(req.http.x-clear-flag, 0));
+        }
+
+        set resp.http.x-flags = c.get_flags();
+    }
+} -start
+
+# Test setting bit 0 in flags
+client c1 {
+    txreq -hdr "X-Set-Flag: 0"
+    rxresp
+    expect resp.http.x-flags == "1"
+} -run
+varnish v1 -expect mystats.default.flags == 1
+
+# Set bit 2 in flags (flags should now be 1 + 4 = 5)
+client c2 {
+    txreq -hdr "X-Set-Flag: 2"
+    rxresp
+    expect resp.http.x-flags == "5"
+} -run
+varnish v1 -expect mystats.default.flags == 5
+
+# Set bit 3 in flags
+client c3 {
+    txreq -hdr "X-Set-Flag: 3" -hdr "X-Set-Status: 1"
+    rxresp
+    expect resp.http.x-flags == "13"
+} -run
+varnish v1 -expect mystats.default.flags == 13
+
+# Clear bit 2 in flags (should go from 13 to 9)
+client c4 {
+    txreq -hdr "X-Clear-Flag: 2"
+    rxresp
+    expect resp.http.x-flags == "9"
+} -run
+varnish v1 -expect mystats.default.flags == 9
+
+# Bitmap values should be persisted across requests
+client c5 {
+    txreq
+    rxresp
+    expect resp.http.x-flags == "9"
+} -run
+varnish v1 -expect mystats.default.flags == 9

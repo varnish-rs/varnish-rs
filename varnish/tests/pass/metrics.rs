@@ -19,4 +19,8 @@ pub struct VariousStats {
     /// A more detailed description than the above oneliner could go here.
     #[gauge(level = "debug", format = "bytes")]
     memory: AtomicU64,
+
+    /// Some arbitrary bitmap
+    #[bitmap]
+    flags: AtomicU64,
 }

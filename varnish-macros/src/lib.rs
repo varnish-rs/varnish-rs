@@ -71,7 +71,8 @@ pub fn vmod(args: pm::TokenStream, input: pm::TokenStream) -> pm::TokenStream {
 /// The struct must have only fields of type `AtomicU64`.
 /// - `#[counter]` attribute on a field will export it as a counter.
 /// - `#[gauge]` attribute on a field will export it as a gauge.
-#[proc_macro_derive(VscMetric, attributes(counter, gauge))]
+/// - `#[bitmap]` attribute on a field will export it as a bitmap.
+#[proc_macro_derive(VscMetric, attributes(counter, gauge, bitmap))]
 pub fn vsc_metric(input: pm::TokenStream) -> pm::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     derive_vsc_metric(&input)
