@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.6](https://github.com/varnish-rs/varnish-rs/compare/varnish-macros-v0.5.5...varnish-macros-v0.5.6) - 2025-11-25
+
+### Other
+
+- Add bitmap type to vsc ([#236](https://github.com/varnish-rs/varnish-rs/pull/236))
+
 ## [0.5.5](https://github.com/varnish-rs/varnish-rs/compare/varnish-sys-v0.5.4...varnish-sys-v0.5.5) - 2025-09-18
 
 ### Other
