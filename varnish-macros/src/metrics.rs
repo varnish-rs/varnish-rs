@@ -38,6 +38,7 @@ impl CType {
 enum MetricType {
     Counter,
     Gauge,
+    Bitmap,
 }
 
 #[derive(Serialize, Clone, Default)]
@@ -80,12 +81,11 @@ impl FromStr for Format {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "integer" => Ok(Format::Integer),
-            "bitmap" => Ok(Format::Bitmap),
             "duration" => Ok(Format::Duration),
             "bytes" => Ok(Format::Bytes),
             _ => Err(format!(
                 // TODO: can s come from an untrusted source? If so, we should not include it
-                "Invalid format value '{s}'. Must be one of: integer, bitmap, duration, bytes"
+                "Invalid format value '{s}'. Must be one of: integer, duration, bytes"
             )),
         }
     }
@@ -198,16 +198,19 @@ fn generate_metrics(fields: &FieldList) -> ProcResult<BTreeMap<String, VscMetric
 
         let has_counter = has_attr(&field.attrs, "counter");
         let has_gauge = has_attr(&field.attrs, "gauge");
-        let metric_type = if has_counter && has_gauge {
-            // FIXME: use errors collection
-            panic!("Field {name} cannot have both #[counter] and #[gauge] attributes");
-        } else if has_counter {
-            MetricType::Counter
-        } else if has_gauge {
-            MetricType::Gauge
-        } else {
-            // FIXME: use errors collection
-            panic!("Field {name} must have either #[counter] or #[gauge] attribute")
+        let has_bitmap = has_attr(&field.attrs, "bitmap");
+        let metric_type = match (has_counter, has_gauge, has_bitmap) {
+            (true, false, false) => MetricType::Counter,
+            (false, true, false) => MetricType::Gauge,
+            (false, false, true) => MetricType::Bitmap,
+            (false, false, false) => {
+                // FIXME: use errors collection
+                panic!("Field {name} must have either #[counter], #[gauge], or #[bitmap] attribute")
+            }
+            _ => {
+                // FIXME: use errors collection
+                panic!("Field {name} cannot have multiple metric type attributes (#[counter], #[gauge], #[bitmap])")
+            }
         };
 
         let doc_str = parse_doc_str(&field.attrs);
@@ -220,6 +223,7 @@ fn generate_metrics(fields: &FieldList) -> ProcResult<BTreeMap<String, VscMetric
             match metric_type {
                 MetricType::Counter => "counter",
                 MetricType::Gauge => "gauge",
+                MetricType::Bitmap => "bitmap",
             },
         )?;
 
@@ -281,7 +285,11 @@ fn parse_metric_attributes(field: &Field, metric_type: &str) -> ProcResult<(Leve
     }
 
     let mut level = Level::default();
-    let mut format = Format::default();
+    let mut format = if metric_type == "bitmap" {
+        Format::Bitmap
+    } else {
+        Format::default()
+    };
     if let Some(attrs) = find_attr(&field.attrs, metric_type) {
         // FIXME: parse_nested_meta() returns an error:
         //     "expected attribute arguments in parentheses ..."
@@ -291,6 +299,12 @@ fn parse_metric_attributes(field: &Field, metric_type: &str) -> ProcResult<(Leve
                 if ident == "level" {
                     level = parse(ident, &meta, field)?;
                 } else if ident == "format" {
+                    if metric_type == "bitmap" {
+                        let field_name = field.ident.as_ref().unwrap();
+                        return Err(meta.error(format!(
+                            "Field {field_name}: #[bitmap] does not support format attribute (always uses 'bitmap' format)"
+                        )));
+                    }
                     format = parse(ident, &meta, field)?;
                 }
             }
