@@ -206,7 +206,13 @@ impl ParamTy {
     /// User MUST use some types with `Option`
     pub fn must_be_optional(self) -> bool {
         match self {
-            Self::Bool | Self::Blob | Self::Duration | Self::F64 | Self::I64 | Self::Str | Self::CStr => false,
+            Self::Bool
+            | Self::Blob
+            | Self::Duration
+            | Self::F64
+            | Self::I64
+            | Self::Str
+            | Self::CStr => false,
             Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
         }
     }

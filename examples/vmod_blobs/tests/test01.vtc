@@ -10,8 +10,8 @@ varnish v1 -vcl+backend {
     import blob;
 
     sub vcl_init {
-    	new b = blob.blob(IDENTITY, "Hello, World!");
-    	new empty_b = blob.blob(IDENTITY, "");
+        new b = blob.blob(IDENTITY, "Hello, World!");
+        new empty_b = blob.blob(IDENTITY, "");
     }
 
     sub vcl_recv {
@@ -21,11 +21,11 @@ varnish v1 -vcl+backend {
     sub vcl_synth {
         # Test blob_length with non-empty blob
         set resp.http.len = blobs.blob_length(b.get());
-        
+
         # Test blob_length_opt
         set resp.http.len-opt-some = blobs.blob_length_opt(b.get());
         set resp.http.len-opt-none = blobs.blob_length_opt();
-        
+
         # Test with empty blob
         set resp.http.len-empty = blobs.blob_length(empty_b.get());
     }

@@ -121,7 +121,7 @@ default_null_ptr!(VCL_BLOB);
 impl From<VCL_BLOB> for &[u8] {
     fn from(value: VCL_BLOB) -> Self {
         if value.0.is_null() {
-            return &[]
+            return &[];
         }
 
         // after 6.0
@@ -131,10 +131,7 @@ impl From<VCL_BLOB> for &[u8] {
             if blob.blob.is_null() || blob.len == 0 {
                 &[]
             } else {
-                    std::slice::from_raw_parts(
-                            blob.blob.cast::<u8>(),
-                            blob.len,
-                    )
+                std::slice::from_raw_parts(blob.blob.cast::<u8>(), blob.len)
             }
         }
         #[cfg(varnishsys_6)]
@@ -143,10 +140,7 @@ impl From<VCL_BLOB> for &[u8] {
             if blob.priv_.is_null() || blob.len <= 0 {
                 &[]
             } else {
-                    std::slice::from_raw_parts(
-                            blob.priv_.cast::<u8>(),
-                            blob.len as usize,
-                    )
+                std::slice::from_raw_parts(blob.priv_.cast::<u8>(), blob.len as usize)
             }
         }
     }

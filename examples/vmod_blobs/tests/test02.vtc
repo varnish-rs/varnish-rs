@@ -10,8 +10,8 @@ varnish v1 -vcl+backend {
     import blob;
 
     sub vcl_init {
-    	new b = blob.blob(IDENTITY, "Hello, World!");
-    	new empty_b = blob.blob(IDENTITY, "");
+        new b = blob.blob(IDENTITY, "Hello, World!");
+        new empty_b = blob.blob(IDENTITY, "");
     }
 
     sub vcl_recv {
@@ -21,7 +21,7 @@ varnish v1 -vcl+backend {
     sub vcl_synth {
         set resp.http.empty = blobs.is_empty(b.get());
         set resp.http.empty-empty = blobs.is_empty(empty_b.get());
-        
+
         set resp.http.checksum = blobs.checksum(b.get());
         set resp.http.checksum-empty = blobs.checksum(empty_b.get());
     }

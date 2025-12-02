@@ -10,7 +10,7 @@ varnish::run_vtc_tests!("tests/*.vtc");
 /// Example VMOD demonstrating BLOB input support
 #[vmod]
 mod blobs {
-    use sha2::{Sha256, Digest};
+    use sha2::{Digest, Sha256};
 
     /// Returns the length of a BLOB
     ///
@@ -57,6 +57,6 @@ mod blobs {
         format!("{:x}", hash)
     }
 
-//    pub fn access_pointer(b: VCL_BLOB) {
-//    }
+    //    pub fn access_pointer(b: VCL_BLOB) {
+    //    }
 }

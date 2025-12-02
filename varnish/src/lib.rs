@@ -85,8 +85,8 @@ pub mod ffi {
     #[cfg(varnishsys_6_priv_free_f)]
     pub use varnish_sys::ffi::vmod_priv_free_f;
     pub use varnish_sys::ffi::{
-        vmod_data, vmod_priv, vrt_ctx, VMOD_ABI_Version, VclEvent, VCL_BACKEND, VCL_BOOL,
-        VCL_BLOB, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE, VCL_REAL, VCL_STRING, VCL_VOID,
+        vmod_data, vmod_priv, vrt_ctx, VMOD_ABI_Version, VclEvent, VCL_BACKEND, VCL_BLOB, VCL_BOOL,
+        VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE, VCL_REAL, VCL_STRING, VCL_VOID,
     };
     #[cfg(not(varnishsys_6_priv_free_f))]
     pub use varnish_sys::ffi::{vmod_priv_methods, VMOD_PRIV_METHODS_MAGIC};
