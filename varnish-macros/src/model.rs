@@ -163,6 +163,7 @@ pub struct ParamInfo {
 #[derive(Debug, Clone, Copy)]
 pub enum ParamTy {
     Bool,
+    Blob,
     Duration,
     F64,
     I64,
@@ -177,6 +178,7 @@ impl ParamTy {
     pub fn to_vcc_type(self) -> &'static str {
         match self {
             Self::Bool => "BOOL",
+            Self::Blob => "BLOB",
             Self::Duration => "DURATION",
             Self::F64 => "REAL",
             Self::I64 => "INT",
@@ -191,6 +193,7 @@ impl ParamTy {
         //            statement in the `varnish-macros/src/generator.rs` file.
         match self {
             Self::Bool => "VCL_BOOL",
+            Self::Blob => "VCL_BLOB",
             Self::Duration => "VCL_DURATION",
             Self::F64 => "VCL_REAL",
             Self::I64 => "VCL_INT",
@@ -203,7 +206,7 @@ impl ParamTy {
     /// User MUST use some types with `Option`
     pub fn must_be_optional(self) -> bool {
         match self {
-            Self::Bool | Self::Duration | Self::F64 | Self::I64 | Self::Str | Self::CStr => false,
+            Self::Bool | Self::Blob | Self::Duration | Self::F64 | Self::I64 | Self::Str | Self::CStr => false,
             Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
         }
     }
@@ -219,7 +222,8 @@ impl ParamTy {
             | Self::Duration
             | Self::F64
             | Self::I64
-            | Self::CStr => false,
+            | Self::CStr
+            | Self::Blob => false,
             Self::Str => true,
         }
     }

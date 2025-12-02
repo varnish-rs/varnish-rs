@@ -52,6 +52,39 @@ source: varnish-macros/src/tests.rs
   ],
   [
     "$FUNC",
+    "type_array_u8",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_types_Func.f_type_array_u8",
+      "",
+      [
+        "BLOB",
+        "_v"
+      ]
+    ]
+  ],
+  [
+    "$FUNC",
+    "opt_array_u8",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_types_Func.f_opt_array_u8",
+      "struct arg_vmod_types_opt_array_u8",
+      [
+        "BLOB",
+        "_v",
+        null,
+        null,
+        true
+      ]
+    ]
+  ],
+  [
+    "$FUNC",
     "type_bool",
     [
       [

@@ -8,7 +8,7 @@ VMOD_JSON_SPEC
     "2.0",
     "types",
     "Vmod_vmod_types_Func",
-    "52017119c74321c7fb095e6e0334165ad142d83cfb72627ad44b471f228c1652",
+    "588c3412d1551da71ba6b202dfc75ddc56e6923b6d0f9c304b2bc485809cbb6e",
     "Varnish (version) (hash)",
     "0",
     "0"
@@ -30,6 +30,21 @@ typedef VCL_VOID td_vmod_types_to_res_str_err(
 
 typedef VCL_VOID td_vmod_types_to_res_box_err(
     VRT_CTX
+);
+
+typedef VCL_VOID td_vmod_types_type_array_u8(
+    VRT_CTX,
+    VCL_BLOB
+);
+
+struct arg_vmod_types_opt_array_u8 {
+  char valid__v;
+  VCL_BLOB _v;
+};
+
+typedef VCL_VOID td_vmod_types_opt_array_u8(
+    VRT_CTX,
+    struct arg_vmod_types_opt_array_u8 *
 );
 
 typedef VCL_VOID td_vmod_types_type_bool(
@@ -357,6 +372,8 @@ struct Vmod_vmod_types_Func {
   td_vmod_types_to_res_void_err *f_to_res_void_err;
   td_vmod_types_to_res_str_err *f_to_res_str_err;
   td_vmod_types_to_res_box_err *f_to_res_box_err;
+  td_vmod_types_type_array_u8 *f_type_array_u8;
+  td_vmod_types_opt_array_u8 *f_opt_array_u8;
   td_vmod_types_type_bool *f_type_bool;
   td_vmod_types_type_bool_dflt *f_type_bool_dflt;
   td_vmod_types_opt_bool *f_opt_bool;
@@ -460,6 +477,41 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
       ],
       "Vmod_vmod_types_Func.f_to_res_box_err",
       ""
+    ]
+  ],
+  [
+    "$FUNC",
+    "type_array_u8",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_types_Func.f_type_array_u8",
+      "",
+      [
+        "BLOB",
+        "_v",
+        "_v"
+      ]
+    ]
+  ],
+  [
+    "$FUNC",
+    "opt_array_u8",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_types_Func.f_opt_array_u8",
+      "struct arg_vmod_types_opt_array_u8",
+      [
+        "BLOB",
+        "_v",
+        "_v",
+        null,
+        null,
+        true
+      ]
     ]
   ],
   [

@@ -346,6 +346,12 @@ impl ParamTy {
                 return Some(Self::CStr);
             }
         }
+        if let Some(ty) = as_ref_ty(ty).and_then(as_slice_ty).and_then(as_simple_ty) {
+            if ty == "u8" {
+                // `&[u8]`
+                return Some(Self::Blob);
+            }
+        }
 
         None
     }

@@ -1,0 +1,41 @@
+varnishtest "Test blob_length and blob_length_opt"
+
+server s1 {
+    rxreq
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import blobs from "${vmod}";
+    import blob;
+
+    sub vcl_init {
+    	new b = blob.blob(IDENTITY, "Hello, World!");
+    	new empty_b = blob.blob(IDENTITY, "");
+    }
+
+    sub vcl_recv {
+        return (synth(200));
+    }
+
+    sub vcl_synth {
+        # Test blob_length with non-empty blob
+        set resp.http.len = blobs.blob_length(b.get());
+        
+        # Test blob_length_opt
+        set resp.http.len-opt-some = blobs.blob_length_opt(b.get());
+        set resp.http.len-opt-none = blobs.blob_length_opt();
+        
+        # Test with empty blob
+        set resp.http.len-empty = blobs.blob_length(empty_b.get());
+    }
+} -start
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.http.len == "13"
+    expect resp.http.len-opt-some == "13"
+    expect resp.http.len-opt-none == "-1"
+    expect resp.http.len-empty == "0"
+} -run

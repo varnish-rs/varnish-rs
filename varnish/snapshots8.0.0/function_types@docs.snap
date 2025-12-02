@@ -28,6 +28,10 @@ import types from "path/to/libtypes.so";
 
 ### Function `VOID types.to_res_box_err()`
 
+### Function `VOID types.type_array_u8(BLOB _v)`
+
+### Function `VOID types.opt_array_u8([BLOB _v])`
+
 ### Function `VOID types.type_bool(BOOL _v)`
 
 ### Function `VOID types.type_bool_dflt(BOOL _v = 1)`

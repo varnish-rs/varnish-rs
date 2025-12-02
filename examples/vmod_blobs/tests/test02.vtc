@@ -1,0 +1,37 @@
+varnishtest "Test .is_empty and .checksum()"
+
+server s1 {
+    rxreq
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import blobs from "${vmod}";
+    import blob;
+
+    sub vcl_init {
+    	new b = blob.blob(IDENTITY, "Hello, World!");
+    	new empty_b = blob.blob(IDENTITY, "");
+    }
+
+    sub vcl_recv {
+        return (synth(200));
+    }
+
+    sub vcl_synth {
+        set resp.http.empty = blobs.is_empty(b.get());
+        set resp.http.empty-empty = blobs.is_empty(empty_b.get());
+        
+        set resp.http.checksum = blobs.checksum(b.get());
+        set resp.http.checksum-empty = blobs.checksum(empty_b.get());
+    }
+} -start
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.http.empty == "false"
+    expect resp.http.empty-empty == "true"
+    expect resp.http.checksum == "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
+    expect resp.http.checksum-empty == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+} -run

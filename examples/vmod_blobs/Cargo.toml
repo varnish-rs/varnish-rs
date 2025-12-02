@@ -1,0 +1,12 @@
+[package]
+name = "vmod_blobs"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+digest = "0.10.7"
+sha2.workspace = true
+varnish = { path = "../../varnish" }

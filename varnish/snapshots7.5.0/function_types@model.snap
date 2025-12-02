@@ -46,6 +46,48 @@ VmodInfo {
         },
         FuncInfo {
             func_type: Function,
+            ident: "type_array_u8",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: Blob,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "opt_array_u8",
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: Null,
+                            ty_info: Blob,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
             ident: "type_bool",
             docs: "",
             has_optional_args: false,
