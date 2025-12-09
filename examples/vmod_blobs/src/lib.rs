@@ -44,7 +44,7 @@ mod blobs {
         data.is_empty()
     }
 
-    /// Computes a simple checksum (sum of all bytes modulo 256)
+    /// Computes the SHA256 checksum of the blob
     ///
     /// Example VCL:
     /// ```vcl
