@@ -17,6 +17,21 @@ typedef VCL_VOID td_vmod_types_to_res_box_err(
     VRT_CTX
 );
 
+typedef VCL_VOID td_vmod_types_type_array_u8(
+    VRT_CTX,
+    VCL_BLOB
+);
+
+struct arg_vmod_types_opt_array_u8 {
+  char valid__v;
+  VCL_BLOB _v;
+};
+
+typedef VCL_VOID td_vmod_types_opt_array_u8(
+    VRT_CTX,
+    struct arg_vmod_types_opt_array_u8 *
+);
+
 typedef VCL_VOID td_vmod_types_type_bool(
     VRT_CTX,
     VCL_BOOL
@@ -342,6 +357,8 @@ struct Vmod_types_Func {
   td_vmod_types_to_res_void_err *f_to_res_void_err;
   td_vmod_types_to_res_str_err *f_to_res_str_err;
   td_vmod_types_to_res_box_err *f_to_res_box_err;
+  td_vmod_types_type_array_u8 *f_type_array_u8;
+  td_vmod_types_opt_array_u8 *f_opt_array_u8;
   td_vmod_types_type_bool *f_type_bool;
   td_vmod_types_type_bool_dflt *f_type_bool_dflt;
   td_vmod_types_opt_bool *f_opt_bool;

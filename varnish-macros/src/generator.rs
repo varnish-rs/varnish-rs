@@ -205,6 +205,7 @@ impl Generator {
         // WARNING: This list must match the list in varnish-macros/src/lib.rs
         let mut use_ffi_items = quote![
             VCL_BACKEND,
+            VCL_BLOB,
             VCL_BOOL,
             VCL_DURATION,
             VCL_INT,

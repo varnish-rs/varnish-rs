@@ -25,6 +25,7 @@
 //! | `std::time::Duration` | <-> | `VCL_DURATION` |
 //! | `&str` | <-> | `VCL_STRING` |
 //! | `String` | -> | `VCL_STRING` |
+//! | `&[u8]` | <- | `VCL_BLOB` |
 //! | `Option<CowProbe>` | <-> | `VCL_PROBE` |
 //! | `Option<Probe>` | <-> | `VCL_PROBE` |
 //! | `Option<std::net::SockAdd>` | -> | `VCL_IP` |
@@ -117,6 +118,34 @@ default_null_ptr!(VCL_BACKEND);
 
 // VCL_BLOB
 default_null_ptr!(VCL_BLOB);
+impl From<VCL_BLOB> for &[u8] {
+    fn from(value: VCL_BLOB) -> Self {
+        if value.0.is_null() {
+            return &[];
+        }
+
+        // after 6.0
+        #[cfg(not(varnishsys_6))]
+        unsafe {
+            let blob = &*value.0;
+            if blob.blob.is_null() || blob.len == 0 {
+                &[]
+            } else {
+                std::slice::from_raw_parts(blob.blob.cast::<u8>(), blob.len)
+            }
+        }
+        #[cfg(varnishsys_6)]
+        unsafe {
+            let blob = &*value.0;
+            if blob.priv_.is_null() || blob.len <= 0 {
+                &[]
+            } else {
+                std::slice::from_raw_parts(blob.priv_.cast::<u8>(), blob.len as usize)
+            }
+        }
+    }
+}
+from_vcl_to_opt_rust!(VCL_BLOB, &[u8]);
 
 // VCL_BODY
 default_null_ptr!(VCL_BODY);

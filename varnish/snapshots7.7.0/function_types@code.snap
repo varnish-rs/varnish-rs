@@ -9,9 +9,9 @@ mod types {
         use std::ffi::{c_char, c_int, c_uint, c_void, CStr};
         use std::ptr::null;
         use varnish::ffi::{
-            VCL_BACKEND, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE, VCL_REAL,
-            VCL_STRING, VCL_VOID, VMOD_ABI_Version, VclEvent, vmod_data, vmod_priv,
-            vrt_ctx, VMOD_PRIV_METHODS_MAGIC, vmod_priv_methods,
+            VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE,
+            VCL_REAL, VCL_STRING, VCL_VOID, VMOD_ABI_Version, VclEvent, vmod_data,
+            vmod_priv, vrt_ctx, VMOD_PRIV_METHODS_MAGIC, vmod_priv_methods,
         };
         use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
         use super::*;
@@ -47,6 +47,23 @@ mod types {
                 .unwrap_or_else(|err| {
                     __ctx.fail(err);
                 })
+        }
+        unsafe extern "C" fn vmod_c_type_array_u8(__ctx: *mut vrt_ctx, _v: VCL_BLOB) {
+            super::type_array_u8(_v.into())
+        }
+        #[repr(C)]
+        struct arg_vmod_types_opt_array_u8 {
+            valid__v: c_char,
+            _v: VCL_BLOB,
+        }
+        unsafe extern "C" fn vmod_c_opt_array_u8(
+            __ctx: *mut vrt_ctx,
+            __args: *const arg_vmod_types_opt_array_u8,
+        ) {
+            let __args = __args.as_ref().unwrap();
+            super::opt_array_u8(
+                if __args.valid__v != 0 { __args._v.into() } else { None },
+            )
         }
         unsafe extern "C" fn vmod_c_type_bool(__ctx: *mut vrt_ctx, _v: VCL_BOOL) {
             super::type_bool(_v.into())
@@ -608,6 +625,15 @@ mod types {
             vmod_c_to_res_void_err: Option<unsafe extern "C" fn(__ctx: *mut vrt_ctx)>,
             vmod_c_to_res_str_err: Option<unsafe extern "C" fn(__ctx: *mut vrt_ctx)>,
             vmod_c_to_res_box_err: Option<unsafe extern "C" fn(__ctx: *mut vrt_ctx)>,
+            vmod_c_type_array_u8: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, _v: VCL_BLOB),
+            >,
+            vmod_c_opt_array_u8: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __args: *const arg_vmod_types_opt_array_u8,
+                ),
+            >,
             vmod_c_type_bool: Option<
                 unsafe extern "C" fn(__ctx: *mut vrt_ctx, _v: VCL_BOOL),
             >,
@@ -811,6 +837,8 @@ mod types {
             vmod_c_to_res_void_err: Some(vmod_c_to_res_void_err),
             vmod_c_to_res_str_err: Some(vmod_c_to_res_str_err),
             vmod_c_to_res_box_err: Some(vmod_c_to_res_box_err),
+            vmod_c_type_array_u8: Some(vmod_c_type_array_u8),
+            vmod_c_opt_array_u8: Some(vmod_c_opt_array_u8),
             vmod_c_type_bool: Some(vmod_c_type_bool),
             vmod_c_type_bool_dflt: Some(vmod_c_type_bool_dflt),
             vmod_c_opt_bool: Some(vmod_c_opt_bool),
@@ -874,7 +902,7 @@ mod types {
         pub static Vmod_types_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"52017119c74321c7fb095e6e0334165ad142d83cfb72627ad44b471f228c1652"
+            file_id: c"588c3412d1551da71ba6b202dfc75ddc56e6923b6d0f9c304b2bc485809cbb6e"
                 .as_ptr(),
             name: c"types".as_ptr(),
             func_name: c"Vmod_vmod_types_Func".as_ptr(),
@@ -905,6 +933,8 @@ mod types {
     pub fn to_res_box_err() -> Result<(), Box<dyn Error>> {
         Ok(())
     }
+    pub fn type_array_u8(_v: &[u8]) {}
+    pub fn opt_array_u8(_v: Option<&[u8]>) {}
     pub fn type_bool(_v: bool) {}
     pub fn type_bool_dflt(_v: bool) {}
     pub fn opt_bool(_v: Option<bool>) {}
