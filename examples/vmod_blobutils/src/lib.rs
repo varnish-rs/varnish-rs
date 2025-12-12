@@ -9,14 +9,14 @@ varnish::run_vtc_tests!("tests/*.vtc");
 
 /// Example VMOD demonstrating BLOB input support
 #[vmod]
-mod blobs {
+mod blobutils {
     use sha2::{Digest, Sha256};
 
     /// Returns the length of a BLOB
     ///
     /// Example VCL:
     /// ```vcl
-    /// set req.http.blob-len = blob_example.blob_length(blob);
+    /// set req.http.blob-len = blobutils.blob_length(blob);
     /// ```
     pub fn blob_length(data: &[u8]) -> i64 {
         data.len() as i64
@@ -26,7 +26,7 @@ mod blobs {
     ///
     /// Example VCL:
     /// ```vcl
-    /// set req.http.blob-len = blob_example.blob_length_opt(blob);
+    /// set req.http.blob-len = blobutils.blob_length_opt(blob);
     /// ```
     pub fn blob_length_opt(data: Option<&[u8]>) -> i64 {
         data.map_or(-1, |d| d.len() as i64)
@@ -36,7 +36,7 @@ mod blobs {
     ///
     /// Example VCL:
     /// ```vcl
-    /// if (blob_example.is_empty(blob)) {
+    /// if (blobutils.is_empty(blob)) {
     ///     # Handle empty blob
     /// }
     /// ```
@@ -48,7 +48,7 @@ mod blobs {
     ///
     /// Example VCL:
     /// ```vcl
-    /// set req.http.checksum = blob_example.checksum(blob);
+    /// set req.http.checksum = blobutils.checksum(blob);
     /// ```
     pub fn checksum(data: &[u8]) -> String {
         let mut hasher = Sha256::new();

@@ -6,7 +6,7 @@ server s1 {
 } -start
 
 varnish v1 -vcl+backend {
-    import blobs from "${vmod}";
+    import blobutils from "${vmod}";
     import blob;
 
     sub vcl_init {
@@ -19,11 +19,11 @@ varnish v1 -vcl+backend {
     }
 
     sub vcl_synth {
-        set resp.http.empty = blobs.is_empty(b.get());
-        set resp.http.empty-empty = blobs.is_empty(empty_b.get());
+        set resp.http.empty = blobutils.is_empty(b.get());
+        set resp.http.empty-empty = blobutils.is_empty(empty_b.get());
 
-        set resp.http.checksum = blobs.checksum(b.get());
-        set resp.http.checksum-empty = blobs.checksum(empty_b.get());
+        set resp.http.checksum = blobutils.checksum(b.get());
+        set resp.http.checksum-empty = blobutils.checksum(empty_b.get());
     }
 } -start
 

@@ -1,4 +1,4 @@
-# VMOD Blobs
+# VMOD Blobutils
 
 This example demonstrates how to use VCL_BLOB arguments in Varnish modules written in Rust.
 
@@ -20,7 +20,7 @@ This example VMOD provides several functions that work with BLOB data:
 ```vcl
 vcl 4.1;
 
-import blobs;
+import blobutils;
 
 backend default {
     .host = "127.0.0.1";
@@ -32,8 +32,8 @@ sub vcl_init {
 }
 
 sub vcl_recv {
-    set req.http.blob-len = blobs.blob_length(b.get());
-    set req.http.checksum = blobs.checksum(b.get());
+    set req.http.blob-len = blobutils.blob_length(b.get());
+    set req.http.checksum = blobutils.checksum(b.get());
 }
 ```
 
@@ -43,7 +43,7 @@ sub vcl_recv {
 cargo build --release
 ```
 
-The compiled VMOD will be available at `target/release/libvmod_blobs.so`.
+The compiled VMOD will be available at `target/release/libvmod_blobutils.so`.
 
 ## See Also
 

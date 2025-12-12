@@ -6,7 +6,7 @@ server s1 {
 } -start
 
 varnish v1 -vcl+backend {
-    import blobs from "${vmod}";
+    import blobutils from "${vmod}";
     import blob;
 
     sub vcl_init {
@@ -20,14 +20,14 @@ varnish v1 -vcl+backend {
 
     sub vcl_synth {
         # Test blob_length with non-empty blob
-        set resp.http.len = blobs.blob_length(b.get());
+        set resp.http.len = blobutils.blob_length(b.get());
 
         # Test blob_length_opt
-        set resp.http.len-opt-some = blobs.blob_length_opt(b.get());
-        set resp.http.len-opt-none = blobs.blob_length_opt();
+        set resp.http.len-opt-some = blobutils.blob_length_opt(b.get());
+        set resp.http.len-opt-none = blobutils.blob_length_opt();
 
         # Test with empty blob
-        set resp.http.len-empty = blobs.blob_length(empty_b.get());
+        set resp.http.len-empty = blobutils.blob_length(empty_b.get());
     }
 } -start
 
