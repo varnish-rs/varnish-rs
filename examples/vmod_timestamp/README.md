@@ -19,6 +19,16 @@ import timestamp;
 import timestamp from "path/to/libtimestamp.so";
 ```
 
+### Function `TIME timestamp.now()`
+
+Just return the current system time. This will actually return different values if called
+multiple times in the same VCL subroutine, contrary to the `now` keyword that always has
+the same value for a give subroutine.
+
+### Function `TIME timestamp.add_duration(TIME time, DURATION duration)`
+
+Add `time` and `duration` and return the resulting time
+
 ### Function `DURATION timestamp.timestamp()`
 
 Returns the duration since the same function was called for the last time (in the same task).
