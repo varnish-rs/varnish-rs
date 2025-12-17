@@ -377,6 +377,7 @@ default_null_ptr!(VCL_STRANDS);
 //
 impl From<VCL_TIME> for SystemTime {
     fn from(value: VCL_TIME) -> Self {
+        // seconds are stored in `VCL_TIME(vtim_real(f64))`
         UNIX_EPOCH.add(Duration::from_secs_f64(value.0 .0))
     }
 }
