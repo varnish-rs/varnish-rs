@@ -377,7 +377,7 @@ default_null_ptr!(VCL_STRANDS);
 //
 impl From<VCL_TIME> for SystemTime {
     fn from(value: VCL_TIME) -> Self {
-        UNIX_EPOCH.add(Duration::from_secs_f64(value.0.0))
+        UNIX_EPOCH.add(Duration::from_secs_f64(value.0 .0))
     }
 }
 
