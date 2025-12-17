@@ -1,6 +1,7 @@
 ---
 source: varnish-macros/src/tests.rs
 ---
+
 typedef VCL_ACL td_vmod_vcl_returns_val_acl(
     VRT_CTX
 );

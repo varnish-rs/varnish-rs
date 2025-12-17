@@ -45,7 +45,7 @@ mod be {
         }
 
         pub unsafe fn backend(&self) -> VCL_BACKEND {
-            self.backend.vcl_ptr()
+            self.backend.as_ref().vcl_ptr()
         }
     }
 }

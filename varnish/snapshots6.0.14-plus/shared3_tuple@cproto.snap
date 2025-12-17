@@ -1,6 +1,7 @@
 ---
 source: varnish-macros/src/tests.rs
 ---
+
 typedef VCL_STRING td_vmod_tuple_ref_to_slice_lifetime(
     VRT_CTX,
     struct vmod_priv *

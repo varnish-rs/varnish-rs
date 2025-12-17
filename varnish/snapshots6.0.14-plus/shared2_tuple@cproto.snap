@@ -1,6 +1,7 @@
 ---
 source: varnish-macros/src/tests.rs
 ---
+
 typedef VCL_VOID td_vmod_tuple_per_tsk_val(
     VRT_CTX,
     struct vmod_priv *,
