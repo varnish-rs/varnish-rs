@@ -23,6 +23,7 @@
 //! | `i64`  | <-> | `VCL_INT` |
 //! | `bool` | <-> | `VCL_BOOL` |
 //! | `std::time::Duration` | <-> | `VCL_DURATION` |
+//! | `std::time::SystemTime` | <-> | `VCL_TIME` |
 //! | `&str` | <-> | `VCL_STRING` |
 //! | `String` | -> | `VCL_STRING` |
 //! | `&[u8]` | <- | `VCL_BLOB` |
@@ -47,8 +48,9 @@
 use std::borrow::Cow;
 use std::ffi::{c_char, CStr};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
+use std::ops::Add;
 use std::ptr::{null, null_mut};
-use std::time::{Duration, SystemTime};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use crate::ffi::{
     http, vtim_dur, vtim_real, VSA_GetPtr, VSA_Port, PF_INET, PF_INET6, VCL_ACL, VCL_BACKEND,
@@ -373,11 +375,19 @@ default_null_ptr!(VCL_STRANDS);
 //
 // VCL_TIME
 //
+impl From<VCL_TIME> for SystemTime {
+    fn from(value: VCL_TIME) -> Self {
+        // seconds are stored in `VCL_TIME(vtim_real(f64))`
+        UNIX_EPOCH.add(Duration::from_secs_f64(value.0 .0))
+    }
+}
+
 impl IntoVCL<VCL_TIME> for SystemTime {
     fn into_vcl(self, _: &mut Workspace) -> Result<VCL_TIME, VclError> {
         self.try_into()
     }
 }
+
 impl TryFrom<SystemTime> for VCL_TIME {
     type Error = VclError;
 

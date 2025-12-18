@@ -10,8 +10,8 @@ mod obj {
         use std::ptr::null;
         use varnish::ffi::{
             VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE,
-            VCL_REAL, VCL_STRING, VCL_VOID, VMOD_ABI_Version, VclEvent, vmod_data,
-            vmod_priv, vrt_ctx, vmod_priv_free_f,
+            VCL_REAL, VCL_STRING, VCL_TIME, VCL_VOID, VMOD_ABI_Version, VclEvent,
+            vmod_data, vmod_priv, vrt_ctx, vmod_priv_free_f,
         };
         use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
         use super::*;

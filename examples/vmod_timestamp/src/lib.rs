@@ -4,7 +4,20 @@ varnish::run_vtc_tests!("tests/*.vtc");
 #[varnish::vmod(docs = "README.md")]
 mod timestamp {
     use std::mem;
-    use std::time::{Duration, Instant};
+    use std::ops::Add;
+    use std::time::{Duration, Instant, SystemTime};
+
+    /// Just return the current system time. This will actually return different values if called
+    /// multiple times in the same VCL subroutine, contrary to the `now` keyword that always has
+    /// the same value for a give subroutine.
+    pub fn now() -> SystemTime {
+        SystemTime::now()
+    }
+
+    /// Add `time` and `duration` and return the resulting time
+    pub fn add_duration(time: SystemTime, duration: Duration) -> SystemTime {
+        time.add(duration)
+    }
 
     /// Returns the duration since the same function was called for the last time (in the same task).
     /// If it's the first time it's been called, return 0.
