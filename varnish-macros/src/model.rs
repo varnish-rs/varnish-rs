@@ -174,6 +174,7 @@ pub enum ParamTy {
     SocketAddr,
     Str,
     CStr,
+    VclType(&'static str),
 }
 
 impl ParamTy {
@@ -189,6 +190,7 @@ impl ParamTy {
             Self::Probe | Self::ProbeCow => "PROBE",
             Self::SocketAddr => "IP",
             Self::Str | Self::CStr => "STRING",
+            Self::VclType(ty) => &ty[4..],
         }
     }
 
@@ -206,6 +208,7 @@ impl ParamTy {
             Self::Probe | Self::ProbeCow => "VCL_PROBE",
             Self::SocketAddr => "VCL_IP",
             Self::Str | Self::CStr => "VCL_STRING",
+            Self::VclType(ty) => ty,
         }
     }
 
@@ -221,6 +224,7 @@ impl ParamTy {
             | Self::Str
             | Self::CStr => false,
             Self::BackendRef | Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
+            Self::VclType(_ty) => false,
         }
     }
 
@@ -238,7 +242,8 @@ impl ParamTy {
             | Self::Probe
             | Self::ProbeCow
             | Self::SystemTime
-            | Self::SocketAddr => false,
+            | Self::SocketAddr
+            | Self::VclType(_) => false,
             Self::Str => true,
         }
     }
@@ -274,6 +279,14 @@ impl OutputTy {
             Self::Bytes | Self::String => "VCL_STRING".into(),
             Self::SelfType | Self::Default => "VCL_VOID".into(),
             Self::VclType(ty) => ty.into(),
+        }
+    }
+
+    pub fn requires_unsafe(&self) -> bool {
+        match self {
+            Self::VclType(_ty) => true,
+            Self::ParamType(ty) => matches!(ty, ParamTy::VclType(_)),
+            _ => false,
         }
     }
 }
