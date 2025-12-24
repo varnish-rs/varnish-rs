@@ -10,6 +10,29 @@ VmodInfo {
     funcs: [
         FuncInfo {
             func_type: Function,
+            ident: "arg_vcl_backend",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "backend",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: VclType(
+                                "VCL_BACKEND",
+                            ),
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
             ident: "val_acl",
             docs: "",
             has_optional_args: false,

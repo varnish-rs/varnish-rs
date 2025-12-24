@@ -332,6 +332,8 @@ impl ParamTy {
                 return Some(Self::Probe);
             } else if ident == "SocketAddr" {
                 return Some(Self::SocketAddr);
+            } else if ident == "VCL_BACKEND" {
+                return Some(Self::VclType("VCL_BACKEND"));
             }
         }
 
@@ -379,6 +381,16 @@ impl OutputTy {
     }
 
     fn try_parse(ty: &Type) -> Option<Self> {
+        if let Some(ident) = as_simple_ty(ty) {
+            let ident = ident.to_string();
+            if ident.starts_with("VCL_")
+                && ident
+                    .chars()
+                    .all(|v| char::is_ascii_uppercase(&v) || v == '_')
+            {
+                return Some(Self::VclType(ident));
+            }
+        }
         if let Some(ty) = ParamTy::try_parse(ty) {
             return Some(Self::ParamType(ty));
         }
@@ -387,14 +399,6 @@ impl OutputTy {
                 return Some(Self::String);
             } else if ident == "Self" {
                 return Some(Self::SelfType);
-            }
-            let ident = ident.to_string();
-            if ident.starts_with("VCL_")
-                && ident
-                    .chars()
-                    .all(|v| char::is_ascii_uppercase(&v) || v == '_')
-            {
-                return Some(Self::VclType(ident));
             }
         }
         if let Some(ty) = as_option_type(ty) {

@@ -8,7 +8,7 @@ VMOD_JSON_SPEC
     "2.0",
     "vcl_returns",
     "Vmod_vmod_vcl_returns_Func",
-    "a6876b707a04e5bc7badd29339d22abb0b7ae46d62d946fbfbc5882f6d37eeed",
+    "497ee393f05b7e8c4bc0c40f54c54a6a0dc57f82658aab2708f62af6ecb41d9d",
     "Varnish (version) (hash)",
     "0",
     "0"
@@ -16,6 +16,11 @@ VMOD_JSON_SPEC
   [
     "$CPROTO",
     "
+typedef VCL_VOID td_vmod_vcl_returns_arg_vcl_backend(
+    VRT_CTX,
+    VCL_BACKEND
+);
+
 typedef VCL_ACL td_vmod_vcl_returns_val_acl(
     VRT_CTX
 );
@@ -189,6 +194,7 @@ typedef VCL_VCL td_vmod_vcl_returns_res_vcl(
 );
 
 struct Vmod_vmod_vcl_returns_Func {
+  td_vmod_vcl_returns_arg_vcl_backend *f_arg_vcl_backend;
   td_vmod_vcl_returns_val_acl *f_val_acl;
   td_vmod_vcl_returns_res_acl *f_res_acl;
   td_vmod_vcl_returns_val_backend *f_val_backend;
@@ -235,6 +241,22 @@ struct Vmod_vmod_vcl_returns_Func {
 };
 
 static struct Vmod_vmod_vcl_returns_Func Vmod_vmod_vcl_returns_Func;"
+  ],
+  [
+    "$FUNC",
+    "arg_vcl_backend",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_vcl_returns_Func.f_arg_vcl_backend",
+      "",
+      [
+        "BACKEND",
+        "backend",
+        "backend"
+      ]
+    ]
   ],
   [
     "$FUNC",
