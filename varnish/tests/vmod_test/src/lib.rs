@@ -154,6 +154,10 @@ mod rustest {
         s
     }
 
+    pub fn panic(msg: &str) {
+        panic!("{}", msg);
+    }
+
     pub fn ws_tests(ctx: &mut Ctx) {
         //external buffer, 0-length -> new ptr
         let buf = b"";

@@ -57,4 +57,6 @@ import rustest from "path/to/librustest.so";
 
 ### Function `STRING rustest.merge_all_names()`
 
+### Function `VOID rustest.panic(STRING msg)`
+
 ### Function `VOID rustest.ws_tests()`

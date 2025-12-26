@@ -95,6 +95,8 @@ pub mod ffi {
 #[cfg(feature = "ffi")]
 pub use varnish_sys::ffi;
 
+pub use varnish_sys::panic;
+
 pub mod varnishtest;
 
 mod metrics_reader;

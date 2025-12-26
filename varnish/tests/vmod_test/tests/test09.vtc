@@ -1,0 +1,23 @@
+varnishtest "vmod panic"
+
+varnish v1 -cliok "param.set feature +no_coredump"
+varnish v1 -expectexit 0x40
+
+varnish v1 -vcl {
+    import rustest from "${vmod}";
+
+    backend be none;
+
+    sub vcl_recv {
+        rustest.panic("what is this rust thing?");
+    }
+} -start
+
+client c1 {
+    txreq
+    expect_close
+} -run
+
+varnish v1 -cliexpect "Wrong turn at " panic.show
+varnish v1 -cliexpect "rust panic" panic.show
+varnish v1 -cliok panic.clear
