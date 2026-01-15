@@ -3,6 +3,8 @@ mod backend;
 mod convert;
 mod ctx;
 #[cfg(not(varnishsys_6))]
+mod director;
+#[cfg(not(varnishsys_6))]
 mod endpoint;
 mod error;
 mod http;
@@ -20,6 +22,8 @@ mod ws_str_buffer;
 pub use backend::*;
 pub use convert::*;
 pub use ctx::*;
+#[cfg(not(varnishsys_6))]
+pub use director::*;
 #[cfg(not(varnishsys_6))]
 pub use endpoint::*;
 pub use error::*;
