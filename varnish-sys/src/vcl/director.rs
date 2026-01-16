@@ -44,6 +44,196 @@
 //!     let ptr = director.vcl_ptr();
 //! }
 //! ```
+//!
+//! # Director Lifecycle
+//!
+//! ## Creation
+//!
+//! Directors are created during VCL initialization by calling `Director::new()`. This function
+//! performs the following operations:
+//!
+//! 1. Boxes the director implementation on the heap
+//! 2. Creates a `vdi_methods` structure with function pointers to FFI wrappers
+//! 3. Calls `VRT_AddDirector()` to register the director with Varnish
+//! 4. Returns a `Director<D>` wrapper containing the VCL_BACKEND pointer
+//!
+//! The director implementation is stored in the `Director` wrapper and will remain valid
+//! for the lifetime of the VCL.
+//!
+//! ## Backend Registration
+//!
+//! When a director stores backend references, it must use `VRT_Assign_Backend()` to properly
+//! manage reference counts. This function increments the reference count of the assigned backend
+//! and decrements the reference count of any previously assigned backend.
+//!
+//! Correct usage:
+//!
+//! ```ignore
+//! let mut slot = VCL_BACKEND(std::ptr::null_mut());
+//! unsafe { ffi::VRT_Assign_Backend(&mut slot, backend); }
+//! self.backends.push(slot);
+//! ```
+//!
+//! Incorrect usage that will cause use-after-free bugs:
+//!
+//! ```ignore
+//! self.backends.push(backend);  // Missing VRT_Assign_Backend call
+//! ```
+//!
+//! ## Request Processing
+//!
+//! When a request is processed and the director is selected as the backend hint, Varnish calls
+//! the `resolve` callback through the FFI wrapper. The `resolve` method is expected to return
+//! a `VCL_BACKEND` pointer to the selected backend, or `None` if no backend is available.
+//!
+//! The `resolve` method may be called concurrently from multiple worker threads. All state
+//! accessed by `resolve` must be protected by appropriate synchronization primitives.
+//!
+//! ## Health Checking
+//!
+//! Varnish may call the `healthy` callback to determine the overall health of the director.
+//! This is typically used to aggregate the health state of child backends. The method returns
+//! a boolean indicating health status and a timestamp of the last health change.
+//!
+//! ## VCL State Transitions
+//!
+//! VCL goes through several states during its lifetime:
+//!
+//! 1. COLD - Initial state after loading, not handling requests
+//! 2. WARM - Active state, handling requests
+//! 3. COLD - Transitioned back when VCL is replaced
+//! 4. Discarded - VCL is unloaded and resources are freed
+//!
+//! When VCL transitions from WARM to COLD, the `release` callback is invoked. This callback
+//! must release all backend references by calling `VRT_Assign_Backend(ptr, NULL)` for each
+//! stored backend pointer. The `release` method must be idempotent as it may be called
+//! multiple times.
+//!
+//! Example release implementation:
+//!
+//! ```ignore
+//! fn release(&self) {
+//!     let mut inner = self.backends.write().unwrap();
+//!     for be in &mut inner.backends {
+//!         unsafe {
+//!             ffi::VRT_Assign_Backend(be, VCL_BACKEND(std::ptr::null_mut()));
+//!         }
+//!     }
+//!     inner.backends.clear();
+//! }
+//! ```
+//!
+//! ## Destruction
+//!
+//! When the `Director<D>` is dropped, the `Drop` implementation calls `VRT_DelDirector()`
+//! to unregister the director from Varnish. This triggers the `destroy` callback, which can
+//! be used for final cleanup. After `VRT_DelDirector()` returns, the boxed director
+//! implementation is dropped.
+//!
+//! The destruction sequence ensures that Varnish will not call director methods after the
+//! implementation is freed.
+//!
+//! ## Backend Reference Counting
+//!
+//! Backend reference counting follows these rules:
+//!
+//! 1. `VRT_Assign_Backend(&mut slot, backend)` increments the refcount of `backend`
+//! 2. `VRT_Assign_Backend(&mut slot, backend)` decrements the refcount of the old value in `slot`
+//! 3. `VRT_Assign_Backend(&mut slot, NULL)` decrements the refcount and clears `slot`
+//! 4. When refcount reaches zero, the backend may be freed by Varnish
+//!
+//! Example reference count flow:
+//!
+//! - Backend created in VCL: refcount = 1
+//! - Director calls `VRT_Assign_Backend(&slot, backend)`: refcount = 2
+//! - Director calls `VRT_Assign_Backend(&slot, NULL)`: refcount = 1
+//! - VCL discarded: refcount = 0, backend freed
+//!
+//! ## Thread Safety Requirements
+//!
+//! Director implementations must be Send and Sync. The following methods may be called
+//! concurrently:
+//!
+//! - `resolve` - Called by multiple worker threads
+//! - `healthy` - Called by worker threads and health check thread
+//!
+//! The following methods are called single-threaded:
+//!
+//! - `release` - Called during VCL_EVENT_COLD
+//! - `destroy` - Called during director destruction
+//! - `event` - Called during VCL events
+//!
+//! Appropriate synchronization must be used for any shared mutable state. Common patterns:
+//!
+//! - AtomicUsize for counters
+//! - RwLock for collections that are read frequently and written rarely
+//! - Mutex for collections with frequent writes
+//!
+//! Using RefCell will cause runtime panics when resolve is called concurrently.
+//!
+//! ## Common Implementation Errors
+//!
+//! Missing release implementation:
+//!
+//! ```ignore
+//! impl VclDirector for MyDirector {
+//!     fn resolve(&self, ctx: &mut Ctx) -> Option<VCL_BACKEND> {
+//!         self.backends.first()
+//!     }
+//!     // Missing: fn release(&self) { ... }
+//! }
+//! ```
+//!
+//! Result: Memory leak when VCL is discarded.
+//!
+//! Using RefCell for shared state:
+//!
+//! ```ignore
+//! struct MyDirector {
+//!     state: RefCell<State>,
+//! }
+//!
+//! impl VclDirector for MyDirector {
+//!     fn resolve(&self, ctx: &mut Ctx) -> Option<VCL_BACKEND> {
+//!         self.state.borrow_mut()  // Panics under concurrent access
+//!     }
+//! }
+//! ```
+//!
+//! Result: Runtime panic when multiple requests hit the director concurrently.
+//!
+//! Storing backends without refcounting:
+//!
+//! ```ignore
+//! impl MyDirector {
+//!     fn add(&mut self, be: VCL_BACKEND) {
+//!         self.backends.push(be);  // Missing VRT_Assign_Backend
+//!     }
+//! }
+//! ```
+//!
+//! Result: Backend may be freed while director still references it.
+//!
+//! Creating backends outside vcl_init:
+//!
+//! ```ignore
+//! fn process_request(ctx: &mut Ctx) {
+//!     let backend = NativeBackend::new(ctx, &config, None);  // Wrong VCL state
+//! }
+//! ```
+//!
+//! Result: Varnish may reject or crash due to VCL state machine violation.
+//!
+//! ## Recommended Practices
+//!
+//! 1. Always implement the `release` method and call `VRT_Assign_Backend(ptr, NULL)` for all backends
+//! 2. Use `BackendSet` helper to automate reference counting
+//! 3. Use lock-free atomics for simple counters
+//! 4. Use RwLock for collections that are read concurrently
+//! 5. Create backends only in vcl_init or ensure correct VCL state
+//! 6. Test VCL reload scenarios to verify correct refcounting
+//! 7. Run tests under Valgrind to detect memory leaks
+//! 8. Make the release method idempotent
 
 use std::ffi::{c_char, c_int, c_void, CString};
 use std::mem::ManuallyDrop;
