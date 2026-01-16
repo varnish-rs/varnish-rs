@@ -15,16 +15,17 @@ server s2 {
     txresp -body "s2"
 } -start
 
-# Varnish with round-robin director (no -backend since we create them dynamically)
+# Varnish with round-robin director using VCL-declared backends
 varnish v1 -vcl {
     import directors_rs from "${vmod}";
 
-    backend default none;
+    backend be1 { .host = "${s1_addr}"; .port = "${s1_port}"; }
+    backend be2 { .host = "${s2_addr}"; .port = "${s2_port}"; }
 
     sub vcl_init {
         new rr = directors_rs.round_robin();
-        rr.add_backend(name = "s1", host = "${s1_addr}", port = ${s1_port});
-        rr.add_backend(name = "s2", host = "${s2_addr}", port = ${s2_port});
+        rr.add_backend(be1);
+        rr.add_backend(be2);
     }
 
     sub vcl_recv {

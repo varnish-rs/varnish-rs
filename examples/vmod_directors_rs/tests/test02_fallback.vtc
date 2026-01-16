@@ -14,17 +14,18 @@ server s2 {
     txresp -body "fallback"
 } -start
 
-# Varnish with fallback director (no -backend since we create them dynamically)
+# Varnish with fallback director using VCL-declared backends
 varnish v1 -vcl {
     import directors_rs from "${vmod}";
 
-    backend default none;
+    backend be_primary { .host = "${s1_addr}"; .port = "${s1_port}"; }
+    backend be_backup { .host = "${s2_addr}"; .port = "${s2_port}"; }
 
     sub vcl_init {
         new fb = directors_rs.fallback();
         # Add primary first, then fallback
-        fb.add_backend(name = "primary", host = "${s1_addr}", port = ${s1_port});
-        fb.add_backend(name = "backup", host = "${s2_addr}", port = ${s2_port});
+        fb.add_backend(be_primary);
+        fb.add_backend(be_backup);
     }
 
     sub vcl_recv {

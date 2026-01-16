@@ -160,7 +160,7 @@ pub struct ParamInfo {
 }
 
 /// Represents the common function argument types. These could also be returned.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum ParamTy {
     Bool,
     Blob,
@@ -172,10 +172,11 @@ pub enum ParamTy {
     SocketAddr,
     Str,
     CStr,
+    VclType(String), // Raw VCL types like VCL_BACKEND, VCL_ACL
 }
 
 impl ParamTy {
-    pub fn to_vcc_type(self) -> &'static str {
+    pub fn to_vcc_type(&self) -> &str {
         match self {
             Self::Bool => "BOOL",
             Self::Blob => "BLOB",
@@ -185,10 +186,11 @@ impl ParamTy {
             Self::Probe | Self::ProbeCow => "PROBE",
             Self::SocketAddr => "IP",
             Self::Str | Self::CStr => "STRING",
+            Self::VclType(s) => &s[4..], // Strip "VCL_" prefix
         }
     }
 
-    pub fn to_c_type(self) -> &'static str {
+    pub fn to_c_type(&self) -> &str {
         // ATTENTION: Each VCL_* type here must also be listed in the `use varnish::...`
         //            statement in the `varnish-macros/src/generator.rs` file.
         match self {
@@ -200,11 +202,12 @@ impl ParamTy {
             Self::Probe | Self::ProbeCow => "VCL_PROBE",
             Self::SocketAddr => "VCL_IP",
             Self::Str | Self::CStr => "VCL_STRING",
+            Self::VclType(s) => s, // Return as-is
         }
     }
 
     /// User MUST use some types with `Option`
-    pub fn must_be_optional(self) -> bool {
+    pub fn must_be_optional(&self) -> bool {
         match self {
             Self::Bool
             | Self::Blob
@@ -213,13 +216,13 @@ impl ParamTy {
             | Self::I64
             | Self::Str
             | Self::CStr => false,
-            Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
+            Self::Probe | Self::ProbeCow | Self::SocketAddr | Self::VclType(_) => true,
         }
     }
 
     /// Some VCL->Rust conversions require `TryFrom` instead of `From`,
     /// e.g. if `&CStr` contains invalid UTF-8 characters and cannot be converted to `&str`.
-    pub fn use_try_from(self) -> bool {
+    pub fn use_try_from(&self) -> bool {
         match self {
             Self::Probe
             | Self::ProbeCow
@@ -229,9 +232,17 @@ impl ParamTy {
             | Self::F64
             | Self::I64
             | Self::CStr
-            | Self::Blob => false,
+            | Self::Blob
+            | Self::VclType(_) => false,
             Self::Str => true,
         }
+    }
+
+    /// Raw VCL types (VCL_BACKEND, etc.) need explicit null pointer checking
+    /// instead of using `.into()` because we can't override the blanket
+    /// `impl<T> From<T> for Option<T>` from core.
+    pub fn needs_null_check(&self) -> bool {
+        matches!(self, Self::VclType(_))
     }
 }
 

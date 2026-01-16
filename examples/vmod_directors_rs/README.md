@@ -26,11 +26,10 @@ Create a new round-robin director
 The round-robin director distributes requests evenly across all
 healthy backends in a circular fashion.
 
-#### Method `VOID <object>.add_backend(STRING name, STRING host, INT port)`
+#### Method `VOID <object>.add_backend([BACKEND be])`
 
-Add a backend to the director by host and port
+Add a backend to the director
 
-Creates a native backend and adds it to the rotation.
 Backends are selected round-robin among those that are healthy.
 
 #### Method `BACKEND <object>.backend()`
@@ -48,11 +47,10 @@ Create a new fallback director
 The fallback director returns the first healthy backend in
 priority order. Add backends in order of preference.
 
-#### Method `VOID <object>.add_backend(STRING name, STRING host, INT port)`
+#### Method `VOID <object>.add_backend([BACKEND be])`
 
-Add a backend to the director by host and port
+Add a backend to the director
 
-Creates a native backend and adds it to the fallback list.
 Backends are checked in order - the first healthy one is used.
 Add your primary backend first, then fallbacks in order.
 

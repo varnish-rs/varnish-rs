@@ -4,19 +4,25 @@
 //! in pure Rust using the `BackendSet` helper for thread-safe backend
 //! management with proper reference counting.
 //!
-//! Note: Due to current VMOD macro limitations, backends are created
-//! internally from host/port parameters rather than accepting VCL
-//! backend references directly.
+//! Backends are passed directly from VCL as `VCL_BACKEND` references,
+//! allowing idiomatic VCL usage like:
+//!
+//! ```vcl
+//! backend be1 { .host = "10.0.0.1"; .port = "80"; }
+//! backend be2 { .host = "10.0.0.2"; .port = "80"; }
+//!
+//! sub vcl_init {
+//!     new rr = directors_rs.round_robin();
+//!     rr.add_backend(be1);
+//!     rr.add_backend(be2);
+//! }
+//! ```
 
-use std::net::SocketAddr;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::SystemTime;
 
 use varnish::ffi::VCL_BACKEND;
-use varnish::vcl::{
-    BackendSet, Buffer, Ctx, Director, Endpoint, NativeBackend, NativeBackendConfig, VclDirector,
-    VclError,
-};
+use varnish::vcl::{BackendSet, Buffer, Ctx, Director, VclDirector};
 
 varnish::run_vtc_tests!("tests/*.vtc");
 
@@ -74,9 +80,6 @@ impl VclDirector for RoundRobinImpl {
 #[allow(non_camel_case_types)]
 pub struct round_robin {
     director: Director<RoundRobinImpl>,
-    /// We need to keep the native backends alive
-    #[allow(dead_code)]
-    native_backends: std::sync::RwLock<Vec<NativeBackend>>,
 }
 
 // ============================================================================
@@ -121,35 +124,6 @@ impl VclDirector for FallbackImpl {
 #[allow(non_camel_case_types)]
 pub struct fallback {
     director: Director<FallbackImpl>,
-    /// We need to keep the native backends alive
-    #[allow(dead_code)]
-    native_backends: std::sync::RwLock<Vec<NativeBackend>>,
-}
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/// Create a native backend from host and port
-fn create_native_backend(
-    ctx: &mut Ctx,
-    name: &str,
-    host: &str,
-    port: i64,
-) -> Result<NativeBackend, VclError> {
-    let ip: std::net::IpAddr = host
-        .parse()
-        .map_err(|e| format!("Invalid IP address '{}': {}", host, e))?;
-
-    let port: u16 = port
-        .try_into()
-        .map_err(|_| format!("Invalid port: {}", port))?;
-
-    let addr = SocketAddr::new(ip, port);
-    let endpoint = Endpoint::ip(addr);
-    let config = NativeBackendConfig::new(name, endpoint);
-
-    NativeBackend::new(ctx, &config, None)
 }
 
 // ============================================================================
@@ -162,7 +136,7 @@ mod directors_rs {
     use varnish::ffi::VCL_BACKEND;
     use varnish::vcl::{Ctx, Director, VclError};
 
-    use super::{create_native_backend, fallback, round_robin, FallbackImpl, RoundRobinImpl};
+    use super::{fallback, round_robin, FallbackImpl, RoundRobinImpl};
 
     // ------------------------------------------------------------------------
     // Round-Robin Director
@@ -175,33 +149,16 @@ mod directors_rs {
         /// healthy backends in a circular fashion.
         pub fn new(ctx: &mut Ctx, #[vcl_name] name: &str) -> Result<Self, VclError> {
             let director = Director::new(ctx, "round-robin", name, RoundRobinImpl::new())?;
-            Ok(round_robin {
-                director,
-                native_backends: std::sync::RwLock::new(Vec::new()),
-            })
+            Ok(round_robin { director })
         }
 
-        /// Add a backend to the director by host and port
+        /// Add a backend to the director
         ///
-        /// Creates a native backend and adds it to the rotation.
         /// Backends are selected round-robin among those that are healthy.
-        pub fn add_backend(
-            &self,
-            ctx: &mut Ctx,
-            name: &str,
-            host: &str,
-            port: i64,
-        ) -> Result<(), VclError> {
-            let backend = create_native_backend(ctx, name, host, port)?;
-            let ptr = backend.vcl_ptr();
-
-            // Store the native backend to keep it alive
-            self.native_backends.write().unwrap().push(backend);
-
-            // Add to the BackendSet
-            self.director.get_inner().backends.add(ptr);
-
-            Ok(())
+        pub fn add_backend(&self, be: Option<VCL_BACKEND>) {
+            if let Some(be) = be {
+                self.director.get_inner().backends.add(be);
+            }
         }
 
         /// Get the director backend pointer for use in VCL
@@ -226,34 +183,17 @@ mod directors_rs {
         /// priority order. Add backends in order of preference.
         pub fn new(ctx: &mut Ctx, #[vcl_name] name: &str) -> Result<Self, VclError> {
             let director = Director::new(ctx, "fallback", name, FallbackImpl::new())?;
-            Ok(fallback {
-                director,
-                native_backends: std::sync::RwLock::new(Vec::new()),
-            })
+            Ok(fallback { director })
         }
 
-        /// Add a backend to the director by host and port
+        /// Add a backend to the director
         ///
-        /// Creates a native backend and adds it to the fallback list.
         /// Backends are checked in order - the first healthy one is used.
         /// Add your primary backend first, then fallbacks in order.
-        pub fn add_backend(
-            &self,
-            ctx: &mut Ctx,
-            name: &str,
-            host: &str,
-            port: i64,
-        ) -> Result<(), VclError> {
-            let backend = create_native_backend(ctx, name, host, port)?;
-            let ptr = backend.vcl_ptr();
-
-            // Store the native backend to keep it alive
-            self.native_backends.write().unwrap().push(backend);
-
-            // Add to the BackendSet
-            self.director.get_inner().backends.add(ptr);
-
-            Ok(())
+        pub fn add_backend(&self, be: Option<VCL_BACKEND>) {
+            if let Some(be) = be {
+                self.director.get_inner().backends.add(be);
+            }
         }
 
         /// Get the director backend pointer for use in VCL

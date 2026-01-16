@@ -216,7 +216,7 @@ impl ParamType {
             if !opt && arg_ty.must_be_optional() {
                 error! { "This type of argument must be declared as optional with `Option<...>`" }
             }
-            let default = Self::get_arg_opts(pat_ty, arg_ty)?;
+            let default = Self::get_arg_opts(pat_ty, &arg_ty)?;
             let has_required = Self::get_required_attr(pat_ty)?;
             let opt = if has_required {
                 if !opt {
@@ -236,7 +236,7 @@ impl ParamType {
     }
 
     /// Try to get the default value from the #[default(...)] attribute on an argument
-    fn get_arg_opts(pat_ty: &mut PatType, arg_type: ParamTy) -> ProcResult<Value> {
+    fn get_arg_opts(pat_ty: &mut PatType, arg_type: &ParamTy) -> ProcResult<Value> {
         let Some(arg) = remove_attr(&mut pat_ty.attrs, "default") else {
             return Ok(Value::Null);
         };
@@ -333,6 +333,14 @@ impl ParamTy {
             } else if ident == "SocketAddr" {
                 return Some(Self::SocketAddr);
             }
+
+            // Check for VCL_* pattern (after existing matches)
+            let ident_str = ident.to_string();
+            if ident_str.starts_with("VCL_")
+                && ident_str.chars().all(|c| c.is_ascii_uppercase() || c == '_')
+            {
+                return Some(Self::VclType(ident_str));
+            }
         }
 
         if let Some(GenericArgument::Lifetime(_)) = as_one_gen_arg(ty, "CowProbe") {
@@ -379,23 +387,25 @@ impl OutputTy {
     }
 
     fn try_parse(ty: &Type) -> Option<Self> {
-        if let Some(ty) = ParamTy::try_parse(ty) {
-            return Some(Self::ParamType(ty));
-        }
+        // Check for VCL_* raw types first, before ParamTy parsing
+        // (ParamTy now also recognizes VCL_* types for input parameters)
         if let Some(ident) = as_simple_ty(ty) {
             if ident == "String" {
                 return Some(Self::String);
             } else if ident == "Self" {
                 return Some(Self::SelfType);
             }
-            let ident = ident.to_string();
-            if ident.starts_with("VCL_")
-                && ident
+            let ident_str = ident.to_string();
+            if ident_str.starts_with("VCL_")
+                && ident_str
                     .chars()
                     .all(|v| char::is_ascii_uppercase(&v) || v == '_')
             {
-                return Some(Self::VclType(ident));
+                return Some(Self::VclType(ident_str));
             }
+        }
+        if let Some(ty) = ParamTy::try_parse(ty) {
+            return Some(Self::ParamType(ty));
         }
         if let Some(ty) = as_option_type(ty) {
             if let Some(ident) = as_simple_ty(ty) {
