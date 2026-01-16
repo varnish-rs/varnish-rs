@@ -245,11 +245,7 @@ impl NativeBackend {
         };
 
         if ptr.0.is_null() {
-            return Err(format!(
-                "VRT_new_backend returned null for '{}'",
-                config.name
-            )
-            .into());
+            return Err(format!("VRT_new_backend returned null for '{}'", config.name).into());
         }
 
         Ok(Self { ptr })
@@ -275,11 +271,7 @@ impl NativeBackend {
     /// This queries Varnish's health status for this backend, which is determined
     /// by the probe configuration (if any).
     pub fn is_healthy(&self, ctx: &Ctx) -> bool {
-        unsafe {
-            crate::ffi::VRT_Healthy(ctx.raw, self.ptr, ptr::null_mut())
-                .0
-                != 0
-        }
+        unsafe { crate::ffi::VRT_Healthy(ctx.raw, self.ptr, ptr::null_mut()).0 != 0 }
     }
 
     /// Explicitly delete this backend

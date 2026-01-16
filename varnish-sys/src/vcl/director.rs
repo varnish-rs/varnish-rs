@@ -335,12 +335,7 @@ impl<D: VclDirector> Director<D> {
     ///
     /// # Errors
     /// Returns error if director creation fails (e.g., out of memory)
-    pub fn new(
-        ctx: &mut Ctx,
-        director_type: &str,
-        name: &str,
-        director: D,
-    ) -> VclResult<Self> {
+    pub fn new(ctx: &mut Ctx, director_type: &str, name: &str, director: D) -> VclResult<Self> {
         let mut inner = Box::new(director);
         let ctype = CString::new(director_type).map_err(|e| e.to_string())?;
         let cname = CString::new(name).map_err(|e| e.to_string())?;

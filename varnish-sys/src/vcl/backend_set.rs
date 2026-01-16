@@ -150,10 +150,7 @@ impl BackendSet {
             if inner.backends[i].0 == be.0 {
                 // Decrement refcount by assigning null
                 unsafe {
-                    ffi::VRT_Assign_Backend(
-                        &mut inner.backends[i],
-                        VCL_BACKEND(ptr::null_mut()),
-                    );
+                    ffi::VRT_Assign_Backend(&mut inner.backends[i], VCL_BACKEND(ptr::null_mut()));
                 }
 
                 inner.total_weight -= inner.weights[i];
@@ -196,9 +193,7 @@ impl BackendSet {
 
         for &be in &inner.backends {
             let mut changed = VCL_TIME(vtim_real(0.0));
-            let healthy: bool = unsafe {
-                ffi::VRT_Healthy(ctx.raw, be, &mut changed).into()
-            };
+            let healthy: bool = unsafe { ffi::VRT_Healthy(ctx.raw, be, &mut changed).into() };
             // Compare inner f64 values
             if (changed.0).0 > (latest_change.0).0 {
                 latest_change = changed;
@@ -210,8 +205,7 @@ impl BackendSet {
             }
         }
 
-        let time = SystemTime::UNIX_EPOCH
-            + std::time::Duration::from_secs_f64((latest_change.0).0);
+        let time = SystemTime::UNIX_EPOCH + std::time::Duration::from_secs_f64((latest_change.0).0);
         (false, time)
     }
 
@@ -230,9 +224,8 @@ impl BackendSet {
             .iter()
             .copied()
             .filter(|&be| {
-                let healthy: bool = unsafe {
-                    ffi::VRT_Healthy(ctx.raw, be, ptr::null_mut()).into()
-                };
+                let healthy: bool =
+                    unsafe { ffi::VRT_Healthy(ctx.raw, be, ptr::null_mut()).into() };
                 healthy
             })
             .collect()
@@ -270,9 +263,7 @@ impl BackendSet {
         // Calculate total weight of healthy backends
         let mut healthy_weight = 0.0;
         for (i, &be) in inner.backends.iter().enumerate() {
-            let healthy: bool = unsafe {
-                ffi::VRT_Healthy(ctx.raw, be, ptr::null_mut()).into()
-            };
+            let healthy: bool = unsafe { ffi::VRT_Healthy(ctx.raw, be, ptr::null_mut()).into() };
             if healthy {
                 healthy_weight += inner.weights[i];
             }
@@ -288,9 +279,7 @@ impl BackendSet {
         let mut acc = 0.0;
 
         for (i, &be) in inner.backends.iter().enumerate() {
-            let healthy: bool = unsafe {
-                ffi::VRT_Healthy(ctx.raw, be, ptr::null_mut()).into()
-            };
+            let healthy: bool = unsafe { ffi::VRT_Healthy(ctx.raw, be, ptr::null_mut()).into() };
             if healthy {
                 acc += inner.weights[i];
                 if target < acc {
@@ -301,9 +290,7 @@ impl BackendSet {
 
         // Fallback: return last healthy backend (shouldn't normally reach here)
         for &be in inner.backends.iter().rev() {
-            let healthy: bool = unsafe {
-                ffi::VRT_Healthy(ctx.raw, be, ptr::null_mut()).into()
-            };
+            let healthy: bool = unsafe { ffi::VRT_Healthy(ctx.raw, be, ptr::null_mut()).into() };
             if healthy {
                 return Some(be);
             }
@@ -341,9 +328,7 @@ impl BackendSet {
         let inner = self.inner.read().unwrap();
 
         for &be in &inner.backends {
-            let healthy: bool = unsafe {
-                ffi::VRT_Healthy(ctx.raw, be, ptr::null_mut()).into()
-            };
+            let healthy: bool = unsafe { ffi::VRT_Healthy(ctx.raw, be, ptr::null_mut()).into() };
             if healthy {
                 return Some(be);
             }
@@ -398,9 +383,7 @@ impl BackendSet {
         let mut weight = 0.0;
 
         for (i, &be) in inner.backends.iter().enumerate() {
-            let healthy: bool = unsafe {
-                ffi::VRT_Healthy(ctx.raw, be, ptr::null_mut()).into()
-            };
+            let healthy: bool = unsafe { ffi::VRT_Healthy(ctx.raw, be, ptr::null_mut()).into() };
             if healthy {
                 weight += inner.weights[i];
             }
@@ -419,9 +402,7 @@ impl BackendSet {
         let mut count = 0;
 
         for &be in &inner.backends {
-            let healthy: bool = unsafe {
-                ffi::VRT_Healthy(ctx.raw, be, ptr::null_mut()).into()
-            };
+            let healthy: bool = unsafe { ffi::VRT_Healthy(ctx.raw, be, ptr::null_mut()).into() };
             if healthy {
                 count += 1;
             }

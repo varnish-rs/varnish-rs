@@ -337,7 +337,9 @@ impl ParamTy {
             // Check for VCL_* pattern (after existing matches)
             let ident_str = ident.to_string();
             if ident_str.starts_with("VCL_")
-                && ident_str.chars().all(|c| c.is_ascii_uppercase() || c == '_')
+                && ident_str
+                    .chars()
+                    .all(|c| c.is_ascii_uppercase() || c == '_')
             {
                 return Some(Self::VclType(ident_str));
             }
