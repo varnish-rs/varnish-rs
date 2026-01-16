@@ -1,0 +1,101 @@
+varnishtest "VCL reload/discard - verify proper reference counting"
+
+# This test verifies that directors properly release backend references
+# when VCL is discarded. Improper refcounting would cause crashes or leaks.
+
+server s1 -repeat 5 {
+    rxreq
+    txresp -body "s1"
+} -start
+
+server s2 -repeat 5 {
+    rxreq
+    txresp -body "s2"
+} -start
+
+# Start varnish with initial VCL containing a director
+varnish v1 -vcl {
+    import directors_rs from "${vmod}";
+
+    backend be1 { .host = "${s1_addr}"; .port = "${s1_port}"; }
+    backend be2 { .host = "${s2_addr}"; .port = "${s2_port}"; }
+
+    sub vcl_init {
+        new rr = directors_rs.round_robin();
+        rr.add_backend(be1);
+        rr.add_backend(be2);
+    }
+
+    sub vcl_recv {
+        set req.backend_hint = rr.backend();
+        return (pass);
+    }
+} -start
+
+# Verify it works
+client c1 {
+    txreq
+    rxresp
+    expect resp.status == 200
+} -run
+
+# Load a new VCL without the director
+varnish v1 -vcl {
+    backend be1 { .host = "${s1_addr}"; .port = "${s1_port}"; }
+
+    sub vcl_recv {
+        set req.backend_hint = be1;
+        return (pass);
+    }
+}
+
+# Use the new VCL
+varnish v1 -cliok "vcl.use vcl2"
+
+# Wait for old VCL to become cold
+delay 0.5
+
+# Discard the old VCL - this triggers director cleanup
+# If refcounting is broken, this will crash or hang
+varnish v1 -cliok "vcl.discard vcl1"
+
+# Verify varnish is still healthy
+client c2 {
+    txreq
+    rxresp
+    expect resp.status == 200
+    expect resp.body == "s1"
+} -run
+
+# Load another VCL with a director to verify we can still create directors
+varnish v1 -vcl {
+    import directors_rs from "${vmod}";
+
+    backend be1 { .host = "${s1_addr}"; .port = "${s1_port}"; }
+    backend be2 { .host = "${s2_addr}"; .port = "${s2_port}"; }
+
+    sub vcl_init {
+        new fb = directors_rs.fallback();
+        fb.add_backend(be1);
+        fb.add_backend(be2);
+    }
+
+    sub vcl_recv {
+        set req.backend_hint = fb.backend();
+        return (pass);
+    }
+}
+
+varnish v1 -cliok "vcl.use vcl3"
+
+# Wait for old VCL to become cold
+delay 0.5
+
+varnish v1 -cliok "vcl.discard vcl2"
+
+# Final verification
+client c3 {
+    txreq
+    rxresp
+    expect resp.status == 200
+} -run

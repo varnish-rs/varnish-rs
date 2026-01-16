@@ -1,9 +1,17 @@
 #[cfg(not(varnishsys_6))]
 mod backend;
+#[cfg(not(varnishsys_6))]
+mod backend_set;
 mod convert;
 mod ctx;
+#[cfg(not(varnishsys_6))]
+mod director;
+#[cfg(not(varnishsys_6))]
+mod endpoint;
 mod error;
 mod http;
+#[cfg(not(varnishsys_6))]
+mod native_backend;
 mod probe;
 #[cfg(not(varnishsys_6))]
 mod processor;
@@ -14,10 +22,18 @@ mod ws_str_buffer;
 
 #[cfg(not(varnishsys_6))]
 pub use backend::*;
+#[cfg(not(varnishsys_6))]
+pub use backend_set::*;
 pub use convert::*;
 pub use ctx::*;
+#[cfg(not(varnishsys_6))]
+pub use director::*;
+#[cfg(not(varnishsys_6))]
+pub use endpoint::*;
 pub use error::*;
 pub use http::*;
+#[cfg(not(varnishsys_6))]
+pub use native_backend::*;
 pub use probe::*;
 #[cfg(not(varnishsys_6))]
 pub use processor::*;

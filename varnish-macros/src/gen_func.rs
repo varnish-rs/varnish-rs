@@ -28,7 +28,7 @@ pub struct FuncProcessor {
     func_needs_ctx: bool,
 
     /// C function list of arguments for funcs with no optional args, e.g. `["VCL_INT", "VCL_STRING"]`
-    cproto_wrapper_args: Vec<&'static str>,
+    cproto_wrapper_args: Vec<String>,
     /// For optional arguments, params to go into the C header, i.e. `[ {c_char valid_arg0}, {VCL_INT arg1} ]`
     cproto_opt_arg_decl: Vec<String>,
     /// For optional arguments, params to go into `args` struct, i.e. `[ {valid_arg0: c_char}, {arg1: VCL_INT} ]`
@@ -302,7 +302,11 @@ impl FuncProcessor {
             }
             ParamType::Value(pi) => {
                 // Convert all other C arg types into a Rust arg, and pass it to the user's function
-                let mut input_expr = if pi.ty_info.use_try_from() {
+                let mut input_expr = if pi.ty_info.needs_null_check() {
+                    // Raw VCL types need explicit null check since we can't override
+                    // the blanket `impl<T> From<T> for Option<T>` from core
+                    quote! { if #arg_value.0.is_null() { None } else { Some(#arg_value) } }
+                } else if pi.ty_info.use_try_from() {
                     quote! { #arg_value.try_into()? }
                 } else {
                     quote! { #arg_value.into() }
@@ -351,11 +355,11 @@ impl FuncProcessor {
         }
     }
 
-    fn add_cproto_arg(&mut self, func_info: &FuncInfo, ctype: &'static str, arg_name: &str) {
+    fn add_cproto_arg(&mut self, func_info: &FuncInfo, ctype: &str, arg_name: &str) {
         if func_info.has_optional_args {
             self.cproto_opt_arg_decl.push(format!("{ctype} {arg_name}"));
         } else {
-            self.cproto_wrapper_args.push(ctype);
+            self.cproto_wrapper_args.push(ctype.to_string());
         }
     }
 

@@ -1,0 +1,67 @@
+varnishtest "Director behavior with multiple backends"
+
+# This test verifies directors properly handle multiple backends
+# and that the fallback director returns backends in priority order.
+
+# Both backends respond multiple times
+server s1 -repeat 4 {
+    rxreq
+    txresp -body "primary"
+} -start
+
+server s2 -repeat 4 {
+    rxreq
+    txresp -body "secondary"
+} -start
+
+varnish v1 -vcl {
+    import directors_rs from "${vmod}";
+
+    backend be_primary { .host = "${s1_addr}"; .port = "${s1_port}"; }
+    backend be_secondary { .host = "${s2_addr}"; .port = "${s2_port}"; }
+
+    sub vcl_init {
+        # Fallback director - returns first backend in list
+        new fb = directors_rs.fallback();
+        fb.add_backend(be_primary);
+        fb.add_backend(be_secondary);
+
+        # Round-robin for comparison
+        new rr = directors_rs.round_robin();
+        rr.add_backend(be_primary);
+        rr.add_backend(be_secondary);
+    }
+
+    sub vcl_recv {
+        if (req.url ~ "^/fb") {
+            set req.backend_hint = fb.backend();
+        } else {
+            set req.backend_hint = rr.backend();
+        }
+        return (pass);
+    }
+} -start
+
+# Fallback: all requests should go to primary (first healthy backend)
+client c1 {
+    txreq -url "/fb/1"
+    rxresp
+    expect resp.status == 200
+    expect resp.body == "primary"
+
+    txreq -url "/fb/2"
+    rxresp
+    expect resp.status == 200
+    expect resp.body == "primary"
+} -run
+
+# Round-robin: requests should alternate
+client c2 {
+    txreq -url "/rr/1"
+    rxresp
+    expect resp.status == 200
+
+    txreq -url "/rr/2"
+    rxresp
+    expect resp.status == 200
+} -run

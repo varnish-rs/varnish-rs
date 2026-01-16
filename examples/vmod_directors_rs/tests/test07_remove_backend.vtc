@@ -1,0 +1,81 @@
+varnishtest "Dynamic backend removal test"
+
+# Start two backend servers
+server s1 -repeat 5 {
+    rxreq
+    txresp -body "s1"
+} -start
+
+server s2 -repeat 5 {
+    rxreq
+    txresp -body "s2"
+} -start
+
+# Varnish with round-robin director that supports dynamic removal
+varnish v1 -vcl {
+    import directors_rs from "${vmod}";
+
+    backend be1 { .host = "${s1_addr}"; .port = "${s1_port}"; }
+    backend be2 { .host = "${s2_addr}"; .port = "${s2_port}"; }
+
+    sub vcl_init {
+        new rr = directors_rs.round_robin();
+        rr.add_backend(be1);
+        rr.add_backend(be2);
+    }
+
+    sub vcl_recv {
+        # Remove be1 when triggered by header
+        if (req.http.X-Remove-Be1 == "true") {
+            if (rr.remove_backend(be1)) {
+                set req.http.X-Removed = "be1";
+            }
+        }
+        set req.backend_hint = rr.backend();
+        return (pass);
+    }
+
+    sub vcl_deliver {
+        set resp.http.X-Backend-Count = rr.count();
+        if (req.http.X-Removed) {
+            set resp.http.X-Removed = req.http.X-Removed;
+        }
+    }
+} -start
+
+# Initial state: 2 backends, requests go to both
+client c1 {
+    txreq
+    rxresp
+    expect resp.http.X-Backend-Count == "2"
+
+    txreq
+    rxresp
+    expect resp.http.X-Backend-Count == "2"
+} -run
+
+# Remove be1 - should return true and count should be 1
+client c2 {
+    txreq -hdr "X-Remove-Be1: true"
+    rxresp
+    expect resp.http.X-Backend-Count == "1"
+    expect resp.http.X-Removed == "be1"
+} -run
+
+# Now all requests should go to s2 only
+client c3 {
+    txreq
+    rxresp
+    expect resp.body == "s2"
+    expect resp.http.X-Backend-Count == "1"
+
+    txreq
+    rxresp
+    expect resp.body == "s2"
+    expect resp.http.X-Backend-Count == "1"
+
+    txreq
+    rxresp
+    expect resp.body == "s2"
+    expect resp.http.X-Backend-Count == "1"
+} -run
