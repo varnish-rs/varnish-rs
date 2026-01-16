@@ -1,0 +1,53 @@
+varnishtest "Round-robin director test"
+
+# Start two backend servers
+server s1 {
+    rxreq
+    txresp -body "s1"
+    rxreq
+    txresp -body "s1"
+} -start
+
+server s2 {
+    rxreq
+    txresp -body "s2"
+    rxreq
+    txresp -body "s2"
+} -start
+
+# Varnish with round-robin director (no -backend since we create them dynamically)
+varnish v1 -vcl {
+    import directors_rs from "${vmod}";
+
+    backend default none;
+
+    sub vcl_init {
+        new rr = directors_rs.round_robin();
+        rr.add_backend(name = "s1", host = "${s1_addr}", port = ${s1_port});
+        rr.add_backend(name = "s2", host = "${s2_addr}", port = ${s2_port});
+    }
+
+    sub vcl_recv {
+        set req.backend_hint = rr.backend();
+        return (pass);
+    }
+} -start
+
+# Test round-robin distribution
+client c1 {
+    txreq
+    rxresp
+    expect resp.body == "s1"
+
+    txreq
+    rxresp
+    expect resp.body == "s2"
+
+    txreq
+    rxresp
+    expect resp.body == "s1"
+
+    txreq
+    rxresp
+    expect resp.body == "s2"
+} -run

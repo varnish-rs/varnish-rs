@@ -1,0 +1,14 @@
+[package]
+name = "vmod_directors_rs"
+version = "0.0.0"
+publish = false
+edition.workspace = true
+
+[dependencies]
+varnish.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[lints]
+workspace = true

@@ -1,5 +1,7 @@
 #[cfg(not(varnishsys_6))]
 mod backend;
+#[cfg(not(varnishsys_6))]
+mod backend_set;
 mod convert;
 mod ctx;
 #[cfg(not(varnishsys_6))]
@@ -20,6 +22,8 @@ mod ws_str_buffer;
 
 #[cfg(not(varnishsys_6))]
 pub use backend::*;
+#[cfg(not(varnishsys_6))]
+pub use backend_set::*;
 pub use convert::*;
 pub use ctx::*;
 #[cfg(not(varnishsys_6))]

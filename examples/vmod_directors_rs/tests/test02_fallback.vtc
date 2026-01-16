@@ -1,0 +1,45 @@
+varnishtest "Fallback director test"
+
+# Primary backend
+server s1 {
+    rxreq
+    txresp -body "primary"
+    rxreq
+    txresp -body "primary"
+} -start
+
+# Fallback backend
+server s2 {
+    rxreq
+    txresp -body "fallback"
+} -start
+
+# Varnish with fallback director (no -backend since we create them dynamically)
+varnish v1 -vcl {
+    import directors_rs from "${vmod}";
+
+    backend default none;
+
+    sub vcl_init {
+        new fb = directors_rs.fallback();
+        # Add primary first, then fallback
+        fb.add_backend(name = "primary", host = "${s1_addr}", port = ${s1_port});
+        fb.add_backend(name = "backup", host = "${s2_addr}", port = ${s2_port});
+    }
+
+    sub vcl_recv {
+        set req.backend_hint = fb.backend();
+        return (pass);
+    }
+} -start
+
+# Test that primary is always used when healthy
+client c1 {
+    txreq
+    rxresp
+    expect resp.body == "primary"
+
+    txreq
+    rxresp
+    expect resp.body == "primary"
+} -run
