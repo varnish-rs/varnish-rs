@@ -46,10 +46,11 @@
 //! ```
 
 use std::ffi::{c_char, c_int, c_void, CString};
+use std::mem::ManuallyDrop;
 use std::ptr;
 use std::time::SystemTime;
 
-use crate::ffi::{VclEvent, VCL_BACKEND, VCL_BOOL, VCL_TIME};
+use crate::ffi::{vtim_real, VclEvent, VCL_BACKEND, VCL_BOOL, VCL_TIME};
 use crate::vcl::{Buffer, Ctx, VclResult};
 use crate::{ffi, validate_director};
 
@@ -125,7 +126,10 @@ pub struct Director<D: VclDirector> {
     ptr: VCL_BACKEND,
     #[expect(dead_code)]
     methods: Box<ffi::vdi_methods>,
-    inner: Box<D>,
+    /// Wrapped in ManuallyDrop to ensure VRT_DelDirector is called before
+    /// the inner director is dropped. This prevents use-after-free if Varnish
+    /// calls director methods during VRT_DelDirector.
+    inner: ManuallyDrop<Box<D>>,
     #[expect(dead_code)]
     ctype: CString,
 }
@@ -187,7 +191,7 @@ impl<D: VclDirector> Director<D> {
         Ok(Self {
             ptr,
             methods,
-            inner,
+            inner: ManuallyDrop::new(inner),
             ctype,
         })
     }
@@ -209,8 +213,13 @@ impl<D: VclDirector> Director<D> {
 
 impl<D: VclDirector> Drop for Director<D> {
     fn drop(&mut self) {
+        // SAFETY: We must call VRT_DelDirector first to unregister the director
+        // from Varnish before dropping inner. This ensures Varnish won't call
+        // director methods after the inner implementation is freed.
         unsafe {
             ffi::VRT_DelDirector(&raw mut self.ptr);
+            // Now safe to drop inner - Varnish has finished with the director
+            ManuallyDrop::drop(&mut self.inner);
         }
     }
 }
@@ -249,7 +258,8 @@ unsafe extern "C" fn wrap_healthy<D: VclDirector>(
 
     let (healthy, when) = director.healthy(&mut ctx);
     if !changed.is_null() {
-        *changed = when.try_into().unwrap(); // FIXME: on error?
+        // Fall back to UNIX_EPOCH (0.0) if conversion fails (e.g., time before epoch)
+        *changed = when.try_into().unwrap_or(VCL_TIME(vtim_real(0.0)));
     }
     healthy.into()
 }

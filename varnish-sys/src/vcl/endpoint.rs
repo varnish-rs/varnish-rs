@@ -91,14 +91,21 @@ impl Endpoint {
     }
 
     /// Set both IPv4 and IPv6 addresses for dual-stack support
-    pub fn dual_stack(ipv4: SocketAddr, ipv6: SocketAddr) -> Self {
-        assert!(ipv4.is_ipv4(), "First argument must be IPv4");
-        assert!(ipv6.is_ipv6(), "Second argument must be IPv6");
-        Self {
+    ///
+    /// # Errors
+    /// Returns an error if `ipv4` is not an IPv4 address or `ipv6` is not an IPv6 address.
+    pub fn dual_stack(ipv4: SocketAddr, ipv6: SocketAddr) -> Result<Self, &'static str> {
+        if !ipv4.is_ipv4() {
+            return Err("First argument must be IPv4");
+        }
+        if !ipv6.is_ipv6() {
+            return Err("Second argument must be IPv6");
+        }
+        Ok(Self {
             ipv4: Some(ipv4),
             ipv6: Some(ipv6),
             ..Default::default()
-        }
+        })
     }
 
     /// Add a PROXY protocol preamble to the endpoint
@@ -195,9 +202,19 @@ mod tests {
     fn test_endpoint_dual_stack() {
         let v4: SocketAddr = "127.0.0.1:8080".parse().unwrap();
         let v6: SocketAddr = "[::1]:8080".parse().unwrap();
-        let ep = Endpoint::dual_stack(v4, v6);
+        let ep = Endpoint::dual_stack(v4, v6).unwrap();
         assert_eq!(ep.ipv4, Some(v4));
         assert_eq!(ep.ipv6, Some(v6));
+    }
+
+    #[test]
+    fn test_endpoint_dual_stack_invalid() {
+        let v4: SocketAddr = "127.0.0.1:8080".parse().unwrap();
+        let v6: SocketAddr = "[::1]:8080".parse().unwrap();
+        // Wrong order should fail
+        assert!(Endpoint::dual_stack(v6, v4).is_err());
+        // Same type for both should fail
+        assert!(Endpoint::dual_stack(v4, v4).is_err());
     }
 
     #[test]
