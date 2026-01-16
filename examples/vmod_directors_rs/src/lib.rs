@@ -161,6 +161,17 @@ mod directors_rs {
             }
         }
 
+        /// Remove a backend from the director
+        ///
+        /// Returns true if the backend was found and removed, false otherwise.
+        pub fn remove_backend(&self, be: Option<VCL_BACKEND>) -> bool {
+            if let Some(be) = be {
+                self.director.get_inner().backends.remove(be)
+            } else {
+                false
+            }
+        }
+
         /// Get the director backend pointer for use in VCL
         pub unsafe fn backend(&self) -> VCL_BACKEND {
             self.director.vcl_ptr()
@@ -193,6 +204,17 @@ mod directors_rs {
         pub fn add_backend(&self, be: Option<VCL_BACKEND>) {
             if let Some(be) = be {
                 self.director.get_inner().backends.add(be);
+            }
+        }
+
+        /// Remove a backend from the director
+        ///
+        /// Returns true if the backend was found and removed, false otherwise.
+        pub fn remove_backend(&self, be: Option<VCL_BACKEND>) -> bool {
+            if let Some(be) = be {
+                self.director.get_inner().backends.remove(be)
+            } else {
+                false
             }
         }
 

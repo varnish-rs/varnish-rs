@@ -1,0 +1,45 @@
+varnishtest "Native backend with health probe"
+
+# Backend server that responds to health probes and regular requests
+# Use -repeat to handle multiple connections (probes close connections)
+server s1 -repeat 10 {
+    rxreq
+    txresp -status 200
+} -start
+
+# Varnish with native backend using health probe
+varnish v1 -vcl+backend {
+    import native_be from "${vmod}";
+
+    sub vcl_init {
+        new mybackend = native_be.backend(
+            host = "${s1_addr}",
+            port = ${s1_port},
+            probe_url = "/health",
+            probe_interval = 1.0,
+            probe_timeout = 0.5,
+            probe_window = 3,
+            probe_threshold = 2,
+            probe_initial = 2
+        );
+    }
+
+    sub vcl_recv {
+        set req.backend_hint = mybackend.backend();
+        return (pass);
+    }
+} -start
+
+# Wait for probe to run and backend to become healthy
+delay 1.5
+
+# Verify backend is healthy via CLI
+varnish v1 -cliok "backend.list"
+varnish v1 -cliexpect "healthy" "backend.list"
+
+# Make a request through the backend
+client c1 {
+    txreq -url "/test"
+    rxresp
+    expect resp.status == 200
+} -run

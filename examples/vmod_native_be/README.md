@@ -19,7 +19,7 @@ import native_be;
 import native_be from "path/to/libnative_be.so";
 ```
 
-### Constructor `native_be.backend(STRING host, INT port)`
+### Constructor `native_be.backend(STRING host, INT port, [STRING probe_url], [REAL probe_interval], [REAL probe_timeout], [INT probe_window], [INT probe_threshold], [INT probe_initial])`
 
 Create a new native backend
 
@@ -27,6 +27,12 @@ Create a new native backend
 * `name` - Automatically supplied VCL name
 * `host` - Backend host (IP address)
 * `port` - Backend port
+* `probe_url` - Optional URL path for health probe (e.g., "/health")
+* `probe_interval` - Seconds between probe requests (default: 5.0)
+* `probe_timeout` - Seconds before probe times out (default: 2.0)
+* `probe_window` - Number of probes in sliding window (default: 8)
+* `probe_threshold` - Minimum healthy probes in window (default: 3)
+* `probe_initial` - Initial healthy probe count (default: same as threshold)
 
 #### Method `BACKEND <object>.backend()`
 

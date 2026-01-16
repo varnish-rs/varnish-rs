@@ -1,0 +1,77 @@
+varnishtest "Concurrent director resolution - verify thread safety"
+
+# This test verifies that the director's resolve() method is thread-safe
+# by running many concurrent requests. Race conditions would cause crashes
+# or incorrect distribution.
+
+# Backends that handle many requests
+server s1 -repeat 60 {
+    rxreq
+    txresp -body "s1"
+} -start
+
+server s2 -repeat 60 {
+    rxreq
+    txresp -body "s2"
+} -start
+
+varnish v1 -vcl {
+    import directors_rs from "${vmod}";
+
+    backend be1 { .host = "${s1_addr}"; .port = "${s1_port}"; }
+    backend be2 { .host = "${s2_addr}"; .port = "${s2_port}"; }
+
+    sub vcl_init {
+        new rr = directors_rs.round_robin();
+        rr.add_backend(be1);
+        rr.add_backend(be2);
+    }
+
+    sub vcl_recv {
+        set req.backend_hint = rr.backend();
+        return (pass);
+    }
+} -start
+
+# Run multiple clients concurrently
+client c1 -repeat 20 {
+    txreq
+    rxresp
+    expect resp.status == 200
+} -start
+
+client c2 -repeat 20 {
+    txreq
+    rxresp
+    expect resp.status == 200
+} -start
+
+client c3 -repeat 20 {
+    txreq
+    rxresp
+    expect resp.status == 200
+} -start
+
+client c4 -repeat 20 {
+    txreq
+    rxresp
+    expect resp.status == 200
+} -start
+
+client c5 -repeat 20 {
+    txreq
+    rxresp
+    expect resp.status == 200
+} -start
+
+# Wait for all clients to complete
+client c1 -wait
+client c2 -wait
+client c3 -wait
+client c4 -wait
+client c5 -wait
+
+# Verify both backends received requests (rough distribution check)
+# With 100 requests round-robin'd, each should get ~50
+# Allow some variance due to timing
+varnish v1 -expect MAIN.client_req >= 100

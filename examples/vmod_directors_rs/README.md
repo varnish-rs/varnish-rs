@@ -32,6 +32,12 @@ Add a backend to the director
 
 Backends are selected round-robin among those that are healthy.
 
+#### Method `BOOL <object>.remove_backend([BACKEND be])`
+
+Remove a backend from the director
+
+Returns true if the backend was found and removed, false otherwise.
+
 #### Method `BACKEND <object>.backend()`
 
 Get the director backend pointer for use in VCL
@@ -53,6 +59,12 @@ Add a backend to the director
 
 Backends are checked in order - the first healthy one is used.
 Add your primary backend first, then fallbacks in order.
+
+#### Method `BOOL <object>.remove_backend([BACKEND be])`
+
+Remove a backend from the director
+
+Returns true if the backend was found and removed, false otherwise.
 
 #### Method `BACKEND <object>.backend()`
 

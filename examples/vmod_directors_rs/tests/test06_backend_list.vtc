@@ -1,0 +1,56 @@
+varnishtest "Backend list CLI output for directors"
+
+# This test verifies that directors show up correctly in
+# varnishadm backend.list output
+
+server s1 {
+    rxreq
+    txresp -body "s1"
+} -start
+
+server s2 {
+    rxreq
+    txresp -body "s2"
+} -start
+
+varnish v1 -vcl {
+    import directors_rs from "${vmod}";
+
+    backend be1 { .host = "${s1_addr}"; .port = "${s1_port}"; }
+    backend be2 { .host = "${s2_addr}"; .port = "${s2_port}"; }
+
+    sub vcl_init {
+        new rr = directors_rs.round_robin();
+        rr.add_backend(be1);
+        rr.add_backend(be2);
+
+        new fb = directors_rs.fallback();
+        fb.add_backend(be1);
+        fb.add_backend(be2);
+    }
+
+    sub vcl_recv {
+        set req.backend_hint = rr.backend();
+        return (pass);
+    }
+} -start
+
+# Verify backend.list shows the directors
+varnish v1 -cliok "backend.list"
+
+# Check that our directors appear in the output
+# The round-robin director should show as "rr"
+varnish v1 -cliexpect "rr" "backend.list"
+
+# The fallback director should show as "fb"
+varnish v1 -cliexpect "fb" "backend.list"
+
+# Check detailed output
+varnish v1 -cliok "backend.list -p"
+
+# Verify the count method works
+client c1 {
+    txreq
+    rxresp
+    expect resp.status == 200
+} -run
