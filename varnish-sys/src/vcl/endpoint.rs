@@ -160,8 +160,6 @@ impl Endpoint {
             ipv6,
             uds_path,
             preamble,
-            sslflags: 0,
-            hosthdr: ptr::null(),
         })?;
 
         Ok(ptr::from_ref(endpoint))
