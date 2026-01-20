@@ -15,6 +15,12 @@ mod vcl_returns {
         };
         use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
         use super::*;
+        unsafe extern "C" fn vmod_c_arg_vcl_backend(
+            __ctx: *mut vrt_ctx,
+            backend: VCL_BACKEND,
+        ) {
+            super::arg_vcl_backend(backend.into())
+        }
         unsafe extern "C" fn vmod_c_val_acl(__ctx: *mut vrt_ctx) -> VCL_ACL {
             super::val_acl()
         }
@@ -314,6 +320,9 @@ mod vcl_returns {
         }
         #[repr(C)]
         pub struct VmodExports {
+            vmod_c_arg_vcl_backend: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, backend: VCL_BACKEND),
+            >,
             vmod_c_val_acl: Option<unsafe extern "C" fn(__ctx: *mut vrt_ctx) -> VCL_ACL>,
             vmod_c_res_acl: Option<unsafe extern "C" fn(__ctx: *mut vrt_ctx) -> VCL_ACL>,
             vmod_c_val_backend: Option<
@@ -425,6 +434,7 @@ mod vcl_returns {
             vmod_c_res_vcl: Option<unsafe extern "C" fn(__ctx: *mut vrt_ctx) -> VCL_VCL>,
         }
         pub static VMOD_EXPORTS: VmodExports = VmodExports {
+            vmod_c_arg_vcl_backend: Some(vmod_c_arg_vcl_backend),
             vmod_c_val_acl: Some(vmod_c_val_acl),
             vmod_c_res_acl: Some(vmod_c_res_acl),
             vmod_c_val_backend: Some(vmod_c_val_backend),
@@ -474,7 +484,7 @@ mod vcl_returns {
         pub static Vmod_vcl_returns_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"a6876b707a04e5bc7badd29339d22abb0b7ae46d62d946fbfbc5882f6d37eeed"
+            file_id: c"497ee393f05b7e8c4bc0c40f54c54a6a0dc57f82658aab2708f62af6ecb41d9d"
                 .as_ptr(),
             name: c"vcl_returns".as_ptr(),
             func_name: c"Vmod_vmod_vcl_returns_Func".as_ptr(),
@@ -494,6 +504,7 @@ mod vcl_returns {
         VCL_REAL, VCL_REGEX, VCL_STEVEDORE, VCL_STRANDS, VCL_STRING, VCL_SUB, VCL_TIME,
         VCL_VCL,
     };
+    pub fn arg_vcl_backend(backend: VCL_BACKEND) {}
     pub unsafe fn val_acl() -> VCL_ACL {
         VCL_ACL::default()
     }
