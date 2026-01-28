@@ -216,7 +216,6 @@ impl ParamTy {
             | Self::I64
             | Self::Str
             | Self::CStr => false,
-            Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
             Self::BackendRef | Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
         }
     }
