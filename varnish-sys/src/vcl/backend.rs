@@ -114,6 +114,11 @@ impl<S: VclBackend<T>, T: VclResponse> Backend<S, T> {
         self.bep
     }
 
+    /// Return a [`BackendRef`] for this backend.
+    pub fn as_backend_ref(&self) -> BackendRef {
+        BackendRef::new(self.bep).expect("Backend pointer should never be null")
+    }
+
     /// Create a new builder, wrapping the `inner` structure (that implements [`VclBackend`]),
     /// calling the backend `backend_id`. If the backend has a probe attached to it, set `has_probe` to
     /// true.
@@ -664,8 +669,7 @@ unsafe extern "C" fn wrap_director_resolve<D: VclDirector>(
     let dir_impl: &D = &*dir.priv_.cast::<D>();
     dir_impl
         .resolve(&mut ctx, director)
-        .map(|backend_ref| backend_ref.raw())
-        .unwrap_or(VCL_BACKEND(null()))
+        .map_or(VCL_BACKEND(null()), |backend_ref| backend_ref.raw())
 }
 
 unsafe extern "C" fn wrap_director_healthy<D: VclDirector>(
@@ -728,7 +732,7 @@ pub struct Director<D: VclDirector> {
 }
 
 impl<D: VclDirector> Director<D> {
-    /// Create a new director by calling VRT_AddDirector
+    /// Create a new director by calling `VRT_AddDirector`
     ///
     /// This registers the director with Varnish and sets up the appropriate callbacks.
     /// The director will be automatically unregistered when dropped.
@@ -776,9 +780,9 @@ impl<D: VclDirector> Director<D> {
         }
         Ok(Director {
             inner,
-            ctype,
-            director_impl,
             methods,
+            director_impl,
+            ctype,
         })
     }
 
@@ -794,7 +798,7 @@ impl<D: VclDirector> Director<D> {
 
     /// Get the raw C backend pointer
     pub fn raw(&self) -> VCL_BACKEND {
-        self.inner.clone()
+        self.inner
     }
 
     /// Get the VCL name of this director
@@ -807,7 +811,7 @@ impl<D: VclDirector> Director<D> {
         }
     }
 
-    /// Resolve this director to a backend using VRT_DirectorResolve
+    /// Resolve this director to a backend using `VRT_DirectorResolve`
     ///
     /// This calls into Varnish's resolution mechanism, which will invoke
     /// the director's `resolve` method if needed.
@@ -815,7 +819,7 @@ impl<D: VclDirector> Director<D> {
         unsafe { ffi::VRT_DirectorResolve(ctx.raw, self.inner) }
     }
 
-    /// Check if this director is healthy using VRT_Healthy
+    /// Check if this director is healthy using `VRT_Healthy`
     pub fn healthy(&self, ctx: &Ctx) -> ProbeResult {
         let mut changed: VCL_TIME = VCL_TIME::default();
         let healthy = unsafe { ffi::VRT_Healthy(ctx.raw, self.inner, &raw mut changed).into() };
@@ -824,6 +828,11 @@ impl<D: VclDirector> Director<D> {
             healthy,
             last_changed,
         }
+    }
+
+    /// Return a [`BackendRef`] for this director.
+    pub fn as_backend_ref(&self) -> BackendRef {
+        BackendRef::new(self.inner).expect("Director pointer should never be null")
     }
 }
 
@@ -892,7 +901,7 @@ impl BackendRef {
 
     pub fn raw(&self) -> VCL_BACKEND {
         // need to clone, we'll clear inner on drop
-        self.inner.clone()
+        self.inner
     }
 }
 
