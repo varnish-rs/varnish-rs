@@ -390,6 +390,16 @@ impl TryFrom<SystemTime> for VCL_TIME {
     }
 }
 
+impl TryFrom<VCL_TIME> for SystemTime {
+    type Error = VclError;
+
+    fn try_from(value: VCL_TIME) -> Result<Self, Self::Error> {
+        SystemTime::UNIX_EPOCH
+            .checked_add(Duration::from_secs_f64(value.0 .0))
+            .ok_or_else(|| VclError::new("Time value out of range".to_string()))
+    }
+}
+
 // VCL_VCL
 default_null_ptr!(mut VCL_VCL);
 
