@@ -1,5 +1,5 @@
 [package]
-name = "vmod_backend_ref"
+name = "vmod_round_robin"
 version = "0.0.0"
 publish = false
 edition.workspace = true
