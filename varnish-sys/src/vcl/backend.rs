@@ -764,6 +764,10 @@ impl<D: VclDirector> Director<D> {
             return Err(format!("VRT_AddDirector returned null while creating {vcl_name}").into());
         }
 
+
+        unsafe {
+        assert_eq!((*inner.0).magic, ffi::DIRECTOR_MAGIC);
+        }
         Ok(Director {
             inner,
             ctype,
@@ -784,7 +788,7 @@ impl<D: VclDirector> Director<D> {
 
     /// Get the raw C backend pointer
     pub fn raw(&self) -> VCL_BACKEND {
-        self.inner
+        self.inner.clone()
     }
 
     /// Get the VCL name of this director
@@ -829,10 +833,9 @@ impl BackendRef {
             return None;
         }
         unsafe {
-            let dir = *inner.0;
+            let dir = inner.0.as_ref()?;
             assert_eq!(dir.magic, ffi::DIRECTOR_MAGIC);
-            assert!(!dir.vdir.is_null());
-            let mut vdir = *dir.vdir;
+            let vdir = dir.vdir.as_mut().expect("vdir can't be null");
             assert_eq!(vdir.magic, ffi::VCLDIR_MAGIC);
             if vdir.flags & ffi::VDIR_FLG_NOREFCNT == 0 {
                 ffi::Lck__Lock(
@@ -870,7 +873,8 @@ impl BackendRef {
     }
 
     pub fn raw(&self) -> VCL_BACKEND {
-        self.inner
+        // need to clone, we'll clear inner on drop
+        self.inner.clone()
     }
 }
 
@@ -884,6 +888,8 @@ impl Clone for BackendRef {
 impl Drop for BackendRef {
     fn drop(&mut self) {
         assert!(!self.inner.0.is_null());
+        // Safety: this is a bit silly, but need to preserve self.inner in case it was passed on to someone
+        // else.
         unsafe {
             ffi::VRT_Assign_Backend(&raw mut self.inner, VCL_BACKEND(null()));
         };

@@ -115,9 +115,6 @@ macro_rules! from_vcl_to_opt_rust {
 // VCL_ACL
 default_null_ptr!(VCL_ACL);
 
-// VCL_BACKEND
-default_null_ptr!(VCL_BACKEND);
-
 // VCL_BLOB
 default_null_ptr!(VCL_BLOB);
 impl From<VCL_BLOB> for &[u8] {
@@ -395,6 +392,9 @@ impl TryFrom<SystemTime> for VCL_TIME {
 
 // VCL_VCL
 default_null_ptr!(mut VCL_VCL);
+
+// VCL_BACKEND
+default_null_ptr!(VCL_BACKEND);
 
 impl IntoVCL<VCL_BACKEND> for BackendRef {
     fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
