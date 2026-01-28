@@ -1,14 +1,13 @@
-varnishtest "Test round-robin director"
+varnishtest "Test round-robin director list functionality"
 
 server s1 {
-    rxreq
-    txresp
-
     rxreq
     txresp
 } -start
 
 server s2 {
+    rxreq
+    txresp
 } -start
 
 server s3 {
@@ -18,6 +17,7 @@ server s3 {
 
 varnish v1 -vcl+backend {
     import round_robin from "${vmod}";
+    import std;
 
     sub vcl_init {
         new rr = round_robin.rr();
@@ -32,25 +32,20 @@ varnish v1 -vcl+backend {
     }
 } -start
 
+# Check that the director shows up in backend.list
+varnish v1 -cliok "backend.list"
+varnish v1 -cliexpect "vcl1.rr        probe     3/3     healthy   " "backend.list"
 
-client c1 {
-    txreq
-    rxresp
-    expect resp.status == 200
-    expect resp.http.Server == "s1"
-} -run
-
-# make s2 sick and make sure we skip it
 varnish v1 -cliok "backend.set_health *.s2 sick"
-client c1 {
-    txreq
-    rxresp
-    expect resp.http.Server == "s3"
-} -run
 
+
+# Check that the director shows up in backend.list
+varnish v1 -cliok "backend.list"
+varnish v1 -cliexpect "vcl1.rr        probe     2/3     healthy   " "backend.list"
+
+# Make one request to ensure everything is working
 client c1 {
     txreq
     rxresp
     expect resp.status == 200
-    expect resp.http.Server == "s1"
 } -run

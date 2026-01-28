@@ -14,6 +14,7 @@ server s2 {
 } -start
 
 varnish v1 -vcl+backend {
+import std;
     import round_robin from "${vmod}";
 
     sub vcl_init {
@@ -23,6 +24,7 @@ varnish v1 -vcl+backend {
     }
 
     sub vcl_recv {
+    std.log(rr.backend());
         set req.backend_hint = rr.backend();
         set req.http.Backend-Count = rr.count();
         return(pass);
@@ -53,3 +55,6 @@ client c1 {
     expect resp.http.Backend-Count == "2"
     expect resp.http.Server == "s1"
 } -run
+
+# make sure everything is nice an proper regarding refcounts
+varnish v1 -wait
