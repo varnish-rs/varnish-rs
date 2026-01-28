@@ -84,7 +84,7 @@ mod object_vmod {
         pub fn new(capacity: Option<i64>) -> Self {
             // Constructor becomes VCL `new` statement
         }
-        
+
         pub fn method(&self, arg: &str) -> String {
             // Regular method becomes VCL object.method()
         }
