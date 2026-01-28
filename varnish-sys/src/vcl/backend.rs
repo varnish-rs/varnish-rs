@@ -615,25 +615,29 @@ impl BackendRef {
             let mut vdir = *dir.vdir;
             assert_eq!(vdir.magic, ffi::VCLDIR_MAGIC);
             if vdir.flags & ffi::VDIR_FLG_NOREFCNT == 0 {
-                ffi::Lck__Lock(&raw mut vdir.dlck, c"BackendRef::new".as_ptr(), line!() as i32);
+                ffi::Lck__Lock(
+                    &raw mut vdir.dlck,
+                    c"BackendRef::new".as_ptr(),
+                    line!() as i32,
+                );
                 assert!(vdir.refcnt > 0);
                 vdir.refcnt += 1;
-                ffi::Lck__Unlock(&raw mut vdir.dlck, c"BackendRef::new".as_ptr(), line!() as i32);
+                ffi::Lck__Unlock(
+                    &raw mut vdir.dlck,
+                    c"BackendRef::new".as_ptr(),
+                    line!() as i32,
+                );
             }
         }
-        Some(BackendRef{inner})
+        Some(BackendRef { inner })
     }
 
     pub fn resolve(&self, ctx: &Ctx) -> VCL_BACKEND {
-        unsafe {
-            ffi::VRT_DirectorResolve(ctx.raw, self.inner)
-        }
+        unsafe { ffi::VRT_DirectorResolve(ctx.raw, self.inner) }
     }
 
     pub fn healthy(&self, ctx: &Ctx) -> bool {
-        unsafe {
-            ffi::VRT_Healthy(ctx.raw, self.inner, null_mut()).into()
-        }
+        unsafe { ffi::VRT_Healthy(ctx.raw, self.inner, null_mut()).into() }
     }
 
     pub fn name(&self) -> &CStr {
