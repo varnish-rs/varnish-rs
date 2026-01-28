@@ -55,7 +55,9 @@ use crate::ffi::{
     VCL_BLOB, VCL_BODY, VCL_BOOL, VCL_DURATION, VCL_ENUM, VCL_HEADER, VCL_HTTP, VCL_INT, VCL_IP,
     VCL_PROBE, VCL_REAL, VCL_STEVEDORE, VCL_STRANDS, VCL_STRING, VCL_TIME, VCL_VCL,
 };
-use crate::vcl::{from_vcl_probe, into_vcl_probe, BackendRef, CowProbe, Probe, VclError, Workspace};
+use crate::vcl::{
+    from_vcl_probe, into_vcl_probe, BackendRef, CowProbe, Probe, VclError, Workspace,
+};
 
 /// Convert a Rust type into a VCL one
 ///

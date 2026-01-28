@@ -1,8 +1,8 @@
 varnishtest "basic tests"
 
 server s1 {
-	rxreq
-	txresp
+    rxreq
+    txresp
 } -start
 
 # VCL, no backend needed
@@ -14,17 +14,17 @@ varnish v1 -vcl+backend {
     }
 
     sub vcl_recv {
-    	set req.backend_hint = be_ref.backend();
+        set req.backend_hint = be_ref.backend();
     }
 
     sub vcl_backend_response {
-    	set beresp.http.healthy = be_ref.healthy();
-    	set beresp.http.name = be_ref.name();
+        set beresp.http.healthy = be_ref.healthy();
+        set beresp.http.name = be_ref.name();
     }
 
     sub vcl_backend_error {
-    	set beresp.http.healthy = be_ref.healthy();
-    	set beresp.http.name = be_ref.name();
+        set beresp.http.healthy = be_ref.healthy();
+        set beresp.http.name = be_ref.name();
     }
 } -start
 
@@ -44,5 +44,3 @@ client c1 {
     expect resp.http.name == "s1"
     expect resp.http.healthy == "false"
 } -run
-
-

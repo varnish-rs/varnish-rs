@@ -23,7 +23,7 @@ mod backend_ref {
         pub fn new(backend_arg: Option<BackendRef>) -> Result<Self, VclError> {
             match backend_arg {
                 None => Err("backend_ref.new() can't take a NULL backend".into()),
-                Some(backend) => Ok(new { backend })
+                Some(backend) => Ok(new { backend }),
             }
         }
 
