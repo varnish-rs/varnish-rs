@@ -38,10 +38,12 @@ mod round_robin {
         }
 
         /// Add a backend to the director
-        pub fn add_backend(&self, backend: Option<BackendRef>) {
-            if let Some(backend) = backend {
-                self.director.get_inner().state.lock().unwrap().backends.push(backend);
-            }
+        pub fn add_backend(&self, backend: Option<BackendRef>) -> Result<(), VclError> {
+            let backend = backend.ok_or_else(|| {
+                VclError::new("round_robin.add_backend() requires a non-null backend".to_string())
+            })?;
+            self.director.get_inner().state.lock().unwrap().backends.push(backend);
+            Ok(())
         }
 
         /// Get the number of backends in the director
@@ -49,9 +51,10 @@ mod round_robin {
             self.director.get_inner().state.lock().unwrap().backends.len() as i64
         }
 
-        /// Get the director backend pointer
-        pub unsafe fn backend(&self) -> VCL_BACKEND {
-            self.director.raw()
+        /// Get the director as a backend reference
+        pub fn backend(&self) -> BackendRef {
+            BackendRef::new(self.director.raw())
+                .expect("Director should always have a valid backend pointer")
         }
     }
 }

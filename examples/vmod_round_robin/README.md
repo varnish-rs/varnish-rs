@@ -33,4 +33,4 @@ Get the number of backends in the director
 
 #### Method `BACKEND <object>.backend()`
 
-Get the director backend pointer
+Get the director as a backend reference
