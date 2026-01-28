@@ -599,6 +599,15 @@ fn sc_to_ptr(sc: StreamClose) -> ffi::stream_close_t {
     }
 }
 
+/// Result from a probe health check
+///
+/// Contains both the health status and when it last changed.
+#[derive(Debug, Clone, Copy)]
+pub struct ProbeResult {
+    pub healthy: bool,
+    pub last_changed: SystemTime,
+}
+
 /// Trait for wrapping a C `struct director`
 ///
 /// This trait provides a safe interface to interact with Varnish directors,
@@ -619,11 +628,10 @@ pub trait VclDirector {
 
     /// Check if the director (or its backends) are healthy
     ///
-    /// Returns `true` if the director can currently serve requests, along with
-    /// the timestamp of when the health status last changed.
+    /// Returns a `ProbeResult` containing the health status and when it last changed.
     ///
     /// Corresponds to the `healthy` callback in `vdi_methods`.
-    fn healthy(&self, ctx: &mut Ctx, changed: &mut SystemTime) -> bool;
+    fn healthy(&self, ctx: &mut Ctx) -> ProbeResult;
 
     /// Generate output for `varnishadm backend.list`
     ///
@@ -668,12 +676,11 @@ unsafe extern "C" fn wrap_director_healthy<D: VclDirector>(
     let mut ctx = Ctx::from_ptr(ctxp);
     let dir = validate_director(director);
     let dir_impl: &D = &*dir.priv_.cast::<D>();
-    let mut when = SystemTime::UNIX_EPOCH;
-    let healthy = dir_impl.healthy(&mut ctx, &mut when);
+    let result = dir_impl.healthy(&mut ctx);
     if !changed.is_null() {
-        *changed = when.try_into().unwrap();
+        *changed = result.last_changed.try_into().unwrap();
     }
-    healthy.into()
+    result.healthy.into()
 }
 
 unsafe extern "C" fn wrap_director_list<D: VclDirector>(
@@ -810,8 +817,14 @@ impl<D: VclDirector> Director<D> {
     }
 
     /// Check if this director is healthy using VRT_Healthy
-    pub fn healthy(&self, ctx: &Ctx) -> bool {
-        unsafe { ffi::VRT_Healthy(ctx.raw, self.inner, null_mut()).into() }
+    pub fn healthy(&self, ctx: &Ctx) -> ProbeResult {
+        let mut changed: VCL_TIME = VCL_TIME::default();
+        let healthy = unsafe { ffi::VRT_Healthy(ctx.raw, self.inner, &raw mut changed).into() };
+        let last_changed = changed.try_into().unwrap_or(SystemTime::UNIX_EPOCH);
+        ProbeResult {
+            healthy,
+            last_changed,
+        }
     }
 }
 
@@ -859,8 +872,16 @@ impl BackendRef {
         unsafe { ffi::VRT_DirectorResolve(ctx.raw, self.inner) }
     }
 
-    pub fn healthy(&self, ctx: &Ctx) -> bool {
-        unsafe { ffi::VRT_Healthy(ctx.raw, self.inner, null_mut()).into() }
+    pub fn healthy(&self, ctx: &Ctx) -> ProbeResult {
+        let mut changed = VCL_TIME::default();
+        let healthy = unsafe {
+            ffi::VRT_Healthy(ctx.raw, self.inner, &raw mut changed).into()
+        };
+        let last_changed = changed.try_into().unwrap_or(SystemTime::UNIX_EPOCH);
+        ProbeResult {
+            healthy,
+            last_changed,
+        }
     }
 
     pub fn name(&self) -> &CStr {

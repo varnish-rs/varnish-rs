@@ -1,6 +1,6 @@
 use std::sync::Mutex;
 use std::time::SystemTime;
-use varnish::vcl::{BackendRef, Buffer, Ctx, Director, VclDirector, VclError};
+use varnish::vcl::{BackendRef, Buffer, Ctx, Director, ProbeResult, VclDirector, VclError};
 use varnish::ffi::VCL_BACKEND;
 
 varnish::run_vtc_tests!("tests/*.vtc");
@@ -83,7 +83,7 @@ impl VclDirector for RoundRobinDirector {
             let idx = (start_idx + i) % state.backends.len();
             let backend = &state.backends[idx];
             
-            if backend.healthy(ctx) {
+            if backend.healthy(ctx).healthy {
                 // Clone before updating state to avoid borrow checker issues
                 let result = backend.clone();
                 // Update current position for next call
@@ -96,28 +96,47 @@ impl VclDirector for RoundRobinDirector {
         None
     }
 
-    fn healthy(&self, ctx: &mut Ctx, changed: &mut SystemTime) -> bool {
-        *changed = SystemTime::UNIX_EPOCH;
-        
+    fn healthy(&self, ctx: &mut Ctx) -> ProbeResult {
         let state = self.state.lock().unwrap();
-        // Check if at least one backend is healthy
-        for backend in state.backends.iter() {
-            if backend.healthy(ctx) {
-                return true;
-            }
+        
+        let (any_healthy, latest_change) = state.backends.iter()
+            .map(|backend| backend.healthy(ctx))
+            .fold((false, SystemTime::UNIX_EPOCH), |(any_healthy, latest), probe| {
+                (
+                    any_healthy || probe.healthy,
+                    latest.max(probe.last_changed),
+                )
+            });
+        
+        ProbeResult {
+            healthy: any_healthy,
+            last_changed: latest_change,
         }
-        false
     }
 
     fn list(&self, ctx: &mut Ctx, vsb: &mut Buffer, _detailed: bool, json: bool) {
         let state = self.state.lock().unwrap();
         
         if json {
-            let healthy_count = state.backends.iter()
-                .filter(|backend| backend.healthy(ctx))
+            // Collect probe results to get health status and last change timestamp
+            let probe_results: Vec<_> = state.backends.iter()
+                .map(|backend| backend.healthy(ctx))
+                .collect();
+            
+            let healthy_count = probe_results.iter()
+                .filter(|probe| probe.healthy)
                 .count();
             let total_count = state.backends.len();
             let health_status = if healthy_count > 0 { "healthy" } else { "sick" };
+            
+            // Find the most recent change across all backends
+            let last_change = probe_results.iter()
+                .map(|probe| probe.last_changed)
+                .max()
+                .unwrap_or(SystemTime::UNIX_EPOCH)
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_secs_f64();
             
             let _ = vsb.write(&"{\n");
             let _ = vsb.write(&"  \"type\": \"roundrobin\",\n");
@@ -137,16 +156,12 @@ impl VclDirector for RoundRobinDirector {
                     name
                 ));
             }
-            let _ = vsb.write(&"\n  ],\n");
-            let now = SystemTime::now()
-                .duration_since(SystemTime::UNIX_EPOCH)
-                .unwrap()
-                .as_secs_f64();
-            let _ = vsb.write(&format!("  \"last_change\": {:.3}\n", now));
+            let _ = vsb.write(&"\n        ],\n");
+            let _ = vsb.write(&format!("  \"last_change\": {:.3}\n", last_change));
             let _ = vsb.write(&"}");
         } else {
             let healthy_count = state.backends.iter()
-                .filter(|backend| backend.healthy(ctx))
+                .filter(|backend| backend.healthy(ctx).healthy)
                 .count();
             let _ = vsb.write(&format!("{}/{}	", healthy_count, state.backends.len()));
             let _ = vsb.write(&(if healthy_count > 0 { "healthy" } else { "sick" }));
