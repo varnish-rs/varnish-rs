@@ -114,6 +114,11 @@ impl<S: VclBackend<T>, T: VclResponse> Backend<S, T> {
         self.bep
     }
 
+    /// Return a [`BackendRef`] for this backend.
+    pub fn as_backend_ref(&self) -> BackendRef {
+        BackendRef::new(self.bep).expect("Backend pointer should never be null")
+    }
+
     /// Create a new builder, wrapping the `inner` structure (that implements [`VclBackend`]),
     /// calling the backend `backend_id`. If the backend has a probe attached to it, set `has_probe` to
     /// true.
@@ -596,5 +601,319 @@ fn sc_to_ptr(sc: StreamClose) -> ffi::stream_close_t {
             StreamClose::ReqHttp20 => ffi::SC_REQ_HTTP20.as_ptr(),
             StreamClose::VclFailure => ffi::SC_VCL_FAILURE.as_ptr(),
         }
+    }
+}
+
+/// Result from a probe health check
+///
+/// Contains both the health status and when it last changed.
+#[derive(Debug, Clone, Copy)]
+pub struct ProbeResult {
+    pub healthy: bool,
+    pub last_changed: SystemTime,
+}
+
+/// Trait for wrapping a C `struct director`
+///
+/// This trait provides a safe interface to interact with Varnish directors,
+/// which are responsible for selecting backends. Directors receive requests
+/// and decide which backend should handle them, implementing load balancing
+/// and health checking strategies.
+///
+/// The trait methods map to the C `vdi_methods` structure function pointers.
+pub trait VclDirector {
+    /// Resolve the director to a concrete backend
+    ///
+    /// This is called when Varnish needs to select a backend to handle a request.
+    /// The director should inspect the context (request headers, etc.) and return
+    /// the appropriate backend, or `None` if no backend is available.
+    ///
+    /// Corresponds to the `resolve` callback in `vdi_methods`.
+    fn resolve(&self, ctx: &mut Ctx, director: VCL_BACKEND) -> Option<BackendRef>;
+
+    /// Check if the director (or its backends) are healthy
+    ///
+    /// Returns a `ProbeResult` containing the health status and when it last changed.
+    ///
+    /// Corresponds to the `healthy` callback in `vdi_methods`.
+    fn healthy(&self, ctx: &mut Ctx) -> ProbeResult;
+
+    /// Generate output for `varnishadm backend.list`
+    ///
+    /// - `detailed`: corresponds to the `-p` flag
+    /// - `json`: corresponds to the `-j` flag
+    ///
+    /// Corresponds to the `list` callback in `vdi_methods`.
+    fn list(&self, ctx: &mut Ctx, vsb: &mut Buffer, detailed: bool, json: bool);
+
+    /// Called when the director is being destroyed
+    ///
+    /// Use this to clean up any resources like backend references.
+    /// Corresponds to the `release` callback in `vdi_methods`.
+    fn release(&self) {}
+
+    /// Called when the VCL temperature changes or is discarded
+    ///
+    /// Corresponds to the `event` callback in `vdi_methods`.
+    fn event(&self, event: VclEvent) {
+        let _ = event;
+    }
+}
+
+unsafe extern "C" fn wrap_director_resolve<D: VclDirector>(
+    ctxp: *const ffi::vrt_ctx,
+    director: VCL_BACKEND,
+) -> VCL_BACKEND {
+    let mut ctx = Ctx::from_ptr(ctxp);
+    let dir = validate_director(director);
+    let dir_impl: &D = &*dir.priv_.cast::<D>();
+    dir_impl
+        .resolve(&mut ctx, director)
+        .map_or(VCL_BACKEND(null()), |backend_ref| backend_ref.raw())
+}
+
+unsafe extern "C" fn wrap_director_healthy<D: VclDirector>(
+    ctxp: *const ffi::vrt_ctx,
+    director: VCL_BACKEND,
+    changed: *mut VCL_TIME,
+) -> VCL_BOOL {
+    let mut ctx = Ctx::from_ptr(ctxp);
+    let dir = validate_director(director);
+    let dir_impl: &D = &*dir.priv_.cast::<D>();
+    let result = dir_impl.healthy(&mut ctx);
+    if !changed.is_null() {
+        *changed = result.last_changed.try_into().unwrap();
+    }
+    result.healthy.into()
+}
+
+unsafe extern "C" fn wrap_director_list<D: VclDirector>(
+    ctxp: *const ffi::vrt_ctx,
+    director: VCL_BACKEND,
+    vsbp: *mut ffi::vsb,
+    detailed: i32,
+    json: i32,
+) {
+    let mut ctx = Ctx::from_ptr(ctxp);
+    let mut vsb = Buffer::from_ptr(vsbp);
+    let dir = validate_director(director);
+    let dir_impl: &D = &*dir.priv_.cast::<D>();
+    dir_impl.list(&mut ctx, &mut vsb, detailed != 0, json != 0);
+}
+
+unsafe extern "C" fn wrap_director_event<D: VclDirector>(director: VCL_BACKEND, ev: VclEvent) {
+    let dir = validate_director(director);
+    let dir_impl: &D = &*dir.priv_.cast::<D>();
+    dir_impl.event(ev);
+}
+
+unsafe extern "C" fn wrap_director_release<D: VclDirector>(director: VCL_BACKEND) {
+    let dir = validate_director(director);
+    let dir_impl: &D = &*dir.priv_.cast::<D>();
+    dir_impl.release();
+}
+
+/// Safe wrapper around a `struct director` pointer with a trait implementation
+///
+/// This struct wraps a C director along with a Rust implementation that provides
+/// the director's behavior through the [`VclDirector`] trait. The wrapper handles
+/// the FFI boundary and ensures proper lifetime management.
+///
+/// Directors are typically used to implement load balancing strategies (round-robin,
+/// random, hash-based, etc.) by selecting from multiple backends.
+#[derive(Debug)]
+pub struct Director<D: VclDirector> {
+    bep: VCL_BACKEND,
+    #[expect(dead_code)]
+    methods: Box<ffi::vdi_methods>,
+    inner: Box<D>,
+    #[expect(dead_code)]
+    ctype: CString,
+}
+
+impl<D: VclDirector> Director<D> {
+    /// Create a new director by calling `VRT_AddDirector`
+    ///
+    /// This registers the director with Varnish and sets up the appropriate callbacks.
+    /// The director will be automatically unregistered when dropped.
+    pub fn new(ctx: &mut Ctx, director_type: &str, vcl_name: &str, inner: D) -> VclResult<Self> {
+        let mut inner = Box::new(inner);
+        let ctype = CString::new(director_type).map_err(|e| e.to_string())?;
+        let cname = CString::new(vcl_name).map_err(|e| e.to_string())?;
+        let methods = Box::new(ffi::vdi_methods {
+            type_: ctype.as_ptr(),
+            magic: ffi::VDI_METHODS_MAGIC,
+            http1pipe: None,
+            healthy: Some(wrap_director_healthy::<D>),
+            resolve: Some(wrap_director_resolve::<D>),
+            gethdrs: None,
+            getip: None,
+            finish: None,
+            event: Some(wrap_director_event::<D>),
+            release: Some(wrap_director_release::<D>),
+            destroy: None,
+            panic: None,
+            list: Some(wrap_director_list::<D>),
+        });
+
+        let bep = unsafe {
+            ffi::VRT_AddDirector(
+                ctx.raw,
+                &raw const *methods,
+                ptr::from_mut::<D>(&mut *inner).cast::<c_void>(),
+                c"%.*s".as_ptr(),
+                cname.as_bytes().len(),
+                cname.as_ptr().cast::<c_char>(),
+            )
+        };
+        if bep.0.is_null() {
+            return Err(format!("VRT_AddDirector returned null while creating {vcl_name}").into());
+        }
+
+        unsafe {
+            assert_eq!((*bep.0).magic, ffi::DIRECTOR_MAGIC);
+        }
+        Ok(Director {
+            bep,
+            methods,
+            inner,
+            ctype,
+        })
+    }
+
+    /// Access the bep director implementation
+    pub fn get_inner(&self) -> &D {
+        &self.inner
+    }
+
+    /// Access the bep director implementation mutably
+    pub fn get_inner_mut(&mut self) -> &mut D {
+        &mut self.inner
+    }
+
+    /// Get the raw C backend pointer
+    pub fn raw(&self) -> VCL_BACKEND {
+        self.bep
+    }
+
+    /// Get the VCL name of this director
+    pub fn vcl_name(&self) -> &CStr {
+        assert!(!self.bep.0.is_null());
+        unsafe {
+            let dir = *self.bep.0;
+            assert_eq!(dir.magic, ffi::DIRECTOR_MAGIC);
+            CStr::from_ptr(dir.vcl_name)
+        }
+    }
+
+    /// Resolve this director to a backend using `VRT_DirectorResolve`
+    ///
+    /// This calls into Varnish's resolution mechanism, which will invoke
+    /// the director's `resolve` method if needed.
+    pub fn resolve(&self, ctx: &Ctx) -> VCL_BACKEND {
+        unsafe { ffi::VRT_DirectorResolve(ctx.raw, self.bep) }
+    }
+
+    /// Check if this director is healthy using `VRT_Healthy`
+    pub fn healthy(&self, ctx: &Ctx) -> ProbeResult {
+        let mut changed: VCL_TIME = VCL_TIME::default();
+        let healthy = unsafe { ffi::VRT_Healthy(ctx.raw, self.bep, &raw mut changed).into() };
+        let last_changed = changed.try_into().unwrap_or(SystemTime::UNIX_EPOCH);
+        ProbeResult {
+            healthy,
+            last_changed,
+        }
+    }
+
+    /// Return a [`BackendRef`] for this director.
+    pub fn as_backend_ref(&self) -> BackendRef {
+        BackendRef::new(self.bep).expect("Director pointer should never be null")
+    }
+}
+
+impl<D: VclDirector> Drop for Director<D> {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::VRT_DelDirector(&raw mut self.bep);
+        };
+    }
+}
+
+pub struct BackendRef {
+    bep: VCL_BACKEND,
+}
+
+impl BackendRef {
+    pub fn new(bep: VCL_BACKEND) -> Option<Self> {
+        if bep.0.is_null() {
+            return None;
+        }
+        unsafe {
+            let dir = bep.0.as_ref()?;
+            assert_eq!(dir.magic, ffi::DIRECTOR_MAGIC);
+            let vdir = dir.vdir.as_mut().expect("vdir can't be null");
+            assert_eq!(vdir.magic, ffi::VCLDIR_MAGIC);
+            if vdir.flags & ffi::VDIR_FLG_NOREFCNT == 0 {
+                ffi::Lck__Lock(
+                    &raw mut vdir.dlck,
+                    c"BackendRef::new".as_ptr(),
+                    line!() as i32,
+                );
+                assert!(vdir.refcnt > 0);
+                vdir.refcnt += 1;
+                ffi::Lck__Unlock(
+                    &raw mut vdir.dlck,
+                    c"BackendRef::new".as_ptr(),
+                    line!() as i32,
+                );
+            }
+        }
+        Some(BackendRef { bep })
+    }
+
+    pub fn resolve(&self, ctx: &Ctx) -> VCL_BACKEND {
+        unsafe { ffi::VRT_DirectorResolve(ctx.raw, self.bep) }
+    }
+
+    pub fn healthy(&self, ctx: &Ctx) -> ProbeResult {
+        let mut changed = VCL_TIME::default();
+        let healthy = unsafe { ffi::VRT_Healthy(ctx.raw, self.bep, &raw mut changed).into() };
+        let last_changed = changed.try_into().unwrap_or(SystemTime::UNIX_EPOCH);
+        ProbeResult {
+            healthy,
+            last_changed,
+        }
+    }
+
+    pub fn name(&self) -> &CStr {
+        assert!(!self.bep.0.is_null());
+        unsafe {
+            let dir = *self.bep.0;
+            assert_eq!(dir.magic, ffi::DIRECTOR_MAGIC);
+            CStr::from_ptr(dir.vcl_name)
+        }
+    }
+
+    pub fn raw(&self) -> VCL_BACKEND {
+        // need to clone, we'll clear bep on drop
+        self.bep
+    }
+}
+
+impl Clone for BackendRef {
+    fn clone(&self) -> BackendRef {
+        // self.raw() will never be null
+        BackendRef::new(self.raw()).unwrap()
+    }
+}
+
+impl Drop for BackendRef {
+    fn drop(&mut self) {
+        assert!(!self.bep.0.is_null());
+        // Safety: this is a bit silly, but need to preserve self.bep in case it was passed on to someone
+        // else.
+        unsafe {
+            ffi::VRT_Assign_Backend(&raw mut self.bep, VCL_BACKEND(null()));
+        };
     }
 }

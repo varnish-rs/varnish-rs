@@ -322,6 +322,8 @@ impl ParamTy {
         if let Some(ident) = as_simple_ty(ty) {
             if ident == "bool" {
                 return Some(Self::Bool);
+            } else if ident == "BackendRef" {
+                return Some(Self::BackendRef);
             } else if ident == "Duration" {
                 return Some(Self::Duration);
             } else if ident == "f64" {
