@@ -163,6 +163,7 @@ pub struct ParamInfo {
 #[derive(Debug, Clone, Copy)]
 pub enum ParamTy {
     Bool,
+    BackendRef,
     Blob,
     Duration,
     F64,
@@ -178,6 +179,7 @@ impl ParamTy {
     pub fn to_vcc_type(self) -> &'static str {
         match self {
             Self::Bool => "BOOL",
+            Self::BackendRef => "BACKEND",
             Self::Blob => "BLOB",
             Self::Duration => "DURATION",
             Self::F64 => "REAL",
@@ -193,6 +195,7 @@ impl ParamTy {
         //            statement in the `varnish-macros/src/generator.rs` file.
         match self {
             Self::Bool => "VCL_BOOL",
+            Self::BackendRef => "VCL_BACKEND",
             Self::Blob => "VCL_BLOB",
             Self::Duration => "VCL_DURATION",
             Self::F64 => "VCL_REAL",
@@ -214,6 +217,7 @@ impl ParamTy {
             | Self::Str
             | Self::CStr => false,
             Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
+            Self::BackendRef | Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
         }
     }
 
@@ -221,15 +225,16 @@ impl ParamTy {
     /// e.g. if `&CStr` contains invalid UTF-8 characters and cannot be converted to `&str`.
     pub fn use_try_from(self) -> bool {
         match self {
-            Self::Probe
-            | Self::ProbeCow
-            | Self::SocketAddr
-            | Self::Bool
+            Self::Bool
+            | Self::BackendRef
+            | Self::Blob => false,
+            | Self::CStr
             | Self::Duration
             | Self::F64
             | Self::I64
-            | Self::CStr
-            | Self::Blob => false,
+            | Self::Probe
+            | Self::ProbeCow
+            | Self::SocketAddr => false,
             Self::Str => true,
         }
     }

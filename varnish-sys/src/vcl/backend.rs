@@ -598,3 +598,70 @@ fn sc_to_ptr(sc: StreamClose) -> ffi::stream_close_t {
         }
     }
 }
+
+pub struct BackendRef {
+    inner: VCL_BACKEND,
+}
+
+impl BackendRef {
+    pub fn new(inner: VCL_BACKEND) -> Option<Self> {
+        if inner.0.is_null() {
+            return None;
+        }
+        unsafe {
+            let dir = *inner.0;
+            assert_eq!(dir.magic, ffi::DIRECTOR_MAGIC);
+            assert!(!dir.vdir.is_null());
+            let mut vdir = *dir.vdir;
+            assert_eq!(vdir.magic, ffi::VCLDIR_MAGIC);
+            if vdir.flags & ffi::VDIR_FLG_NOREFCNT == 0 {
+                ffi::Lck__Lock(&raw mut vdir.dlck, c"BackendRef::new".as_ptr(), line!() as i32);
+                assert!(vdir.refcnt > 0);
+                vdir.refcnt += 1;
+                ffi::Lck__Unlock(&raw mut vdir.dlck, c"BackendRef::new".as_ptr(), line!() as i32);
+            }
+        }
+        Some(BackendRef{inner})
+    }
+
+    pub fn resolve(&self, ctx: &Ctx) -> VCL_BACKEND {
+        unsafe {
+            ffi::VRT_DirectorResolve(ctx.raw, self.inner)
+        }
+    }
+
+    pub fn healthy(&self, ctx: &Ctx) -> bool {
+        unsafe {
+            ffi::VRT_Healthy(ctx.raw, self.inner, null_mut()).into()
+        }
+    }
+
+    pub fn name(&self) -> &CStr {
+        assert!(!self.inner.0.is_null());
+        unsafe {
+            let dir = *self.inner.0;
+            assert_eq!(dir.magic, ffi::DIRECTOR_MAGIC);
+            CStr::from_ptr(dir.vcl_name)
+        }
+    }
+
+    pub fn raw(&self) -> VCL_BACKEND {
+        self.inner
+    }
+}
+
+impl Clone for BackendRef {
+    fn clone(&self) -> BackendRef {
+        // self.raw() will never be null
+        BackendRef::new(self.raw()).unwrap()
+    }
+}
+
+impl Drop for BackendRef {
+    fn drop(&mut self) {
+        assert!(!self.inner.0.is_null());
+        unsafe {
+            ffi::VRT_Assign_Backend(&raw mut self.inner, VCL_BACKEND(null()));
+        };
+    }
+}

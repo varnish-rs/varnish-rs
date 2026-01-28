@@ -1,0 +1,48 @@
+varnishtest "basic tests"
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+# VCL, no backend needed
+varnish v1 -vcl+backend {
+    import backend_ref from "${vmod}";
+
+    sub vcl_init {
+        new be_ref = backend_ref.new(s1);
+    }
+
+    sub vcl_recv {
+    	set req.backend_hint = be_ref.backend();
+    }
+
+    sub vcl_backend_response {
+    	set beresp.http.healthy = be_ref.healthy();
+    	set beresp.http.name = be_ref.name();
+    }
+
+    sub vcl_backend_error {
+    	set beresp.http.healthy = be_ref.healthy();
+    	set beresp.http.name = be_ref.name();
+    }
+} -start
+
+client c1 {
+    txreq -url /1
+    rxresp
+    expect resp.status == 200
+    expect resp.http.name == "s1"
+    expect resp.http.healthy == "true"
+} -run
+
+varnish v1 -cliok "backend.set_health *.s1 sick"
+client c1 {
+    txreq -url /2
+    rxresp
+    expect resp.status == 503
+    expect resp.http.name == "s1"
+    expect resp.http.healthy == "false"
+} -run
+
+
