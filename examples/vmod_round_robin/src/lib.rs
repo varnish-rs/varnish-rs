@@ -175,7 +175,7 @@ impl VclDirector for RoundRobinDirector {
                 .iter()
                 .filter(|backend| backend.healthy(ctx).healthy)
                 .count();
-            let _ = vsb.write(&format!("{}/{}   ", healthy_count, state.backends.len()));
+            let _ = vsb.write(&format!("{}/{}\t", healthy_count, state.backends.len()));
             let _ = vsb.write(&(if healthy_count > 0 { "healthy" } else { "sick" }));
         }
     }
