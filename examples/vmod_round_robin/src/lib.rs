@@ -113,19 +113,37 @@ impl VclDirector for RoundRobinDirector {
         let state = self.state.lock().unwrap();
         
         if json {
-            let _ = vsb.write(&"[\n");
+            let healthy_count = state.backends.iter()
+                .filter(|backend| backend.healthy(ctx))
+                .count();
+            let total_count = state.backends.len();
+            let health_status = if healthy_count > 0 { "healthy" } else { "sick" };
+            
+            let _ = vsb.write(&"{\n");
+            let _ = vsb.write(&"  \"type\": \"roundrobin\",\n");
+            let _ = vsb.write(&"  \"admin_health\": \"probe\",\n");
+            let _ = vsb.write(&format!(
+                "  \"probe_message\": [{}, {}, \"{}\"],\n",
+                healthy_count, total_count, health_status
+            ));
+            let _ = vsb.write(&"  \"backends\": [\n");
             for (i, backend) in state.backends.iter().enumerate() {
                 if i > 0 {
                     let _ = vsb.write(&",\n");
                 }
                 let name = backend.name().to_string_lossy();
-                let is_healthy = backend.healthy(ctx);
                 let _ = vsb.write(&format!(
-                    "    {{ \"backend_name\": \"{}\", \"healthy\": {} }}",
-                    name, is_healthy
+                    "    \"{}\"",
+                    name
                 ));
             }
-            let _ = vsb.write(&"\n]");
+            let _ = vsb.write(&"\n  ],\n");
+            let now = SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_secs_f64();
+            let _ = vsb.write(&format!("  \"last_change\": {:.3}\n", now));
+            let _ = vsb.write(&"}");
         } else {
             let healthy_count = state.backends.iter()
                 .filter(|backend| backend.healthy(ctx))
