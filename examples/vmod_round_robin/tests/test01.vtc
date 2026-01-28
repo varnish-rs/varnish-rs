@@ -42,13 +42,13 @@ client c1 {
     expect resp.status == 200
     expect resp.http.Backend-Count == "2"
     expect resp.http.Server == "s1"
-    
+
     txreq
     rxresp
     expect resp.status == 200
     expect resp.http.Backend-Count == "2"
     expect resp.http.Server == "s2"
-    
+
     txreq
     rxresp
     expect resp.status == 200

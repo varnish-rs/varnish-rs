@@ -635,7 +635,7 @@ pub trait VclDirector {
 
     /// Generate output for `varnishadm backend.list`
     ///
-    /// - `detailed`: corresponds to the `-p` flag  
+    /// - `detailed`: corresponds to the `-p` flag
     /// - `json`: corresponds to the `-j` flag
     ///
     /// Corresponds to the `list` callback in `vdi_methods`.
@@ -771,9 +771,8 @@ impl<D: VclDirector> Director<D> {
             return Err(format!("VRT_AddDirector returned null while creating {vcl_name}").into());
         }
 
-
         unsafe {
-        assert_eq!((*inner.0).magic, ffi::DIRECTOR_MAGIC);
+            assert_eq!((*inner.0).magic, ffi::DIRECTOR_MAGIC);
         }
         Ok(Director {
             inner,
@@ -874,9 +873,7 @@ impl BackendRef {
 
     pub fn healthy(&self, ctx: &Ctx) -> ProbeResult {
         let mut changed = VCL_TIME::default();
-        let healthy = unsafe {
-            ffi::VRT_Healthy(ctx.raw, self.inner, &raw mut changed).into()
-        };
+        let healthy = unsafe { ffi::VRT_Healthy(ctx.raw, self.inner, &raw mut changed).into() };
         let last_changed = changed.try_into().unwrap_or(SystemTime::UNIX_EPOCH);
         ProbeResult {
             healthy,
