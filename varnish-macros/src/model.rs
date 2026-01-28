@@ -224,8 +224,10 @@ impl ParamTy {
     /// e.g. if `&CStr` contains invalid UTF-8 characters and cannot be converted to `&str`.
     pub fn use_try_from(self) -> bool {
         match self {
-            Self::Bool | Self::BackendRef | Self::Blob => false,
-            Self::CStr
+            Self::Bool
+            | Self::BackendRef
+            | Self::Blob
+            | Self::CStr
             | Self::Duration
             | Self::F64
             | Self::I64
