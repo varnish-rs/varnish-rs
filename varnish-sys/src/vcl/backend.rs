@@ -723,10 +723,10 @@ unsafe extern "C" fn wrap_director_release<D: VclDirector>(director: VCL_BACKEND
 /// random, hash-based, etc.) by selecting from multiple backends.
 #[derive(Debug)]
 pub struct Director<D: VclDirector> {
-    inner: VCL_BACKEND,
+    bep: VCL_BACKEND,
     #[expect(dead_code)]
     methods: Box<ffi::vdi_methods>,
-    director_impl: Box<D>,
+    inner: Box<D>,
     #[expect(dead_code)]
     ctype: CString,
 }
@@ -736,13 +736,8 @@ impl<D: VclDirector> Director<D> {
     ///
     /// This registers the director with Varnish and sets up the appropriate callbacks.
     /// The director will be automatically unregistered when dropped.
-    pub fn new(
-        ctx: &mut Ctx,
-        director_type: &str,
-        vcl_name: &str,
-        director_impl: D,
-    ) -> VclResult<Self> {
-        let mut director_impl = Box::new(director_impl);
+    pub fn new(ctx: &mut Ctx, director_type: &str, vcl_name: &str, inner: D) -> VclResult<Self> {
+        let mut inner = Box::new(inner);
         let ctype = CString::new(director_type).map_err(|e| e.to_string())?;
         let cname = CString::new(vcl_name).map_err(|e| e.to_string())?;
         let methods = Box::new(ffi::vdi_methods {
@@ -761,51 +756,51 @@ impl<D: VclDirector> Director<D> {
             list: Some(wrap_director_list::<D>),
         });
 
-        let inner = unsafe {
+        let bep = unsafe {
             ffi::VRT_AddDirector(
                 ctx.raw,
                 &raw const *methods,
-                ptr::from_mut::<D>(&mut *director_impl).cast::<c_void>(),
+                ptr::from_mut::<D>(&mut *inner).cast::<c_void>(),
                 c"%.*s".as_ptr(),
                 cname.as_bytes().len(),
                 cname.as_ptr().cast::<c_char>(),
             )
         };
-        if inner.0.is_null() {
+        if bep.0.is_null() {
             return Err(format!("VRT_AddDirector returned null while creating {vcl_name}").into());
         }
 
         unsafe {
-            assert_eq!((*inner.0).magic, ffi::DIRECTOR_MAGIC);
+            assert_eq!((*bep.0).magic, ffi::DIRECTOR_MAGIC);
         }
         Ok(Director {
-            inner,
+            bep,
             methods,
-            director_impl,
+            inner,
             ctype,
         })
     }
 
-    /// Access the inner director implementation
+    /// Access the bep director implementation
     pub fn get_inner(&self) -> &D {
-        &self.director_impl
+        &self.inner
     }
 
-    /// Access the inner director implementation mutably
+    /// Access the bep director implementation mutably
     pub fn get_inner_mut(&mut self) -> &mut D {
-        &mut self.director_impl
+        &mut self.inner
     }
 
     /// Get the raw C backend pointer
     pub fn raw(&self) -> VCL_BACKEND {
-        self.inner
+        self.bep
     }
 
     /// Get the VCL name of this director
     pub fn vcl_name(&self) -> &CStr {
-        assert!(!self.inner.0.is_null());
+        assert!(!self.bep.0.is_null());
         unsafe {
-            let dir = *self.inner.0;
+            let dir = *self.bep.0;
             assert_eq!(dir.magic, ffi::DIRECTOR_MAGIC);
             CStr::from_ptr(dir.vcl_name)
         }
@@ -816,13 +811,13 @@ impl<D: VclDirector> Director<D> {
     /// This calls into Varnish's resolution mechanism, which will invoke
     /// the director's `resolve` method if needed.
     pub fn resolve(&self, ctx: &Ctx) -> VCL_BACKEND {
-        unsafe { ffi::VRT_DirectorResolve(ctx.raw, self.inner) }
+        unsafe { ffi::VRT_DirectorResolve(ctx.raw, self.bep) }
     }
 
     /// Check if this director is healthy using `VRT_Healthy`
     pub fn healthy(&self, ctx: &Ctx) -> ProbeResult {
         let mut changed: VCL_TIME = VCL_TIME::default();
-        let healthy = unsafe { ffi::VRT_Healthy(ctx.raw, self.inner, &raw mut changed).into() };
+        let healthy = unsafe { ffi::VRT_Healthy(ctx.raw, self.bep, &raw mut changed).into() };
         let last_changed = changed.try_into().unwrap_or(SystemTime::UNIX_EPOCH);
         ProbeResult {
             healthy,
@@ -832,29 +827,29 @@ impl<D: VclDirector> Director<D> {
 
     /// Return a [`BackendRef`] for this director.
     pub fn as_backend_ref(&self) -> BackendRef {
-        BackendRef::new(self.inner).expect("Director pointer should never be null")
+        BackendRef::new(self.bep).expect("Director pointer should never be null")
     }
 }
 
 impl<D: VclDirector> Drop for Director<D> {
     fn drop(&mut self) {
         unsafe {
-            ffi::VRT_DelDirector(&raw mut self.inner);
+            ffi::VRT_DelDirector(&raw mut self.bep);
         };
     }
 }
 
 pub struct BackendRef {
-    inner: VCL_BACKEND,
+    bep: VCL_BACKEND,
 }
 
 impl BackendRef {
-    pub fn new(inner: VCL_BACKEND) -> Option<Self> {
-        if inner.0.is_null() {
+    pub fn new(bep: VCL_BACKEND) -> Option<Self> {
+        if bep.0.is_null() {
             return None;
         }
         unsafe {
-            let dir = inner.0.as_ref()?;
+            let dir = bep.0.as_ref()?;
             assert_eq!(dir.magic, ffi::DIRECTOR_MAGIC);
             let vdir = dir.vdir.as_mut().expect("vdir can't be null");
             assert_eq!(vdir.magic, ffi::VCLDIR_MAGIC);
@@ -873,16 +868,16 @@ impl BackendRef {
                 );
             }
         }
-        Some(BackendRef { inner })
+        Some(BackendRef { bep })
     }
 
     pub fn resolve(&self, ctx: &Ctx) -> VCL_BACKEND {
-        unsafe { ffi::VRT_DirectorResolve(ctx.raw, self.inner) }
+        unsafe { ffi::VRT_DirectorResolve(ctx.raw, self.bep) }
     }
 
     pub fn healthy(&self, ctx: &Ctx) -> ProbeResult {
         let mut changed = VCL_TIME::default();
-        let healthy = unsafe { ffi::VRT_Healthy(ctx.raw, self.inner, &raw mut changed).into() };
+        let healthy = unsafe { ffi::VRT_Healthy(ctx.raw, self.bep, &raw mut changed).into() };
         let last_changed = changed.try_into().unwrap_or(SystemTime::UNIX_EPOCH);
         ProbeResult {
             healthy,
@@ -891,17 +886,17 @@ impl BackendRef {
     }
 
     pub fn name(&self) -> &CStr {
-        assert!(!self.inner.0.is_null());
+        assert!(!self.bep.0.is_null());
         unsafe {
-            let dir = *self.inner.0;
+            let dir = *self.bep.0;
             assert_eq!(dir.magic, ffi::DIRECTOR_MAGIC);
             CStr::from_ptr(dir.vcl_name)
         }
     }
 
     pub fn raw(&self) -> VCL_BACKEND {
-        // need to clone, we'll clear inner on drop
-        self.inner
+        // need to clone, we'll clear bep on drop
+        self.bep
     }
 }
 
@@ -914,11 +909,11 @@ impl Clone for BackendRef {
 
 impl Drop for BackendRef {
     fn drop(&mut self) {
-        assert!(!self.inner.0.is_null());
-        // Safety: this is a bit silly, but need to preserve self.inner in case it was passed on to someone
+        assert!(!self.bep.0.is_null());
+        // Safety: this is a bit silly, but need to preserve self.bep in case it was passed on to someone
         // else.
         unsafe {
-            ffi::VRT_Assign_Backend(&raw mut self.inner, VCL_BACKEND(null()));
+            ffi::VRT_Assign_Backend(&raw mut self.bep, VCL_BACKEND(null()));
         };
     }
 }

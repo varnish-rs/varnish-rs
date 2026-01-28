@@ -14,7 +14,9 @@ pub struct rr {
 /// Round-robin director VMOD
 #[varnish::vmod(docs = "README.md")]
 mod round_robin {
-    use super::*;
+    use super::{
+        rr, BackendRef, Ctx, Director, Mutex, RoundRobinDirector, RoundRobinState, VclError,
+    };
 
     impl rr {
         /// Create a new round-robin director
@@ -154,8 +156,7 @@ impl VclDirector for RoundRobinDirector {
             let _ = vsb.write(&"  \"type\": \"roundrobin\",\n");
             let _ = vsb.write(&"  \"admin_health\": \"probe\",\n");
             let _ = vsb.write(&format!(
-                "  \"probe_message\": [{}, {}, \"{}\"],\n",
-                healthy_count, total_count, health_status
+                "  \"probe_message\": [{healthy_count}, {total_count}, \"{health_status}\"],\n"
             ));
             let _ = vsb.write(&"  \"backends\": [\n");
             for (i, backend) in state.backends.iter().enumerate() {
@@ -163,10 +164,10 @@ impl VclDirector for RoundRobinDirector {
                     let _ = vsb.write(&",\n");
                 }
                 let name = backend.name().to_string_lossy();
-                let _ = vsb.write(&format!("    \"{}\"", name));
+                let _ = vsb.write(&format!("    \"{name}\""));
             }
             let _ = vsb.write(&"\n        ],\n");
-            let _ = vsb.write(&format!("  \"last_change\": {:.3}\n", last_change));
+            let _ = vsb.write(&format!("  \"last_change\": {last_change:.3}\n"));
             let _ = vsb.write(&"}");
         } else {
             let healthy_count = state
