@@ -812,8 +812,9 @@ impl<D: VclDirector> Director<D> {
         &mut self.inner
     }
 
-    /// Get the raw C backend pointer
-    pub fn raw(&self) -> VCL_BACKEND {
+    /// Return the C pointer wrapped by the [`Director`]. Conventionally used by the `.backend()`
+    /// methods of VCL objects.
+    pub fn vcl_ptr(&self) -> VCL_BACKEND {
         self.bep
     }
 
@@ -857,6 +858,233 @@ impl<D: VclDirector> Drop for Director<D> {
         unsafe {
             ffi::VRT_DelDirector(&raw mut self.bep);
         };
+    }
+}
+
+/// A native Varnish backend created via `VRT_new_backend()`
+///
+/// This wraps a regular Varnish backend (the kind you'd normally define in VCL)
+/// but created dynamically from Rust code. Unlike [`Backend`], which allows you
+/// to implement custom backend logic, `NativeBackend` creates a standard HTTP/1
+/// backend that connects to a real server.
+///
+/// Use [`NativeBackendBuilder`] to construct instances with a fluent API.
+///
+/// # Example
+///
+/// ```ignore
+/// let backend = NativeBackend::builder()
+///     .host("example.com", 80)
+///     .vcl_name("my_backend")
+///     .connect_timeout(Duration::from_secs(5))
+///     .build(ctx)?;
+///
+/// let backend_ref = backend.as_backend_ref();
+/// ```
+#[derive(Debug)]
+pub struct NativeBackend {
+    bep: VCL_BACKEND,
+    // Keep C structures alive for the backend's lifetime
+    #[expect(dead_code)]
+    endpoint: Box<ffi::vrt_endpoint>,
+    #[expect(dead_code)]
+    backend_config: Box<ffi::vrt_backend>,
+}
+
+impl NativeBackend {
+    /// Return the C pointer wrapped by the [`NativeBackend`]. Conventionally used by the `.backend()`
+    /// methods of VCL objects.
+    pub fn vcl_ptr(&self) -> VCL_BACKEND {
+        self.bep
+    }
+
+    /// Return a [`BackendRef`] for this backend
+    pub fn as_backend_ref(&self) -> BackendRef {
+        BackendRef::new(self.bep).expect("Backend pointer should never be null")
+    }
+
+    /// Get the VCL name of this backend
+    pub fn vcl_name(&self) -> &CStr {
+        assert!(!self.bep.0.is_null());
+        unsafe {
+            let dir = *self.bep.0;
+            assert_eq!(dir.magic, ffi::DIRECTOR_MAGIC);
+            CStr::from_ptr(dir.vcl_name)
+        }
+    }
+
+    /// Check if this backend is healthy using `VRT_Healthy`
+    pub fn healthy(&self, ctx: &Ctx) -> ProbeResult {
+        let mut changed: VCL_TIME = VCL_TIME::default();
+        let healthy = unsafe { ffi::VRT_Healthy(ctx.raw, self.bep, &raw mut changed).into() };
+        let last_changed = changed.try_into().unwrap_or(SystemTime::UNIX_EPOCH);
+        ProbeResult {
+            healthy,
+            last_changed,
+        }
+    }
+}
+
+impl Drop for NativeBackend {
+    fn drop(&mut self) {
+        unsafe {
+            // VRT_delete_backend doesn't actually use the context (it's cast to void)
+            ffi::VRT_delete_backend(null(), &raw mut self.bep);
+        }
+    }
+}
+
+/// Internal enum to store the backend endpoint type
+#[derive(Debug, Clone, Copy)]
+enum BackendEndpoint<'a> {
+    Ip(SocketAddr),
+    Uds(&'a CStr),
+}
+
+/// Macro to generate builder setter methods
+macro_rules! builder_setter {
+    ($name:ident, $type:ty, $doc:expr) => {
+        #[doc = $doc]
+        #[must_use]
+        pub fn $name(mut self, $name: $type) -> Self {
+            self.$name = Some($name);
+            self
+        }
+    };
+}
+
+/// Builder for creating a [`NativeBackend`]
+///
+/// Provides a fluent interface for configuring and creating native Varnish backends.
+#[derive(Debug)]
+pub struct NativeBackendBuilder<'a> {
+    endpoint: Option<BackendEndpoint<'a>>,
+    vcl_name: &'a CStr,
+    hosthdr: Option<&'a CStr>,
+    authority: Option<&'a CStr>,
+    connect_timeout: Option<std::time::Duration>,
+    first_byte_timeout: Option<std::time::Duration>,
+    between_bytes_timeout: Option<std::time::Duration>,
+    backend_wait_timeout: Option<std::time::Duration>,
+    max_connections: Option<u32>,
+    proxy_header: Option<u32>,
+    backend_wait_limit: Option<u32>,
+}
+
+impl<'a> NativeBackendBuilder<'a> {
+    /// Create a new builder for a TCP/IP backend
+    pub fn new_ip(vcl_name: &'a CStr, addr: SocketAddr) -> Self {
+        Self {
+            endpoint: Some(BackendEndpoint::Ip(addr)),
+            vcl_name,
+            hosthdr: None,
+            authority: None,
+            connect_timeout: None,
+            first_byte_timeout: None,
+            between_bytes_timeout: None,
+            backend_wait_timeout: None,
+            max_connections: None,
+            proxy_header: None,
+            backend_wait_limit: None,
+        }
+    }
+
+    /// Create a new builder for a Unix domain socket backend
+    pub fn new_uds(vcl_name: &'a CStr, path: &'a CStr) -> Self {
+        Self {
+            endpoint: Some(BackendEndpoint::Uds(path)),
+            vcl_name,
+            hosthdr: None,
+            authority: None,
+            connect_timeout: None,
+            first_byte_timeout: None,
+            between_bytes_timeout: None,
+            backend_wait_timeout: None,
+            max_connections: None,
+            proxy_header: None,
+            backend_wait_limit: None,
+        }
+    }
+
+    builder_setter!(hosthdr, &'a CStr, "Set the Host header to use when connecting");
+    builder_setter!(authority, &'a CStr, "Set the authority for this backend");
+    builder_setter!(connect_timeout, std::time::Duration, "Set the connection timeout");
+    builder_setter!(first_byte_timeout, std::time::Duration, "Set the first byte timeout");
+    builder_setter!(between_bytes_timeout, std::time::Duration, "Set the between bytes timeout");
+    builder_setter!(backend_wait_timeout, std::time::Duration, "Set the backend wait timeout");
+    builder_setter!(max_connections, u32, "Set the maximum number of connections");
+    builder_setter!(proxy_header, u32, "Set the proxy protocol header version (0 = disabled, 1 or 2)");
+    builder_setter!(backend_wait_limit, u32, "Set the backend wait limit");
+
+    /// Build the native backend
+    pub fn build(self, ctx: &mut Ctx) -> VclResult<NativeBackend> {
+        // Validate required fields
+        let endpoint_type = self
+            .endpoint
+            .expect("endpoint must be set before calling build()");
+
+        // Create the endpoint
+        let mut endpoint = Box::new(ffi::vrt_endpoint {
+            magic: ffi::VRT_ENDPOINT_MAGIC,
+            ipv4: VCL_IP(null()),
+            ipv6: VCL_IP(null()),
+            uds_path: null(),
+            preamble: null(),
+        });
+
+        // Set endpoint based on type
+        match endpoint_type {
+            BackendEndpoint::Uds(path) => {
+                endpoint.uds_path = path.as_ptr();
+            }
+            BackendEndpoint::Ip(addr) => {
+                let sa = addr.into_vcl(&mut ctx.ws)?;
+                match addr {
+                    SocketAddr::V4(_) => endpoint.ipv4 = sa,
+                    SocketAddr::V6(_) => endpoint.ipv6 = sa,
+                }
+            }
+        }
+
+        // Create the backend config
+        let backend_config = Box::new(ffi::vrt_backend {
+            magic: ffi::VRT_BACKEND_MAGIC,
+            endpoint: &raw const *endpoint,
+            vcl_name: self.vcl_name.as_ptr(),
+            hosthdr: self.hosthdr.map_or(null(), CStr::as_ptr),
+            authority: self.authority.map_or(null(), CStr::as_ptr),
+            connect_timeout: ffi::vtim_dur(self
+                .connect_timeout
+                .map_or(-1.0, |d| d.as_secs_f64())),
+            first_byte_timeout: ffi::vtim_dur(self
+                .first_byte_timeout
+                .map_or(-1.0, |d| d.as_secs_f64())),
+            between_bytes_timeout: ffi::vtim_dur(self
+                .between_bytes_timeout
+                .map_or(-1.0, |d| d.as_secs_f64())),
+            backend_wait_timeout: ffi::vtim_dur(self
+                .backend_wait_timeout
+                .map_or(-1.0, |d| d.as_secs_f64())),
+            max_connections: self.max_connections.unwrap_or(0),
+            proxy_header: self.proxy_header.unwrap_or(0),
+            backend_wait_limit: self.backend_wait_limit.unwrap_or(0),
+            probe: ffi::VCL_PROBE(null()),
+        });
+
+        // Create the backend via VRT_new_backend (NULL via backend)
+        let bep = unsafe { ffi::VRT_new_backend(ctx.raw, &raw const *backend_config, VCL_BACKEND(null())) };
+
+        if bep.0.is_null() {
+            return Err(
+                format!("VRT_new_backend returned null for {}", self.vcl_name.to_string_lossy()).into(),
+            );
+        }
+
+        Ok(NativeBackend {
+            bep,
+            endpoint,
+            backend_config,
+        })
     }
 }
 

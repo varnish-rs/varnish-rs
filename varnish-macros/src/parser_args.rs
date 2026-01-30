@@ -412,6 +412,10 @@ impl OutputTy {
                     return Some(Self::Bytes);
                 }
             }
+            // Try to parse as Option<ParamTy> (e.g., Option<BackendRef>)
+            if let Some(param_ty) = ParamTy::try_parse(ty) {
+                return Some(Self::ParamType(param_ty));
+            }
         }
         if let Tuple(v) = ty {
             if v.elems.is_empty() {
