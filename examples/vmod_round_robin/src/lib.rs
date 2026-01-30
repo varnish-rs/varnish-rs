@@ -53,7 +53,7 @@ mod round_robin {
 
         /// Get the director as a backend reference
         pub fn backend(&self) -> BackendRef {
-            BackendRef::new(self.director.raw())
+            BackendRef::new(self.director.vcl_ptr())
                 .expect("Director should always have a valid backend pointer")
         }
     }
@@ -85,7 +85,7 @@ impl RoundRobinDirector {
             .map(|backend| backend.healthy(ctx))
             .fold((0, SystemTime::UNIX_EPOCH), |(count, latest), probe| {
                 (
-                    count + if probe.healthy { 1 } else { 0 },
+                    count + usize::from(probe.healthy),
                     latest.max(probe.last_changed),
                 )
             });
@@ -143,7 +143,7 @@ impl VclDirector for RoundRobinDirector {
 
     fn probe(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
         let (healthy_count, total_count, health_status) = self.health_stats(ctx);
-        let _ = vsb.write(&format!("{}/{}\t", healthy_count, total_count));
+        let _ = vsb.write(&format!("{healthy_count}/{total_count}\t"));
         let _ = vsb.write(&(health_status));
     }
 
@@ -154,7 +154,7 @@ impl VclDirector for RoundRobinDirector {
             let probe = backend.healthy(ctx);
             let name = backend.name().to_str().unwrap();
             let health = if probe.healthy { "healthy" } else { "sick" };
-            let _ = vsb.write(&format!("{:<30}{}\n", name, health));
+            let _ = vsb.write(&format!("{name:<30}{health}\n"));
         }
     }
 

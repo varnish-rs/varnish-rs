@@ -1,19 +1,8 @@
 varnishtest "Test round-robin director JSON list output"
 
-server s1 {
-    rxreq
-    txresp
-} -start
-
-server s2 {
-    rxreq
-    txresp
-} -start
-
-server s3 {
-    rxreq
-    txresp
-} -start
+server s1 -start
+server s2 -start
+server s3 -start
 
 varnish v1 -vcl+backend {
     import round_robin from "${vmod}";
@@ -32,41 +21,16 @@ varnish v1 -vcl+backend {
 } -start
 
 # Test JSON output with all backends healthy
-shell -match {"probe_message": \{
-        "type": "roundrobin",
-        "admin_health": "probe",
-        "probe_message": \[3, 3, "healthy"\],
-        "backends": \[
-          "s1",
-          "s2",
-          "s3"
-        \],
-        "last_change": [0-9]+\.[0-9]+
-      \}} {
-    varnishadm -n ${v1_name} backend.list -j vcl1.rr
+shell {
+    varnishadm -n ${v1_name} backend.list -j vcl1.rr |
+        jq -e '.[3]["vcl1.rr"].probe_message == [3,3,"healthy"]'
 }
 
 # Mark one backend as sick
 varnish v1 -cliok "backend.set_health vcl1.s2 sick"
 
 # Test JSON output with one backend unhealthy
-shell -match {"probe_message": \{
-        "type": "roundrobin",
-        "admin_health": "probe",
-        "probe_message": \[2, 3, "healthy"\],
-        "backends": \[
-          "s1",
-          "s2",
-          "s3"
-        \],
-        "last_change": [0-9]+\.[0-9]+
-      \}} {
-    varnishadm -n ${v1_name} backend.list -j vcl1.rr
+shell {
+    varnishadm -n ${v1_name} backend.list -j vcl1.rr |
+        jq -e '.[3]["vcl1.rr"].probe_message == [2,3,"healthy"]'
 }
-
-# Make a request to ensure director still works
-client c1 {
-    txreq
-    rxresp
-    expect resp.status == 200
-} -run

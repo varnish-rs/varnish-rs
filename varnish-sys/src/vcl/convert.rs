@@ -28,7 +28,7 @@
 //! | `&[u8]` | <- | `VCL_BLOB` |
 //! | `Option<CowProbe>` | <-> | `VCL_PROBE` |
 //! | `Option<Probe>` | <-> | `VCL_PROBE` |
-//! | `Option<std::net::SockAdd>` | -> | `VCL_IP` |
+//! | `Option<std::net::SocketAddr>` | -> | `VCL_IP` |
 //!
 //! For all the other types, which are pointers, you will need to use the native types.
 //!
@@ -409,6 +409,12 @@ default_null_ptr!(VCL_BACKEND);
 impl IntoVCL<VCL_BACKEND> for BackendRef {
     fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
         Ok(self.raw())
+    }
+}
+
+impl IntoVCL<VCL_BACKEND> for Option<BackendRef> {
+    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
+        Ok(self.map_or(VCL_BACKEND(null()), |b| b.raw()))
     }
 }
 
