@@ -638,13 +638,29 @@ pub trait VclDirector {
     /// Corresponds to the `healthy` callback in `vdi_methods`.
     fn healthy(&self, ctx: &mut Ctx) -> ProbeResult;
 
-    /// Generate output for `varnishadm backend.list`
+    /// Generate simple probe output for `varnishadm backend.list` (no flags)
     ///
-    /// - `detailed`: corresponds to the `-p` flag
-    /// - `json`: corresponds to the `-j` flag
+    /// Corresponds to the `list` callback in `vdi_methods` when neither `-p` nor `-j` is passed.
+    fn probe(&self, _ctx: &mut Ctx, _vsb: &mut Buffer) {}
+
+    /// Generate detailed probe output for `varnishadm backend.list -p`
     ///
-    /// Corresponds to the `list` callback in `vdi_methods`.
-    fn list(&self, ctx: &mut Ctx, vsb: &mut Buffer, detailed: bool, json: bool);
+    /// Corresponds to the `list` callback in `vdi_methods` when `-p` is passed.
+    fn probe_details(&self, _ctx: &mut Ctx, _vsb: &mut Buffer) {}
+
+    /// Generate simple JSON probe output for `varnishadm backend.list -j`
+    ///
+    /// Corresponds to the `list` callback in `vdi_methods` when `-j` is passed.
+    fn probe_json(&self, _ctx: &mut Ctx, vsb: &mut Buffer) {
+        let _ = vsb.write(&"{}");
+    }
+
+    /// Generate detailed JSON probe output for `varnishadm backend.list -j -p`
+    ///
+    /// Corresponds to the `list` callback in `vdi_methods` when both `-j` and `-p` are passed.
+    fn probe_json_details(&self, _ctx: &mut Ctx, vsb: &mut Buffer) {
+        let _ = vsb.write(&"{}");
+    }
 
     /// Called when the director is being destroyed
     ///
@@ -698,7 +714,12 @@ unsafe extern "C" fn wrap_director_list<D: VclDirector>(
     let mut vsb = Buffer::from_ptr(vsbp);
     let dir = validate_director(director);
     let dir_impl: &D = &*dir.priv_.cast::<D>();
-    dir_impl.list(&mut ctx, &mut vsb, detailed != 0, json != 0);
+    match (json != 0, detailed != 0) {
+        (true, true) => dir_impl.probe_json_details(&mut ctx, &mut vsb),
+        (true, false) => dir_impl.probe_json(&mut ctx, &mut vsb),
+        (false, true) => dir_impl.probe_details(&mut ctx, &mut vsb),
+        (false, false) => dir_impl.probe(&mut ctx, &mut vsb),
+    }
 }
 
 unsafe extern "C" fn wrap_director_event<D: VclDirector>(director: VCL_BACKEND, ev: VclEvent) {
@@ -917,3 +938,33 @@ impl Drop for BackendRef {
         };
     }
 }
+
+/// Creates a JSON string with custom indentation and writes it to a Buffer:
+/// - Top level line has no indentation
+/// - All other lines have 6 extra spaces on top of normal indentation
+/// - Appends a trailing comma and newline with indentation
+/// 
+/// Usage: `probe_details_json!(vsb, serde_json::json!({ "key": "value" }))`
+#[macro_export]
+macro_rules! probe_details_json {
+    ($vsb:expr, $json_value:expr) => {{
+        let json_str = serde_json::to_string_pretty(&$json_value)
+            .expect("Failed to serialize JSON");
+        
+        let indent = "      "; // 6 spaces
+        let lines: Vec<&str> = json_str.lines().collect();
+        if let Some((first, rest)) = lines.split_first() {
+            let _ = $vsb.write(first);
+            for line in rest {
+                let _ = $vsb.write(&"\n");
+                let _ = $vsb.write(&indent);
+                let _ = $vsb.write(line);
+            }
+        } else {
+            let _ = $vsb.write(&json_str);
+        }
+        let _ = $vsb.write(&",\n");
+        let _ = $vsb.write(&indent);
+    }};
+}
+
