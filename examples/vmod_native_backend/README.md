@@ -6,18 +6,18 @@
    It will be automatically updated on each build.
 
 -->
-# Varnish Module (VMOD) `native_backends`
+# Varnish Module (VMOD) `native_backend`
 
 ```vcl
 // Place import statement at the top of your VCL file
 // This loads vmod from a standard location
-import native_backends;
+import native_backend;
 
 // Or load vmod from a specific file
-import native_backends from "path/to/libnative_backends.so";
+import native_backend from "path/to/libnative_backend.so";
 ```
 
-### Function `BACKEND native_backends.create([STRING addr])`
+### Function `BACKEND native_backend.create([STRING addr])`
 
 Create a dynamic backend from a socket address.
 
@@ -26,7 +26,7 @@ The backend is stored per-task and reused within the same request.
 
 Example:
 ```vcl
-set req.backend_hint = native_backends.create("${server_addr}:${server_port}");
+set req.backend_hint = native_backend.create("${server_addr}:${server_port}");
 ```
 
 * `[STRING addr]`:

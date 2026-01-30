@@ -1,7 +1,7 @@
 varnish::run_vtc_tests!("tests/*.vtc");
 
 #[varnish::vmod(docs = "README.md")]
-mod native_backends {
+mod native_backend {
     use std::net::SocketAddr;
     use varnish::vcl::Ctx;
     use varnish::vcl::NativeBackendBuilder;
@@ -16,7 +16,7 @@ mod native_backends {
     ///
     /// Example:
     /// ```vcl
-    /// set req.backend_hint = native_backends.create("${server_addr}:${server_port}");
+    /// set req.backend_hint = native_backend.create("${server_addr}:${server_port}");
     /// ```
     pub fn create(
         ctx: &mut Ctx,

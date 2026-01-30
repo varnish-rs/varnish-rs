@@ -1,5 +1,5 @@
 [package]
-name = "vmod_native_backends"
+name = "vmod_native_backend"
 version = "0.0.0"
 publish = false
 edition.workspace = true
