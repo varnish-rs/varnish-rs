@@ -13,15 +13,15 @@ server s2 {
 } -start
 
 varnish v1 -vcl {
-    import native_backends from "${vmod}";
+    import native_backend from "${vmod}";
     
     backend default none;
 
     sub vcl_recv {
         if (req.url == "/to-s1") {
-            set req.backend_hint = native_backends.create("${s1_addr}:${s1_port}");
+            set req.backend_hint = native_backend.create("${s1_addr}:${s1_port}");
         } elsif (req.url == "/to-s2") {
-            set req.backend_hint = native_backends.create("${s2_addr}:${s2_port}");
+            set req.backend_hint = native_backend.create("${s2_addr}:${s2_port}");
         }
         return(pass);
     }

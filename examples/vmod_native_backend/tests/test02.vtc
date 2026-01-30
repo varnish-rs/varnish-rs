@@ -6,13 +6,13 @@ server s1 {
 } -start
 
 varnish v1 -vcl {
-    import native_backends from "${vmod}";
+    import native_backend from "${vmod}";
     
     backend default none;
 
     sub vcl_recv {
-        set req.backend_hint = native_backends.create("${s1_addr}:${s1_port}");
-        set req.backend_hint = native_backends.create("${s1_addr}:${s1_port}");
+        set req.backend_hint = native_backend.create("${s1_addr}:${s1_port}");
+        set req.backend_hint = native_backend.create("${s1_addr}:${s1_port}");
     }
 } -start
 
