@@ -2,6 +2,7 @@ use std::sync::Mutex;
 use std::time::SystemTime;
 use varnish::ffi::VCL_BACKEND;
 use varnish::vcl::{BackendRef, Buffer, Ctx, Director, ProbeResult, VclDirector, VclError};
+use varnish_sys::probe_details_json;
 
 varnish::run_vtc_tests!("tests/*.vtc");
 
@@ -21,19 +22,19 @@ mod round_robin {
     impl rr {
         /// Create a new round-robin director
         pub fn new(ctx: &mut Ctx, #[vcl_name] name: &str) -> Result<Self, VclError> {
-            let director = Director::new(
-                ctx,
-                "round-robin",
-                name,
-                RoundRobinDirector {
-                    state: Mutex::new(RoundRobinState {
-                        backends: Vec::new(),
-                        current: 0,
-                    }),
-                },
-            )?;
-
-            Ok(rr { director })
+            Ok(rr {
+                director: Director::new(
+                    ctx,
+                    "roundrobin",
+                    name,
+                    RoundRobinDirector {
+                        state: Mutex::new(RoundRobinState {
+                            backends: Vec::new(),
+                            current: 0,
+                        }),
+                    },
+                )?,
+            })
         }
 
         /// Add a backend to the director
@@ -41,25 +42,13 @@ mod round_robin {
             let backend = backend.ok_or_else(|| {
                 VclError::new("round_robin.add_backend() requires a non-null backend".to_string())
             })?;
-            self.director
-                .get_inner()
-                .state
-                .lock()
-                .unwrap()
-                .backends
-                .push(backend);
+            self.director.get_inner().state().backends.push(backend);
             Ok(())
         }
 
         /// Get the number of backends in the director
         pub fn count(&self) -> i64 {
-            self.director
-                .get_inner()
-                .state
-                .lock()
-                .unwrap()
-                .backends
-                .len() as i64
+            self.director.get_inner().state().backends.len() as i64
         }
 
         /// Get the director as a backend reference
@@ -81,9 +70,34 @@ struct RoundRobinDirector {
     state: Mutex<RoundRobinState>,
 }
 
+impl RoundRobinDirector {
+    /// Helper function to access the locked state
+    fn state(&self) -> std::sync::MutexGuard<'_, RoundRobinState> {
+        self.state.lock().unwrap()
+    }
+
+    /// Get backend health statistics
+    fn health_stats(&self, ctx: &mut Ctx) -> (usize, usize, &'static str) {
+        let state = self.state();
+        let (healthy_count, _) = state
+            .backends
+            .iter()
+            .map(|backend| backend.healthy(ctx))
+            .fold((0, SystemTime::UNIX_EPOCH), |(count, latest), probe| {
+                (
+                    count + if probe.healthy { 1 } else { 0 },
+                    latest.max(probe.last_changed),
+                )
+            });
+        let total_count = state.backends.len();
+        let health_status = if healthy_count > 0 { "healthy" } else { "sick" };
+        (healthy_count, total_count, health_status)
+    }
+}
+
 impl VclDirector for RoundRobinDirector {
     fn resolve(&self, ctx: &mut Ctx, _director: VCL_BACKEND) -> Option<BackendRef> {
-        let mut state = self.state.lock().unwrap();
+        let mut state = self.state();
         if state.backends.is_empty() {
             return None;
         }
@@ -108,7 +122,7 @@ impl VclDirector for RoundRobinDirector {
     }
 
     fn healthy(&self, ctx: &mut Ctx) -> ProbeResult {
-        let state = self.state.lock().unwrap();
+        let state = self.state();
 
         let (any_healthy, latest_change) = state
             .backends
@@ -127,62 +141,54 @@ impl VclDirector for RoundRobinDirector {
         }
     }
 
-    fn list(&self, ctx: &mut Ctx, vsb: &mut Buffer, _detailed: bool, json: bool) {
-        let state = self.state.lock().unwrap();
+    fn probe(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
+        let (healthy_count, total_count, health_status) = self.health_stats(ctx);
+        let _ = vsb.write(&format!("{}/{}\t", healthy_count, total_count));
+        let _ = vsb.write(&(health_status));
+    }
 
-        if json {
-            // Collect probe results to get health status and last change timestamp
-            let probe_results: Vec<_> = state
-                .backends
-                .iter()
-                .map(|backend| backend.healthy(ctx))
-                .collect();
-
-            let healthy_count = probe_results.iter().filter(|probe| probe.healthy).count();
-            let total_count = state.backends.len();
-            let health_status = if healthy_count > 0 { "healthy" } else { "sick" };
-
-            // Find the most recent change across all backends
-            let last_change = probe_results
-                .iter()
-                .map(|probe| probe.last_changed)
-                .max()
-                .unwrap_or(SystemTime::UNIX_EPOCH)
-                .duration_since(SystemTime::UNIX_EPOCH)
-                .unwrap()
-                .as_secs_f64();
-
-            let _ = vsb.write(&"{\n");
-            let _ = vsb.write(&"  \"type\": \"roundrobin\",\n");
-            let _ = vsb.write(&"  \"admin_health\": \"probe\",\n");
-            let _ = vsb.write(&format!(
-                "  \"probe_message\": [{healthy_count}, {total_count}, \"{health_status}\"],\n"
-            ));
-            let _ = vsb.write(&"  \"backends\": [\n");
-            for (i, backend) in state.backends.iter().enumerate() {
-                if i > 0 {
-                    let _ = vsb.write(&",\n");
-                }
-                let name = backend.name().to_string_lossy();
-                let _ = vsb.write(&format!("    \"{name}\""));
-            }
-            let _ = vsb.write(&"\n        ],\n");
-            let _ = vsb.write(&format!("  \"last_change\": {last_change:.3}\n"));
-            let _ = vsb.write(&"}");
-        } else {
-            let healthy_count = state
-                .backends
-                .iter()
-                .filter(|backend| backend.healthy(ctx).healthy)
-                .count();
-            let _ = vsb.write(&format!("{}/{}\t", healthy_count, state.backends.len()));
-            let _ = vsb.write(&(if healthy_count > 0 { "healthy" } else { "sick" }));
+    fn probe_details(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
+        let state = self.state();
+        let _ = vsb.write(&format!("{:<30}{}\n", "Backend", "Health"));
+        for backend in &state.backends {
+            let probe = backend.healthy(ctx);
+            let name = backend.name().to_str().unwrap();
+            let health = if probe.healthy { "healthy" } else { "sick" };
+            let _ = vsb.write(&format!("{:<30}{}\n", name, health));
         }
+    }
+
+    fn probe_json(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
+        let (healthy_count, total_count, health_status) = self.health_stats(ctx);
+        let json_array = serde_json::json!([healthy_count, total_count, health_status]);
+        let json_str = serde_json::to_string(&json_array)
+            .expect("Failed to serialize JSON array");
+        let _ = vsb.write(&json_str);
+    }
+
+    fn probe_json_details(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
+        let state = self.state();
+        let backend_map: std::collections::HashMap<&str, serde_json::Value> = state
+            .backends
+            .iter()
+            .map(|backend| {
+                let probe = backend.healthy(ctx);
+                let name = backend.name().to_str().unwrap();
+                let health_info = serde_json::json!({
+                    "healthy": probe.healthy
+                });
+                (name, health_info)
+            })
+            .collect();
+
+        probe_details_json!(vsb, serde_json::json!({
+            "backends": backend_map
+        }));
     }
 
     fn release(&self) {
         // BackendRef instances will be automatically dropped when the Vec is dropped
         // This explicit release ensures all backend references are cleaned up
-        self.state.lock().unwrap().backends.clear();
+        self.state().backends.clear();
     }
 }
