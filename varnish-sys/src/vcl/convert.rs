@@ -55,9 +55,7 @@ use crate::ffi::{
     VCL_BLOB, VCL_BODY, VCL_BOOL, VCL_DURATION, VCL_ENUM, VCL_HEADER, VCL_HTTP, VCL_INT, VCL_IP,
     VCL_PROBE, VCL_REAL, VCL_STEVEDORE, VCL_STRANDS, VCL_STRING, VCL_TIME, VCL_VCL,
 };
-use crate::vcl::{
-    from_vcl_probe, into_vcl_probe, BackendRef, CowProbe, Probe, VclError, Workspace,
-};
+use crate::vcl::{from_vcl_probe, into_vcl_probe, CowProbe, Probe, VclError, Workspace};
 
 /// Convert a Rust type into a VCL one
 ///
@@ -406,24 +404,6 @@ default_null_ptr!(mut VCL_VCL);
 // VCL_BACKEND
 default_null_ptr!(VCL_BACKEND);
 
-impl IntoVCL<VCL_BACKEND> for BackendRef {
-    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
-        Ok(self.vcl_ptr())
-    }
-}
-
-impl IntoVCL<VCL_BACKEND> for Option<BackendRef> {
-    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
-        Ok(self.map_or(VCL_BACKEND(null()), |b| b.vcl_ptr()))
-    }
-}
-
-impl From<VCL_BACKEND> for Option<BackendRef> {
-    fn from(value: VCL_BACKEND) -> Self {
-        BackendRef::new(value)
-    }
-}
-
 #[cfg(not(varnishsys_6))]
 mod version_after_v6 {
     use std::ffi::c_void;
@@ -434,9 +414,28 @@ mod version_after_v6 {
 
     use super::IntoVCL;
     use crate::ffi::{
-        sa_family_t, vsa_suckaddr_len, VSA_BuildFAP, PF_INET, PF_INET6, VCL_IP, VCL_REGEX, VCL_SUB,
+        sa_family_t, vsa_suckaddr_len, VSA_BuildFAP, PF_INET, PF_INET6, VCL_BACKEND, VCL_IP, VCL_REGEX, VCL_SUB,
     };
-    use crate::vcl::{VclError, Workspace};
+    use crate::vcl::{BackendRef, VclError, Workspace};
+
+    impl IntoVCL<VCL_BACKEND> for BackendRef {
+        fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
+            Ok(self.vcl_ptr())
+        }
+    }
+
+    impl IntoVCL<VCL_BACKEND> for Option<BackendRef> {
+        fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
+            Ok(self.map_or(VCL_BACKEND(null()), |b: BackendRef| b.vcl_ptr()))
+        }
+    }
+
+    impl From<VCL_BACKEND> for Option<BackendRef> {
+        fn from(value: VCL_BACKEND) -> Self {
+            BackendRef::new(value)
+        }
+    }
+
     default_null_ptr!(VCL_SUB);
 
     default_null_ptr!(VCL_REGEX);
