@@ -195,7 +195,7 @@ pub trait VclBackend<T: VclResponse> {
     fn finish(&self, _ctx: &mut Ctx) {}
 
     /// Is your backend healthy, and when did its health change for the last time.
-    fn healthy(&self, _ctx: &mut Ctx) -> (bool, SystemTime) {
+    fn probe(&self, _ctx: &mut Ctx) -> (bool, SystemTime) {
         (true, SystemTime::UNIX_EPOCH)
     }
 
@@ -215,11 +215,11 @@ pub trait VclBackend<T: VclResponse> {
 
     fn panic(&self, _vsb: &mut Buffer) {}
 
-    /// Generate simple probe output for `varnishadm backend.list` (no flags)
+    /// Generate simple report output for `varnishadm backend.list` (no flags)
     ///
     /// Corresponds to the `list` callback in `vdi_methods` when neither `-p` nor `-j` is passed.
-    fn probe(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
-        let state = if self.healthy(ctx).0 {
+    fn report(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
+        let state = if self.probe(ctx).0 {
             "healthy"
         } else {
             "sick"
@@ -228,16 +228,16 @@ pub trait VclBackend<T: VclResponse> {
         vsb.write(&state).unwrap();
     }
 
-    /// Generate detailed probe output for `varnishadm backend.list -p`
+    /// Generate detailed report output for `varnishadm backend.list -p`
     ///
     /// Corresponds to the `list` callback in `vdi_methods` when `-p` is passed.
-    fn probe_details(&self, _ctx: &mut Ctx, _vsb: &mut Buffer) {}
+    fn report_details(&self, _ctx: &mut Ctx, _vsb: &mut Buffer) {}
 
-    /// Generate simple JSON probe output for `varnishadm backend.list -j`
+    /// Generate simple JSON report output for `varnishadm backend.list -j`
     ///
     /// Corresponds to the `list` callback in `vdi_methods` when `-j` is passed.
-    fn probe_json(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
-        let state = if self.healthy(ctx).0 {
+    fn report_json(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
+        let state = if self.probe(ctx).0 {
             "healthy"
         } else {
             "sick"
@@ -247,10 +247,10 @@ pub trait VclBackend<T: VclResponse> {
         vsb.write(&"]").unwrap();
     }
 
-    /// Generate detailed JSON probe output for `varnishadm backend.list -j -p`
+    /// Generate detailed JSON report output for `varnishadm backend.list -j -p`
     ///
     /// Corresponds to the `list` callback in `vdi_methods` when both `-j` and `-p` are passed.
-    fn probe_json_details(&self, _ctx: &mut Ctx, vsb: &mut Buffer) {
+    fn report_details_json(&self, _ctx: &mut Ctx, vsb: &mut Buffer) {
         let _ = vsb.write(&"{}");
     }
 }
@@ -345,10 +345,10 @@ unsafe extern "C" fn wrap_list<S: VclBackend<T>, T: VclResponse>(
     let mut vsb = Buffer::from_ptr(vsbp);
     let backend: &S = get_backend(validate_director(be));
     match (json != 0, detailed != 0) {
-        (true, true) => backend.probe_json_details(&mut ctx, &mut vsb),
-        (true, false) => backend.probe_json(&mut ctx, &mut vsb),
-        (false, true) => backend.probe_details(&mut ctx, &mut vsb),
-        (false, false) => backend.probe(&mut ctx, &mut vsb),
+        (true, true) => backend.report_details_json(&mut ctx, &mut vsb),
+        (true, false) => backend.report_json(&mut ctx, &mut vsb),
+        (false, true) => backend.report_details(&mut ctx, &mut vsb),
+        (false, false) => backend.report(&mut ctx, &mut vsb),
     }
 }
 
@@ -505,7 +505,7 @@ unsafe extern "C" fn wrap_healthy<S: VclBackend<T>, T: VclResponse>(
     let backend: &S = get_backend(validate_director(be));
 
     let mut ctx = Ctx::from_ptr(ctxp);
-    let (healthy, when) = backend.healthy(&mut ctx);
+    let (healthy, when) = backend.probe(&mut ctx);
     if !changed.is_null() {
         *changed = when.try_into().unwrap(); // FIXME: on error?
     }
@@ -653,29 +653,29 @@ pub trait VclDirector {
     /// Returns a `ProbeResult` containing the health status and when it last changed.
     ///
     /// Corresponds to the `healthy` callback in `vdi_methods`.
-    fn healthy(&self, ctx: &mut Ctx) -> ProbeResult;
+    fn probe(&self, ctx: &mut Ctx) -> ProbeResult;
 
-    /// Generate simple probe output for `varnishadm backend.list` (no flags)
+    /// Generate simple report output for `varnishadm backend.list` (no flags)
     ///
     /// Corresponds to the `list` callback in `vdi_methods` when neither `-p` nor `-j` is passed.
-    fn probe(&self, _ctx: &mut Ctx, _vsb: &mut Buffer) {}
+    fn report(&self, _ctx: &mut Ctx, _vsb: &mut Buffer) {}
 
-    /// Generate detailed probe output for `varnishadm backend.list -p`
+    /// Generate detailed report output for `varnishadm backend.list -p`
     ///
     /// Corresponds to the `list` callback in `vdi_methods` when `-p` is passed.
-    fn probe_details(&self, _ctx: &mut Ctx, _vsb: &mut Buffer) {}
+    fn report_details(&self, _ctx: &mut Ctx, _vsb: &mut Buffer) {}
 
-    /// Generate simple JSON probe output for `varnishadm backend.list -j`
+    /// Generate simple JSON report output for `varnishadm backend.list -j`
     ///
     /// Corresponds to the `list` callback in `vdi_methods` when `-j` is passed.
-    fn probe_json(&self, _ctx: &mut Ctx, vsb: &mut Buffer) {
+    fn report_json(&self, _ctx: &mut Ctx, vsb: &mut Buffer) {
         let _ = vsb.write(&"{}");
     }
 
-    /// Generate detailed JSON probe output for `varnishadm backend.list -j -p`
+    /// Generate detailed JSON report output for `varnishadm backend.list -j -p`
     ///
     /// Corresponds to the `list` callback in `vdi_methods` when both `-j` and `-p` are passed.
-    fn probe_json_details(&self, _ctx: &mut Ctx, vsb: &mut Buffer) {
+    fn report_details_json(&self, _ctx: &mut Ctx, vsb: &mut Buffer) {
         let _ = vsb.write(&"{}");
     }
 
@@ -713,7 +713,7 @@ unsafe extern "C" fn wrap_director_healthy<D: VclDirector>(
     let mut ctx = Ctx::from_ptr(ctxp);
     let dir = validate_director(director);
     let dir_impl: &D = &*dir.priv_.cast::<D>();
-    let result = dir_impl.healthy(&mut ctx);
+    let result = dir_impl.probe(&mut ctx);
     if !changed.is_null() {
         *changed = result.last_changed.try_into().unwrap();
     }
@@ -732,10 +732,10 @@ unsafe extern "C" fn wrap_director_list<D: VclDirector>(
     let dir = validate_director(director);
     let dir_impl: &D = &*dir.priv_.cast::<D>();
     match (json != 0, detailed != 0) {
-        (true, true) => dir_impl.probe_json_details(&mut ctx, &mut vsb),
-        (true, false) => dir_impl.probe_json(&mut ctx, &mut vsb),
-        (false, true) => dir_impl.probe_details(&mut ctx, &mut vsb),
-        (false, false) => dir_impl.probe(&mut ctx, &mut vsb),
+        (true, true) => dir_impl.report_details_json(&mut ctx, &mut vsb),
+        (true, false) => dir_impl.report_json(&mut ctx, &mut vsb),
+        (false, true) => dir_impl.report_details(&mut ctx, &mut vsb),
+        (false, false) => dir_impl.report(&mut ctx, &mut vsb),
     }
 }
 
@@ -854,7 +854,7 @@ impl<D: VclDirector> Director<D> {
     }
 
     /// Check if this director is healthy using `VRT_Healthy`
-    pub fn healthy(&self, ctx: &Ctx) -> ProbeResult {
+    pub fn probe(&self, ctx: &Ctx) -> ProbeResult {
         let mut changed: VCL_TIME = VCL_TIME::default();
         let healthy = unsafe { ffi::VRT_Healthy(ctx.raw, self.bep, &raw mut changed).into() };
         let last_changed = changed.try_into().unwrap_or(SystemTime::UNIX_EPOCH);
@@ -931,7 +931,7 @@ impl NativeBackend {
     }
 
     /// Check if this backend is healthy using `VRT_Healthy`
-    pub fn healthy(&self, ctx: &Ctx) -> ProbeResult {
+    pub fn probe(&self, ctx: &Ctx) -> ProbeResult {
         let mut changed: VCL_TIME = VCL_TIME::default();
         let healthy = unsafe { ffi::VRT_Healthy(ctx.raw, self.bep, &raw mut changed).into() };
         let last_changed = changed.try_into().unwrap_or(SystemTime::UNIX_EPOCH);
@@ -1141,7 +1141,7 @@ impl BackendRef {
         unsafe { ffi::VRT_DirectorResolve(ctx.raw, self.bep) }
     }
 
-    pub fn healthy(&self, ctx: &Ctx) -> ProbeResult {
+    pub fn probe(&self, ctx: &Ctx) -> ProbeResult {
         let mut changed = VCL_TIME::default();
         let healthy = unsafe { ffi::VRT_Healthy(ctx.raw, self.bep, &raw mut changed).into() };
         let last_changed = changed.try_into().unwrap_or(SystemTime::UNIX_EPOCH);
@@ -1189,9 +1189,9 @@ impl Drop for BackendRef {
 /// - All other lines have 6 extra spaces on top of normal indentation
 /// - Appends a trailing comma and newline with indentation
 /// 
-/// Usage: `probe_details_json!(vsb, serde_json::json!({ "key": "value" }))`
+/// Usage: `report_details_json!(vsb, serde_json::json!({ "key": "value" }))`
 #[macro_export]
-macro_rules! probe_details_json {
+macro_rules! report_details_json {
     ($vsb:expr, $json_value:expr) => {{
         let json_str = serde_json::to_string_pretty(&$json_value)
             .expect("Failed to serialize JSON");

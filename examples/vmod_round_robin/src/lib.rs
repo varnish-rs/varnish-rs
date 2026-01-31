@@ -2,7 +2,7 @@ use std::sync::Mutex;
 use std::time::SystemTime;
 use varnish::ffi::VCL_BACKEND;
 use varnish::vcl::{BackendRef, Buffer, Ctx, Director, ProbeResult, VclDirector, VclError};
-use varnish_sys::probe_details_json;
+use varnish_sys::report_details_json;
 
 varnish::run_vtc_tests!("tests/*.vtc");
 
@@ -82,7 +82,7 @@ impl RoundRobinDirector {
         let (healthy_count, _) = state
             .backends
             .iter()
-            .map(|backend| backend.healthy(ctx))
+            .map(|backend| backend.probe(ctx))
             .fold((0, SystemTime::UNIX_EPOCH), |(count, latest), probe| {
                 (
                     count + usize::from(probe.healthy),
@@ -108,7 +108,7 @@ impl VclDirector for RoundRobinDirector {
             let idx = (start_idx + i) % state.backends.len();
             let backend = &state.backends[idx];
 
-            if backend.healthy(ctx).healthy {
+            if backend.probe(ctx).healthy {
                 // Clone before updating state to avoid borrow checker issues
                 let result = backend.clone();
                 // Update current position for next call
@@ -121,13 +121,13 @@ impl VclDirector for RoundRobinDirector {
         None
     }
 
-    fn healthy(&self, ctx: &mut Ctx) -> ProbeResult {
+    fn probe(&self, ctx: &mut Ctx) -> ProbeResult {
         let state = self.state();
 
         let (any_healthy, latest_change) = state
             .backends
             .iter()
-            .map(|backend| backend.healthy(ctx))
+            .map(|backend| backend.probe(ctx))
             .fold(
                 (false, SystemTime::UNIX_EPOCH),
                 |(any_healthy, latest), probe| {
@@ -141,24 +141,24 @@ impl VclDirector for RoundRobinDirector {
         }
     }
 
-    fn probe(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
+    fn report(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
         let (healthy_count, total_count, health_status) = self.health_stats(ctx);
         let _ = vsb.write(&format!("{healthy_count}/{total_count}\t"));
         let _ = vsb.write(&(health_status));
     }
 
-    fn probe_details(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
+    fn report_details(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
         let state = self.state();
         let _ = vsb.write(&format!("{:<30}{}\n", "Backend", "Health"));
         for backend in &state.backends {
-            let probe = backend.healthy(ctx);
+            let probe = backend.probe(ctx);
             let name = backend.name().to_str().unwrap();
             let health = if probe.healthy { "healthy" } else { "sick" };
             let _ = vsb.write(&format!("{name:<30}{health}\n"));
         }
     }
 
-    fn probe_json(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
+    fn report_json(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
         let (healthy_count, total_count, health_status) = self.health_stats(ctx);
         let json_array = serde_json::json!([healthy_count, total_count, health_status]);
         let json_str = serde_json::to_string(&json_array)
@@ -166,13 +166,13 @@ impl VclDirector for RoundRobinDirector {
         let _ = vsb.write(&json_str);
     }
 
-    fn probe_json_details(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
+    fn report_details_json(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
         let state = self.state();
         let backend_map: std::collections::HashMap<&str, serde_json::Value> = state
             .backends
             .iter()
             .map(|backend| {
-                let probe = backend.healthy(ctx);
+                let probe = backend.probe(ctx);
                 let name = backend.name().to_str().unwrap();
                 let health_info = serde_json::json!({
                     "healthy": probe.healthy
@@ -181,7 +181,7 @@ impl VclDirector for RoundRobinDirector {
             })
             .collect();
 
-        probe_details_json!(vsb, serde_json::json!({
+        report_details_json!(vsb, serde_json::json!({
             "backends": backend_map
         }));
     }
