@@ -646,7 +646,7 @@ pub trait VclDirector {
     /// the appropriate backend, or `None` if no backend is available.
     ///
     /// Corresponds to the `resolve` callback in `vdi_methods`.
-    fn resolve(&self, ctx: &mut Ctx, director: VCL_BACKEND) -> Option<BackendRef>;
+    fn resolve(&self, ctx: &mut Ctx) -> Option<BackendRef>;
 
     /// Check if the director (or its backends) are healthy
     ///
@@ -701,8 +701,8 @@ unsafe extern "C" fn wrap_director_resolve<D: VclDirector>(
     let dir = validate_director(director);
     let dir_impl: &D = &*dir.priv_.cast::<D>();
     dir_impl
-        .resolve(&mut ctx, director)
-        .map_or(VCL_BACKEND(null()), |backend_ref| backend_ref.raw())
+        .resolve(&mut ctx)
+        .map_or(VCL_BACKEND(null()), |backend_ref| backend_ref.vcl_ptr())
 }
 
 unsafe extern "C" fn wrap_director_healthy<D: VclDirector>(
@@ -1137,8 +1137,9 @@ impl BackendRef {
         Some(BackendRef { bep })
     }
 
-    pub fn resolve(&self, ctx: &Ctx) -> VCL_BACKEND {
-        unsafe { ffi::VRT_DirectorResolve(ctx.raw, self.bep) }
+    pub fn resolve(&self, ctx: &Ctx) -> Option<BackendRef> {
+        let bep = unsafe { ffi::VRT_DirectorResolve(ctx.raw, self.bep) };
+        BackendRef::new(bep)
     }
 
     pub fn probe(&self, ctx: &Ctx) -> ProbeResult {
@@ -1160,7 +1161,7 @@ impl BackendRef {
         }
     }
 
-    pub fn raw(&self) -> VCL_BACKEND {
+    pub fn vcl_ptr(&self) -> VCL_BACKEND {
         // need to clone, we'll clear bep on drop
         self.bep
     }
@@ -1168,8 +1169,8 @@ impl BackendRef {
 
 impl Clone for BackendRef {
     fn clone(&self) -> BackendRef {
-        // self.raw() will never be null
-        BackendRef::new(self.raw()).unwrap()
+        // self.vcl_ptr() will never be null
+        BackendRef::new(self.vcl_ptr()).unwrap()
     }
 }
 
