@@ -408,13 +408,13 @@ default_null_ptr!(VCL_BACKEND);
 
 impl IntoVCL<VCL_BACKEND> for BackendRef {
     fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
-        Ok(self.raw())
+        Ok(self.vcl_ptr())
     }
 }
 
 impl IntoVCL<VCL_BACKEND> for Option<BackendRef> {
     fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
-        Ok(self.map_or(VCL_BACKEND(null()), |b| b.raw()))
+        Ok(self.map_or(VCL_BACKEND(null()), |b| b.vcl_ptr()))
     }
 }
 

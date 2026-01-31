@@ -1,6 +1,5 @@
 use std::sync::Mutex;
 use std::time::SystemTime;
-use varnish::ffi::VCL_BACKEND;
 use varnish::vcl::{BackendRef, Buffer, Ctx, Director, ProbeResult, VclDirector, VclError};
 use varnish_sys::report_details_json;
 
@@ -96,7 +95,7 @@ impl RoundRobinDirector {
 }
 
 impl VclDirector for RoundRobinDirector {
-    fn resolve(&self, ctx: &mut Ctx, _director: VCL_BACKEND) -> Option<BackendRef> {
+    fn resolve(&self, ctx: &mut Ctx) -> Option<BackendRef> {
         let mut state = self.state();
         if state.backends.is_empty() {
             return None;
