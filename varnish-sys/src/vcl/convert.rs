@@ -28,7 +28,7 @@
 //! | `&[u8]` | <- | `VCL_BLOB` |
 //! | `Option<CowProbe>` | <-> | `VCL_PROBE` |
 //! | `Option<Probe>` | <-> | `VCL_PROBE` |
-//! | `Option<std::net::SockAdd>` | -> | `VCL_IP` |
+//! | `Option<std::net::SocketAddr>` | -> | `VCL_IP` |
 //!
 //! For all the other types, which are pointers, you will need to use the native types.
 //!
@@ -55,7 +55,9 @@ use crate::ffi::{
     VCL_BLOB, VCL_BODY, VCL_BOOL, VCL_DURATION, VCL_ENUM, VCL_HEADER, VCL_HTTP, VCL_INT, VCL_IP,
     VCL_PROBE, VCL_REAL, VCL_STEVEDORE, VCL_STRANDS, VCL_STRING, VCL_TIME, VCL_VCL,
 };
-use crate::vcl::{from_vcl_probe, into_vcl_probe, CowProbe, Probe, VclError, Workspace};
+use crate::vcl::{
+    from_vcl_probe, into_vcl_probe, BackendRef, CowProbe, Probe, VclError, Workspace,
+};
 
 /// Convert a Rust type into a VCL one
 ///
@@ -112,9 +114,6 @@ macro_rules! from_vcl_to_opt_rust {
 
 // VCL_ACL
 default_null_ptr!(VCL_ACL);
-
-// VCL_BACKEND
-default_null_ptr!(VCL_BACKEND);
 
 // VCL_BLOB
 default_null_ptr!(VCL_BLOB);
@@ -391,8 +390,39 @@ impl TryFrom<SystemTime> for VCL_TIME {
     }
 }
 
+impl TryFrom<VCL_TIME> for SystemTime {
+    type Error = VclError;
+
+    fn try_from(value: VCL_TIME) -> Result<Self, Self::Error> {
+        SystemTime::UNIX_EPOCH
+            .checked_add(Duration::from_secs_f64(value.0 .0))
+            .ok_or_else(|| VclError::new("Time value out of range".to_string()))
+    }
+}
+
 // VCL_VCL
 default_null_ptr!(mut VCL_VCL);
+
+// VCL_BACKEND
+default_null_ptr!(VCL_BACKEND);
+
+impl IntoVCL<VCL_BACKEND> for BackendRef {
+    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
+        Ok(self.raw())
+    }
+}
+
+impl IntoVCL<VCL_BACKEND> for Option<BackendRef> {
+    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
+        Ok(self.map_or(VCL_BACKEND(null()), |b| b.raw()))
+    }
+}
+
+impl From<VCL_BACKEND> for Option<BackendRef> {
+    fn from(value: VCL_BACKEND) -> Self {
+        BackendRef::new(value)
+    }
+}
 
 #[cfg(not(varnishsys_6))]
 mod version_after_v6 {
