@@ -9,7 +9,7 @@ targets := '--all-targets'  # For all targets (lib, bin, tests, examples, benche
 default_varnish_ver := '8.0'
 
 # Make sure to update CI with the changes.  The versions with 'r' suffix are Varnish Plus versions - must have all 4 numbers.
-supported_varnish_vers := '8.0  7.7  7.7.0  7.6  7.5  6.0  6.0.14r3'
+supported_varnish_vers := '8.0  7.7  7.7.0  6.0  6.0.14r3'
 
 # if running in CI, treat warnings as errors by setting RUSTFLAGS and RUSTDOCFLAGS to '-D warnings' unless they are already set
 # Use `CI=true just ci-test` to run the same tests as in GitHub CI.
