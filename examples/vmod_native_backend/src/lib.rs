@@ -3,9 +3,9 @@ varnish::run_vtc_tests!("tests/*.vtc");
 #[varnish::vmod(docs = "README.md")]
 mod native_backend {
     use std::net::SocketAddr;
+    use varnish::vcl::BackendRef;
     use varnish::vcl::Ctx;
     use varnish::vcl::NativeBackendBuilder;
-    use varnish::vcl::BackendRef;
 
     use super::NativeBackend;
 
@@ -23,7 +23,8 @@ mod native_backend {
         /// Socket address string (e.g., "127.0.0.1:8080")
         addr: Option<&str>,
         /// Storage for the created native backend (per-task)
-        #[shared_per_task] backend_storage: &mut Option<Box<NativeBackend>>,
+        #[shared_per_task]
+        backend_storage: &mut Option<Box<NativeBackend>>,
     ) -> Option<BackendRef> {
         // Check if backend already exists in storage
         if let Some(backend) = backend_storage.as_ref() {
@@ -33,11 +34,11 @@ mod native_backend {
         // Parse the socket address string
         let addr_str = addr?;
         let sock_addr: SocketAddr = addr_str.parse().ok()?;
-        
+
         // Create backend name from address
         let name = format!("native_{sock_addr}");
         let name_cstr = std::ffi::CString::new(name).ok()?;
-        
+
         // Build the backend
         let native_backend = NativeBackendBuilder::new_ip(&name_cstr, sock_addr)
             .build(ctx)
