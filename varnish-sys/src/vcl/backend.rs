@@ -215,31 +215,43 @@ pub trait VclBackend<T: VclResponse> {
 
     fn panic(&self, _vsb: &mut Buffer) {}
 
-    /// Convenience function for the implementors to call if they don't have a probe. This one is
-    /// not used by Varnish directly.
-    fn list_without_probe(&self, ctx: &mut Ctx, vsb: &mut Buffer, detailed: bool, json: bool) {
-        if detailed {
-            return;
-        }
+    /// Generate simple probe output for `varnishadm backend.list` (no flags)
+    ///
+    /// Corresponds to the `list` callback in `vdi_methods` when neither `-p` nor `-j` is passed.
+    fn probe(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
         let state = if self.healthy(ctx).0 {
             "healthy"
         } else {
             "sick"
         };
-        if json {
-            vsb.write(&"[0, 0, ").unwrap();
-            vsb.write(&state).unwrap();
-            vsb.write(&"]").unwrap();
-        } else {
-            vsb.write(&"0/0\t").unwrap();
-            vsb.write(&state).unwrap();
-        }
+        vsb.write(&"0/0\t").unwrap();
+        vsb.write(&state).unwrap();
     }
 
-    /// Used to generate the output of `varnishadm backend.list`. `detailed` means the `-p`
-    /// argument was passed and `json` means `-j` was passed.
-    fn list(&self, ctx: &mut Ctx, vsb: &mut Buffer, detailed: bool, json: bool) {
-        self.list_without_probe(ctx, vsb, detailed, json);
+    /// Generate detailed probe output for `varnishadm backend.list -p`
+    ///
+    /// Corresponds to the `list` callback in `vdi_methods` when `-p` is passed.
+    fn probe_details(&self, _ctx: &mut Ctx, _vsb: &mut Buffer) {}
+
+    /// Generate simple JSON probe output for `varnishadm backend.list -j`
+    ///
+    /// Corresponds to the `list` callback in `vdi_methods` when `-j` is passed.
+    fn probe_json(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
+        let state = if self.healthy(ctx).0 {
+            "healthy"
+        } else {
+            "sick"
+        };
+        vsb.write(&"[0, 0, ").unwrap();
+        vsb.write(&state).unwrap();
+        vsb.write(&"]").unwrap();
+    }
+
+    /// Generate detailed JSON probe output for `varnishadm backend.list -j -p`
+    ///
+    /// Corresponds to the `list` callback in `vdi_methods` when both `-j` and `-p` are passed.
+    fn probe_json_details(&self, _ctx: &mut Ctx, vsb: &mut Buffer) {
+        let _ = vsb.write(&"{}");
     }
 }
 
@@ -332,7 +344,12 @@ unsafe extern "C" fn wrap_list<S: VclBackend<T>, T: VclResponse>(
     let mut ctx = Ctx::from_ptr(ctxp);
     let mut vsb = Buffer::from_ptr(vsbp);
     let backend: &S = get_backend(validate_director(be));
-    backend.list(&mut ctx, &mut vsb, detailed != 0, json != 0);
+    match (json != 0, detailed != 0) {
+        (true, true) => backend.probe_json_details(&mut ctx, &mut vsb),
+        (true, false) => backend.probe_json(&mut ctx, &mut vsb),
+        (false, true) => backend.probe_details(&mut ctx, &mut vsb),
+        (false, false) => backend.probe(&mut ctx, &mut vsb),
+    }
 }
 
 unsafe extern "C" fn wrap_panic<S: VclBackend<T>, T: VclResponse>(
