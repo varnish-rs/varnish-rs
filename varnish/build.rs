@@ -12,7 +12,7 @@ fn main() {
 }
 
 fn parse_version(version: &str) -> (u32, u32) {
-    // version string usually looks like "7.5.0"
+    // version string usually looks like "7.7.0"
     let mut parts = version.split('.');
     (
         parse_next_int(&mut parts, "major"),
