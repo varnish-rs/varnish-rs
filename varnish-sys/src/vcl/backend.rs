@@ -219,11 +219,7 @@ pub trait VclBackend<T: VclResponse> {
     ///
     /// Corresponds to the `list` callback in `vdi_methods` when neither `-p` nor `-j` is passed.
     fn report(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
-        let state = if self.probe(ctx).0 {
-            "healthy"
-        } else {
-            "sick"
-        };
+        let state = if self.probe(ctx).0 { "healthy" } else { "sick" };
         vsb.write(&"0/0\t").unwrap();
         vsb.write(&state).unwrap();
     }
@@ -237,11 +233,7 @@ pub trait VclBackend<T: VclResponse> {
     ///
     /// Corresponds to the `list` callback in `vdi_methods` when `-j` is passed.
     fn report_json(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
-        let state = if self.probe(ctx).0 {
-            "healthy"
-        } else {
-            "sick"
-        };
+        let state = if self.probe(ctx).0 { "healthy" } else { "sick" };
         vsb.write(&"[0, 0, ").unwrap();
         vsb.write(&state).unwrap();
         vsb.write(&"]").unwrap();
@@ -1023,14 +1015,42 @@ impl<'a> NativeBackendBuilder<'a> {
         }
     }
 
-    builder_setter!(hosthdr, &'a CStr, "Set the Host header to use when connecting");
+    builder_setter!(
+        hosthdr,
+        &'a CStr,
+        "Set the Host header to use when connecting"
+    );
     builder_setter!(authority, &'a CStr, "Set the authority for this backend");
-    builder_setter!(connect_timeout, std::time::Duration, "Set the connection timeout");
-    builder_setter!(first_byte_timeout, std::time::Duration, "Set the first byte timeout");
-    builder_setter!(between_bytes_timeout, std::time::Duration, "Set the between bytes timeout");
-    builder_setter!(backend_wait_timeout, std::time::Duration, "Set the backend wait timeout");
-    builder_setter!(max_connections, u32, "Set the maximum number of connections");
-    builder_setter!(proxy_header, u32, "Set the proxy protocol header version (0 = disabled, 1 or 2)");
+    builder_setter!(
+        connect_timeout,
+        std::time::Duration,
+        "Set the connection timeout"
+    );
+    builder_setter!(
+        first_byte_timeout,
+        std::time::Duration,
+        "Set the first byte timeout"
+    );
+    builder_setter!(
+        between_bytes_timeout,
+        std::time::Duration,
+        "Set the between bytes timeout"
+    );
+    builder_setter!(
+        backend_wait_timeout,
+        std::time::Duration,
+        "Set the backend wait timeout"
+    );
+    builder_setter!(
+        max_connections,
+        u32,
+        "Set the maximum number of connections"
+    );
+    builder_setter!(
+        proxy_header,
+        u32,
+        "Set the proxy protocol header version (0 = disabled, 1 or 2)"
+    );
     builder_setter!(backend_wait_limit, u32, "Set the backend wait limit");
 
     /// Build the native backend
@@ -1070,18 +1090,16 @@ impl<'a> NativeBackendBuilder<'a> {
             vcl_name: self.vcl_name.as_ptr(),
             hosthdr: self.hosthdr.map_or(null(), CStr::as_ptr),
             authority: self.authority.map_or(null(), CStr::as_ptr),
-            connect_timeout: ffi::vtim_dur(self
-                .connect_timeout
-                .map_or(-1.0, |d| d.as_secs_f64())),
-            first_byte_timeout: ffi::vtim_dur(self
-                .first_byte_timeout
-                .map_or(-1.0, |d| d.as_secs_f64())),
-            between_bytes_timeout: ffi::vtim_dur(self
-                .between_bytes_timeout
-                .map_or(-1.0, |d| d.as_secs_f64())),
-            backend_wait_timeout: ffi::vtim_dur(self
-                .backend_wait_timeout
-                .map_or(-1.0, |d| d.as_secs_f64())),
+            connect_timeout: ffi::vtim_dur(self.connect_timeout.map_or(-1.0, |d| d.as_secs_f64())),
+            first_byte_timeout: ffi::vtim_dur(
+                self.first_byte_timeout.map_or(-1.0, |d| d.as_secs_f64()),
+            ),
+            between_bytes_timeout: ffi::vtim_dur(
+                self.between_bytes_timeout.map_or(-1.0, |d| d.as_secs_f64()),
+            ),
+            backend_wait_timeout: ffi::vtim_dur(
+                self.backend_wait_timeout.map_or(-1.0, |d| d.as_secs_f64()),
+            ),
             max_connections: self.max_connections.unwrap_or(0),
             proxy_header: self.proxy_header.unwrap_or(0),
             backend_wait_limit: self.backend_wait_limit.unwrap_or(0),
@@ -1089,12 +1107,16 @@ impl<'a> NativeBackendBuilder<'a> {
         });
 
         // Create the backend via VRT_new_backend (NULL via backend)
-        let bep = unsafe { ffi::VRT_new_backend(ctx.raw, &raw const *backend_config, VCL_BACKEND(null())) };
+        let bep = unsafe {
+            ffi::VRT_new_backend(ctx.raw, &raw const *backend_config, VCL_BACKEND(null()))
+        };
 
         if bep.0.is_null() {
-            return Err(
-                format!("VRT_new_backend returned null for {}", self.vcl_name.to_string_lossy()).into(),
-            );
+            return Err(format!(
+                "VRT_new_backend returned null for {}",
+                self.vcl_name.to_string_lossy()
+            )
+            .into());
         }
 
         Ok(NativeBackend {
@@ -1189,14 +1211,14 @@ impl Drop for BackendRef {
 /// - Top level line has no indentation
 /// - All other lines have 6 extra spaces on top of normal indentation
 /// - Appends a trailing comma and newline with indentation
-/// 
+///
 /// Usage: `report_details_json!(vsb, serde_json::json!({ "key": "value" }))`
 #[macro_export]
 macro_rules! report_details_json {
     ($vsb:expr, $json_value:expr) => {{
-        let json_str = serde_json::to_string_pretty(&$json_value)
-            .expect("Failed to serialize JSON");
-        
+        let json_str =
+            serde_json::to_string_pretty(&$json_value).expect("Failed to serialize JSON");
+
         let indent = "      "; // 6 spaces
         let lines: Vec<&str> = json_str.lines().collect();
         if let Some((first, rest)) = lines.split_first() {
@@ -1213,4 +1235,3 @@ macro_rules! report_details_json {
         let _ = $vsb.write(&indent);
     }};
 }
-
