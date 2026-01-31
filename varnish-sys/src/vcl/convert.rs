@@ -414,7 +414,8 @@ mod version_after_v6 {
 
     use super::IntoVCL;
     use crate::ffi::{
-        sa_family_t, vsa_suckaddr_len, VSA_BuildFAP, PF_INET, PF_INET6, VCL_BACKEND, VCL_IP, VCL_REGEX, VCL_SUB,
+        sa_family_t, vsa_suckaddr_len, VSA_BuildFAP, PF_INET, PF_INET6, VCL_BACKEND, VCL_IP,
+        VCL_REGEX, VCL_SUB,
     };
     use crate::vcl::{BackendRef, VclError, Workspace};
 
