@@ -152,7 +152,7 @@ impl HttpHeaders<'_> {
     /// Set the URL of this HTTP request.
     ///
     /// This updates the URL (path and query) component of the HTTP request line associated
-    /// with this [`HTTP`] object. It is only meaningful for request objects; for responses
+    /// with this [`HttpHeaders`] object. It is only meaningful for request objects; for responses
     /// the corresponding [`url`](Self::url) accessor will return `None`.
     ///
     /// The new value must fit in the underlying Varnish workspace; otherwise an error is
