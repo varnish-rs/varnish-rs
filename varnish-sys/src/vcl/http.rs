@@ -149,7 +149,22 @@ impl HttpHeaders<'_> {
         self.field(HDR_URL)
     }
 
-    /// Set URL
+    /// Set the URL of this HTTP request.
+    ///
+    /// This updates the URL (path and query) component of the HTTP request line associated
+    /// with this [`HTTP`] object. It is only meaningful for request objects; for responses
+    /// the corresponding [`url`](Self::url) accessor will return `None`.
+    ///
+    /// The new value must fit in the underlying Varnish workspace; otherwise an error is
+    /// returned.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// // Change the URL of the current request before it is processed further.
+    /// http.set_url("/new/path?foo=bar")?;
+    /// assert_eq!(http.url().unwrap().as_str(), "/new/path?foo=bar");
+    /// ```
     pub fn set_url(&mut self, value: &str) -> VclResult<()> {
         self.change_header(HDR_URL, value)
     }
