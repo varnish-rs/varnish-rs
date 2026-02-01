@@ -78,6 +78,9 @@
 // Re-publish some varnish_sys modules
 pub use varnish_sys::vcl;
 
+// Re-export the report_details_json macro
+pub use varnish_sys::report_details_json;
+
 #[cfg(not(feature = "ffi"))]
 #[doc(hidden)]
 pub mod ffi {
