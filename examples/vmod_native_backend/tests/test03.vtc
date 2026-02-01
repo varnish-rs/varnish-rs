@@ -14,7 +14,7 @@ server s2 {
 
 varnish v1 -vcl {
     import native_backend from "${vmod}";
-    
+
     backend default none;
 
     sub vcl_recv {

@@ -38,4 +38,3 @@ s2                            sick
 s3                            healthy} {
     varnishadm -n ${v1_name} backend.list -p vcl1.rr
 }
-
