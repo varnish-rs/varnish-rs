@@ -149,6 +149,11 @@ impl HttpHeaders<'_> {
         self.field(HDR_URL)
     }
 
+    /// Set URL
+    pub fn set_url(&mut self, value: &str) -> VclResult<()> {
+        self.change_header(HDR_URL, value)
+    }
+
     /// Protocol of an object
     ///
     /// It should exist for both requests and responses, but the `Option` is maintained for
