@@ -322,6 +322,8 @@ impl ParamTy {
         if let Some(ident) = as_simple_ty(ty) {
             if ident == "bool" {
                 return Some(Self::Bool);
+            } else if ident == "BackendRef" {
+                return Some(Self::BackendRef);
             } else if ident == "Duration" {
                 return Some(Self::Duration);
             } else if ident == "f64" {
@@ -409,6 +411,10 @@ impl OutputTy {
                     // `&[u8]`
                     return Some(Self::Bytes);
                 }
+            }
+            // Try to parse as Option<ParamTy> (e.g., Option<BackendRef>)
+            if let Some(param_ty) = ParamTy::try_parse(ty) {
+                return Some(Self::ParamType(param_ty));
             }
         }
         if let Tuple(v) = ty {

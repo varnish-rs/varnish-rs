@@ -6,7 +6,7 @@ use bindgen_helpers as bindgen;
 use bindgen_helpers::{rename_enum, Renamer};
 
 static BINDINGS_FILE: &str = "bindings.for-docs";
-static BINDINGS_FILE_VER: &str = "7.7.1";
+static BINDINGS_FILE_VER: &str = "8.0.0";
 
 struct VarnishInfo {
     bindings: PathBuf,
@@ -17,17 +17,13 @@ struct VarnishInfo {
 
 impl VarnishInfo {
     fn parse(bindings: PathBuf, varnish_paths: Vec<PathBuf>, version: String) -> Self {
-        let (major, minor) = parse_version(&version);
+        let (major, _minor) = parse_version(&version);
 
         // >= 8.0
         if major >= 8 {
             println!("cargo::rustc-cfg=varnishsys_80_io_vdp");
         }
 
-        // >= 7.0 .. < 7.6
-        if major == 7 && minor < 6 {
-            println!("cargo::rustc-cfg=varnishsys_7_5_objcore_init");
-        }
         if major < 7 {
             println!("cargo::rustc-cfg=varnishsys_6");
         }
@@ -78,8 +74,6 @@ fn detect_varnish() -> Option<VarnishInfo> {
 
     // 8.0 adds a few fields to the vdp struct
     println!("cargo::rustc-check-cfg=cfg(varnishsys_80_io_vdp)");
-    // 7.0..=7.5 passed *objcore in vdp_init_f as the 4th param
-    println!("cargo::rustc-check-cfg=cfg(varnishsys_7_5_objcore_init)");
     // 6.0 support
     println!("cargo::rustc-check-cfg=cfg(varnishsys_6)");
 
@@ -183,7 +177,7 @@ fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
         // FIXME: If the user has set the VARNISH_INCLUDE_PATHS environment variable, use that.
         //    At the moment we have no way to detect which version it is.
         //    vmod_abi.h  seems to have this line, which can be used in the future.
-        //    #define VMOD_ABI_Version "Varnish 7.5.0 eef25264e5ca5f96a77129308edb83ccf84cb1b1"
+        //    #define VMOD_ABI_Version "Varnish 7.7.0 eef25264e5ca5f96a77129308edb83ccf84cb1b1"
         println!("cargo::warning=Using VARNISH_INCLUDE_PATHS='{s}' env var, and assume it is the latest supported version {BINDINGS_FILE_VER}");
         return Some((
             s.split(':').map(PathBuf::from).collect(),
@@ -211,7 +205,7 @@ fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
 }
 
 fn parse_version(version: &str) -> (u32, u32) {
-    // version string usually looks like "7.5.0"
+    // version string usually looks like "7.7.0"
     let mut parts = version.split('.');
     (
         parse_next_int(&mut parts, "major"),

@@ -34,7 +34,7 @@ pub struct Generator {
     pub objects: Vec<ObjProcessor>,
 }
 
-/// See also <https://varnish-cache.org/docs/7.6/reference/vmod.html>
+/// See also <https://varnish-cache.org/docs/7.7/reference/vmod.html>
 impl Generator {
     pub fn render(vmod: &VmodInfo) -> TokenStream {
         let mut obj = Self {

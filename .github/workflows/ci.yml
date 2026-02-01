@@ -38,8 +38,6 @@ jobs:
           # This list must match the justfile list for supported_varnish_vers var without the latest version
           - ver: 8.0.0
           - ver: 7.7.0
-          - ver: 7.6
-          - ver: 7.5
           - ver: 6.0
           - ver: 6.0.14r3  # Varnish Plus
     steps:

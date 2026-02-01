@@ -1,0 +1,56 @@
+varnishtest "Test round-robin director"
+
+server s1 {
+    rxreq
+    txresp
+
+    rxreq
+    txresp
+} -start
+
+server s2 {
+} -start
+
+server s3 {
+    rxreq
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import round_robin from "${vmod}";
+
+    sub vcl_init {
+        new rr = round_robin.rr();
+        rr.add_backend(s1);
+        rr.add_backend(s2);
+        rr.add_backend(s3);
+    }
+
+    sub vcl_recv {
+        set req.backend_hint = rr.backend();
+        return(pass);
+    }
+} -start
+
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.status == 200
+    expect resp.http.Server == "s1"
+} -run
+
+# make s2 sick and make sure we skip it
+varnish v1 -cliok "backend.set_health *.s2 sick"
+client c1 {
+    txreq
+    rxresp
+    expect resp.http.Server == "s3"
+} -run
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.status == 200
+    expect resp.http.Server == "s1"
+} -run

@@ -28,7 +28,7 @@
 //! | `&[u8]` | <- | `VCL_BLOB` |
 //! | `Option<CowProbe>` | <-> | `VCL_PROBE` |
 //! | `Option<Probe>` | <-> | `VCL_PROBE` |
-//! | `Option<std::net::SockAdd>` | -> | `VCL_IP` |
+//! | `Option<std::net::SocketAddr>` | -> | `VCL_IP` |
 //!
 //! For all the other types, which are pointers, you will need to use the native types.
 //!
@@ -112,9 +112,6 @@ macro_rules! from_vcl_to_opt_rust {
 
 // VCL_ACL
 default_null_ptr!(VCL_ACL);
-
-// VCL_BACKEND
-default_null_ptr!(VCL_BACKEND);
 
 // VCL_BLOB
 default_null_ptr!(VCL_BLOB);
@@ -391,8 +388,21 @@ impl TryFrom<SystemTime> for VCL_TIME {
     }
 }
 
+impl TryFrom<VCL_TIME> for SystemTime {
+    type Error = VclError;
+
+    fn try_from(value: VCL_TIME) -> Result<Self, Self::Error> {
+        SystemTime::UNIX_EPOCH
+            .checked_add(Duration::from_secs_f64(value.0 .0))
+            .ok_or_else(|| VclError::new("Time value out of range".to_string()))
+    }
+}
+
 // VCL_VCL
 default_null_ptr!(mut VCL_VCL);
+
+// VCL_BACKEND
+default_null_ptr!(VCL_BACKEND);
 
 #[cfg(not(varnishsys_6))]
 mod version_after_v6 {
@@ -404,9 +414,29 @@ mod version_after_v6 {
 
     use super::IntoVCL;
     use crate::ffi::{
-        sa_family_t, vsa_suckaddr_len, VSA_BuildFAP, PF_INET, PF_INET6, VCL_IP, VCL_REGEX, VCL_SUB,
+        sa_family_t, vsa_suckaddr_len, VSA_BuildFAP, PF_INET, PF_INET6, VCL_BACKEND, VCL_IP,
+        VCL_REGEX, VCL_SUB,
     };
-    use crate::vcl::{VclError, Workspace};
+    use crate::vcl::{BackendRef, VclError, Workspace};
+
+    impl IntoVCL<VCL_BACKEND> for BackendRef {
+        fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
+            Ok(self.vcl_ptr())
+        }
+    }
+
+    impl IntoVCL<VCL_BACKEND> for Option<BackendRef> {
+        fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
+            Ok(self.map_or(VCL_BACKEND(null()), |b: BackendRef| b.vcl_ptr()))
+        }
+    }
+
+    impl From<VCL_BACKEND> for Option<BackendRef> {
+        fn from(value: VCL_BACKEND) -> Self {
+            unsafe { BackendRef::new(value) }
+        }
+    }
+
     default_null_ptr!(VCL_SUB);
 
     default_null_ptr!(VCL_REGEX);

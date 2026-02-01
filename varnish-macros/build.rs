@@ -20,11 +20,7 @@ fn main() {
         println!("cargo::rustc-cfg=varnishsys_77_vmod_data");
     }
 
-    if major <= 6
-        || (major == 7 && minor == 7 && patch < 1)
-        || (major == 7 && minor == 6 && patch < 3)
-        || (major == 7 && minor <= 5)
-    {
+    if major <= 6 || (major == 7 && minor == 7 && patch < 1) {
         println!("cargo::rustc-cfg=varnishsys_vmod_meta_1_0");
     }
 
@@ -34,7 +30,7 @@ fn main() {
 }
 
 fn parse_version(version: &str) -> (u32, u32, u32, bool) {
-    // version string usually looks like "7.5.0"
+    // version string usually looks like "7.7.0"
     let mut parts = version.split('.');
     (
         parse_next_int(&mut parts, "major"),

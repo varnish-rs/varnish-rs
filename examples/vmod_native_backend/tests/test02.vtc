@@ -1,0 +1,26 @@
+varnishtest "Multiple calls"
+
+server s1 {
+    rxreq
+    txresp
+} -start
+
+varnish v1 -vcl {
+    import native_backend from "${vmod}";
+
+    backend default none;
+
+    sub vcl_recv {
+        set req.backend_hint = native_backend.create("${s1_addr}:${s1_port}");
+        set req.backend_hint = native_backend.create("${s1_addr}:${s1_port}");
+    }
+} -start
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.status == 200
+    expect resp.http.server == "s1"
+} -run
+
+varnish v1 -cliok backend.list
