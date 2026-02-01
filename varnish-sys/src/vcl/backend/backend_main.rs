@@ -29,6 +29,7 @@ impl VclBackend<NativeVclResponseShim> for NativeVclBackendShim {
     }
 }
 
+pub type NativeBackend = Backend<NativeVclBackendShim, NativeVclResponseShim>;
 /// Placeholder response implementation for native Varnish backends.
 ///
 /// This type exists only to satisfy the trait bounds for `Backend<S, T>` when
@@ -331,8 +332,6 @@ fn sc_to_ptr(sc: StreamClose) -> ffi::stream_close_t {
 ///
 /// let backend_ref = backend.as_ref();
 /// ```
-pub type NativeBackend = Backend<NativeVclBackendShim, NativeVclResponseShim>;
-
 /// Internal enum to store the backend endpoint type
 #[derive(Debug, Clone, Copy)]
 enum BackendEndpoint<'a> {
