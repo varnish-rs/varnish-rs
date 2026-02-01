@@ -83,7 +83,7 @@ impl RoundRobinDirector {
             .map(|backend| backend.probe(ctx))
             .fold((0, SystemTime::UNIX_EPOCH), |(count, latest), probe| {
                 (
-                    count + if probe.healthy { 1 } else { 0 },
+                    count + usize::from(probe.healthy),
                     latest.max(probe.last_changed),
                 )
             });
@@ -141,7 +141,7 @@ impl VclDirector for RoundRobinDirector {
 
     fn report(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
         let (healthy_count, total_count, health_status) = self.health_stats(ctx);
-        let _ = vsb.write(&format!("{}/{}\t", healthy_count, total_count));
+        let _ = vsb.write(&format!("{healthy_count}/{total_count}\t"));
         let _ = vsb.write(&(health_status));
     }
 
@@ -152,15 +152,14 @@ impl VclDirector for RoundRobinDirector {
             let probe = backend.probe(ctx);
             let name = backend.name().to_str().unwrap();
             let health = if probe.healthy { "healthy" } else { "sick" };
-            let _ = vsb.write(&format!("{:<30}{}\n", name, health));
+            let _ = vsb.write(&format!("{name:<30}{health}\n"));
         }
     }
 
     fn report_json(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
         let (healthy_count, total_count, health_status) = self.health_stats(ctx);
         let json_array = serde_json::json!([healthy_count, total_count, health_status]);
-        let json_str = serde_json::to_string(&json_array)
-            .expect("Failed to serialize JSON array");
+        let json_str = serde_json::to_string(&json_array).expect("Failed to serialize JSON array");
         let _ = vsb.write(&json_str);
     }
 
@@ -179,14 +178,11 @@ impl VclDirector for RoundRobinDirector {
             })
             .collect();
 
-        report_details_json!(vsb, serde_json::json!({
-            "backends": backend_map
-        }));
-    }
-
-    fn release(&self) {
-        // BackendRef instances will be automatically dropped when the Vec is dropped
-        // This explicit release ensures all backend references are cleaned up
-        self.state().backends.clear();
+        report_details_json!(
+            vsb,
+            serde_json::json!({
+                "backends": backend_map
+            })
+        );
     }
 }

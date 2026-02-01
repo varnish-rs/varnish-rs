@@ -80,6 +80,28 @@ use crate::{
     ffi, validate_director, validate_vdir, validate_vfp_ctx, validate_vfp_entry, validate_vrt_ctx,
 };
 
+/// Placeholder backend implementation for native Varnish backends.
+///
+/// This type exists only to satisfy the trait bounds for `Backend<S, T>` when
+/// wrapping native backends. None of its methods should ever be called.
+#[derive(Debug)]
+pub struct NativeVclBackendShim;
+
+impl VclBackend<NativeVclResponseShim> for NativeVclBackendShim {
+    fn get_response(&self, _ctx: &mut Ctx) -> Result<Option<NativeVclResponseShim>, VclError> {
+        Ok(None)
+    }
+}
+
+/// Placeholder response implementation for native Varnish backends.
+///
+/// This type exists only to satisfy the trait bounds for `Backend<S, T>` when
+/// wrapping native backends. None of its methods should ever be called.
+#[derive(Debug)]
+pub struct NativeVclResponseShim;
+
+impl VclResponse for NativeVclResponseShim {}
+
 /// Fat wrapper around [`VCL_BACKEND`].
 ///
 /// It will handle almost all the necessary boilerplate needed to create a vmod. Most importantly,
@@ -98,7 +120,9 @@ pub struct Backend<S: VclBackend<T>, T: VclResponse> {
     #[expect(dead_code)]
     ctype: CString,
     phantom: PhantomData<T>,
+    #[allow(clippy::struct_field_names)]
     backend_ref: BackendRef,
+    native_configuration: Option<(Box<ffi::vrt_endpoint>, Box<ffi::vrt_backend>)>,
 }
 
 impl<S: VclBackend<T>, T: VclResponse> Backend<S, T> {
@@ -151,7 +175,9 @@ impl<S: VclBackend<T>, T: VclResponse> Backend<S, T> {
             return Err(format!("VRT_AddDirector return null while creating {backend_id}").into());
         }
 
-        let backend_ref = unsafe { BackendRef::new_withouth_refcount(bep).expect("Backend pointer should never be null") };
+        let backend_ref = unsafe {
+            BackendRef::new_withouth_refcount(bep).expect("Backend pointer should never be null")
+        };
 
         Ok(Backend {
             ctype,
@@ -159,6 +185,7 @@ impl<S: VclBackend<T>, T: VclResponse> Backend<S, T> {
             methods,
             phantom: PhantomData,
             backend_ref,
+            native_configuration: None,
         })
     }
 }
@@ -210,11 +237,7 @@ pub trait VclBackend<T: VclResponse> {
     ///
     /// Corresponds to the `list` callback in `vdi_methods` when neither `-p` nor `-j` is passed.
     fn report(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
-        let state = if self.probe(ctx).0 {
-            "healthy"
-        } else {
-            "sick"
-        };
+        let state = if self.probe(ctx).0 { "healthy" } else { "sick" };
         vsb.write(&"0/0\t").unwrap();
         vsb.write(&state).unwrap();
     }
@@ -228,11 +251,7 @@ pub trait VclBackend<T: VclResponse> {
     ///
     /// Corresponds to the `list` callback in `vdi_methods` when `-j` is passed.
     fn report_json(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
-        let state = if self.probe(ctx).0 {
-            "healthy"
-        } else {
-            "sick"
-        };
+        let state = if self.probe(ctx).0 { "healthy" } else { "sick" };
         vsb.write(&"[0, 0, ").unwrap();
         vsb.write(&state).unwrap();
         vsb.write(&"]").unwrap();
@@ -263,7 +282,10 @@ pub trait VclResponse {
     ///
     /// `.read()` will never be called on an empty buffer, and the implementer must return the
     /// number of bytes written (which therefore must be less than the buffer size).
-    fn read(&mut self, buf: &mut [u8]) -> Result<usize, VclError>;
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize, VclError> {
+        let _ = buf;
+        Ok(0)
+    }
 
     /// If returning `Some(_)`, we know the size of the body generated, and it'll be used to fill the
     /// `content-length` header of the response. Otherwise, chunked encoding will be used, which is
@@ -557,7 +579,11 @@ impl<S: VclBackend<T>, T: VclResponse> Drop for Backend<S, T> {
     fn drop(&mut self) {
         unsafe {
             let mut bep = self.backend_ref.vcl_ptr();
-            ffi::VRT_DelDirector(&raw mut bep);
+            if self.native_configuration.is_some() {
+                ffi::VRT_delete_backend(null(), &raw mut bep);
+            } else {
+                ffi::VRT_DelDirector(&raw mut bep);
+            }
         };
     }
 }
@@ -677,12 +703,6 @@ pub trait VclDirector {
         let _ = vsb.write(&"{}");
     }
 
-    /// Called when the director is being destroyed
-    ///
-    /// Use this to clean up any resources like backend references.
-    /// Corresponds to the `release` callback in `vdi_methods`.
-    fn release(&self) {}
-
     /// Called when the VCL temperature changes or is discarded
     ///
     /// Corresponds to the `event` callback in `vdi_methods`.
@@ -743,12 +763,6 @@ unsafe extern "C" fn wrap_director_event<D: VclDirector>(director: VCL_BACKEND, 
     dir_impl.event(ev);
 }
 
-unsafe extern "C" fn wrap_director_release<D: VclDirector>(director: VCL_BACKEND) {
-    let dir = validate_director(director);
-    let dir_impl: &D = &*dir.priv_.cast::<D>();
-    dir_impl.release();
-}
-
 /// Safe wrapper around a `struct director` pointer with a trait implementation
 ///
 /// This struct wraps a C director along with a Rust implementation that provides
@@ -786,7 +800,7 @@ impl<D: VclDirector> Director<D> {
             getip: None,
             finish: None,
             event: Some(wrap_director_event::<D>),
-            release: Some(wrap_director_release::<D>),
+            release: None,
             destroy: None,
             panic: None,
             list: Some(wrap_director_list::<D>),
@@ -810,7 +824,9 @@ impl<D: VclDirector> Director<D> {
             assert_eq!((*bep.0).magic, ffi::DIRECTOR_MAGIC);
         }
 
-        let backend_ref = unsafe { BackendRef::new_withouth_refcount(bep).expect("Backend pointer should never be null") };
+        let backend_ref = unsafe {
+            BackendRef::new_withouth_refcount(bep).expect("Backend pointer should never be null")
+        };
 
         Ok(Director {
             methods,
@@ -861,9 +877,10 @@ impl<D: VclDirector> AsRef<BackendRef> for Director<D> {
 
 /// A native Varnish backend created via `VRT_new_backend()`
 ///
-/// This wraps a regular Varnish backend (the kind you'd normally define in VCL)
-/// but created dynamically from Rust code. Unlike [`Backend`], which allows you
-/// to implement custom backend logic, `NativeBackend` creates a standard HTTP/1
+/// This is a type alias for `Backend<NativeVclBackendShim, NativeVclResponseShim>`.
+/// It wraps a regular Varnish backend (the kind you'd normally define in VCL)
+/// but created dynamically from Rust code. Unlike custom backends, which allow you
+/// to implement backend logic in Rust, `NativeBackend` creates a standard HTTP/1
 /// backend that connects to a real server.
 ///
 /// Use [`NativeBackendBuilder`] to construct instances with a fluent API.
@@ -871,46 +888,13 @@ impl<D: VclDirector> AsRef<BackendRef> for Director<D> {
 /// # Example
 ///
 /// ```ignore
-/// let backend = NativeBackend::builder()
-///     .host("example.com", 80)
-///     .vcl_name("my_backend")
+/// let backend = NativeBackendBuilder::new_ip(c"my_backend", "127.0.0.1:8080".parse()?)
 ///     .connect_timeout(Duration::from_secs(5))
 ///     .build(ctx)?;
 ///
-/// let backend_ref = backend.backend_ref();
+/// let backend_ref = backend.as_ref();
 /// ```
-#[derive(Debug)]
-pub struct NativeBackend {
-    // Keep C structures alive for the backend's lifetime
-    #[expect(dead_code)]
-    endpoint: Box<ffi::vrt_endpoint>,
-    #[expect(dead_code)]
-    backend_config: Box<ffi::vrt_backend>,
-    backend_ref: BackendRef,
-}
-
-impl NativeBackend {
-    /// Return a [`BackendRef`] for this backend
-    pub fn backend_ref(&self) -> BackendRef {
-        self.backend_ref.clone()
-    }
-}
-
-impl Drop for NativeBackend {
-    fn drop(&mut self) {
-        unsafe {
-            // VRT_delete_backend doesn't actually use the context (it's cast to void)
-            let mut bep = self.backend_ref.vcl_ptr();
-            ffi::VRT_delete_backend(null(), &raw mut bep);
-        }
-    }
-}
-
-impl AsRef<BackendRef> for NativeBackend {
-    fn as_ref(&self) -> &BackendRef {
-        &self.backend_ref
-    }
-}
+pub type NativeBackend = Backend<NativeVclBackendShim, NativeVclResponseShim>;
 
 /// Internal enum to store the backend endpoint type
 #[derive(Debug, Clone, Copy)]
@@ -984,18 +968,49 @@ impl<'a> NativeBackendBuilder<'a> {
         }
     }
 
-    builder_setter!(hosthdr, &'a CStr, "Set the Host header to use when connecting");
+    builder_setter!(
+        hosthdr,
+        &'a CStr,
+        "Set the Host header to use when connecting"
+    );
     builder_setter!(authority, &'a CStr, "Set the authority for this backend");
-    builder_setter!(connect_timeout, std::time::Duration, "Set the connection timeout");
-    builder_setter!(first_byte_timeout, std::time::Duration, "Set the first byte timeout");
-    builder_setter!(between_bytes_timeout, std::time::Duration, "Set the between bytes timeout");
-    builder_setter!(backend_wait_timeout, std::time::Duration, "Set the backend wait timeout");
-    builder_setter!(max_connections, u32, "Set the maximum number of connections");
-    builder_setter!(proxy_header, u32, "Set the proxy protocol header version (0 = disabled, 1 or 2)");
+    builder_setter!(
+        connect_timeout,
+        std::time::Duration,
+        "Set the connection timeout"
+    );
+    builder_setter!(
+        first_byte_timeout,
+        std::time::Duration,
+        "Set the first byte timeout"
+    );
+    builder_setter!(
+        between_bytes_timeout,
+        std::time::Duration,
+        "Set the between bytes timeout"
+    );
+    builder_setter!(
+        backend_wait_timeout,
+        std::time::Duration,
+        "Set the backend wait timeout"
+    );
+    builder_setter!(
+        max_connections,
+        u32,
+        "Set the maximum number of connections"
+    );
+    builder_setter!(
+        proxy_header,
+        u32,
+        "Set the proxy protocol header version (0 = disabled, 1 or 2)"
+    );
     builder_setter!(backend_wait_limit, u32, "Set the backend wait limit");
 
     /// Build the native backend
-    pub fn build(self, ctx: &mut Ctx) -> VclResult<NativeBackend> {
+    pub fn build(
+        self,
+        ctx: &mut Ctx,
+    ) -> VclResult<Backend<NativeVclBackendShim, NativeVclResponseShim>> {
         // Validate required fields
         let endpoint_type = self
             .endpoint
@@ -1031,18 +1046,16 @@ impl<'a> NativeBackendBuilder<'a> {
             vcl_name: self.vcl_name.as_ptr(),
             hosthdr: self.hosthdr.map_or(null(), CStr::as_ptr),
             authority: self.authority.map_or(null(), CStr::as_ptr),
-            connect_timeout: ffi::vtim_dur(self
-                .connect_timeout
-                .map_or(-1.0, |d| d.as_secs_f64())),
-            first_byte_timeout: ffi::vtim_dur(self
-                .first_byte_timeout
-                .map_or(-1.0, |d| d.as_secs_f64())),
-            between_bytes_timeout: ffi::vtim_dur(self
-                .between_bytes_timeout
-                .map_or(-1.0, |d| d.as_secs_f64())),
-            backend_wait_timeout: ffi::vtim_dur(self
-                .backend_wait_timeout
-                .map_or(-1.0, |d| d.as_secs_f64())),
+            connect_timeout: ffi::vtim_dur(self.connect_timeout.map_or(-1.0, |d| d.as_secs_f64())),
+            first_byte_timeout: ffi::vtim_dur(
+                self.first_byte_timeout.map_or(-1.0, |d| d.as_secs_f64()),
+            ),
+            between_bytes_timeout: ffi::vtim_dur(
+                self.between_bytes_timeout.map_or(-1.0, |d| d.as_secs_f64()),
+            ),
+            backend_wait_timeout: ffi::vtim_dur(
+                self.backend_wait_timeout.map_or(-1.0, |d| d.as_secs_f64()),
+            ),
             max_connections: self.max_connections.unwrap_or(0),
             proxy_header: self.proxy_header.unwrap_or(0),
             backend_wait_limit: self.backend_wait_limit.unwrap_or(0),
@@ -1050,20 +1063,29 @@ impl<'a> NativeBackendBuilder<'a> {
         });
 
         // Create the backend via VRT_new_backend (NULL via backend)
-        let bep = unsafe { ffi::VRT_new_backend(ctx.raw, &raw const *backend_config, VCL_BACKEND(null())) };
+        let bep = unsafe {
+            ffi::VRT_new_backend(ctx.raw, &raw const *backend_config, VCL_BACKEND(null()))
+        };
 
         if bep.0.is_null() {
-            return Err(
-                format!("VRT_new_backend returned null for {}", self.vcl_name.to_string_lossy()).into(),
-            );
+            return Err(format!(
+                "VRT_new_backend returned null for {}",
+                self.vcl_name.to_string_lossy()
+            )
+            .into());
         }
 
-        let backend_ref = unsafe { BackendRef::new_withouth_refcount(bep).expect("Backend pointer should never be null") };
+        let backend_ref = unsafe {
+            BackendRef::new_withouth_refcount(bep).expect("Backend pointer should never be null")
+        };
 
         Ok(NativeBackend {
-            endpoint,
-            backend_config,
+            methods: Box::new(ffi::vdi_methods::default()),
+            inner: Box::new(NativeVclBackendShim),
+            ctype: CString::new("native").unwrap(),
+            phantom: PhantomData,
             backend_ref,
+            native_configuration: Some((endpoint, backend_config)),
         })
     }
 }
@@ -1099,7 +1121,10 @@ impl BackendRef {
                 );
             }
         }
-        Some(BackendRef { bep, refcounted: true })
+        Some(BackendRef {
+            bep,
+            refcounted: true,
+        })
     }
 
     // this doesn't grab a reference and is only used to
@@ -1108,7 +1133,10 @@ impl BackendRef {
         if bep.0.is_null() {
             return None;
         }
-        Some(BackendRef { bep, refcounted: false })
+        Some(BackendRef {
+            bep,
+            refcounted: false,
+        })
     }
 
     pub fn probe(&self, ctx: &Ctx) -> ProbeResult {
@@ -1150,7 +1178,7 @@ impl Drop for BackendRef {
             unsafe {
                 ffi::VRT_Assign_Backend(&raw mut self.bep, VCL_BACKEND(null()));
             }
-        };
+        }
     }
 }
 
@@ -1158,14 +1186,14 @@ impl Drop for BackendRef {
 /// - Top level line has no indentation
 /// - All other lines have 6 extra spaces on top of normal indentation
 /// - Appends a trailing comma and newline with indentation
-/// 
+///
 /// Usage: `report_details_json!(vsb, serde_json::json!({ "key": "value" }))`
 #[macro_export]
 macro_rules! report_details_json {
     ($vsb:expr, $json_value:expr) => {{
-        let json_str = serde_json::to_string_pretty(&$json_value)
-            .expect("Failed to serialize JSON");
-        
+        let json_str =
+            serde_json::to_string_pretty(&$json_value).expect("Failed to serialize JSON");
+
         let indent = "      "; // 6 spaces
         let lines: Vec<&str> = json_str.lines().collect();
         if let Some((first, rest)) = lines.split_first() {
@@ -1182,4 +1210,3 @@ macro_rules! report_details_json {
         let _ = $vsb.write(&indent);
     }};
 }
-
