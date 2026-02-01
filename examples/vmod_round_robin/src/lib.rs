@@ -52,8 +52,7 @@ mod round_robin {
 
         /// Get the director as a backend reference
         pub fn backend(&self) -> BackendRef {
-            BackendRef::new(self.director.vcl_ptr())
-                .expect("Director should always have a valid backend pointer")
+            self.director.as_ref().clone()
         }
     }
 }
@@ -84,7 +83,7 @@ impl RoundRobinDirector {
             .map(|backend| backend.probe(ctx))
             .fold((0, SystemTime::UNIX_EPOCH), |(count, latest), probe| {
                 (
-                    count + usize::from(probe.healthy),
+                    count + if probe.healthy { 1 } else { 0 },
                     latest.max(probe.last_changed),
                 )
             });
@@ -142,7 +141,7 @@ impl VclDirector for RoundRobinDirector {
 
     fn report(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
         let (healthy_count, total_count, health_status) = self.health_stats(ctx);
-        let _ = vsb.write(&format!("{healthy_count}/{total_count}\t"));
+        let _ = vsb.write(&format!("{}/{}\t", healthy_count, total_count));
         let _ = vsb.write(&(health_status));
     }
 
@@ -153,14 +152,15 @@ impl VclDirector for RoundRobinDirector {
             let probe = backend.probe(ctx);
             let name = backend.name().to_str().unwrap();
             let health = if probe.healthy { "healthy" } else { "sick" };
-            let _ = vsb.write(&format!("{name:<30}{health}\n"));
+            let _ = vsb.write(&format!("{:<30}{}\n", name, health));
         }
     }
 
     fn report_json(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
         let (healthy_count, total_count, health_status) = self.health_stats(ctx);
         let json_array = serde_json::json!([healthy_count, total_count, health_status]);
-        let json_str = serde_json::to_string(&json_array).expect("Failed to serialize JSON array");
+        let json_str = serde_json::to_string(&json_array)
+            .expect("Failed to serialize JSON array");
         let _ = vsb.write(&json_str);
     }
 
@@ -179,12 +179,9 @@ impl VclDirector for RoundRobinDirector {
             })
             .collect();
 
-        report_details_json!(
-            vsb,
-            serde_json::json!({
-                "backends": backend_map
-            })
-        );
+        report_details_json!(vsb, serde_json::json!({
+            "backends": backend_map
+        }));
     }
 
     fn release(&self) {

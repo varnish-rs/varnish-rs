@@ -433,7 +433,7 @@ mod version_after_v6 {
 
     impl From<VCL_BACKEND> for Option<BackendRef> {
         fn from(value: VCL_BACKEND) -> Self {
-            BackendRef::new(value)
+            unsafe { BackendRef::new(value) }
         }
     }
 
