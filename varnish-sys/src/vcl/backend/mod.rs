@@ -1,4 +1,4 @@
-//! Facilities to create a VMOD backend
+//! Facilities to create a backend
 //!
 //! [`VCL_BACKEND`] can be a bit confusing to create and manipulate, notably as they
 //! involve a bunch of structures with different lifetimes and quite a lot of casting. This
@@ -6,64 +6,18 @@
 //! idiomatic interface centered around vmod objects.
 //!
 //! Here's what's in the toolbox:
-//! - the [`Backend`] type wraps a [`VclBackend`]-implementing struct into a C backend
-//! - the [`VclBackend`] trait defines which methods to implement to act as a backend, and includes
-//!   default implementations for most methods.
-//! - the [`VclResponse`] trait provides a way to generate a response body,notably handling the
-//!   transfer-encoding for you.
-//!
-//! Note: You can check out the [example/vmod_be
-//! code](https://github.com/varnish-rs/varnish-rs/blob/main/examples/vmod_be/src/lib.rs) for a
-//! fully commented vmod.
-//!
-//! For a very simple example, let's build a backend that just replies with 'A' a predetermined
-//! number of times.
-//!
-//! ```
-//! # mod varnish { pub use varnish_sys::vcl; }
-//! use varnish::vcl::{Ctx, Backend, VclBackend, VclResponse, VclError};
-//!
-//! // First we need to define a struct that implement `VclResponse`:
-//! struct BodyResponse {
-//!     left: usize,
-//! }
-//!
-//! impl VclResponse for BodyResponse {
-//!     fn read(&mut self, buf: &mut [u8]) -> Result<usize, VclError> {
-//!         let mut done = 0;
-//!         for p in buf {
-//!              if self.left == 0 {
-//!                  break;
-//!              }
-//!              *p = 'A' as u8;
-//!              done += 1;
-//!              self.left -= 1;
-//!         }
-//!         Ok(done)
-//!     }
-//! }
-//!
-//! // Then, we need a struct implementing `VclBackend` to build the headers and return a BodyResponse
-//! // Here, MyBe only needs to know how many times to repeat the character
-//! struct MyBe {
-//!     n: usize
-//! }
-//!
-//! impl VclBackend<BodyResponse> for MyBe {
-//!      fn get_response(&self, ctx: &mut Ctx) -> Result<Option<BodyResponse>, VclError> {
-//!          Ok(Some(
-//!            BodyResponse { left: self.n },
-//!          ))
-//!      }
-//! }
-//!
-//! // Finally, we create a `Backend` wrapping a `MyBe`, and we can ask for a pointer to give to the C
-//! // layers.
-//! fn some_vmod_function(ctx: &mut Ctx) {
-//!     let backend = Backend::new(ctx, "Arepeater", "repeat42", MyBe { n: 42 }).expect("couldn't create the backend");
-//!     let ptr = backend.vcl_ptr();
-//! }
-//! ```
+//! - [`Backend`]: an "actual" backend that can be used by Varnish to create an HTTP response. It
+//!   relies on two traits:
+//!   - [`VclBackend`] reports health, and generates the response headers
+//!   - [`VclResponse`] for the response body writer, structs implementing that trait are
+//!     returned by [`VclBackend::get_response`]
+//! - [`NativeBackend`]: a specialization of [`Backend`], rellying on the native Varnish
+//!   implementation providing IP and UDS backends
+//! - [`NativeBackendBuilder`]: a builder to easily create a [`NativeBackend`]
+//! - [`Director`]: a routing object doesn't create responses, but insead pick a [`Backend`]
+//!   or [`Director`] object based on the HTTP request, based on the [`VclDirector`].
+//! - [`BackendRef`]: a refcounted wrapper around [`Backend`] and [`Director`], this is the primary
+//!   type used for arguments and returns of vmod functions.
 
 mod backend_main;
 mod backend_ref;
