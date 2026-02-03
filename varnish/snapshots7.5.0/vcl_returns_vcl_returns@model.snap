@@ -1,5 +1,6 @@
 ---
 source: varnish-macros/src/tests.rs
+snapshot_kind: text
 ---
 VmodInfo {
     params: VmodParams {
@@ -8,6 +9,29 @@ VmodInfo {
     ident: "vcl_returns",
     docs: "",
     funcs: [
+        FuncInfo {
+            func_type: Function,
+            ident: "arg_vcl_backend",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "backend",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: VclType(
+                                "VCL_BACKEND",
+                            ),
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
         FuncInfo {
             func_type: Function,
             ident: "val_acl",
