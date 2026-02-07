@@ -1,0 +1,21 @@
+varnishtest "set_url"
+
+server s1 {
+    rxreq
+    expect req.url == "/modified/path"
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import rustest from "${vmod}";
+
+    sub vcl_recv {
+        rustest.set_url("/modified/path");
+    }
+} -start
+
+client c1 {
+    txreq -url "/original/path"
+    rxresp
+    expect resp.status == 200
+} -run

@@ -39,6 +39,14 @@ mod rustest {
         }
     }
 
+    pub fn set_url(ctx: &mut Ctx, url: &str) -> Result<(), VclError> {
+        if let Some(ref mut req) = ctx.http_req {
+            Ok(req.set_url(url)?)
+        } else {
+            Err("http_req isn't accessible".into())
+        }
+    }
+
     pub unsafe fn ws_reserve(ws: &mut Workspace, s: &str) -> Result<VCL_STRING, &'static str> {
         let mut buf = ws.vcl_string_builder().unwrap();
         match write!(buf, "{s} {s} {s}") {

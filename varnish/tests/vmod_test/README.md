@@ -23,6 +23,8 @@ import rustest from "path/to/librustest.so";
 
 ### Function `VOID rustest.unset_hdr(STRING name)`
 
+### Function `VOID rustest.set_url(STRING url)`
+
 ### Function `STRING rustest.ws_reserve(STRING s)`
 
 ### Function `STRING rustest.out_str()`
