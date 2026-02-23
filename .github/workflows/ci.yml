@@ -83,7 +83,12 @@ jobs:
           else
             just install-varnish ${{ matrix.ver }}
           fi
-      - run: just ci-test
+      - run: |
+          if [ "trunk" = "${{ matrix.ver }}" ]; then
+            just test-fmt build clippy test
+          else
+            just ci-test
+          fi
 
   test-msrv:
     name: Test MSRV
