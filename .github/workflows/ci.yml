@@ -73,7 +73,7 @@ jobs:
               libunwind-dev \
               pkg-config \
               python3-sphinx
-            git clone https://github.com/varnish/varnish.git varnish-c
+            git clone --recursive https://github.com/varnish/varnish.git varnish-c
             cd varnish-c
             ./autogen.sh
             ./configure --prefix=$VARNISH_INSTALL_DIR
