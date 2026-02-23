@@ -4,10 +4,16 @@ fn main() {
     println!("cargo::rustc-check-cfg=cfg(varnishsys_77_vmod_data)");
     println!("cargo::rustc-check-cfg=cfg(varnishsys_vmod_meta_1_0)");
     println!("cargo::rustc-check-cfg=cfg(varnishsys_6plus_vmod_data_priv)");
-
-    let ver = std::env::var("DEP_VARNISHAPI_VERSION_NUMBER");
-    let (major, minor, patch, plus) =
-        parse_version(&ver.expect("DEP_VARNISHAPI_VERSION_NUMBER not set"));
+    // 7.x support removed, only 6.x and 8.x+
+    let ver = std::env::var("DEP_VARNISHAPI_VERSION_NUMBER").expect("DEP_VARNISHAPI_VERSION_NUMBER not set");
+    if ver == "trunk" {
+        // Treat trunk as latest Varnish
+        // Add any config options for latest Varnish here
+        // If you add new cfgs for 8.x, add them here too
+        println!("cargo::rustc-cfg=varnishsys_77_vmod_data");
+        return;
+    }
+    let (major, minor, patch, plus) = parse_version(&ver);
     println!(
         "cargo::rustc-env=VARNISHAPI_VERSION_NUMBER={major}.{minor}.{patch}{}",
         if plus { "-plus" } else { "" }

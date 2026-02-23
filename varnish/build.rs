@@ -2,9 +2,13 @@ fn main() {
     println!("cargo::rustc-check-cfg=cfg(varnishsys_6)");
     println!("cargo::rustc-check-cfg=cfg(varnishsys_6_priv_free_f)");
 
-    let ver = std::env::var("DEP_VARNISHAPI_VERSION_NUMBER");
-    let (major, _minor) = parse_version(&ver.expect("DEP_VARNISHAPI_VERSION_NUMBER not set"));
-
+    let ver = std::env::var("DEP_VARNISHAPI_VERSION_NUMBER").expect("DEP_VARNISHAPI_VERSION_NUMBER not set");
+    if ver == "trunk" {
+        // Treat trunk as latest Varnish
+        // Add any config options for latest Varnish here
+        return;
+    }
+    let (major, _minor) = parse_version(&ver);
     if major < 7 {
         println!("cargo::rustc-cfg=varnishsys_6");
         println!("cargo::rustc-cfg=varnishsys_6_priv_free_f");
