@@ -39,6 +39,10 @@ fn parse_pass_ffi_tests() {
 
 fn run_parse_tests(path: &str) {
     let version = env!("VARNISHAPI_VERSION_NUMBER");
+    // don't test trunk against snapshot as they would probably change too frequently
+    if version == "trunk" {
+        return;
+    }
     let snapshot_path = format!("../../varnish/snapshots{version}");
     with_settings!({ snapshot_path => snapshot_path, omit_expression => true, prepend_module_to_snapshot => false }, {
         let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(path);

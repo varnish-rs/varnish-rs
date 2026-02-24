@@ -12,6 +12,7 @@ fn main() {
         // Add any config options for latest Varnish here
         // If you add new cfgs for 8.x, add them here too
         println!("cargo::rustc-cfg=varnishsys_77_vmod_data");
+        println!("cargo::rustc-env=VARNISHAPI_VERSION_NUMBER=trunk");
         return;
     }
     let (major, minor, patch, plus) = parse_version(&ver);
