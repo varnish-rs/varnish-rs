@@ -450,3 +450,22 @@ mod version_after_v6 {
         }
     }
 }
+
+//
+// http::HeaderValue for all major versions
+//
+#[cfg(feature = "http0")]
+impl IntoVCL<VCL_STRING> for http0::HeaderValue {
+    fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_STRING, VclError> {
+        // TODO: optimize this, and get rid of unwrap
+        self.to_str().unwrap().into_vcl(ws)
+    }
+}
+
+#[cfg(feature = "http1")]
+impl IntoVCL<VCL_STRING> for http1::HeaderValue {
+    fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_STRING, VclError> {
+        // TODO: optimize this, and get rid of unwrap
+        self.to_str().unwrap().into_vcl(ws)
+    }
+}
