@@ -277,7 +277,7 @@ impl FuncInfo {
         );
 
         let is_unsafe = signature.unsafety.is_some();
-        let out_vcl = matches!(output_ty, OutputTy::VclType(..));
+        let out_vcl = output_ty.requires_unsafe();
         if is_unsafe && !out_vcl {
             errors.add(signature, "functions and methods must not be tagged as `unsafe` unless they return a VCL_* type");
         } else if out_vcl && !is_unsafe {
