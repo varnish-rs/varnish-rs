@@ -85,6 +85,7 @@ jobs:
       - run: |
           if [ "trunk" = "${{ matrix.ver }}" ]; then
             export "PKG_CONFIG_PATH=$VARNISH_INSTALL_DIR/lib/pkgconfig/"
+            export LD_LIBRARY_PATH=$VARNISH_INSTALL_DIR/lib/
             export "PATH=$PATH:$VARNISH_INSTALL_DIR/bin/:$VARNISH_INSTALL_DIR/sbin/"
             cargo clippy --workspace --all-features --all-targets
             cargo build --workspace --all-features --all-targets
