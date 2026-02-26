@@ -17,7 +17,7 @@ use crate::parser_utils::remove_attr;
 static RE_VARNISH_VER: LazyLock<Regex> = LazyLock::new(|| {
     // Use regex to remove "Varnish 7.5.0 eef25264e5ca5f96a77129308edb83ccf84cb1b1" and similar.
     // Also removes any pre-builds and other versions because we assume a double-quote at the end.
-    Regex::new(r"Varnish \d+\.[-+. 0-9a-z]+").unwrap()
+    Regex::new(r"Varnish (\d+\.|trunk )[-+. 0-9a-z]+").unwrap()
 });
 
 static RE_STR_BLOB: LazyLock<Regex> = LazyLock::new(|| {
@@ -39,10 +39,6 @@ fn parse_pass_ffi_tests() {
 
 fn run_parse_tests(path: &str) {
     let version = env!("VARNISHAPI_VERSION_NUMBER");
-    // don't test trunk against snapshot as they would probably change too frequently
-    if version == "trunk" {
-        return;
-    }
     let snapshot_path = format!("../../varnish/snapshots{version}");
     with_settings!({ snapshot_path => snapshot_path, omit_expression => true, prepend_module_to_snapshot => false }, {
         let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(path);

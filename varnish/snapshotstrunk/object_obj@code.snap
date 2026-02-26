@@ -1,0 +1,316 @@
+---
+source: varnish-macros/src/tests.rs
+---
+mod obj {
+    #[allow(non_snake_case, unused_imports, unused_qualifications, unused_variables)]
+    #[allow(clippy::needless_question_mark, clippy::new_without_default)]
+    #[automatically_derived]
+    mod varnish_generated {
+        use std::ffi::{c_char, c_int, c_uint, c_void, CStr};
+        use std::ptr::null;
+        use varnish::ffi::{
+            VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE,
+            VCL_REAL, VCL_STRING, VCL_VOID, VMOD_ABI_Version, VclEvent, vmod_data,
+            vmod_priv, vrt_ctx, VMOD_PRIV_METHODS_MAGIC, vmod_priv_methods,
+        };
+        use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
+        use super::*;
+        #[repr(C)]
+        struct arg_vmod_obj_kv1__init {
+            valid_cap: c_char,
+            cap: VCL_INT,
+        }
+        unsafe extern "C" fn vmod_c_kv1__init(
+            __ctx: *mut vrt_ctx,
+            __objp: *mut *mut kv1,
+            __vcl_name: *const c_char,
+            __args: *const arg_vmod_obj_kv1__init,
+        ) {
+            let __args = __args.as_ref().unwrap();
+            let __result = Box::new(
+                super::kv1::new(
+                    if __args.valid_cap != 0 { __args.cap.into() } else { None },
+                ),
+            );
+            *__objp = Box::into_raw(__result);
+        }
+        unsafe extern "C" fn vmod_c_kv1__fini(__objp: *mut *mut kv1) {
+            drop(Box::from_raw(*__objp));
+            *__objp = ::std::ptr::null_mut();
+        }
+        unsafe extern "C" fn vmod_c_kv1_set(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::kv1,
+            key: VCL_STRING,
+            value: VCL_STRING,
+        ) {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __obj = __obj.as_ref().unwrap();
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(__obj.set(key.try_into()?, value.try_into()?))
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                })
+        }
+        unsafe extern "C" fn vmod_c_kv1_get(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::kv1,
+            key: VCL_STRING,
+        ) -> VCL_STRING {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __obj = __obj.as_ref().unwrap();
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(__obj.get(key.try_into()?).into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        #[repr(C)]
+        struct arg_vmod_obj_kv2__init {
+            valid_cap: c_char,
+            cap: VCL_INT,
+        }
+        unsafe extern "C" fn vmod_c_kv2__init(
+            __ctx: *mut vrt_ctx,
+            __objp: *mut *mut kv2,
+            __vcl_name: *const c_char,
+            __args: *const arg_vmod_obj_kv2__init,
+        ) {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __args = __args.as_ref().unwrap();
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                let __result = Box::new(
+                    super::kv2::new(
+                        if __args.valid_cap != 0 { __args.cap.into() } else { None },
+                        VCL_STRING(__vcl_name).try_into()?,
+                    ),
+                );
+                *__objp = Box::into_raw(__result);
+                Ok(())
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                })
+        }
+        unsafe extern "C" fn vmod_c_kv2__fini(__objp: *mut *mut kv2) {
+            drop(Box::from_raw(*__objp));
+            *__objp = ::std::ptr::null_mut();
+        }
+        #[repr(C)]
+        struct arg_vmod_obj_kv2_set {
+            key: VCL_STRING,
+            valid_value: c_char,
+            value: VCL_STRING,
+        }
+        unsafe extern "C" fn vmod_c_kv2_set(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::kv2,
+            __args: *const arg_vmod_obj_kv2_set,
+        ) {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __args = __args.as_ref().unwrap();
+            let __obj = __obj.as_ref().unwrap();
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(
+                    __obj
+                        .set(
+                            __args.key.try_into()?,
+                            if __args.valid_value != 0 {
+                                __args.value.try_into()?
+                            } else {
+                                None
+                            },
+                        ),
+                )
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                })
+        }
+        #[repr(C)]
+        struct arg_vmod_obj_kv3__init {
+            valid_cap: c_char,
+            cap: VCL_INT,
+        }
+        unsafe extern "C" fn vmod_c_kv3__init(
+            __ctx: *mut vrt_ctx,
+            __objp: *mut *mut kv3,
+            __vcl_name: *const c_char,
+            __args: *const arg_vmod_obj_kv3__init,
+        ) {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __args = __args.as_ref().unwrap();
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                let __result = Box::new(
+                    super::kv3::new(
+                        &mut __ctx,
+                        if __args.valid_cap != 0 { __args.cap.into() } else { None },
+                        VCL_STRING(__vcl_name).try_into()?,
+                    ),
+                );
+                *__objp = Box::into_raw(__result);
+                Ok(())
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                })
+        }
+        unsafe extern "C" fn vmod_c_kv3__fini(__objp: *mut *mut kv3) {
+            drop(Box::from_raw(*__objp));
+            *__objp = ::std::ptr::null_mut();
+        }
+        #[repr(C)]
+        struct arg_vmod_obj_kv3_set {
+            key: VCL_STRING,
+            valid_value: c_char,
+            value: VCL_STRING,
+        }
+        unsafe extern "C" fn vmod_c_kv3_set(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::kv3,
+            __args: *const arg_vmod_obj_kv3_set,
+        ) {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __args = __args.as_ref().unwrap();
+            let __obj = __obj.as_ref().unwrap();
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(
+                    __obj
+                        .set(
+                            &mut __ctx,
+                            __args.key.try_into()?,
+                            if __args.valid_value != 0 {
+                                __args.value.try_into()?
+                            } else {
+                                None
+                            },
+                        ),
+                )
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                })
+        }
+        #[repr(C)]
+        pub struct VmodExports {
+            vmod_c_kv1__init: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __objp: *mut *mut kv1,
+                    __vcl_name: *const c_char,
+                    __args: *const arg_vmod_obj_kv1__init,
+                ),
+            >,
+            vmod_c_kv1__fini: Option<unsafe extern "C" fn(__objp: *mut *mut kv1)>,
+            vmod_c_kv1_set: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::kv1,
+                    key: VCL_STRING,
+                    value: VCL_STRING,
+                ),
+            >,
+            vmod_c_kv1_get: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::kv1,
+                    key: VCL_STRING,
+                ) -> VCL_STRING,
+            >,
+            vmod_c_kv2__init: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __objp: *mut *mut kv2,
+                    __vcl_name: *const c_char,
+                    __args: *const arg_vmod_obj_kv2__init,
+                ),
+            >,
+            vmod_c_kv2__fini: Option<unsafe extern "C" fn(__objp: *mut *mut kv2)>,
+            vmod_c_kv2_set: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::kv2,
+                    __args: *const arg_vmod_obj_kv2_set,
+                ),
+            >,
+            vmod_c_kv3__init: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __objp: *mut *mut kv3,
+                    __vcl_name: *const c_char,
+                    __args: *const arg_vmod_obj_kv3__init,
+                ),
+            >,
+            vmod_c_kv3__fini: Option<unsafe extern "C" fn(__objp: *mut *mut kv3)>,
+            vmod_c_kv3_set: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::kv3,
+                    __args: *const arg_vmod_obj_kv3_set,
+                ),
+            >,
+        }
+        pub static VMOD_EXPORTS: VmodExports = VmodExports {
+            vmod_c_kv1__init: Some(vmod_c_kv1__init),
+            vmod_c_kv1__fini: Some(vmod_c_kv1__fini),
+            vmod_c_kv1_set: Some(vmod_c_kv1_set),
+            vmod_c_kv1_get: Some(vmod_c_kv1_get),
+            vmod_c_kv2__init: Some(vmod_c_kv2__init),
+            vmod_c_kv2__fini: Some(vmod_c_kv2__fini),
+            vmod_c_kv2_set: Some(vmod_c_kv2_set),
+            vmod_c_kv3__init: Some(vmod_c_kv3__init),
+            vmod_c_kv3__fini: Some(vmod_c_kv3__fini),
+            vmod_c_kv3_set: Some(vmod_c_kv3_set),
+        };
+        #[allow(non_upper_case_globals)]
+        #[no_mangle]
+        pub static Vmod_obj_Data: vmod_data = vmod_data {
+            vrt_major: 0,
+            vrt_minor: 0,
+            file_id: c"e4dde1367a8785e0bb9e3b32a6a53880156eb4050d20f22573df4b5ea5f44461"
+                .as_ptr(),
+            name: c"obj".as_ptr(),
+            func_name: c"Vmod_vmod_obj_Func".as_ptr(),
+            func_len: ::std::mem::size_of::<VmodExports>() as c_int,
+            func: &VMOD_EXPORTS as *const _ as *const c_void,
+            abi: VMOD_ABI_Version.as_ptr(),
+            json: JSON.as_ptr(),
+            proto: null(),
+            vcs: c"".as_ptr(),
+            version: c"".as_ptr(),
+        };
+        const JSON: &CStr = c"(moved to @json.snap files)";
+    }
+    use super::*;
+    use varnish::vcl::Ctx;
+    impl kv1 {
+        pub fn new(cap: Option<i64>) -> Self {
+            Self
+        }
+        pub fn set(&self, key: &str, value: &str) {}
+        pub fn get(&self, key: &str) -> String {
+            String::default()
+        }
+    }
+    impl kv2 {
+        pub fn new(cap: Option<i64>, name: &str) -> Self {
+            Self
+        }
+        pub fn set(&self, key: &str, value: Option<&str>) {}
+    }
+    impl kv3 {
+        pub fn new(ctx: &mut Ctx, cap: Option<i64>, name: &str) -> Self {
+            Self
+        }
+        pub fn set(&self, ctx: &mut Ctx, key: &str, value: Option<&str>) {}
+    }
+}
