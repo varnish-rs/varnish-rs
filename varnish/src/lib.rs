@@ -79,6 +79,7 @@
 pub use varnish_sys::vcl;
 
 // Re-export the report_details_json macro
+#[cfg(not(varnishsys_6))]
 pub use varnish_sys::report_details_json;
 
 #[cfg(not(feature = "ffi"))]
