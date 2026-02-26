@@ -39,5 +39,3 @@ shell {
                .[3]["vcl1.rr"].probe_details.backends.s2.healthy == false and
                .[3]["vcl1.rr"].probe_details.backends.s3.healthy == true'
 }
-
-
