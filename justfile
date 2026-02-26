@@ -276,7 +276,7 @@ get-package-exclude-args:
     if {{just_executable()}} get-varnish-version 7.0 > /dev/null 2> /dev/null ; then
         echo ""
     else
-        EXCLUDE="--exclude vmod_be --exclude vmod_vfp --exclude vmod_vdp --exclude vmod_test"
+        EXCLUDE="--exclude vmod_be --exclude vmod_vfp --exclude vmod_vdp --exclude vmod_test --exclude vmod_native_backend"
         >&2 echo "INFO: Due to older Varnish, running with: $EXCLUDE"
         echo "$EXCLUDE"
     fi
