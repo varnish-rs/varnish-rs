@@ -1,0 +1,15 @@
+[package]
+name = "vmod_native_backend"
+version = "0.0.0"
+publish = false
+edition.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+varnish.workspace = true
+varnish-sys.workspace = true
+
+[lints]
+workspace = true

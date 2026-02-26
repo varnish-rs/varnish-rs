@@ -1,0 +1,42 @@
+varnishtest "Test multiple dynamic backends"
+
+server s1 {
+    rxreq
+    expect req.url == "/to-s1"
+    txresp -body "s1"
+} -start
+
+server s2 {
+    rxreq
+    expect req.url == "/to-s2"
+    txresp -body "s2"
+} -start
+
+varnish v1 -vcl {
+    import native_backend from "${vmod}";
+
+    backend default none;
+
+    sub vcl_recv {
+        if (req.url == "/to-s1") {
+            set req.backend_hint = native_backend.create("${s1_addr}:${s1_port}");
+        } elsif (req.url == "/to-s2") {
+            set req.backend_hint = native_backend.create("${s2_addr}:${s2_port}");
+        }
+        return(pass);
+    }
+} -start
+
+client c1 {
+    txreq -url "/to-s1"
+    rxresp
+    expect resp.status == 200
+    expect resp.body == "s1"
+} -run
+
+client c2 {
+    txreq -url "/to-s2"
+    rxresp
+    expect resp.status == 200
+    expect resp.body == "s2"
+} -run

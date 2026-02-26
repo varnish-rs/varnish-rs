@@ -1,0 +1,60 @@
+varnishtest "Test round-robin director"
+
+server s1 {
+    rxreq
+    txresp
+
+    rxreq
+    txresp
+} -start
+
+server s2 {
+    rxreq
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+import std;
+    import round_robin from "${vmod}";
+
+    sub vcl_init {
+        new rr = round_robin.rr();
+        rr.add_backend(s1);
+        rr.add_backend(s2);
+    }
+
+    sub vcl_recv {
+    std.log(rr.backend());
+        set req.backend_hint = rr.backend();
+        set req.http.Backend-Count = rr.count();
+        return(pass);
+    }
+
+    sub vcl_deliver {
+        set resp.http.Backend-Count = req.http.Backend-Count;
+    }
+} -start
+
+# Make multiple requests to see round-robin selection
+client c1 {
+    txreq
+    rxresp
+    expect resp.status == 200
+    expect resp.http.Backend-Count == "2"
+    expect resp.http.Server == "s1"
+
+    txreq
+    rxresp
+    expect resp.status == 200
+    expect resp.http.Backend-Count == "2"
+    expect resp.http.Server == "s2"
+
+    txreq
+    rxresp
+    expect resp.status == 200
+    expect resp.http.Backend-Count == "2"
+    expect resp.http.Server == "s1"
+} -run
+
+# make sure everything is nice an proper regarding refcounts
+varnish v1 -wait
