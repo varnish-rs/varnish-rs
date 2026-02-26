@@ -33,13 +33,13 @@ impl VclBackend<NativeVclResponseShim> for NativeVclBackendShim {
 ///
 /// Once created, you will generated only use it to create a [`BackendRef`] to return to the VCL.
 ///
-type NativeBackend = Backend<NativeVclBackendShim, NativeVclResponseShim>;
+pub type NativeBackend = Backend<NativeVclBackendShim, NativeVclResponseShim>;
 /// Placeholder response implementation for native Varnish backends.
 ///
 /// This type exists only to satisfy the trait bounds for `Backend<S, T>` when
 /// wrapping native backends. None of its methods should ever be called.
 #[derive(Debug)]
-struct NativeVclResponseShim;
+pub struct NativeVclResponseShim;
 
 impl VclResponse for NativeVclResponseShim {}
 

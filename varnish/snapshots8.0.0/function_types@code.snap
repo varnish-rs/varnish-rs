@@ -657,8 +657,7 @@ mod types {
             >,
             vmod_c_opt_cstr: Option<
                 unsafe extern "C" fn(
-                    L_
-
+                    __ctx: *mut vrt_ctx,
                     __args: *const arg_vmod_types_opt_cstr,
                 ),
             >,
