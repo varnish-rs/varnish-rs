@@ -200,6 +200,7 @@ fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
                 eprintln!("libvarnish not found, using saved bindings for the doc.rs: {e}");
                 fs::copy(BINDINGS_FILE, out_path).unwrap();
                 println!("cargo::metadata=version_number={BINDINGS_FILE_VER}");
+                println!("cargo::rustc-cfg=varnishsys_80_io_vdp");
                 None
             } else {
                 // FIXME: we should give a URL describing how to install varnishapi
