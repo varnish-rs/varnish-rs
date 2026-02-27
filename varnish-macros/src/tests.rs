@@ -17,7 +17,7 @@ use crate::parser_utils::remove_attr;
 static RE_VARNISH_VER: LazyLock<Regex> = LazyLock::new(|| {
     // Use regex to remove "Varnish 7.5.0 eef25264e5ca5f96a77129308edb83ccf84cb1b1" and similar.
     // Also removes any pre-builds and other versions because we assume a double-quote at the end.
-    Regex::new(r"Varnish \d+\.[-+. 0-9a-z]+").unwrap()
+    Regex::new(r"Varnish (\d+\.|trunk )[-+. 0-9a-z]+").unwrap()
 });
 
 static RE_STR_BLOB: LazyLock<Regex> = LazyLock::new(|| {

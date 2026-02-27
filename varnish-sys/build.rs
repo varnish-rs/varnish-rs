@@ -17,6 +17,17 @@ struct VarnishInfo {
 
 impl VarnishInfo {
     fn parse(bindings: PathBuf, varnish_paths: Vec<PathBuf>, version: String) -> Self {
+        if version == "trunk" {
+            // Treat trunk as latest Varnish (8.x)
+            println!("cargo::rustc-cfg=varnishsys_80_io_vdp");
+            let defines = vec!["VARNISH_RS_HTTP_CONN", "VARNISH_RS_ALLOC_VARIADIC"];
+            return Self {
+                bindings,
+                varnish_paths,
+                version,
+                defines,
+            };
+        }
         let (major, minor) = parse_version(&version);
 
         // >= 8.0

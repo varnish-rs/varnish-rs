@@ -31,10 +31,13 @@ jobs:
   test-varnish-ver:
     name: Test Varnish ${{ matrix.ver }}
     runs-on: ubuntu-latest
+    env:
+      VARNISH_INSTALL_DIR: '/tmp/varnish-install'
     strategy:
       fail-fast: false  # Run all the tests even if some fail
       matrix:
         include:
+          - ver: trunk
           # This list must match the justfile list for supported_varnish_vers var without the latest version
           - ver: 8.0.0
           - ver: 7.7.0
@@ -50,8 +53,41 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@v2
         with: { tool: just }
-      - run: just install-varnish ${{ matrix.ver }}
-      - run: just ci-test
+      - name: Install Varnish (trunk)
+        if: matrix.ver == 'trunk'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf \
+            automake \
+            build-essential \
+            ca-certificates \
+            cpio \
+            git \
+            libedit-dev \
+            libjemalloc-dev \
+            libncurses-dev \
+            libpcre2-dev \
+            libssl-dev \
+            libtool \
+            libunwind-dev \
+            pkg-config \
+            python3-sphinx
+          git clone --recursive https://github.com/varnish/varnish.git varnish-c
+          cd varnish-c
+          ./autogen.sh
+          ./configure --prefix=$VARNISH_INSTALL_DIR
+          make -j
+          make install -j
+      - name: Install Varnish (non-trunk)
+        if: matrix.ver != 'trunk'
+        run: just install-varnish ${{ matrix.ver }}
+      - name: Build and Test (trunk)
+        if: matrix.ver == 'trunk'
+        run: just ci-test-trunk "$VARNISH_INSTALL_DIR"
+      - name: Build and Test (non-trunk)
+        if: matrix.ver != 'trunk'
+        run: just ci-test
 
   test-msrv:
     name: Test MSRV
