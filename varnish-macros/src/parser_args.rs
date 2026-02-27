@@ -328,6 +328,8 @@ impl ParamTy {
                 return Some(Self::F64);
             } else if ident == "i64" {
                 return Some(Self::I64);
+            } else if ident == "SystemTime" {
+                return Some(Self::SystemTime);
             } else if ident == "Probe" {
                 return Some(Self::Probe);
             } else if ident == "SocketAddr" {

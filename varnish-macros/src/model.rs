@@ -167,6 +167,7 @@ pub enum ParamTy {
     Duration,
     F64,
     I64,
+    SystemTime,
     Probe, // FIXME: can probes be returned?
     ProbeCow,
     SocketAddr,
@@ -182,6 +183,7 @@ impl ParamTy {
             Self::Duration => "DURATION",
             Self::F64 => "REAL",
             Self::I64 => "INT",
+            Self::SystemTime => "TIME",
             Self::Probe | Self::ProbeCow => "PROBE",
             Self::SocketAddr => "IP",
             Self::Str | Self::CStr => "STRING",
@@ -197,6 +199,7 @@ impl ParamTy {
             Self::Duration => "VCL_DURATION",
             Self::F64 => "VCL_REAL",
             Self::I64 => "VCL_INT",
+            Self::SystemTime => "VCL_TIME",
             Self::Probe | Self::ProbeCow => "VCL_PROBE",
             Self::SocketAddr => "VCL_IP",
             Self::Str | Self::CStr => "VCL_STRING",
@@ -211,6 +214,7 @@ impl ParamTy {
             | Self::Duration
             | Self::F64
             | Self::I64
+            | Self::SystemTime
             | Self::Str
             | Self::CStr => false,
             Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
@@ -228,6 +232,7 @@ impl ParamTy {
             | Self::Duration
             | Self::F64
             | Self::I64
+            | Self::SystemTime
             | Self::CStr
             | Self::Blob => false,
             Self::Str => true,
