@@ -127,7 +127,7 @@ impl<'ctx> Workspace<'ctx> {
         {
             let last = match data.last() {
                 None => data.as_ptr(),
-                Some(p) => p as *const _,
+                Some(p) => ptr::from_ref(p),
             };
             unsafe { WS_Inside(self.raw, data.as_ptr().cast(), last.cast()) == 1 }
         }
