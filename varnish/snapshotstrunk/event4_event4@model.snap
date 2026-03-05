@@ -1,0 +1,32 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VmodInfo {
+    params: VmodParams {
+        docs: None,
+    },
+    ident: "event4",
+    docs: "",
+    funcs: [
+        FuncInfo {
+            func_type: Event,
+            ident: "on_event",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "vdp",
+                    docs: "",
+                    ty: DeliveryFilters,
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+    ],
+    objects: [],
+    shared_types: SharedTypes {
+        shared_per_task_ty: None,
+        shared_per_vcl_ty: None,
+    },
+}

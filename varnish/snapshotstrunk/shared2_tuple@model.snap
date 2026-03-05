@@ -1,0 +1,56 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VmodInfo {
+    params: VmodParams {
+        docs: None,
+    },
+    ident: "tuple",
+    docs: "",
+    funcs: [
+        FuncInfo {
+            func_type: Event,
+            ident: "on_event",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "vcl_vals",
+                    docs: "",
+                    ty: SharedPerVclMut,
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "per_tsk_val",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "tsk_vals",
+                    docs: "",
+                    ty: SharedPerTask,
+                },
+                ParamTypeInfo {
+                    ident: "vcl_vals",
+                    docs: "",
+                    ty: SharedPerVclRef,
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+    ],
+    objects: [],
+    shared_types: SharedTypes {
+        shared_per_task_ty: Some(
+            "(PerTask1 , PerTask2)",
+        ),
+        shared_per_vcl_ty: Some(
+            "(PerVcl1 , PerVcl2)",
+        ),
+    },
+}

@@ -1,0 +1,319 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VMOD_JSON_SPEC
+[
+  [
+    "$VMOD",
+    "2.0",
+    "obj",
+    "Vmod_vmod_obj_Func",
+    "e4dde1367a8785e0bb9e3b32a6a53880156eb4050d20f22573df4b5ea5f44461",
+    "Varnish (version) (hash)",
+    "0",
+    "0"
+  ],
+  [
+    "$CPROTO",
+    "
+struct vmod_obj_kv1;
+
+struct vmod_obj_kv2;
+
+struct vmod_obj_kv3;
+
+struct arg_vmod_obj_kv1__init {
+  char valid_cap;
+  VCL_INT cap;
+};
+
+typedef VCL_VOID td_vmod_obj_kv1__init(
+    VRT_CTX,
+    struct vmod_obj_kv1 **,
+    const char *,
+    struct arg_vmod_obj_kv1__init *
+);
+
+typedef VCL_VOID td_vmod_obj_kv1__fini(
+    struct vmod_obj_kv1 **
+);
+
+typedef VCL_VOID td_vmod_obj_kv1_set(
+    VRT_CTX,
+    struct vmod_obj_kv1 *,
+    VCL_STRING,
+    VCL_STRING
+);
+
+typedef VCL_STRING td_vmod_obj_kv1_get(
+    VRT_CTX,
+    struct vmod_obj_kv1 *,
+    VCL_STRING
+);
+
+struct arg_vmod_obj_kv2__init {
+  char valid_cap;
+  VCL_INT cap;
+};
+
+typedef VCL_VOID td_vmod_obj_kv2__init(
+    VRT_CTX,
+    struct vmod_obj_kv2 **,
+    const char *,
+    struct arg_vmod_obj_kv2__init *
+);
+
+typedef VCL_VOID td_vmod_obj_kv2__fini(
+    struct vmod_obj_kv2 **
+);
+
+struct arg_vmod_obj_kv2_set {
+  VCL_STRING key;
+  char valid_value;
+  VCL_STRING value;
+};
+
+typedef VCL_VOID td_vmod_obj_kv2_set(
+    VRT_CTX,
+    struct vmod_obj_kv2 *,
+    struct arg_vmod_obj_kv2_set *
+);
+
+struct arg_vmod_obj_kv3__init {
+  char valid_cap;
+  VCL_INT cap;
+};
+
+typedef VCL_VOID td_vmod_obj_kv3__init(
+    VRT_CTX,
+    struct vmod_obj_kv3 **,
+    const char *,
+    struct arg_vmod_obj_kv3__init *
+);
+
+typedef VCL_VOID td_vmod_obj_kv3__fini(
+    struct vmod_obj_kv3 **
+);
+
+struct arg_vmod_obj_kv3_set {
+  VCL_STRING key;
+  char valid_value;
+  VCL_STRING value;
+};
+
+typedef VCL_VOID td_vmod_obj_kv3_set(
+    VRT_CTX,
+    struct vmod_obj_kv3 *,
+    struct arg_vmod_obj_kv3_set *
+);
+
+struct Vmod_vmod_obj_Func {
+  td_vmod_obj_kv1__init *f_kv1__init;
+  td_vmod_obj_kv1__fini *f_kv1__fini;
+  td_vmod_obj_kv1_set *f_kv1_set;
+  td_vmod_obj_kv1_get *f_kv1_get;
+  td_vmod_obj_kv2__init *f_kv2__init;
+  td_vmod_obj_kv2__fini *f_kv2__fini;
+  td_vmod_obj_kv2_set *f_kv2_set;
+  td_vmod_obj_kv3__init *f_kv3__init;
+  td_vmod_obj_kv3__fini *f_kv3__fini;
+  td_vmod_obj_kv3_set *f_kv3_set;
+};
+
+static struct Vmod_vmod_obj_Func Vmod_vmod_obj_Func;"
+  ],
+  [
+    "$OBJ",
+    "kv1",
+    {
+      "NULL_OK": false
+    },
+    "struct vmod_obj_kv1",
+    [
+      "$INIT",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_obj_Func.f_kv1__init",
+        "struct arg_vmod_obj_kv1__init",
+        [
+          "INT",
+          "cap",
+          "cap",
+          null,
+          null,
+          true
+        ]
+      ]
+    ],
+    [
+      "$FINI",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_obj_Func.f_kv1__fini",
+        ""
+      ]
+    ],
+    [
+      "$METHOD",
+      "set",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_obj_Func.f_kv1_set",
+        "",
+        [
+          "STRING",
+          "key",
+          "key"
+        ],
+        [
+          "STRING",
+          "value",
+          "value"
+        ]
+      ]
+    ],
+    [
+      "$METHOD",
+      "get",
+      [
+        [
+          "STRING"
+        ],
+        "Vmod_vmod_obj_Func.f_kv1_get",
+        "",
+        [
+          "STRING",
+          "key",
+          "key"
+        ]
+      ]
+    ]
+  ],
+  [
+    "$OBJ",
+    "kv2",
+    {
+      "NULL_OK": false
+    },
+    "struct vmod_obj_kv2",
+    [
+      "$INIT",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_obj_Func.f_kv2__init",
+        "struct arg_vmod_obj_kv2__init",
+        [
+          "INT",
+          "cap",
+          "cap",
+          null,
+          null,
+          true
+        ]
+      ]
+    ],
+    [
+      "$FINI",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_obj_Func.f_kv2__fini",
+        ""
+      ]
+    ],
+    [
+      "$METHOD",
+      "set",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_obj_Func.f_kv2_set",
+        "struct arg_vmod_obj_kv2_set",
+        [
+          "STRING",
+          "key",
+          "key"
+        ],
+        [
+          "STRING",
+          "value",
+          "value",
+          null,
+          null,
+          true
+        ]
+      ]
+    ]
+  ],
+  [
+    "$OBJ",
+    "kv3",
+    {
+      "NULL_OK": false
+    },
+    "struct vmod_obj_kv3",
+    [
+      "$INIT",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_obj_Func.f_kv3__init",
+        "struct arg_vmod_obj_kv3__init",
+        [
+          "INT",
+          "cap",
+          "cap",
+          null,
+          null,
+          true
+        ]
+      ]
+    ],
+    [
+      "$FINI",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_obj_Func.f_kv3__fini",
+        ""
+      ]
+    ],
+    [
+      "$METHOD",
+      "set",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_obj_Func.f_kv3_set",
+        "struct arg_vmod_obj_kv3_set",
+        [
+          "STRING",
+          "key",
+          "key"
+        ],
+        [
+          "STRING",
+          "value",
+          "value",
+          null,
+          null,
+          true
+        ]
+      ]
+    ]
+  ]
+]
+

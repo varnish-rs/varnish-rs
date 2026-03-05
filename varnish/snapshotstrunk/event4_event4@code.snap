@@ -1,0 +1,71 @@
+---
+source: varnish-macros/src/tests.rs
+---
+mod event4 {
+    #[allow(non_snake_case, unused_imports, unused_qualifications, unused_variables)]
+    #[allow(clippy::needless_question_mark, clippy::new_without_default)]
+    #[automatically_derived]
+    mod varnish_generated {
+        use std::ffi::{c_char, c_int, c_uint, c_void, CStr};
+        use std::ptr::null;
+        use varnish::ffi::{
+            VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE,
+            VCL_REAL, VCL_STRING, VCL_VOID, VMOD_ABI_Version, VclEvent, vmod_data,
+            vmod_priv, vrt_ctx, VMOD_PRIV_METHODS_MAGIC, vmod_priv_methods,
+        };
+        use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
+        use super::*;
+        static PRIV_VCL_METHODS: vmod_priv_methods = vmod_priv_methods {
+            magic: VMOD_PRIV_METHODS_MAGIC,
+            type_: c"()".as_ptr(),
+            fini: Some(vmod_priv::on_fini_per_vcl::<()>),
+        };
+        unsafe extern "C" fn vmod_c_on_event(
+            __ctx: *mut vrt_ctx,
+            __vp: *mut vmod_priv,
+            __ev: VclEvent,
+        ) -> VCL_INT {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let mut __obj_per_vcl = (*__vp).take_per_vcl::<()>();
+            super::on_event(
+                &mut __ctx.raw.delivery_filters(&mut __obj_per_vcl.delivery_filters),
+            );
+            let __result = VCL_INT(0);
+            (*__vp).put(__obj_per_vcl, &PRIV_VCL_METHODS);
+            __result
+        }
+        #[repr(C)]
+        pub struct VmodExports {
+            vmod_c_on_event: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __vp: *mut vmod_priv,
+                    __ev: VclEvent,
+                ) -> VCL_INT,
+            >,
+        }
+        pub static VMOD_EXPORTS: VmodExports = VmodExports {
+            vmod_c_on_event: Some(vmod_c_on_event),
+        };
+        #[allow(non_upper_case_globals)]
+        #[no_mangle]
+        pub static Vmod_event4_Data: vmod_data = vmod_data {
+            vrt_major: 0,
+            vrt_minor: 0,
+            file_id: c"884770a967ac851537a1caf26f304aed02fb682067f9b5bfc63423ef05cb4e02"
+                .as_ptr(),
+            name: c"event4".as_ptr(),
+            func_name: c"Vmod_vmod_event4_Func".as_ptr(),
+            func_len: ::std::mem::size_of::<VmodExports>() as c_int,
+            func: &VMOD_EXPORTS as *const _ as *const c_void,
+            abi: VMOD_ABI_Version.as_ptr(),
+            json: JSON.as_ptr(),
+            proto: null(),
+            vcs: c"".as_ptr(),
+            version: c"".as_ptr(),
+        };
+        const JSON: &CStr = c"(moved to @json.snap files)";
+    }
+    use varnish::vcl::DeliveryFilters;
+    pub fn on_event(vdp: &mut DeliveryFilters) {}
+}
