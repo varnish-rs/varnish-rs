@@ -378,7 +378,25 @@ default_null_ptr!(VCL_STRANDS);
 impl From<VCL_TIME> for SystemTime {
     fn from(value: VCL_TIME) -> Self {
         // seconds are stored in `VCL_TIME(vtim_real(f64))`
-        UNIX_EPOCH.add(Duration::from_secs_f64(value.0 .0))
+        let secs = value.0 .0;
+
+        // Reject NaN/Inf and out-of-range values by falling back to UNIX_EPOCH.
+        if !secs.is_finite() {
+            return UNIX_EPOCH;
+        }
+
+        if secs >= 0.0 {
+            Duration::try_from_secs_f64(secs)
+                .ok()
+                .and_then(|dur| UNIX_EPOCH.checked_add(dur))
+                .unwrap_or(UNIX_EPOCH)
+        } else {
+            // Allow times before UNIX_EPOCH by subtracting the positive duration.
+            Duration::try_from_secs_f64(-secs)
+                .ok()
+                .and_then(|dur| UNIX_EPOCH.checked_sub(dur))
+                .unwrap_or(UNIX_EPOCH)
+        }
     }
 }
 

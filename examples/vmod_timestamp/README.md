@@ -23,7 +23,7 @@ import timestamp from "path/to/libtimestamp.so";
 
 Just return the current system time. This will actually return different values if called
 multiple times in the same VCL subroutine, contrary to the `now` keyword that always has
-the same value for a give subroutine.
+the same value for a given subroutine.
 
 ### Function `TIME timestamp.add_duration(TIME time, DURATION duration)`
 
