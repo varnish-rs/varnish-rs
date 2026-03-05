@@ -62,6 +62,16 @@ ci-coverage: env-info && \
 # Run all tests as expected by CI
 ci-test: env-info test-fmt build clippy test && assert-git-is-clean
 
+ci-test-trunk install_dir:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    export "PKG_CONFIG_PATH={{install_dir}}/lib/pkgconfig/"
+    export LD_LIBRARY_PATH={{install_dir}}/lib/
+    export "PATH=$PATH:{{install_dir}}/bin/:{{install_dir}}/sbin/"
+    just build
+    just clippy
+    just test
+
 # Run tests only relevant to the latest Varnish version
 ci-test-latest: ci-test test-doc
 
