@@ -1,6 +1,7 @@
 ---
 source: varnish-macros/src/tests.rs
 ---
+
 struct vmod_types_DocStruct;
 
 typedef VCL_VOID td_vmod_types_with_docs(

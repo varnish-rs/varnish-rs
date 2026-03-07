@@ -1,6 +1,7 @@
 ---
 source: varnish-macros/src/tests.rs
 ---
+
 struct vmod_task_PerVcl;
 
 typedef VCL_VOID td_vmod_task_per_vcl_val(

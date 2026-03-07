@@ -9,7 +9,7 @@ targets := '--all-targets'  # For all targets (lib, bin, tests, examples, benche
 default_varnish_ver := '8.0'
 
 # Make sure to update CI with the changes.  The versions with 'r' suffix are Varnish Plus versions - must have all 4 numbers.
-supported_varnish_vers := '8.0  7.7  7.7.0  7.6  7.5  6.0  6.0.14r3'
+supported_varnish_vers := '8.0  7.7  7.7.0  6.0  6.0.14r3'
 
 # if running in CI, treat warnings as errors by setting RUSTFLAGS and RUSTDOCFLAGS to '-D warnings' unless they are already set
 # Use `CI=true just ci-test` to run the same tests as in GitHub CI.
@@ -71,6 +71,14 @@ ci-test-trunk install_dir:
     just build
     just clippy
     just test
+
+ci-bless-trunk install_dir:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    export "PKG_CONFIG_PATH={{install_dir}}/lib/pkgconfig/"
+    export LD_LIBRARY_PATH={{install_dir}}/lib/
+    export "PATH=$PATH:{{install_dir}}/bin/:{{install_dir}}/sbin/"
+    just bless
 
 # Run tests only relevant to the latest Varnish version
 ci-test-latest: ci-test test-doc
@@ -286,7 +294,7 @@ get-package-exclude-args:
     if {{just_executable()}} get-varnish-version 7.0 > /dev/null 2> /dev/null ; then
         echo ""
     else
-        EXCLUDE="--exclude vmod_be --exclude vmod_vfp --exclude vmod_vdp --exclude vmod_test"
+        EXCLUDE="--exclude vmod_be --exclude vmod_vfp --exclude vmod_vdp --exclude vmod_test --exclude vmod_native_backend --exclude vmod_round_robin"
         >&2 echo "INFO: Due to older Varnish, running with: $EXCLUDE"
         echo "$EXCLUDE"
     fi

@@ -1,6 +1,7 @@
 ---
 source: varnish-macros/src/tests.rs
 ---
+
 typedef VCL_VOID td_vmod_types_to_void(
     VRT_CTX
 );

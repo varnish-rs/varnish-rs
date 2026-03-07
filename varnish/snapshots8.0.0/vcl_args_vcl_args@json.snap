@@ -1,0 +1,47 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VMOD_JSON_SPEC
+[
+  [
+    "$VMOD",
+    "2.0",
+    "vcl_args",
+    "Vmod_vmod_vcl_args_Func",
+    "c19f59f7347c90e481cebb6aec0f4cd0a7f4d5e113e4c7fd2ae8266cf04c86fa",
+    "Varnish (version) (hash)",
+    "0",
+    "0"
+  ],
+  [
+    "$CPROTO",
+    "
+typedef VCL_VOID td_vmod_vcl_args_arg_vcl_backend(
+    VRT_CTX,
+    VCL_BACKEND
+);
+
+struct Vmod_vmod_vcl_args_Func {
+  td_vmod_vcl_args_arg_vcl_backend *f_arg_vcl_backend;
+};
+
+static struct Vmod_vmod_vcl_args_Func Vmod_vmod_vcl_args_Func;"
+  ],
+  [
+    "$FUNC",
+    "arg_vcl_backend",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_vcl_args_Func.f_arg_vcl_backend",
+      "",
+      [
+        "BACKEND",
+        "_backend",
+        "_backend"
+      ]
+    ]
+  ]
+]
+
