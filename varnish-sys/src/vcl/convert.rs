@@ -438,17 +438,13 @@ mod version_after_v6 {
 
     impl IntoVCL<VCL_BACKEND> for BackendRef {
         fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
-            unsafe {
-                Ok(self.vcl_ptr())
-            }
+            unsafe { Ok(self.vcl_ptr()) }
         }
     }
 
     impl IntoVCL<VCL_BACKEND> for Option<BackendRef> {
         fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
-            unsafe {
-                Ok(self.map_or(VCL_BACKEND(null()), |b: BackendRef| b.vcl_ptr()))
-            }
+            unsafe { Ok(self.map_or(VCL_BACKEND(null()), |b: BackendRef| b.vcl_ptr())) }
         }
     }
 

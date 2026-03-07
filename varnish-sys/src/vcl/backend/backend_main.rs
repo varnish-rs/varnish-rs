@@ -416,9 +416,12 @@ impl<'a> NativeBackendBuilder<'a> {
         }
     }
 
-    builder_setter!(authority, &'a CStr,
+    builder_setter!(
+        authority,
+        &'a CStr,
         "Set the authority for this backend when connecting with the `PROXY`
-        protocol");
+        protocol"
+    );
 
     builder_setter!(
         connect_timeout,
@@ -449,9 +452,12 @@ impl<'a> NativeBackendBuilder<'a> {
         also `backend_wait_limit` and `backend_wait_timeout`."
     );
 
-    builder_setter!(backend_wait_limit, u32,
+    builder_setter!(
+        backend_wait_limit,
+        u32,
         "Set how many requests can be queue while waiting for a connection. If
-        the queue is full, new request will go directly to `vcl_backend_error`.");
+        the queue is full, new request will go directly to `vcl_backend_error`."
+    );
 
     builder_setter!(
         backend_wait_timeout,
@@ -459,7 +465,6 @@ impl<'a> NativeBackendBuilder<'a> {
         "Set the time a request can wait for a connection if `max_connections`
         is at its maximum."
     );
-
 
     #[cfg(varnishsys_81_sslflags)]
     builder_setter!(
