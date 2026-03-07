@@ -8,6 +8,21 @@ source: varnish-macros/src/tests.rs
   ],
   [
     "$FUNC",
+    "arg_vcl_backend",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vcl_returns_Func.f_arg_vcl_backend",
+      "",
+      [
+        "BACKEND",
+        "backend"
+      ]
+    ]
+  ],
+  [
+    "$FUNC",
     "val_acl",
     [
       [

@@ -2,6 +2,11 @@
 source: varnish-macros/src/tests.rs
 ---
 
+typedef VCL_VOID td_vmod_vcl_returns_arg_vcl_backend(
+    VRT_CTX,
+    VCL_BACKEND
+);
+
 typedef VCL_ACL td_vmod_vcl_returns_val_acl(
     VRT_CTX
 );
@@ -175,6 +180,7 @@ typedef VCL_VCL td_vmod_vcl_returns_res_vcl(
 );
 
 struct Vmod_vcl_returns_Func {
+  td_vmod_vcl_returns_arg_vcl_backend *f_arg_vcl_backend;
   td_vmod_vcl_returns_val_acl *f_val_acl;
   td_vmod_vcl_returns_res_acl *f_res_acl;
   td_vmod_vcl_returns_val_backend *f_val_backend;

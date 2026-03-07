@@ -1,6 +1,5 @@
 ---
 source: varnish-macros/src/tests.rs
-snapshot_kind: text
 ---
 mod vcl_returns {
     #[allow(non_snake_case, unused_imports, unused_qualifications, unused_variables)]
