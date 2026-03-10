@@ -31,26 +31,17 @@ impl VarnishInfo {
         }
         let (major, _minor) = parse_version(&version);
 
-        // >= 8.0
+        let mut defines = vec![];
         if major >= 8 {
+            defines.push("VARNISH_RS_HTTP_CONN");
             println!("cargo::rustc-cfg=varnishsys_80_io_vdp");
-        }
-
-        if major < 7 {
+        } else if major <= 6 {
+            defines.push("VARNISH_RS_6_0");
             println!("cargo::rustc-cfg=varnishsys_6");
-        }
-
-        if major < 6 || major > 8 {
+        } else {
             println!(
                 "cargo::warning=Varnish {version} is not supported and may not work with this crate"
             );
-        }
-
-        let mut defines = vec![];
-        if major < 7 {
-            defines.push("VARNISH_RS_6_0");
-        } else {
-            defines.push("VARNISH_RS_HTTP_CONN");
         }
 
         // TODO: This should become conditional once this PR merges, and we know its version
