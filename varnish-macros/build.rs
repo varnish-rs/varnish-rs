@@ -21,14 +21,11 @@ fn main() {
         if plus { "-plus" } else { "" }
     );
 
-    if major < 7 {
+    if major >= 8 {
+        println!("cargo::rustc-cfg=varnishsys_77_vmod_data");
+    } else if major <= 6 {
         println!("cargo::rustc-cfg=varnishsys_6");
         println!("cargo::rustc-cfg=varnishsys_6_priv_free_f");
-    } else if (major == 7 && minor >= 7) || major >= 8 {
-        println!("cargo::rustc-cfg=varnishsys_77_vmod_data");
-    }
-
-    if major <= 6 || (major == 7 && minor == 7 && patch < 1) {
         println!("cargo::rustc-cfg=varnishsys_vmod_meta_1_0");
     }
 
