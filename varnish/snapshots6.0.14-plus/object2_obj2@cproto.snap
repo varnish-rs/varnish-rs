@@ -1,6 +1,7 @@
 ---
 source: varnish-macros/src/tests.rs
 ---
+
 struct vmod_obj2_Obj1;
 
 struct vmod_obj2_Obj2;

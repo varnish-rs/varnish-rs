@@ -1,0 +1,41 @@
+varnishtest "Test round-robin director detailed JSON list output"
+
+server s1 -start
+server s2 -start
+server s3 -start
+
+varnish v1 -vcl+backend {
+    import round_robin from "${vmod}";
+
+    sub vcl_init {
+        new rr = round_robin.rr();
+        rr.add_backend(s1);
+        rr.add_backend(s2);
+        rr.add_backend(s3);
+    }
+
+    sub vcl_recv {
+        set req.backend_hint = rr.backend();
+        return(pass);
+    }
+} -start
+
+# Test detailed JSON output with all backends healthy
+shell {
+    varnishadm -n ${v1_name} backend.list -jp vcl1.rr |jq
+    varnishadm -n ${v1_name} backend.list -jp vcl1.rr |
+        jq -e '.[3]["vcl1.rr"].probe_details.backends.s1.healthy == true and
+               .[3]["vcl1.rr"].probe_details.backends.s2.healthy == true and
+               .[3]["vcl1.rr"].probe_details.backends.s3.healthy == true'
+}
+
+# Mark one backend as sick
+varnish v1 -cliok "backend.set_health vcl1.s2 sick"
+
+# Test detailed JSON output with one backend unhealthy
+shell {
+    varnishadm -n ${v1_name} backend.list -jp vcl1.rr |
+        jq -e '.[3]["vcl1.rr"].probe_details.backends.s1.healthy == true and
+               .[3]["vcl1.rr"].probe_details.backends.s2.healthy == false and
+               .[3]["vcl1.rr"].probe_details.backends.s3.healthy == true'
+}

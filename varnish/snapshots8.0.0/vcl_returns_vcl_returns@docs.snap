@@ -20,6 +20,8 @@ import vcl_returns;
 import vcl_returns from "path/to/libvcl_returns.so";
 ```
 
+### Function `VOID vcl_returns.arg_vcl_backend(BACKEND backend)`
+
 ### Function `ACL vcl_returns.val_acl()`
 
 ### Function `ACL vcl_returns.res_acl()`
