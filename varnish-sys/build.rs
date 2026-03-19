@@ -76,8 +76,8 @@ fn detect_varnish() -> Option<VarnishInfo> {
 
     // 8.0 adds a few fields to the vdp struct
     println!("cargo::rustc-check-cfg=cfg(varnishsys_80_io_vdp)");
-    // 8.1 adds ssl_flags to the backend SSL struct
-    println!("cargo::rustc-check-cfg=cfg(varnishsys_81_sslflags)");
+    // 9.0 adds ssl_flags to the backend SSL struct
+    println!("cargo::rustc-check-cfg=cfg(varnishsys_90_sslflags)");
 
     let bindings = PathBuf::from(env::var("OUT_DIR").unwrap()).join("bindings.rs");
 

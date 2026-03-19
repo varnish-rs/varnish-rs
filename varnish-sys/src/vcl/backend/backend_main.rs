@@ -8,7 +8,7 @@ use std::ptr::{null, null_mut};
 use std::time::SystemTime;
 
 use crate::ffi::{VclEvent, VfpStatus, VCL_BACKEND, VCL_BOOL, VCL_IP, VCL_TIME};
-#[cfg(varnishsys_81_sslflags)]
+#[cfg(varnishsys_90_sslflags)]
 use crate::ffi::{BSSL_F_NOVERIFY, BSSL_F_VERIFY_HOST};
 use crate::utils::get_backend;
 use crate::vcl::{Buffer, Ctx, IntoVCL, LogTag, VclError, VclResult, Workspace};
@@ -361,7 +361,7 @@ pub struct NativeBackendBuilder<'a> {
     max_connections: Option<u32>,
     proxy_header: Option<u32>,
     backend_wait_limit: Option<u32>,
-    #[cfg(varnishsys_81_sslflags)]
+    #[cfg(varnishsys_90_sslflags)]
     sslflags: std::ffi::c_uint,
 }
 
@@ -392,7 +392,7 @@ impl<'a> NativeBackendBuilder<'a> {
             max_connections: None,
             proxy_header: None,
             backend_wait_limit: None,
-            #[cfg(varnishsys_81_sslflags)]
+            #[cfg(varnishsys_90_sslflags)]
             sslflags: 0,
         }
     }
@@ -411,7 +411,7 @@ impl<'a> NativeBackendBuilder<'a> {
             max_connections: None,
             proxy_header: None,
             backend_wait_limit: None,
-            #[cfg(varnishsys_81_sslflags)]
+            #[cfg(varnishsys_90_sslflags)]
             sslflags: 0,
         }
     }
@@ -466,7 +466,7 @@ impl<'a> NativeBackendBuilder<'a> {
         is at its maximum."
     );
 
-    #[cfg(varnishsys_81_sslflags)]
+    #[cfg(varnishsys_90_sslflags)]
     builder_setter!(
         hosthdr,
         &'a CStr,
@@ -484,7 +484,7 @@ impl<'a> NativeBackendBuilder<'a> {
         self.proxy_header = Some(2);
     }
 
-    #[cfg(varnishsys_81_sslflags)]
+    #[cfg(varnishsys_90_sslflags)]
     /// Use TLS for the backend connection.
     pub fn tls(mut self, verify_host: bool, verify_peer: bool) {
         if verify_host {
@@ -516,12 +516,12 @@ impl<'a> NativeBackendBuilder<'a> {
             ipv6: VCL_IP(null()),
             uds_path: null(),
             preamble: null(),
-            #[cfg(varnishsys_81_sslflags)]
+            #[cfg(varnishsys_90_sslflags)]
             hosthdr: match self.hosthdr {
                 Some(s) => s.as_ptr(),
                 None => null(),
             },
-            #[cfg(varnishsys_81_sslflags)]
+            #[cfg(varnishsys_90_sslflags)]
             sslflags: self.sslflags,
         });
 
