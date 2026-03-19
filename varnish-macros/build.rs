@@ -1,6 +1,6 @@
 fn main() {
     println!("cargo::rustc-check-cfg=cfg(varnishsys_77_vmod_data)");
-    // Only 8.x and trunk supported
+    // Only 8.0+ and trunk supported
     let ver = std::env::var("DEP_VARNISHAPI_VERSION_NUMBER")
         .expect("DEP_VARNISHAPI_VERSION_NUMBER not set");
     if ver == "trunk" {
