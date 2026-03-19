@@ -16,14 +16,21 @@ struct VarnishInfo {
 
 impl VarnishInfo {
     fn parse(bindings: PathBuf, varnish_paths: Vec<PathBuf>, version: String) -> Self {
-        if version != "trunk" {
-            let ver = semver::Version::parse(&version)
-                .unwrap_or_else(|_| panic!("varnishapi invalid version: {version}"));
-            if ver < semver::Version::new(8, 0, 0) {
-                println!(
-                    "cargo::warning=Varnish {version} is not supported and may not work with this crate"
-                );
-            }
+        if version == "trunk" {
+            // Treat trunk at least as latest Varnish
+            println!("cargo::rustc-cfg=varnishsys_90_sslflags");
+            return Self {
+                bindings,
+                varnish_paths,
+                version,
+            };
+        }
+        let ver = semver::Version::parse(&version)
+            .unwrap_or_else(|_| panic!("varnishapi invalid version: {version}"));
+        if ver < semver::Version::new(8, 0, 0) {
+            println!(
+                "cargo::warning=Varnish {version} is not supported and may not work with this crate"
+            );
         }
         Self {
             bindings,
