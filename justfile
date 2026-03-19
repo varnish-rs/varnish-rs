@@ -8,7 +8,7 @@ targets := '--all-targets'  # For all targets (lib, bin, tests, examples, benche
 # which version of Varnish to install by default. Update the `supported_varnish_vers` variable below.
 default_varnish_ver := '9.0'
 
-# Make sure to update CI with the changes.  The versions with 'r' suffix are Varnish Plus versions - must have all 4 numbers.
+# Make sure to update CI with the changes.
 supported_varnish_vers := '8.0 9.0'
 
 # if running in CI, treat warnings as errors by setting RUSTFLAGS and RUSTDOCFLAGS to '-D warnings' unless they are already set
@@ -173,10 +173,6 @@ get-varnish-version $required_version='':
     #!/usr/bin/env bash
     set -euo pipefail
     VARNISH_VER=$(dpkg-query -W -f='${source:Upstream-Version}\n' varnish-dev || echo "unknown")
-    # try with varnish-plus-dev
-    if [ -z "$VARNISH_VER" ]; then
-        VARNISH_VER=$(dpkg-query -W -f='${source:Upstream-Version}\n' varnish-plus-dev || echo "unknown")
-    fi
     if [ "$VARNISH_VER" = "unknown" -o -z "$VARNISH_VER" ]; then
         echo "ERROR: varnish-dev package was not found"
         exit 1
