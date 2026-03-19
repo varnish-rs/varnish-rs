@@ -19,6 +19,7 @@ name = "varnish_sys"
 bindgen_helpers.workspace = true
 cc.workspace = true
 pkg-config.workspace = true
+semver.workspace = true
 
 [dependencies]
 memchr.workspace = true

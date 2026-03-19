@@ -28,14 +28,12 @@ impl VarnishInfo {
                 defines,
             };
         }
-        let (major, _minor) = parse_version(&version);
+        let ver = semver::Version::parse(&version)
+            .unwrap_or_else(|_| panic!("varnishapi invalid version: {version}"));
 
-        // >= 8.0
-        if major >= 8 {
+        if ver >= semver::Version::new(8, 0, 0) {
             println!("cargo::rustc-cfg=varnishsys_80_io_vdp");
-        }
-
-        if major < 8 {
+        } else {
             println!(
                 "cargo::warning=Varnish {version} is not supported and may not work with this crate"
             );
@@ -206,19 +204,3 @@ fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
     }
 }
 
-fn parse_version(version: &str) -> (u32, u32) {
-    // version string usually looks like "7.5.0"
-    let mut parts = version.split('.');
-    (
-        parse_next_int(&mut parts, "major"),
-        parse_next_int(&mut parts, "minor"),
-    )
-}
-
-fn parse_next_int(parts: &mut std::str::Split<char>, name: &str) -> u32 {
-    let val = parts
-        .next()
-        .unwrap_or_else(|| panic!("varnishapi invalid version {name}"));
-    val.parse::<u32>()
-        .unwrap_or_else(|_| panic!("varnishapi invalid version - {name} value is '{val}'"))
-}

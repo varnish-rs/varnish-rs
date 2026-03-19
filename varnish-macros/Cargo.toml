@@ -14,6 +14,9 @@ readme.workspace = true
 [lib]
 proc-macro = true
 
+[build-dependencies]
+semver.workspace = true
+
 [dependencies]
 darling.workspace = true
 prettyplease.workspace = true

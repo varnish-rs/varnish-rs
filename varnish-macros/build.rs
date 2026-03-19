@@ -11,28 +11,14 @@ fn main() {
         println!("cargo::rustc-env=VARNISHAPI_VERSION_NUMBER=trunk");
         return;
     }
-    let (major, minor, patch) = parse_version(&ver);
-    println!("cargo::rustc-env=VARNISHAPI_VERSION_NUMBER={major}.{minor}.{patch}");
+    let ver = semver::Version::parse(&ver)
+        .unwrap_or_else(|_| panic!("DEP_VARNISHAPI_VERSION_NUMBER is not a valid semver: {ver}"));
+    println!(
+        "cargo::rustc-env=VARNISHAPI_VERSION_NUMBER={}.{}.{}",
+        ver.major, ver.minor, ver.patch
+    );
 
-    if (major == 7 && minor >= 7) || major >= 8 {
+    if ver >= semver::Version::new(7, 7, 0) {
         println!("cargo::rustc-cfg=varnishsys_77_vmod_data");
     }
-}
-
-fn parse_version(version: &str) -> (u32, u32, u32) {
-    // version string usually looks like "8.0.0"
-    let mut parts = version.split('.');
-    (
-        parse_next_int(&mut parts, "major"),
-        parse_next_int(&mut parts, "minor"),
-        parse_next_int(&mut parts, "patch"),
-    )
-}
-
-fn parse_next_int(parts: &mut std::str::Split<char>, name: &str) -> u32 {
-    let val = parts
-        .next()
-        .unwrap_or_else(|| panic!("varnishapi invalid version {name}"));
-    val.parse::<u32>()
-        .unwrap_or_else(|_| panic!("varnishapi invalid version - {name} value is '{val}'"))
 }
