@@ -15,7 +15,7 @@ VmodInfo {
             has_optional_args: false,
             args: [
                 ParamTypeInfo {
-                    ident: "backend",
+                    ident: "_backend",
                     docs: "",
                     ty: Value(
                         ParamInfo {

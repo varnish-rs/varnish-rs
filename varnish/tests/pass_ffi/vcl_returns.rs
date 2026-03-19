@@ -12,7 +12,7 @@ mod vcl_returns {
         VCL_STEVEDORE, VCL_STRANDS, VCL_STRING, VCL_SUB, VCL_TIME, VCL_VCL,
     };
 
-    pub fn arg_vcl_backend(backend: VCL_BACKEND) {
+    pub fn arg_vcl_backend(_backend: VCL_BACKEND) {
     }
 
     pub unsafe fn val_acl() -> VCL_ACL {

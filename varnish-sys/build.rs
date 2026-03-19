@@ -27,7 +27,9 @@ impl VarnishInfo {
         }
         let ver = semver::Version::parse(&version)
             .unwrap_or_else(|_| panic!("varnishapi invalid version: {version}"));
-        if ver < semver::Version::new(8, 0, 0) {
+        if ver >= semver::Version::new(9, 0, 0) {
+            println!("cargo::rustc-cfg=varnishsys_90_sslflags");
+        } else if ver < semver::Version::new(8, 0, 0) {
             println!(
                 "cargo::warning=Varnish {version} is not supported and may not work with this crate"
             );

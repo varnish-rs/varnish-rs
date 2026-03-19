@@ -1,0 +1,34 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VmodInfo {
+    params: VmodParams {
+        docs: None,
+    },
+    ident: "tuple",
+    docs: "",
+    funcs: [
+        FuncInfo {
+            func_type: Function,
+            ident: "ref_to_slice_lifetime",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "tsk_vals",
+                    docs: "",
+                    ty: SharedPerTask,
+                },
+            ],
+            output_ty: Bytes,
+            out_result: false,
+        },
+    ],
+    objects: [],
+    shared_types: SharedTypes {
+        shared_per_task_ty: Some(
+            "PerTask < '_ >",
+        ),
+        shared_per_vcl_ty: None,
+    },
+}

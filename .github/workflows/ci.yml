@@ -39,6 +39,7 @@ jobs:
         include:
           - ver: trunk
           # This list must match the justfile list for supported_varnish_vers var without the latest version
+          - ver: 9.0.0
           - ver: 8.0.0
     steps:
       - uses: actions/checkout@v6

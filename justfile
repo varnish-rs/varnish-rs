@@ -6,10 +6,10 @@ features := '--all-features'  # Enable all features
 targets := '--all-targets'  # For all targets (lib, bin, tests, examples, benches)
 
 # which version of Varnish to install by default. Update the `supported_varnish_vers` variable below.
-default_varnish_ver := '8.0'
+default_varnish_ver := '9.0'
 
 # Make sure to update CI with the changes.  The versions with 'r' suffix are Varnish Plus versions - must have all 4 numbers.
-supported_varnish_vers := '8.0'
+supported_varnish_vers := '8.0 9.0'
 
 # if running in CI, treat warnings as errors by setting RUSTFLAGS and RUSTDOCFLAGS to '-D warnings' unless they are already set
 # Use `CI=true just ci-test` to run the same tests as in GitHub CI.
@@ -299,55 +299,25 @@ get-package-exclude-args:
         echo "$EXCLUDE"
     fi
 
-# Install Varnish from packagecloud.io. This could be damaging to your system - use with caution. Pass non-empty `debug` argument to skip the installation.
+# Install Varnish from packages.varnish-software.com. This could be damaging to your system - use with caution. Pass non-empty `debug` argument to skip the installation.
 [private]
 install-varnish version=default_varnish_ver debug='':
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # Assumes major and minor are one digit each. Two digits without dots are treated as (major.minor).
-    #  60 or 6.0 -> varnishcache/varnish60lts
-    #        7.1 -> varnishcache/varnish71
-    #   6.0.14r3 -> varnishplus/60-enterprise
-
-    # Convert version to a tag name used as URL portion
-    URL_REPO='{{ if version =~ '^\d\.\d\.\d+r\d+$' { \
-        'varnishplus/' + replace_regex(version, '^(\d)\.(\d)\..*$', '$1$2') + '-enterprise' \
-    } else if version =~ '^(\d\d|\d(\.\d(\.\d+)?)?)$' { \
-        'varnishcache/varnish' + replace_regex(replace_regex(replace_regex(replace_regex(replace_regex(version, \
-        '^(\d)(\d)$', '$1.$2') \
-        , '^(\d\.\d)(\..*)$', '$1') \
-        , '^(\d)$', '$1.0') \
-        , '^(\d)\.(\d)$', '$1$2') \
-        , '^60$', '60lts') \
-    } else { \
-      error('Invalid version "' + version + '"') \
-    } }}'
-
-    # Policy name is either 'varnish' or 'varnish-plus'
-    POLICY='{{ if version =~ '^\d\.\d\.\d+r\d+$' { 'varnish-plus' } else { 'varnish' } }}'
-
-    # Ensure version is valid and convert it to an apt package search string. Assumes major and minor parts are one digit. Two digits are treated as (major.minor).
-    PATTERN='{{ if version =~ '^\d\.\d\.\d+r\d+$' { \
-        version + '*' \
-    } else { \
-        replace_regex(replace_regex(replace_regex(version, \
-              '^(\d)(\d)$', '$1.$2') \
-            , '^(\d\.\d\.\d)$', '$1-') \
-            , '^(\d(\.\d)*)$', '$1.') \
-        + '*' \
-    } }}'
-
-    echo "Installing Varnish '{{version}}' (url_repo='$URL_REPO', pattern='$PATTERN') from packagecloud.io"
+    echo "Installing Varnish '{{version}}' from packages.varnish-software.com"
     {{ if debug != '' {'exit 0'} else {''} }}
 
     set -x
-    curl -sSf "https://packagecloud.io/install/repositories/$URL_REPO/script.deb.sh" | sudo bash
+    curl -Ls https://packages.varnish-software.com/varnish/bootstrap-deb.sh | sudo sh
 
-    {{ if version =~ '^\d\.\d\.\d+r\d+$' {''} else { '''
-        echo -e 'Package: varnish varnish-dev\nPin: origin "packagecloud.io"\nPin-Priority: 1001' | sudo tee /etc/apt/preferences.d/varnish
-        cat /etc/apt/preferences.d/varnish
-    ''' } }}
+    cat << -EOF | sudo tee /etc/apt/preferences.d/varnish
+        Package: varnish varnish-dev
+        Pin: origin "packages.varnish-software.com"
+        Pin: version {{version}}
+        Pin-Priority: 1001
+    -EOF
+    cat /etc/apt/preferences.d/varnish
 
-    sudo apt-cache policy "${POLICY}"
-    sudo apt-get install -y "${POLICY}=$PATTERN" "${POLICY}-dev=$PATTERN"
+    sudo apt-cache policy "varnish"
+    sudo apt-get install -y "varnish={{version}}*" "varnish-dev={{version}}*"
