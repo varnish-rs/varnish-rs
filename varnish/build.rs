@@ -10,7 +10,7 @@ fn main() {
         return;
     }
     let (major, _minor) = parse_version(&ver);
-    if major < 7 {
+    if major <= 6 {
         println!("cargo::rustc-cfg=varnishsys_6");
         println!("cargo::rustc-cfg=varnishsys_6_priv_free_f");
     }
