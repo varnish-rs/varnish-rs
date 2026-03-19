@@ -81,7 +81,7 @@ fn generate_bindings(info: &VarnishInfo) {
 
     println!("cargo::rustc-link-lib=varnishapi");
     println!("cargo::rerun-if-changed=c_code/wrapper.h");
-    let mut bindings_builder = bindgen::Builder::default()
+    let bindings_builder = bindgen::Builder::default()
         .header("c_code/wrapper.h")
         .blocklist_item("FP_.*")
         .blocklist_item("FILE")

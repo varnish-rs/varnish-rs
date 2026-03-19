@@ -49,15 +49,14 @@ impl<'a> Ctx<'a> {
     }
 
     /// Instantiate from a mutable reference to a [`vrt_ctx`].
-    #[expect(clippy::useless_conversion)]
     pub fn from_ref(raw: &'a mut vrt_ctx) -> Self {
         assert_eq!(raw.magic, VRT_CTX_MAGIC);
         Self {
-            http_req: HttpHeaders::from_ptr(raw.http_req.into()),
-            http_req_top: HttpHeaders::from_ptr(raw.http_req_top.into()),
-            http_resp: HttpHeaders::from_ptr(raw.http_resp.into()),
-            http_bereq: HttpHeaders::from_ptr(raw.http_bereq.into()),
-            http_beresp: HttpHeaders::from_ptr(raw.http_beresp.into()),
+            http_req: HttpHeaders::from_ptr(raw.http_req),
+            http_req_top: HttpHeaders::from_ptr(raw.http_req_top),
+            http_resp: HttpHeaders::from_ptr(raw.http_resp),
+            http_bereq: HttpHeaders::from_ptr(raw.http_bereq),
+            http_beresp: HttpHeaders::from_ptr(raw.http_beresp),
             ws: Workspace::from_ptr(raw.ws),
             raw,
         }
