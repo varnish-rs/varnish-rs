@@ -12,38 +12,20 @@ struct VarnishInfo {
     bindings: PathBuf,
     varnish_paths: Vec<PathBuf>,
     version: String,
-    defines: Vec<&'static str>,
 }
 
 impl VarnishInfo {
     fn parse(bindings: PathBuf, varnish_paths: Vec<PathBuf>, version: String) -> Self {
-        if version == "trunk" {
-            // Treat trunk as latest Varnish (8.x)
-            let defines = vec!["VARNISH_RS_HTTP_CONN"];
-            return Self {
-                bindings,
-                varnish_paths,
-                version,
-                defines,
-            };
+        if version != "trunk" {
+            let ver = semver::Version::parse(&version)
+                .unwrap_or_else(|_| panic!("varnishapi invalid version: {version}"));
+            if ver < semver::Version::new(8, 0, 0) {
+                println!(
+                    "cargo::warning=Varnish {version} is not supported and may not work with this crate"
+                );
+            }
         }
-        let ver = semver::Version::parse(&version)
-            .unwrap_or_else(|_| panic!("varnishapi invalid version: {version}"));
-
-        if ver < semver::Version::new(8, 0, 0) {
-            println!(
-                "cargo::warning=Varnish {version} is not supported and may not work with this crate"
-            );
-        }
-
-        let defines = vec!["VARNISH_RS_HTTP_CONN"];
-
-        Self {
-            bindings,
-            varnish_paths,
-            version,
-            defines,
-        }
+        Self { bindings, varnish_paths, version }
     }
 }
 
@@ -121,10 +103,6 @@ fn generate_bindings(info: &VarnishInfo) {
         // FIXME: some enums should probably be done as rustified_enum (exhaustive)
         .rustified_non_exhaustive_enum(ren.get_regex_str())
         .parse_callbacks(Box::new(ren));
-
-    for define in &info.defines {
-        bindings_builder = bindings_builder.clang_args(&["-D", define]);
-    }
 
     let bindings = bindings_builder
         .generate()
