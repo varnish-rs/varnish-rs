@@ -6,16 +6,15 @@ This is **varnish-rs**, a Rust framework for building Varnish Cache VMODs (modul
 
 - **varnish-sys**: Low-level FFI bindings generated via bindgen from libvarnish headers
 - **varnish-macros**: Proc-macro crate that handles `#[varnish::vmod]` attribute and code generation
-- **varnish**: High-level safe API that VMOD authors use (see [examples/](examples/))
+- **varnish**: High-level safe API that VMOD authors use (see [examples/](../examples/))
 
 ## Critical Build System Knowledge
 
 ### Multi-Version Varnish Support
 
-This project supports multiple Varnish versions (6.0 LTS, 7.5+, 8.0+). Version detection happens at build time:
+This project supports Varnish 8.0+ and trunk. Version detection happens at build time:
 
 - `varnish-sys/build.rs` detects installed libvarnish version via `pkg-config` and sets `DEP_VARNISHAPI_VERSION_NUMBER`
-- `varnish/build.rs` consumes this to set conditional compilation flags like `cfg(varnishsys_6)`
 - For non-standard installs, use `VARNISH_INCLUDE_PATHS=/path1:/path2` (assumes latest version)
 
 ### Snapshot-Based Testing
@@ -43,7 +42,7 @@ just fmt           # Format code (uses nightly if available for import sorting)
 
 ### Standard VMOD Structure
 
-Every VMOD follows this pattern (see [examples/vmod_example/](examples/vmod_example/)):
+Every VMOD follows this pattern (see [examples/vmod_example/](../examples/vmod_example/)):
 
 ```rust
 // In lib.rs - required for VTC tests
@@ -69,7 +68,7 @@ crate-type = ["cdylib"]  # Required for Varnish to load as shared library
 
 ### Object-Based VMODs
 
-For stateful VMODs (see [examples/vmod_object/](examples/vmod_object/)):
+For stateful VMODs (see [examples/vmod_object/](../examples/vmod_object/)):
 
 ```rust
 #[allow(non_camel_case_types)]
@@ -130,11 +129,11 @@ VTC tests use varnishtest utility and require `${vmod}` placeholder in VCL impor
 
 ### Workspace Structure
 - All crates share version/metadata defined in root `Cargo.toml` `[workspace.package]`
-- Versions updated via `release-plz` (see [release-plz.toml](release-plz.toml))
+- Versions updated via `release-plz` (see [release-plz.toml](../release-plz.toml))
 - MSRV: Rust 1.82+ (tracked in workspace, verified via `just msrv`)
 
 ### Clippy Configuration
-Pedantic lints enabled with specific allows (see [Cargo.toml](Cargo.toml) `[workspace.lints.clippy]`):
+Pedantic lints enabled with specific allows (see [Cargo.toml](../Cargo.toml) `[workspace.lints.clippy]`):
 - `missing_safety_doc` currently allowed (should be fixed eventually)
 - `module_name_repetitions`, `must_use_candidate`, `cast_*` explicitly allowed
 
@@ -147,6 +146,4 @@ CI mode activates via `CI=true` env var, sets `RUSTFLAGS='-D warnings'`:
 
 When modifying code generation or API:
 1. Test against all versions: `just bless-all` (uses Docker containers)
-2. Check conditional compilation in `varnish/build.rs` for version-specific behavior
-3. Version-specific code uses `#[cfg(varnishsys_6)]` for Varnish 6.x differences
-4. New snapshots create `varnish/snapshots<major>.<minor>.<patch>/` directories automatically
+2. New snapshots create `varnish/snapshots<major>.<minor>.<patch>/` directories automatically

@@ -1,6 +1,5 @@
 //! Expose the Varnish context [`vrt_ctx`] as a Rust object
 //!
-#[cfg(not(varnishsys_6))]
 use std::ffi::{c_int, c_uint, c_void};
 
 use crate::ffi;
@@ -50,7 +49,7 @@ impl<'a> Ctx<'a> {
     }
 
     /// Instantiate from a mutable reference to a [`vrt_ctx`].
-    #[cfg_attr(not(varnishsys_6), expect(clippy::useless_conversion))] // Varnish v6 has a different struct, requiring .into()
+    #[expect(clippy::useless_conversion)]
     pub fn from_ref(raw: &'a mut vrt_ctx) -> Self {
         assert_eq!(raw.magic, VRT_CTX_MAGIC);
         Self {
@@ -88,7 +87,6 @@ impl<'a> Ctx<'a> {
             }
         }
     }
-    #[cfg(not(varnishsys_6))]
     pub fn cached_req_body(&mut self) -> Result<Vec<&'a [u8]>, VclError> {
         unsafe extern "C" fn chunk_collector(
             priv_: *mut c_void,
@@ -156,14 +154,9 @@ impl TestCtx {
 
 pub fn log(tag: LogTag, msg: impl AsRef<str>) {
     let msg = msg.as_ref();
-    #[cfg(not(varnishsys_6))]
     unsafe {
         let vxids = ffi::vxids::default();
         ffi::VSL(tag, vxids, c"%.*s".as_ptr(), msg.len(), msg.as_ptr());
-    }
-    #[cfg(varnishsys_6)]
-    unsafe {
-        ffi::VSL(tag, 0, c"%.*s".as_ptr(), msg.len(), msg.as_ptr());
     }
 }
 
@@ -183,10 +176,8 @@ mod tests {
 #[doc(hidden)]
 #[derive(Debug)]
 pub struct PerVclState<T> {
-    #[cfg(not(varnishsys_6))]
     #[expect(clippy::vec_box)] // FIXME: we may want to rethink this
     pub fetch_filters: Vec<Box<ffi::vfp>>,
-    #[cfg(not(varnishsys_6))]
     #[expect(clippy::vec_box)] // FIXME: we may want to rethink this
     pub delivery_filters: Vec<Box<ffi::vdp>>,
     pub user_data: Option<Box<T>>,
@@ -196,9 +187,7 @@ pub struct PerVclState<T> {
 impl<T> Default for PerVclState<T> {
     fn default() -> Self {
         Self {
-            #[cfg(not(varnishsys_6))]
             fetch_filters: Vec::default(),
-            #[cfg(not(varnishsys_6))]
             delivery_filters: Vec::default(),
             user_data: None,
         }

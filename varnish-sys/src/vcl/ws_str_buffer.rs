@@ -6,9 +6,7 @@ use std::slice::from_raw_parts_mut;
 use std::{io, mem, ptr};
 
 use crate::ffi;
-use crate::ffi::VCL_STRING;
-#[cfg(not(varnishsys_6))]
-use crate::ffi::{vrt_blob, VCL_BLOB};
+use crate::ffi::{vrt_blob, VCL_BLOB, VCL_STRING};
 use crate::vcl::VclError::WsOutOfMemory;
 use crate::vcl::VclResult;
 
@@ -28,7 +26,6 @@ pub struct WsBuffer<'ws, Item, Suffix, Output> {
 }
 
 pub type WsStrBuffer<'ws> = WsBuffer<'ws, u8, u8, VCL_STRING>;
-#[cfg(not(varnishsys_6))]
 pub type WsBlobBuffer<'ws> = WsBuffer<'ws, u8, vrt_blob, VCL_BLOB>;
 pub type WsTempBuffer<'ws, T> = WsBuffer<'ws, T, (), &'ws [T]>;
 
@@ -219,7 +216,6 @@ impl WsStrBuffer<'_> {
     }
 }
 
-#[cfg(not(varnishsys_6))]
 impl WsBlobBuffer<'_> {
     /// Finish writing to the [`WsBlobBuffer`], returning the allocated [`VCL_BLOB`].
     pub fn finish(mut self) -> VCL_BLOB {
@@ -271,7 +267,6 @@ mod tests {
         number.div_ceil(size_of::<usize>()) * size_of::<usize>()
     }
 
-    #[cfg(not(varnishsys_6))]
     fn buf_to_vec(buf: WsBlobBuffer<'_>) -> &'_ [u8] {
         let data = buf.finish();
         let vrt_blob { blob, len, .. } = unsafe { *(data.0) };
@@ -327,7 +322,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(not(varnishsys_6))]
     fn blob_buffer() {
         assert_eq!(size_of::<vrt_blob>(), 24);
         assert_eq!(align_of::<vrt_blob>(), 8);

@@ -27,7 +27,8 @@ Before v0.1.0, this library relied on a specific version of `libvarnish`. Since 
 
 | varnish-rs (Rust) | libvarnish (C) |
 |:-----------------:|:--------------:|
-|       0.4+        |  6.0lts, 7.7+  |
+|       0.6+        |  8.0, 9.0      |
+|     0.4 - 0.5     |  6.0lts - 8.0  |
 |   0.1.0 - 0.2.0   |   7.4 - 7.6    |
 |  0.0.18 - 0.0.19  |      7.5       |
 |      0.0.17       |      7.4       |

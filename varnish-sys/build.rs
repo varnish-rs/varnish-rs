@@ -6,7 +6,7 @@ use bindgen_helpers as bindgen;
 use bindgen_helpers::{rename_enum, Renamer};
 
 static BINDINGS_FILE: &str = "bindings.for-docs";
-static BINDINGS_FILE_VER: &str = "8.0.0";
+static BINDINGS_FILE_VER: &str = "7.7.1";
 
 struct VarnishInfo {
     bindings: PathBuf,
@@ -18,8 +18,7 @@ struct VarnishInfo {
 impl VarnishInfo {
     fn parse(bindings: PathBuf, varnish_paths: Vec<PathBuf>, version: String) -> Self {
         if version == "trunk" {
-            // Treat trunk as latest Varnish (8.1)
-            println!("cargo::rustc-cfg=varnishsys_81_sslflags");
+            // Treat trunk as latest Varnish (8.x)
             println!("cargo::rustc-cfg=varnishsys_80_io_vdp");
             let defines = vec!["VARNISH_RS_HTTP_CONN", "VARNISH_RS_ALLOC_VARIADIC"];
             return Self {
@@ -31,18 +30,18 @@ impl VarnishInfo {
         }
         let (major, _minor) = parse_version(&version);
 
-        let mut defines = vec![];
+        // >= 8.0
         if major >= 8 {
-            defines.push("VARNISH_RS_HTTP_CONN");
             println!("cargo::rustc-cfg=varnishsys_80_io_vdp");
-        } else if major <= 6 {
-            defines.push("VARNISH_RS_6_0");
-            println!("cargo::rustc-cfg=varnishsys_6");
-        } else {
+        }
+
+        if major < 8 {
             println!(
                 "cargo::warning=Varnish {version} is not supported and may not work with this crate"
             );
         }
+
+        let mut defines = vec!["VARNISH_RS_HTTP_CONN"];
 
         // TODO: This should become conditional once this PR merges, and we know its version
         //     https://github.com/varnishcache/varnish-cache/pull/4303 merges
@@ -75,13 +74,10 @@ fn detect_varnish() -> Option<VarnishInfo> {
     // The crate must compile for the latest supported version with none of these flags enabled.
     // By convention, the version number is the last version where the feature was available.
 
-    // 8.1 adds .sslflags and .hosthdr to vrt_endpoint
-    println!("cargo::rustc-check-cfg=cfg(varnishsys_81_sslflags)");
-
     // 8.0 adds a few fields to the vdp struct
     println!("cargo::rustc-check-cfg=cfg(varnishsys_80_io_vdp)");
-    // 6.0 support
-    println!("cargo::rustc-check-cfg=cfg(varnishsys_6)");
+    // 8.1 adds ssl_flags to the backend SSL struct
+    println!("cargo::rustc-check-cfg=cfg(varnishsys_81_sslflags)");
 
     let bindings = PathBuf::from(env::var("OUT_DIR").unwrap()).join("bindings.rs");
 
@@ -183,7 +179,7 @@ fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
         // FIXME: If the user has set the VARNISH_INCLUDE_PATHS environment variable, use that.
         //    At the moment we have no way to detect which version it is.
         //    vmod_abi.h  seems to have this line, which can be used in the future.
-        //    #define VMOD_ABI_Version "Varnish 7.7.0 eef25264e5ca5f96a77129308edb83ccf84cb1b1"
+        //    #define VMOD_ABI_Version "Varnish 7.5.0 eef25264e5ca5f96a77129308edb83ccf84cb1b1"
         println!("cargo::warning=Using VARNISH_INCLUDE_PATHS='{s}' env var, and assume it is the latest supported version {BINDINGS_FILE_VER}");
         return Some((
             s.split(':').map(PathBuf::from).collect(),
@@ -200,7 +196,6 @@ fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
                 eprintln!("libvarnish not found, using saved bindings for the doc.rs: {e}");
                 fs::copy(BINDINGS_FILE, out_path).unwrap();
                 println!("cargo::metadata=version_number={BINDINGS_FILE_VER}");
-                println!("cargo::rustc-cfg=varnishsys_80_io_vdp");
                 None
             } else {
                 // FIXME: we should give a URL describing how to install varnishapi
@@ -212,7 +207,7 @@ fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
 }
 
 fn parse_version(version: &str) -> (u32, u32) {
-    // version string usually looks like "7.7.0"
+    // version string usually looks like "7.5.0"
     let mut parts = version.split('.');
     (
         parse_next_int(&mut parts, "major"),

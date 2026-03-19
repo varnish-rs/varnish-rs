@@ -2,14 +2,8 @@
 #include <sys/types.h>
 #include <string.h>
 
-#ifdef VARNISH_RS_6_0
-#define FILE void *
-#endif
-
 #include "cache/cache.h"
-#ifndef VARNISH_RS_6_0
 #include "cache/cache_backend.h"
-#endif
 #include "cache/cache_director.h"
 #include "cache/cache_filter.h"
 #include "vmod_abi.h"

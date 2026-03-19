@@ -2,14 +2,6 @@
 // #[path = "pass/vcl_returns.rs"]
 // mod try_to_build;
 
-#[cfg(varnishsys_6)]
-static EXCLUDE_FILES_V6: &[&str] = &[
-    "pass/event3.rs",
-    "pass/event4.rs",
-    "pass/function.rs",
-    "pass_ffi/vcl_returns.rs",
-];
-
 #[test]
 fn compile_expected_failures() {
     let t = trybuild::TestCases::new();
@@ -30,15 +22,6 @@ fn compile_valid_ffi_code() {
 fn compile_pass(pattern: &str) {
     let t = trybuild::TestCases::new();
     for file in glob::glob(pattern).unwrap() {
-        let file = file.unwrap();
-        #[cfg(varnishsys_6)]
-        {
-            let filepath = file.to_str().unwrap();
-            if EXCLUDE_FILES_V6.iter().any(|&f| filepath.ends_with(f)) {
-                eprintln!("Skipping file: {filepath} because of the old varnish version");
-                continue;
-            }
-        }
-        t.pass(file);
+        t.pass(file.unwrap());
     }
 }
