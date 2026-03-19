@@ -25,7 +25,11 @@ impl VarnishInfo {
                 );
             }
         }
-        Self { bindings, varnish_paths, version }
+        Self {
+            bindings,
+            varnish_paths,
+            version,
+        }
     }
 }
 
@@ -129,7 +133,6 @@ fn generate_bindings(info: &VarnishInfo) {
     }
 }
 
-
 fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
     if let Ok(s) = env::var("VARNISH_INCLUDE_PATHS") {
         // FIXME: If the user has set the VARNISH_INCLUDE_PATHS environment variable, use that.
@@ -161,4 +164,3 @@ fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
         }
     }
 }
-
