@@ -19,7 +19,7 @@ impl VarnishInfo {
     fn parse(bindings: PathBuf, varnish_paths: Vec<PathBuf>, version: String) -> Self {
         if version == "trunk" {
             // Treat trunk as latest Varnish (8.x)
-            let defines = vec!["VARNISH_RS_HTTP_CONN", "VARNISH_RS_ALLOC_VARIADIC"];
+            let defines = vec!["VARNISH_RS_HTTP_CONN"];
             return Self {
                 bindings,
                 varnish_paths,
@@ -36,11 +36,7 @@ impl VarnishInfo {
             );
         }
 
-        let mut defines = vec!["VARNISH_RS_HTTP_CONN"];
-
-        // TODO: This should become conditional once this PR merges, and we know its version
-        //     https://github.com/varnishcache/varnish-cache/pull/4303 merges
-        defines.push("VARNISH_RS_ALLOC_VARIADIC");
+        let defines = vec!["VARNISH_RS_HTTP_CONN"];
 
         Self {
             bindings,
@@ -60,7 +56,6 @@ impl Display for VarnishInfo {
 fn main() {
     if let Some(info) = &detect_varnish() {
         generate_bindings(info);
-        build_c_wrapper(info);
     }
 }
 
@@ -156,16 +151,6 @@ fn generate_bindings(info: &VarnishInfo) {
     }
 }
 
-fn build_c_wrapper(info: &VarnishInfo) {
-    let mut builder = cc::Build::new();
-    for define in &info.defines {
-        builder.define(define, None);
-    }
-    builder
-        .file("c_code/wrapper.c")
-        .includes(&info.varnish_paths)
-        .compile("varnish_wrapper");
-}
 
 fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
     if let Ok(s) = env::var("VARNISH_INCLUDE_PATHS") {

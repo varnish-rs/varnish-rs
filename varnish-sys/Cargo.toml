@@ -17,7 +17,6 @@ name = "varnish_sys"
 
 [build-dependencies]
 bindgen_helpers.workspace = true
-cc.workspace = true
 pkg-config.workspace = true
 semver.workspace = true
 
