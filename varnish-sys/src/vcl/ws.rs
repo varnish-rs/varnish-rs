@@ -254,8 +254,7 @@ fn maybe_uninit(value: &[u8]) -> &[MaybeUninit<u8>] {
 unsafe fn slice_assume_init_mut(value: &mut [MaybeUninit<u8>]) -> &mut [u8] {
     // SAFETY: Valid elements have just been copied into `this` so it is initialized
     // This was copied from MaybeUninit::slice_assume_init_mut, ignoring clippy lints
-    #[expect(clippy::ref_as_ptr)]
-    &mut *(value as *mut [MaybeUninit<u8>] as *mut [u8])
+    &mut *(ptr::from_mut::<[MaybeUninit<u8>]>(value) as *mut [u8])
 }
 
 /// Helper to convert a byte slice with a null terminator to a `txt` struct.
