@@ -19,7 +19,6 @@ impl VarnishInfo {
     fn parse(bindings: PathBuf, varnish_paths: Vec<PathBuf>, version: String) -> Self {
         if version == "trunk" {
             // Treat trunk as latest Varnish (8.x)
-            println!("cargo::rustc-cfg=varnishsys_80_io_vdp");
             let defines = vec!["VARNISH_RS_HTTP_CONN", "VARNISH_RS_ALLOC_VARIADIC"];
             return Self {
                 bindings,
@@ -31,9 +30,7 @@ impl VarnishInfo {
         let ver = semver::Version::parse(&version)
             .unwrap_or_else(|_| panic!("varnishapi invalid version: {version}"));
 
-        if ver >= semver::Version::new(8, 0, 0) {
-            println!("cargo::rustc-cfg=varnishsys_80_io_vdp");
-        } else {
+        if ver < semver::Version::new(8, 0, 0) {
             println!(
                 "cargo::warning=Varnish {version} is not supported and may not work with this crate"
             );
@@ -72,8 +69,6 @@ fn detect_varnish() -> Option<VarnishInfo> {
     // The crate must compile for the latest supported version with none of these flags enabled.
     // By convention, the version number is the last version where the feature was available.
 
-    // 8.0 adds a few fields to the vdp struct
-    println!("cargo::rustc-check-cfg=cfg(varnishsys_80_io_vdp)");
     // 9.0 adds ssl_flags to the backend SSL struct
     println!("cargo::rustc-check-cfg=cfg(varnishsys_90_sslflags)");
 
