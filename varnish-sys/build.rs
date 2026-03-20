@@ -6,53 +6,38 @@ use bindgen_helpers as bindgen;
 use bindgen_helpers::{rename_enum, Renamer};
 
 static BINDINGS_FILE: &str = "bindings.for-docs";
-static BINDINGS_FILE_VER: &str = "8.0.0";
+static BINDINGS_FILE_VER: &str = "7.7.1";
 
 struct VarnishInfo {
     bindings: PathBuf,
     varnish_paths: Vec<PathBuf>,
     version: String,
-    defines: Vec<&'static str>,
 }
 
 impl VarnishInfo {
     fn parse(bindings: PathBuf, varnish_paths: Vec<PathBuf>, version: String) -> Self {
         if version == "trunk" {
-            // Treat trunk as latest Varnish (8.1)
-            println!("cargo::rustc-cfg=varnishsys_81_sslflags");
-            println!("cargo::rustc-cfg=varnishsys_80_io_vdp");
-            let defines = vec!["VARNISH_RS_HTTP_CONN", "VARNISH_RS_ALLOC_VARIADIC"];
+            // Treat trunk at least as latest Varnish
+            println!("cargo::rustc-cfg=varnishsys_90_sslflags");
             return Self {
                 bindings,
                 varnish_paths,
                 version,
-                defines,
             };
         }
-        let (major, _minor) = parse_version(&version);
-
-        let mut defines = vec![];
-        if major >= 8 {
-            defines.push("VARNISH_RS_HTTP_CONN");
-            println!("cargo::rustc-cfg=varnishsys_80_io_vdp");
-        } else if major <= 6 {
-            defines.push("VARNISH_RS_6_0");
-            println!("cargo::rustc-cfg=varnishsys_6");
-        } else {
+        let ver = semver::Version::parse(&version)
+            .unwrap_or_else(|_| panic!("varnishapi invalid version: {version}"));
+        if ver >= semver::Version::new(9, 0, 0) {
+            println!("cargo::rustc-cfg=varnishsys_90_sslflags");
+        } else if ver < semver::Version::new(8, 0, 0) {
             println!(
                 "cargo::warning=Varnish {version} is not supported and may not work with this crate"
             );
         }
-
-        // TODO: This should become conditional once this PR merges, and we know its version
-        //     https://github.com/varnishcache/varnish-cache/pull/4303 merges
-        defines.push("VARNISH_RS_ALLOC_VARIADIC");
-
         Self {
             bindings,
             varnish_paths,
             version,
-            defines,
         }
     }
 }
@@ -66,7 +51,6 @@ impl Display for VarnishInfo {
 fn main() {
     if let Some(info) = &detect_varnish() {
         generate_bindings(info);
-        build_c_wrapper(info);
     }
 }
 
@@ -75,13 +59,8 @@ fn detect_varnish() -> Option<VarnishInfo> {
     // The crate must compile for the latest supported version with none of these flags enabled.
     // By convention, the version number is the last version where the feature was available.
 
-    // 8.1 adds .sslflags and .hosthdr to vrt_endpoint
-    println!("cargo::rustc-check-cfg=cfg(varnishsys_81_sslflags)");
-
-    // 8.0 adds a few fields to the vdp struct
-    println!("cargo::rustc-check-cfg=cfg(varnishsys_80_io_vdp)");
-    // 6.0 support
-    println!("cargo::rustc-check-cfg=cfg(varnishsys_6)");
+    // 9.0 adds ssl_flags to the backend SSL struct
+    println!("cargo::rustc-check-cfg=cfg(varnishsys_90_sslflags)");
 
     let bindings = PathBuf::from(env::var("OUT_DIR").unwrap()).join("bindings.rs");
 
@@ -111,7 +90,7 @@ fn generate_bindings(info: &VarnishInfo) {
 
     println!("cargo::rustc-link-lib=varnishapi");
     println!("cargo::rerun-if-changed=c_code/wrapper.h");
-    let mut bindings_builder = bindgen::Builder::default()
+    let bindings_builder = bindgen::Builder::default()
         .header("c_code/wrapper.h")
         .blocklist_item("FP_.*")
         .blocklist_item("FILE")
@@ -138,10 +117,6 @@ fn generate_bindings(info: &VarnishInfo) {
         .rustified_non_exhaustive_enum(ren.get_regex_str())
         .parse_callbacks(Box::new(ren));
 
-    for define in &info.defines {
-        bindings_builder = bindings_builder.clang_args(&["-D", define]);
-    }
-
     let bindings = bindings_builder
         .generate()
         .expect("Unable to generate bindings");
@@ -167,23 +142,12 @@ fn generate_bindings(info: &VarnishInfo) {
     }
 }
 
-fn build_c_wrapper(info: &VarnishInfo) {
-    let mut builder = cc::Build::new();
-    for define in &info.defines {
-        builder.define(define, None);
-    }
-    builder
-        .file("c_code/wrapper.c")
-        .includes(&info.varnish_paths)
-        .compile("varnish_wrapper");
-}
-
 fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
     if let Ok(s) = env::var("VARNISH_INCLUDE_PATHS") {
         // FIXME: If the user has set the VARNISH_INCLUDE_PATHS environment variable, use that.
         //    At the moment we have no way to detect which version it is.
         //    vmod_abi.h  seems to have this line, which can be used in the future.
-        //    #define VMOD_ABI_Version "Varnish 7.7.0 eef25264e5ca5f96a77129308edb83ccf84cb1b1"
+        //    #define VMOD_ABI_Version "Varnish 7.5.0 eef25264e5ca5f96a77129308edb83ccf84cb1b1"
         println!("cargo::warning=Using VARNISH_INCLUDE_PATHS='{s}' env var, and assume it is the latest supported version {BINDINGS_FILE_VER}");
         return Some((
             s.split(':').map(PathBuf::from).collect(),
@@ -200,7 +164,6 @@ fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
                 eprintln!("libvarnish not found, using saved bindings for the doc.rs: {e}");
                 fs::copy(BINDINGS_FILE, out_path).unwrap();
                 println!("cargo::metadata=version_number={BINDINGS_FILE_VER}");
-                println!("cargo::rustc-cfg=varnishsys_80_io_vdp");
                 None
             } else {
                 // FIXME: we should give a URL describing how to install varnishapi
@@ -209,21 +172,4 @@ fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
             }
         }
     }
-}
-
-fn parse_version(version: &str) -> (u32, u32) {
-    // version string usually looks like "7.7.0"
-    let mut parts = version.split('.');
-    (
-        parse_next_int(&mut parts, "major"),
-        parse_next_int(&mut parts, "minor"),
-    )
-}
-
-fn parse_next_int(parts: &mut std::str::Split<char>, name: &str) -> u32 {
-    let val = parts
-        .next()
-        .unwrap_or_else(|| panic!("varnishapi invalid version {name}"));
-    val.parse::<u32>()
-        .unwrap_or_else(|_| panic!("varnishapi invalid version - {name} value is '{val}'"))
 }

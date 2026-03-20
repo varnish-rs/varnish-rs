@@ -8,7 +8,7 @@ VMOD_JSON_SPEC
     "2.0",
     "vcl_returns",
     "Vmod_vmod_vcl_returns_Func",
-    "497ee393f05b7e8c4bc0c40f54c54a6a0dc57f82658aab2708f62af6ecb41d9d",
+    "544153103ad8859f23d54c3f506207cfb79f3944ae2ebe922c70c6d46a23613b",
     "Varnish (version) (hash)",
     "0",
     "0"
@@ -253,8 +253,8 @@ static struct Vmod_vmod_vcl_returns_Func Vmod_vmod_vcl_returns_Func;"
       "",
       [
         "BACKEND",
-        "backend",
-        "backend"
+        "_backend",
+        "_backend"
       ]
     ]
   ],

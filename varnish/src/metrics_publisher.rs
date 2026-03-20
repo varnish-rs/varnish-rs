@@ -3,7 +3,7 @@ use std::mem::size_of;
 use std::ops::{Deref, DerefMut};
 use std::ptr::null_mut;
 
-use varnish_sys::ffi::{vsc_seg, VRT_VSC_AllocVariadic, VRT_VSC_Destroy};
+use varnish_sys::ffi::{vsc_seg, VRT_VSC_Alloc, VRT_VSC_Destroy};
 
 pub unsafe trait VscMetric {
     fn get_metadata() -> &'static CStr;
@@ -25,7 +25,7 @@ impl<T: VscMetric> Vsc<T> {
         let metadata_json = T::get_metadata();
 
         let metric = unsafe {
-            VRT_VSC_AllocVariadic(
+            VRT_VSC_Alloc(
                 null_mut(),
                 &raw mut seg,
                 name.as_ptr(),

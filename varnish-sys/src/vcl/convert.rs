@@ -122,23 +122,12 @@ impl From<VCL_BLOB> for &[u8] {
             return &[];
         }
 
-        // after 6.0
-        #[cfg(not(varnishsys_6))]
         unsafe {
             let blob = &*value.0;
             if blob.blob.is_null() || blob.len == 0 {
                 &[]
             } else {
                 std::slice::from_raw_parts(blob.blob.cast::<u8>(), blob.len)
-            }
-        }
-        #[cfg(varnishsys_6)]
-        unsafe {
-            let blob = &*value.0;
-            if blob.priv_.is_null() || blob.len <= 0 {
-                &[]
-            } else {
-                std::slice::from_raw_parts(blob.priv_.cast::<u8>(), blob.len as usize)
             }
         }
     }
@@ -421,7 +410,6 @@ default_null_ptr!(mut VCL_VCL);
 // VCL_BACKEND
 default_null_ptr!(VCL_BACKEND);
 
-#[cfg(not(varnishsys_6))]
 mod version_after_v6 {
     use std::ffi::c_void;
     use std::net::SocketAddr;

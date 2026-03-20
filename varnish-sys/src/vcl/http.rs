@@ -197,12 +197,7 @@ impl HttpHeaders<'_> {
     /// Set the response status, it will also set the reason
     pub fn set_status(&mut self, status: u16) {
         unsafe {
-            ffi::http_SetStatus(
-                self.raw,
-                status,
-                #[cfg(not(varnishsys_6))]
-                std::ptr::null(),
-            );
+            ffi::http_SetStatus(self.raw, status, std::ptr::null());
         }
     }
 

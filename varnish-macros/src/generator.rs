@@ -34,7 +34,7 @@ pub struct Generator {
     pub objects: Vec<ObjProcessor>,
 }
 
-/// See also <https://varnish-cache.org/docs/7.7/reference/vmod.html>
+/// See also <https://varnish-cache.org/docs/7.6/reference/vmod.html>
 impl Generator {
     pub fn render(vmod: &VmodInfo) -> TokenStream {
         let mut obj = Self {
@@ -92,20 +92,14 @@ impl Generator {
             "on_fini".to_ident()
         };
         // Static methods to clean up the `vmod_priv` object's `T`
-        if cfg!(varnishsys_6_priv_free_f) {
-            tokens.push(quote! {
-                static #name: vmod_priv_free_f = Some(vmod_priv::#on_fini::<#ty_ident>);
-            });
-        } else {
-            let ty_name = type_name.force_cstr();
-            tokens.push(quote! {
-                static #name: vmod_priv_methods = vmod_priv_methods {
-                    magic: VMOD_PRIV_METHODS_MAGIC,
-                    type_: #ty_name.as_ptr(),
-                    fini: Some(vmod_priv::#on_fini::<#ty_ident>),
-                };
-            });
-        }
+        let ty_name = type_name.force_cstr();
+        tokens.push(quote! {
+            static #name: vmod_priv_methods = vmod_priv_methods {
+                magic: VMOD_PRIV_METHODS_MAGIC,
+                type_: #ty_name.as_ptr(),
+                fini: Some(vmod_priv::#on_fini::<#ty_ident>),
+            };
+        });
     }
 
     fn iter_all_funcs(&self) -> impl Iterator<Item = &FuncProcessor> {
@@ -115,37 +109,25 @@ impl Generator {
     }
 
     fn gen_json(&self) -> String {
-        let version = if cfg!(varnishsys_vmod_meta_1_0) {
-            "1.0"
-        } else {
-            "2.0"
-        };
-
-        let mut header: Vec<Value> = vec!["$VMOD".into(), version.into()];
-
-        if !cfg!(varnishsys_6) {
-            header.extend(vec![
-                self.names.mod_name().into(),
-                self.names.func_struct_name().into(),
-                self.file_id.to_str().unwrap().into(),
-                // Ohh the irony, this string from VMOD_ABI_Version is the reason
-                // why `varnish-sys` must exist. Without it, we could run bindgen
-                // from the `varnish` crate directly.  Ohh well.
-                //
-                // FIXME: figure out a way to assert that the version string used by varnish_macro is the same
-                //        as the value accessible by generated code from varnish::ffi::VMOD_ABI_Version.
-                //        Currently it seems not possible to do a constant assert at compile time on b-str/c-str equality.
-                varnish_sys::ffi::VMOD_ABI_Version.to_str().unwrap().into(),
-                "0".into(),
-                "0".into(),
-            ]);
-        }
+        let mut header: Vec<Value> = vec!["$VMOD".into(), "2.0".into()];
+        header.extend(vec![
+            self.names.mod_name().into(),
+            self.names.func_struct_name().into(),
+            self.file_id.to_str().unwrap().into(),
+            // Ohh the irony, this string from VMOD_ABI_Version is the reason
+            // why `varnish-sys` must exist. Without it, we could run bindgen
+            // from the `varnish` crate directly.  Ohh well.
+            //
+            // FIXME: figure out a way to assert that the version string used by varnish_macro is the same
+            //        as the value accessible by generated code from varnish::ffi::VMOD_ABI_Version.
+            //        Currently it seems not possible to do a constant assert at compile time on b-str/c-str equality.
+            varnish_sys::ffi::VMOD_ABI_Version.to_str().unwrap().into(),
+            "0".into(),
+            "0".into(),
+        ]);
 
         let mut json: Vec<Value> = vec![header.into()];
-
-        if !cfg!(varnishsys_6) {
-            json.push(json! {[ "$CPROTO", self.generate_proto() ]});
-        }
+        json.push(json! {[ "$CPROTO", self.generate_proto() ]});
 
         for func in &self.functions {
             json.push(func.json.clone());
@@ -156,11 +138,8 @@ impl Generator {
         }
 
         let mut json = serde_json::to_string_pretty(&json! {json}).unwrap();
-
-        if !cfg!(varnishsys_6) {
-            // 7.0+ wrap the JSON in a special format
-            json = format!("VMOD_JSON_SPEC\u{2}\n{json}\n\u{3}");
-        }
+        // Wrap the JSON in a special format
+        json = format!("VMOD_JSON_SPEC\u{2}\n{json}\n\u{3}");
 
         json
     }
@@ -185,9 +164,7 @@ impl Generator {
         cproto
     }
 
-    #[expect(clippy::too_many_lines)]
     fn render_generated_mod(&self, vmod: &VmodInfo) -> TokenStream {
-        let cproto = self.generate_proto().force_cstr();
         let vmod_name_data = self.names.data_struct_name().to_ident();
         let c_name = self.names.mod_name().force_cstr();
         let file_id = &self.file_id;
@@ -221,28 +198,13 @@ impl Generator {
             vmod_priv,
             vrt_ctx,
         ];
-        if cfg!(varnishsys_6_priv_free_f) {
-            use_ffi_items.append_all(quote![vmod_priv_free_f]);
-        } else {
-            use_ffi_items.append_all(quote![VMOD_PRIV_METHODS_MAGIC, vmod_priv_methods]);
-        }
+        use_ffi_items.append_all(quote![VMOD_PRIV_METHODS_MAGIC, vmod_priv_methods]);
         // WARNING: This list must match the list in varnish-macros/src/lib.rs
 
-        let func_name;
-        let cproto_ptr;
-        let cproto_def;
-        if cfg!(varnishsys_6) {
-            func_name = quote! {};
-            cproto_ptr = quote! { cproto.as_ptr() };
-            cproto_def = quote! { const cproto: &CStr = #cproto; };
-        } else {
-            let c_func_name = self.names.func_struct_name().force_cstr();
-            func_name = quote! { func_name: #c_func_name.as_ptr(), };
-            cproto_ptr = quote! { null() };
-            cproto_def = quote! {};
-        }
+        let c_func_name = self.names.func_struct_name().force_cstr();
+        let func_name = quote! { func_name: #c_func_name.as_ptr(), };
 
-        let mut vmod_data_extras = if cfg!(varnishsys_77_vmod_data) {
+        let vmod_data_extras = if cfg!(varnishsys_77_vmod_data) {
             quote! {
                 vcs: c"".as_ptr(),  // FIXME: value?
                 version: c"".as_ptr(),  // FIXME: value?
@@ -250,10 +212,6 @@ impl Generator {
         } else {
             quote! {}
         };
-
-        if cfg!(varnishsys_6plus_vmod_data_priv) {
-            vmod_data_extras.append_all(quote![ priv_: 0, ]);
-        }
 
         quote!(
             #[allow(
@@ -299,12 +257,11 @@ impl Generator {
                     func: &VMOD_EXPORTS as *const _ as *const c_void,
                     abi: VMOD_ABI_Version.as_ptr(),
                     json: JSON.as_ptr(),
-                    proto: #cproto_ptr,
+                    proto: null(),
                     #vmod_data_extras
                 };
 
                 const JSON: &CStr = #json;
-                #cproto_def
             }
         )
     }
