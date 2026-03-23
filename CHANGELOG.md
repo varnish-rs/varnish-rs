@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0](https://github.com/varnish-rs/varnish-rs/compare/varnish-sys-v0.5.5...varnish-sys-v0.6.0) - 2026-03-23
+
+### Other
+
+- Remove old version support and clean up ([#257](https://github.com/varnish-rs/varnish-rs/pull/257))
+- Drop 7.x versions ([#256](https://github.com/varnish-rs/varnish-rs/pull/256))
+- Introduce new Backend types ([#246](https://github.com/varnish-rs/varnish-rs/pull/246))
+- Support VCL_TIME as vmod arguments and returns ([#242](https://github.com/varnish-rs/varnish-rs/pull/242))
+- [clippy] reference as raw pointer ([#255](https://github.com/varnish-rs/varnish-rs/pull/255))
+- Update doc bindings ([#254](https://github.com/varnish-rs/varnish-rs/pull/254))
+- Trunk support ([#253](https://github.com/varnish-rs/varnish-rs/pull/253))
+- Add set_url() method to HttpHeaders ([#250](https://github.com/varnish-rs/varnish-rs/pull/250))
+- allow VCL_BLOB arguments as &[u8] ([#239](https://github.com/varnish-rs/varnish-rs/pull/239))
+
 ## [0.5.5](https://github.com/varnish-rs/varnish-rs/compare/varnish-sys-v0.5.4...varnish-sys-v0.5.5) - 2025-09-18
 
 ### Other
