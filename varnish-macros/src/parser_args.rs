@@ -322,16 +322,22 @@ impl ParamTy {
         if let Some(ident) = as_simple_ty(ty) {
             if ident == "bool" {
                 return Some(Self::Bool);
+            } else if ident == "BackendRef" {
+                return Some(Self::BackendRef);
             } else if ident == "Duration" {
                 return Some(Self::Duration);
             } else if ident == "f64" {
                 return Some(Self::F64);
             } else if ident == "i64" {
                 return Some(Self::I64);
+            } else if ident == "SystemTime" {
+                return Some(Self::SystemTime);
             } else if ident == "Probe" {
                 return Some(Self::Probe);
             } else if ident == "SocketAddr" {
                 return Some(Self::SocketAddr);
+            } else if ident == "VCL_BACKEND" {
+                return Some(Self::VclType("VCL_BACKEND"));
             }
         }
 
@@ -344,6 +350,12 @@ impl ParamTy {
                 return Some(Self::Str);
             } else if ident == "CStr" {
                 return Some(Self::CStr);
+            }
+        }
+        if let Some(ty) = as_ref_ty(ty).and_then(as_slice_ty).and_then(as_simple_ty) {
+            if ty == "u8" {
+                // `&[u8]`
+                return Some(Self::Blob);
             }
         }
 
@@ -373,6 +385,16 @@ impl OutputTy {
     }
 
     fn try_parse(ty: &Type) -> Option<Self> {
+        if let Some(ident) = as_simple_ty(ty) {
+            let ident = ident.to_string();
+            if ident.starts_with("VCL_")
+                && ident
+                    .chars()
+                    .all(|v| char::is_ascii_uppercase(&v) || v == '_')
+            {
+                return Some(Self::VclType(ident));
+            }
+        }
         if let Some(ty) = ParamTy::try_parse(ty) {
             return Some(Self::ParamType(ty));
         }
@@ -381,14 +403,6 @@ impl OutputTy {
                 return Some(Self::String);
             } else if ident == "Self" {
                 return Some(Self::SelfType);
-            }
-            let ident = ident.to_string();
-            if ident.starts_with("VCL_")
-                && ident
-                    .chars()
-                    .all(|v| char::is_ascii_uppercase(&v) || v == '_')
-            {
-                return Some(Self::VclType(ident));
             }
         }
         if let Some(ty) = as_option_type(ty) {
@@ -403,6 +417,10 @@ impl OutputTy {
                     // `&[u8]`
                     return Some(Self::Bytes);
                 }
+            }
+            // Try to parse as Option<ParamTy> (e.g., Option<BackendRef>)
+            if let Some(param_ty) = ParamTy::try_parse(ty) {
+                return Some(Self::ParamType(param_ty));
             }
         }
         if let Tuple(v) = ty {

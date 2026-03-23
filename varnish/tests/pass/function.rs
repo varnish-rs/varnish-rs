@@ -26,6 +26,10 @@ mod types {
         Ok(())
     }
 
+    // &[u8]
+    pub fn type_array_u8(_v: &[u8]) {}
+    pub fn opt_array_u8(_v: Option<&[u8]>) {}
+
     // bool
     pub fn type_bool(_v: bool) {}
     pub fn type_bool_dflt(#[default(true)] _v: bool) {}

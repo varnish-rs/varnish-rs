@@ -6,10 +6,10 @@ features := '--all-features'  # Enable all features
 targets := '--all-targets'  # For all targets (lib, bin, tests, examples, benches)
 
 # which version of Varnish to install by default. Update the `supported_varnish_vers` variable below.
-default_varnish_ver := '8.0'
+default_varnish_ver := '9.0'
 
-# Make sure to update CI with the changes.  The versions with 'r' suffix are Varnish Plus versions - must have all 4 numbers.
-supported_varnish_vers := '8.0  7.7  7.7.0  7.6  7.5  6.0  6.0.14r3'
+# Make sure to update CI with the changes.
+supported_varnish_vers := '8.0 9.0'
 
 # if running in CI, treat warnings as errors by setting RUSTFLAGS and RUSTDOCFLAGS to '-D warnings' unless they are already set
 # Use `CI=true just ci-test` to run the same tests as in GitHub CI.
@@ -61,6 +61,24 @@ ci-coverage: env-info && \
 
 # Run all tests as expected by CI
 ci-test: env-info test-fmt build clippy test && assert-git-is-clean
+
+ci-test-trunk install_dir:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    export "PKG_CONFIG_PATH={{install_dir}}/lib/pkgconfig/"
+    export LD_LIBRARY_PATH={{install_dir}}/lib/
+    export "PATH=$PATH:{{install_dir}}/bin/:{{install_dir}}/sbin/"
+    just build
+    just clippy
+    just test
+
+ci-bless-trunk install_dir:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    export "PKG_CONFIG_PATH={{install_dir}}/lib/pkgconfig/"
+    export LD_LIBRARY_PATH={{install_dir}}/lib/
+    export "PATH=$PATH:{{install_dir}}/bin/:{{install_dir}}/sbin/"
+    just bless
 
 # Run tests only relevant to the latest Varnish version
 ci-test-latest: ci-test test-doc
@@ -155,10 +173,6 @@ get-varnish-version $required_version='':
     #!/usr/bin/env bash
     set -euo pipefail
     VARNISH_VER=$(dpkg-query -W -f='${source:Upstream-Version}\n' varnish-dev || echo "unknown")
-    # try with varnish-plus-dev
-    if [ -z "$VARNISH_VER" ]; then
-        VARNISH_VER=$(dpkg-query -W -f='${source:Upstream-Version}\n' varnish-plus-dev || echo "unknown")
-    fi
     if [ "$VARNISH_VER" = "unknown" -o -z "$VARNISH_VER" ]; then
         echo "ERROR: varnish-dev package was not found"
         exit 1
@@ -273,63 +287,33 @@ docker-run-ver version *args:
 get-package-exclude-args:
     #!/usr/bin/env bash
     set -euo pipefail
-    if {{just_executable()}} get-varnish-version 7.0 > /dev/null 2> /dev/null ; then
+    if {{just_executable()}} get-varnish-version 8.0 > /dev/null 2> /dev/null ; then
         echo ""
     else
-        EXCLUDE="--exclude vmod_be --exclude vmod_vfp --exclude vmod_vdp --exclude vmod_test"
+        EXCLUDE="--exclude vmod_be --exclude vmod_vfp --exclude vmod_vdp --exclude vmod_test --exclude vmod_native_backend --exclude vmod_round_robin"
         >&2 echo "INFO: Due to older Varnish, running with: $EXCLUDE"
         echo "$EXCLUDE"
     fi
 
-# Install Varnish from packagecloud.io. This could be damaging to your system - use with caution. Pass non-empty `debug` argument to skip the installation.
+# Install Varnish from packages.varnish-software.com. This could be damaging to your system - use with caution. Pass non-empty `debug` argument to skip the installation.
 [private]
 install-varnish version=default_varnish_ver debug='':
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # Assumes major and minor are one digit each. Two digits without dots are treated as (major.minor).
-    #  60 or 6.0 -> varnishcache/varnish60lts
-    #        7.1 -> varnishcache/varnish71
-    #   6.0.14r3 -> varnishplus/60-enterprise
-
-    # Convert version to a tag name used as URL portion
-    URL_REPO='{{ if version =~ '^\d\.\d\.\d+r\d+$' { \
-        'varnishplus/' + replace_regex(version, '^(\d)\.(\d)\..*$', '$1$2') + '-enterprise' \
-    } else if version =~ '^(\d\d|\d(\.\d(\.\d+)?)?)$' { \
-        'varnishcache/varnish' + replace_regex(replace_regex(replace_regex(replace_regex(replace_regex(version, \
-        '^(\d)(\d)$', '$1.$2') \
-        , '^(\d\.\d)(\..*)$', '$1') \
-        , '^(\d)$', '$1.0') \
-        , '^(\d)\.(\d)$', '$1$2') \
-        , '^60$', '60lts') \
-    } else { \
-      error('Invalid version "' + version + '"') \
-    } }}'
-
-    # Policy name is either 'varnish' or 'varnish-plus'
-    POLICY='{{ if version =~ '^\d\.\d\.\d+r\d+$' { 'varnish-plus' } else { 'varnish' } }}'
-
-    # Ensure version is valid and convert it to an apt package search string. Assumes major and minor parts are one digit. Two digits are treated as (major.minor).
-    PATTERN='{{ if version =~ '^\d\.\d\.\d+r\d+$' { \
-        version + '*' \
-    } else { \
-        replace_regex(replace_regex(replace_regex(version, \
-              '^(\d)(\d)$', '$1.$2') \
-            , '^(\d\.\d\.\d)$', '$1-') \
-            , '^(\d(\.\d)*)$', '$1.') \
-        + '*' \
-    } }}'
-
-    echo "Installing Varnish '{{version}}' (url_repo='$URL_REPO', pattern='$PATTERN') from packagecloud.io"
+    echo "Installing Varnish '{{version}}' from packages.varnish-software.com"
     {{ if debug != '' {'exit 0'} else {''} }}
 
     set -x
-    curl -sSf "https://packagecloud.io/install/repositories/$URL_REPO/script.deb.sh" | sudo bash
+    curl -Ls https://packages.varnish-software.com/varnish/bootstrap-deb.sh | sudo sh
 
-    {{ if version =~ '^\d\.\d\.\d+r\d+$' {''} else { '''
-        echo -e 'Package: varnish varnish-dev\nPin: origin "packagecloud.io"\nPin-Priority: 1001' | sudo tee /etc/apt/preferences.d/varnish
-        cat /etc/apt/preferences.d/varnish
-    ''' } }}
+    cat << -EOF | sudo tee /etc/apt/preferences.d/varnish
+        Package: varnish varnish-dev
+        Pin: origin "packages.varnish-software.com"
+        Pin: version {{version}}
+        Pin-Priority: 1001
+    -EOF
+    cat /etc/apt/preferences.d/varnish
 
-    sudo apt-cache policy "${POLICY}"
-    sudo apt-get install -y "${POLICY}=$PATTERN" "${POLICY}-dev=$PATTERN"
+    sudo apt-cache policy "varnish"
+    sudo apt-get install -y "varnish={{version}}*" "varnish-dev={{version}}*"

@@ -163,26 +163,34 @@ pub struct ParamInfo {
 #[derive(Debug, Clone, Copy)]
 pub enum ParamTy {
     Bool,
+    BackendRef,
+    Blob,
     Duration,
     F64,
     I64,
+    SystemTime,
     Probe, // FIXME: can probes be returned?
     ProbeCow,
     SocketAddr,
     Str,
     CStr,
+    VclType(&'static str),
 }
 
 impl ParamTy {
     pub fn to_vcc_type(self) -> &'static str {
         match self {
             Self::Bool => "BOOL",
+            Self::BackendRef => "BACKEND",
+            Self::Blob => "BLOB",
             Self::Duration => "DURATION",
             Self::F64 => "REAL",
             Self::I64 => "INT",
+            Self::SystemTime => "TIME",
             Self::Probe | Self::ProbeCow => "PROBE",
             Self::SocketAddr => "IP",
             Self::Str | Self::CStr => "STRING",
+            Self::VclType(ty) => &ty[4..],
         }
     }
 
@@ -191,20 +199,32 @@ impl ParamTy {
         //            statement in the `varnish-macros/src/generator.rs` file.
         match self {
             Self::Bool => "VCL_BOOL",
+            Self::BackendRef => "VCL_BACKEND",
+            Self::Blob => "VCL_BLOB",
             Self::Duration => "VCL_DURATION",
             Self::F64 => "VCL_REAL",
             Self::I64 => "VCL_INT",
+            Self::SystemTime => "VCL_TIME",
             Self::Probe | Self::ProbeCow => "VCL_PROBE",
             Self::SocketAddr => "VCL_IP",
             Self::Str | Self::CStr => "VCL_STRING",
+            Self::VclType(ty) => ty,
         }
     }
 
     /// User MUST use some types with `Option`
     pub fn must_be_optional(self) -> bool {
         match self {
-            Self::Bool | Self::Duration | Self::F64 | Self::I64 | Self::Str | Self::CStr => false,
-            Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
+            Self::Bool
+            | Self::Blob
+            | Self::Duration
+            | Self::F64
+            | Self::I64
+            | Self::SystemTime
+            | Self::Str
+            | Self::CStr => false,
+            Self::BackendRef | Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
+            Self::VclType(_ty) => false,
         }
     }
 
@@ -212,14 +232,18 @@ impl ParamTy {
     /// e.g. if `&CStr` contains invalid UTF-8 characters and cannot be converted to `&str`.
     pub fn use_try_from(self) -> bool {
         match self {
-            Self::Probe
-            | Self::ProbeCow
-            | Self::SocketAddr
-            | Self::Bool
+            Self::Bool
+            | Self::BackendRef
+            | Self::Blob
+            | Self::CStr
             | Self::Duration
             | Self::F64
             | Self::I64
-            | Self::CStr => false,
+            | Self::Probe
+            | Self::ProbeCow
+            | Self::SystemTime
+            | Self::SocketAddr
+            | Self::VclType(_) => false,
             Self::Str => true,
         }
     }
@@ -255,6 +279,14 @@ impl OutputTy {
             Self::Bytes | Self::String => "VCL_STRING".into(),
             Self::SelfType | Self::Default => "VCL_VOID".into(),
             Self::VclType(ty) => ty.into(),
+        }
+    }
+
+    pub fn requires_unsafe(&self) -> bool {
+        match self {
+            Self::VclType(_ty) => true,
+            Self::ParamType(ty) => matches!(ty, ParamTy::VclType(_)),
+            _ => false,
         }
     }
 }

@@ -37,10 +37,8 @@ impl req {
     }
 }
 
-#[cfg(not(varnishsys_6))]
 pub use version_after_v6::*;
 
-#[cfg(not(varnishsys_6))]
 mod version_after_v6 {
     use crate::ffi::{
         self, director, vcldir, vfp_ctx, vfp_entry, vrt_ctx, VCLDIR_MAGIC, VFP_CTX_MAGIC,

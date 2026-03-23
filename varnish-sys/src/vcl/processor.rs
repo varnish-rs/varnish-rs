@@ -59,7 +59,6 @@ pub unsafe extern "C" fn gen_vdp_init<T: DeliveryProcessor>(
     vrt_ctx: *const vrt_ctx,
     ctx_raw: *mut vdp_ctx,
     priv_: *mut *mut c_void,
-    #[cfg(varnishsys_7_5_objcore_init)] _oc: *mut ffi::objcore,
 ) -> c_int {
     assert_ne!(priv_, ptr::null_mut());
     assert_eq!(*priv_, ptr::null_mut());
@@ -123,13 +122,9 @@ pub fn new_vdp<T: DeliveryProcessor>() -> ffi::vdp {
         bytes: Some(gen_vdp_push::<T>),
         fini: Some(gen_vdp_fini::<T>),
         priv1: ptr::null(),
-        #[cfg(varnishsys_80_io_vdp)]
         io_init: None,
-        #[cfg(varnishsys_80_io_vdp)]
         io_upgrade: None,
-        #[cfg(varnishsys_80_io_vdp)]
         io_lease: None,
-        #[cfg(varnishsys_80_io_vdp)]
         io_fini: None,
     }
 }

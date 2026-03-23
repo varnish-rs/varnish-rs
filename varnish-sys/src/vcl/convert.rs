@@ -23,11 +23,13 @@
 //! | `i64`  | <-> | `VCL_INT` |
 //! | `bool` | <-> | `VCL_BOOL` |
 //! | `std::time::Duration` | <-> | `VCL_DURATION` |
+//! | `std::time::SystemTime` | <-> | `VCL_TIME` |
 //! | `&str` | <-> | `VCL_STRING` |
 //! | `String` | -> | `VCL_STRING` |
+//! | `&[u8]` | <- | `VCL_BLOB` |
 //! | `Option<CowProbe>` | <-> | `VCL_PROBE` |
 //! | `Option<Probe>` | <-> | `VCL_PROBE` |
-//! | `Option<std::net::SockAdd>` | -> | `VCL_IP` |
+//! | `Option<std::net::SocketAddr>` | -> | `VCL_IP` |
 //!
 //! For all the other types, which are pointers, you will need to use the native types.
 //!
@@ -47,7 +49,7 @@ use std::borrow::Cow;
 use std::ffi::{c_char, CStr};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::ptr::{null, null_mut};
-use std::time::{Duration, SystemTime};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use crate::ffi::{
     http, vtim_dur, vtim_real, VSA_GetPtr, VSA_Port, PF_INET, PF_INET6, VCL_ACL, VCL_BACKEND,
@@ -112,11 +114,25 @@ macro_rules! from_vcl_to_opt_rust {
 // VCL_ACL
 default_null_ptr!(VCL_ACL);
 
-// VCL_BACKEND
-default_null_ptr!(VCL_BACKEND);
-
 // VCL_BLOB
 default_null_ptr!(VCL_BLOB);
+impl From<VCL_BLOB> for &[u8] {
+    fn from(value: VCL_BLOB) -> Self {
+        if value.0.is_null() {
+            return &[];
+        }
+
+        unsafe {
+            let blob = &*value.0;
+            if blob.blob.is_null() || blob.len == 0 {
+                &[]
+            } else {
+                std::slice::from_raw_parts(blob.blob.cast::<u8>(), blob.len)
+            }
+        }
+    }
+}
+from_vcl_to_opt_rust!(VCL_BLOB, &[u8]);
 
 // VCL_BODY
 default_null_ptr!(VCL_BODY);
@@ -344,11 +360,37 @@ default_null_ptr!(VCL_STRANDS);
 //
 // VCL_TIME
 //
+impl From<VCL_TIME> for SystemTime {
+    fn from(value: VCL_TIME) -> Self {
+        // seconds are stored in `VCL_TIME(vtim_real(f64))`
+        let secs = value.0 .0;
+
+        // Reject NaN/Inf and out-of-range values by falling back to UNIX_EPOCH.
+        if !secs.is_finite() {
+            return UNIX_EPOCH;
+        }
+
+        if secs >= 0.0 {
+            Duration::try_from_secs_f64(secs)
+                .ok()
+                .and_then(|dur| UNIX_EPOCH.checked_add(dur))
+                .unwrap_or(UNIX_EPOCH)
+        } else {
+            // Allow times before UNIX_EPOCH by subtracting the positive duration.
+            Duration::try_from_secs_f64(-secs)
+                .ok()
+                .and_then(|dur| UNIX_EPOCH.checked_sub(dur))
+                .unwrap_or(UNIX_EPOCH)
+        }
+    }
+}
+
 impl IntoVCL<VCL_TIME> for SystemTime {
     fn into_vcl(self, _: &mut Workspace) -> Result<VCL_TIME, VclError> {
         self.try_into()
     }
 }
+
 impl TryFrom<SystemTime> for VCL_TIME {
     type Error = VclError;
 
@@ -365,7 +407,9 @@ impl TryFrom<SystemTime> for VCL_TIME {
 // VCL_VCL
 default_null_ptr!(mut VCL_VCL);
 
-#[cfg(not(varnishsys_6))]
+// VCL_BACKEND
+default_null_ptr!(VCL_BACKEND);
+
 mod version_after_v6 {
     use std::ffi::c_void;
     use std::net::SocketAddr;
@@ -375,9 +419,29 @@ mod version_after_v6 {
 
     use super::IntoVCL;
     use crate::ffi::{
-        sa_family_t, vsa_suckaddr_len, VSA_BuildFAP, PF_INET, PF_INET6, VCL_IP, VCL_REGEX, VCL_SUB,
+        sa_family_t, vsa_suckaddr_len, VSA_BuildFAP, PF_INET, PF_INET6, VCL_BACKEND, VCL_IP,
+        VCL_REGEX, VCL_SUB,
     };
-    use crate::vcl::{VclError, Workspace};
+    use crate::vcl::{BackendRef, VclError, Workspace};
+
+    impl IntoVCL<VCL_BACKEND> for BackendRef {
+        fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
+            unsafe { Ok(self.vcl_ptr()) }
+        }
+    }
+
+    impl IntoVCL<VCL_BACKEND> for Option<BackendRef> {
+        fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
+            unsafe { Ok(self.map_or(VCL_BACKEND(null()), |b: BackendRef| b.vcl_ptr())) }
+        }
+    }
+
+    impl From<VCL_BACKEND> for Option<BackendRef> {
+        fn from(value: VCL_BACKEND) -> Self {
+            unsafe { BackendRef::new(value) }
+        }
+    }
+
     default_null_ptr!(VCL_SUB);
 
     default_null_ptr!(VCL_REGEX);

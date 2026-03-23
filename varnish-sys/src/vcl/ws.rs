@@ -22,12 +22,7 @@ use std::slice::from_raw_parts_mut;
 
 use memchr::memchr;
 
-#[cfg(varnishsys_6)]
-use crate::ffi::WS_Inside;
-use crate::ffi::{txt, VCL_STRING};
-#[cfg(not(varnishsys_6))]
-use crate::ffi::{vrt_blob, WS_Allocated, VCL_BLOB};
-#[cfg(not(varnishsys_6))]
+use crate::ffi::{txt, vrt_blob, WS_Allocated, VCL_BLOB, VCL_STRING};
 pub use crate::vcl::ws_str_buffer::WsBlobBuffer;
 pub use crate::vcl::ws_str_buffer::{WsBuffer, WsStrBuffer, WsTempBuffer};
 use crate::vcl::{VclError, VclResult};
@@ -123,18 +118,7 @@ impl<'ctx> Workspace<'ctx> {
 
     /// Check if a pointer is part of the current workspace
     pub fn contains(&self, data: &[u8]) -> bool {
-        #[cfg(varnishsys_6)]
-        {
-            let last = match data.last() {
-                None => data.as_ptr(),
-                Some(p) => p as *const _,
-            };
-            unsafe { WS_Inside(self.raw, data.as_ptr().cast(), last.cast()) == 1 }
-        }
-        #[cfg(not(varnishsys_6))]
-        {
-            unsafe { WS_Allocated(self.raw, data.as_ptr().cast(), data.len() as isize) == 1 }
-        }
+        unsafe { WS_Allocated(self.raw, data.as_ptr().cast(), data.len() as isize) == 1 }
     }
 
     /// Allocate `[u8; size]` array on Workspace.
@@ -187,7 +171,6 @@ impl<'ctx> Workspace<'ctx> {
     }
 
     /// Copy any `AsRef<[u8]>` into a new [`VCL_BLOB`] stored in the workspace
-    #[cfg(not(varnishsys_6))]
     pub fn copy_blob(&mut self, value: impl AsRef<[u8]>) -> Result<VCL_BLOB, VclError> {
         let buf = self.copy_bytes(value)?;
         let blob = self.copy_value(vrt_blob {
@@ -243,7 +226,6 @@ impl<'ctx> Workspace<'ctx> {
 
     /// Allocate workspace free memory as a byte buffer until [`WsBlobBuffer::finish()`]
     /// is called, resulting in an unsafe [`VCL_BLOB`] that can be returned to Varnish.
-    #[cfg(not(varnishsys_6))]
     pub fn vcl_blob_builder(&mut self) -> VclResult<WsBlobBuffer<'ctx>> {
         unsafe { WsBlobBuffer::new(validate_ws(self.raw)) }
     }
@@ -272,8 +254,7 @@ fn maybe_uninit(value: &[u8]) -> &[MaybeUninit<u8>] {
 unsafe fn slice_assume_init_mut(value: &mut [MaybeUninit<u8>]) -> &mut [u8] {
     // SAFETY: Valid elements have just been copied into `this` so it is initialized
     // This was copied from MaybeUninit::slice_assume_init_mut, ignoring clippy lints
-    #[expect(clippy::ref_as_ptr)]
-    &mut *(value as *mut [MaybeUninit<u8>] as *mut [u8])
+    &mut *(ptr::from_mut::<[MaybeUninit<u8>]>(value) as *mut [u8])
 }
 
 /// Helper to convert a byte slice with a null terminator to a `txt` struct.

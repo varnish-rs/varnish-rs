@@ -1,0 +1,40 @@
+varnishtest "Test round-robin director detailed plain text list output"
+
+server s1 -start
+server s2 -start
+server s3 -start
+
+varnish v1 -vcl+backend {
+    import round_robin from "${vmod}";
+
+    sub vcl_init {
+        new rr = round_robin.rr();
+        rr.add_backend(s1);
+        rr.add_backend(s2);
+        rr.add_backend(s3);
+    }
+
+    sub vcl_recv {
+        set req.backend_hint = rr.backend();
+        return(pass);
+    }
+} -start
+
+# Test detailed plain text output with all backends healthy
+shell -match {Backend                       Health
+s1                            healthy
+s2                            healthy
+s3                            healthy} {
+    varnishadm -n ${v1_name} backend.list -p vcl1.rr
+}
+
+# Mark one backend as sick
+varnish v1 -cliok "backend.set_health vcl1.s2 sick"
+
+# Test detailed plain text output with one backend unhealthy
+shell -match {Backend                       Health
+s1                            healthy
+s2                            sick
+s3                            healthy} {
+    varnishadm -n ${v1_name} backend.list -p vcl1.rr
+}
