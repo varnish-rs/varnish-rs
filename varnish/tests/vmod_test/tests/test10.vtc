@@ -11,8 +11,10 @@ varnish v1 -arg "-a foo=${tmpdir}/foo.sock -a bar=${tmpdir}/bar.sock" \
 	import std;
 
 	sub vcl_init {
-		std.log("----->" + rustest.local_socket());
+		std.log("this is empty:" + rustest.local_socket());
+		std.log("this too:" + rustest.local_endpoint());
 	}
+	
 	sub vcl_backend_response {
 		set beresp.http.besocket = rustest.local_socket();
 		set beresp.http.beendpoint = rustest.local_endpoint();
@@ -30,8 +32,8 @@ client c1 -connect "${tmpdir}/foo.sock" {
 	expect resp.status == 200
 	expect resp.http.socket == "foo"
 	expect resp.http.endpoint == "${tmpdir}/foo.sock"
-	expect resp.http.besocket == ""
-	expect resp.http.beendpoint == ""
+	expect resp.http.besocket == "foo"
+	expect resp.http.beendpoint == "${tmpdir}/foo.sock"
 } -run
 
 client c1 -connect "${tmpdir}/bar.sock" {
