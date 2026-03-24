@@ -133,8 +133,9 @@ impl<'a> Ctx<'a> {
     }
 }
 
-/// rust` proxy for the `C` req` struct. Its methods provides getters/setters to various variables
-/// dictating how the client request is processed by Varnish.
+/// Rust proxy for the C `req` struct.
+/// Its methods provide getters and setters for various fields that control how the client request
+/// is processed by Varnish.
 #[derive(Debug)]
 pub struct Req<'a> {
     raw: &'a mut ffi::req,
