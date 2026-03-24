@@ -95,7 +95,11 @@ impl<'a> Ctx<'a> {
         let raw = unsafe { ffi::VRT_r_local_socket(self.raw) };
         let cstr = <Option<&CStr>>::from(raw)?;
         let s = cstr.to_str().ok()?;
-        if s.is_empty() { None } else { Some(s) }
+        if s.is_empty() {
+            None
+        } else {
+            Some(s)
+        }
     }
 
     pub fn cached_req_body(&mut self) -> Result<Vec<&'a [u8]>, VclError> {
