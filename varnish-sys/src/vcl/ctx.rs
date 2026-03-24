@@ -1,6 +1,6 @@
 //! Expose the Varnish context [`vrt_ctx`] as a Rust object
 //!
-use std::ffi::{c_int, c_uint, c_void};
+use std::ffi::{c_int, c_uint, c_void, CStr};
 
 use crate::ffi;
 use crate::ffi::{vrt_ctx, VRT_fail, VRT_CTX_MAGIC};
@@ -86,6 +86,18 @@ impl<'a> Ctx<'a> {
             }
         }
     }
+    /// Return the name of the listener socket that received the current request.
+    ///
+    /// This corresponds to the VCL variable `local.socket` and returns the `-a` socket
+    /// name (e.g., `"a0"`, `"http-80"`). Returns `None` in backend context where the
+    /// session isn't available, or if the name is empty.
+    pub fn local_socket(&self) -> Option<&'a str> {
+        let raw = unsafe { ffi::VRT_r_local_socket(self.raw) };
+        let cstr = <Option<&CStr>>::from(raw)?;
+        let s = cstr.to_str().ok()?;
+        if s.is_empty() { None } else { Some(s) }
+    }
+
     pub fn cached_req_body(&mut self) -> Result<Vec<&'a [u8]>, VclError> {
         unsafe extern "C" fn chunk_collector(
             priv_: *mut c_void,
