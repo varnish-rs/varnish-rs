@@ -86,20 +86,36 @@ impl<'a> Ctx<'a> {
             }
         }
     }
+
     /// Return the name of the listener socket that received the current request.
     ///
     /// This corresponds to the VCL variable `local.socket` and returns the `-a` socket
     /// name (e.g., `"a0"`, `"http-80"`). Returns `None` in backend context where the
-    /// session isn't available, or if the name is empty.
-    pub fn local_socket(&self) -> Option<&'a str> {
-        let raw = unsafe { ffi::VRT_r_local_socket(self.raw) };
-        let cstr = <Option<&CStr>>::from(raw)?;
-        let s = cstr.to_str().ok()?;
-        if s.is_empty() {
-            None
-        } else {
-            Some(s)
+    /// session isn't available, or if the name is empty or non-UTF-8.
+    pub fn local_socket(&self) -> Result<&'a str, VclError> {
+        // we're breaking abstraction here, but the other ways are to just reimplement the
+        //whole logic in rust (which is admitedly short), or to let the user crash)
+        if self.raw.req.is_null() && self.raw.bo.is_null() {
+            return Err("local.socket isn't available in this contnext context".into());
         }
+        let raw = unsafe { ffi::VRT_r_local_socket(self.raw) };
+        let cstr = <&CStr>::from(raw);
+        Ok(cstr.to_str()?)
+    }
+
+    /// Return the address of the local endpoint that received the current request.
+    ///
+    /// This corresponds to the VCL variable `local.endpoint` and returns the address
+    /// string (e.g., `"127.0.0.1:8080"`, `"/var/run/varnish.sock"`). Returns `None` in
+    /// backend context where the session isn't available, or if the value is empty or non-UTF-8.
+    // same notes as for local_socket
+    pub fn local_endpoint(&self) -> Result<&'a str, VclError> {
+        if self.raw.req.is_null() && self.raw.bo.is_null() {
+            return Err("local.endpoint isn't available in this context".into());
+        }
+        let raw = unsafe { ffi::VRT_r_local_endpoint(self.raw) };
+        let cstr = <&CStr>::from(raw);
+        Ok(cstr.to_str()?)
     }
 
     pub fn cached_req_body(&mut self) -> Result<Vec<&'a [u8]>, VclError> {
