@@ -14,3 +14,6 @@
 
 
 struct vfp_entry *VFP_Push(struct vfp_ctx *, const struct vfp *);
+
+/* From vrt_obj.h - VCL variable accessors for session/connection info */
+VCL_STRING VRT_r_local_socket(VRT_CTX);
