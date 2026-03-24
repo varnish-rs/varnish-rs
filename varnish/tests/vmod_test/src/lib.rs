@@ -162,6 +162,14 @@ mod rustest {
         s
     }
 
+    pub fn local_socket(ctx: &Ctx) -> Option<String> {
+        ctx.local_socket().ok().map(str::to_owned)
+    }
+
+    pub fn local_endpoint(ctx: &Ctx) -> Option<String> {
+        ctx.local_endpoint().ok().map(str::to_owned)
+    }
+
     pub fn ws_tests(ctx: &mut Ctx) {
         //external buffer, 0-length -> new ptr
         let buf = b"";
