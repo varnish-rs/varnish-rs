@@ -38,6 +38,8 @@ pub struct Ctx<'a> {
     pub http_bereq: Option<HttpHeaders<'a>>,
     pub http_beresp: Option<HttpHeaders<'a>>,
     pub ws: Workspace<'a>,
+
+    req: Option<Req<'a>>,
 }
 
 impl<'a> Ctx<'a> {
@@ -58,6 +60,7 @@ impl<'a> Ctx<'a> {
             http_bereq: HttpHeaders::from_ptr(raw.http_bereq),
             http_beresp: HttpHeaders::from_ptr(raw.http_beresp),
             ws: Workspace::from_ptr(raw.ws),
+            req: Req::from_ptr(raw.req),
             raw,
         }
     }
@@ -119,6 +122,54 @@ impl<'a> Ctx<'a> {
             0 => Ok(*v),
             _ => Err("req.body iteration failed".into()),
         }
+    }
+
+    pub fn req(&self) -> Option<&Req<'_>> {
+        self.req.as_ref()
+    }
+
+    pub fn req_mut(&mut self) -> Option<&mut Req<'a>> {
+        self.req.as_mut()
+    }
+}
+
+/// rust` proxy for the `C` req` struct. Its methods provides getters/setters to various variables
+/// dictating how the client request is processed by Varnish.
+#[derive(Debug)]
+pub struct Req<'a> {
+    raw: &'a mut ffi::req,
+}
+
+impl Req<'_> {
+    /// Wrap a raw pointer into an object we can use.
+    pub(crate) fn from_ptr(p: *mut ffi::req) -> Option<Self> {
+        Some(Req {
+            raw: unsafe { p.as_mut()? },
+        })
+    }
+
+    pub fn hash_always_miss(&self) -> bool {
+        self.raw.hash_always_miss() == 1
+    }
+
+    pub fn set_hash_always_miss(&mut self, val: bool) {
+        self.raw.set_hash_always_miss(val.into());
+    }
+
+    pub fn hash_ignore_busy(&self) -> bool {
+        self.raw.hash_ignore_busy() == 1
+    }
+
+    pub fn set_hash_ignore_busy(&mut self, val: bool) {
+        self.raw.set_hash_ignore_busy(val.into());
+    }
+
+    pub fn hash_ignore_vary(&self) -> bool {
+        self.raw.hash_ignore_vary() == 1
+    }
+
+    pub fn set_hash_ignore_vary(&mut self, val: bool) {
+        self.raw.set_hash_ignore_vary(val.into());
     }
 }
 
