@@ -440,6 +440,39 @@ default_null_ptr!(VCL_SUB);
 
 default_null_ptr!(VCL_REGEX);
 
+unsafe fn write_ip_to_ptr(ip: SocketAddr, p: *mut c_void) {
+    match ip {
+        SocketAddr::V4(sa) => {
+            assert!(!VSA_BuildFAP(
+                p,
+                PF_INET as sa_family_t,
+                sa.ip().octets().as_slice().as_ptr().cast::<c_void>(),
+                4,
+                ptr::from_ref::<u16>(&sa.port().to_be()).cast::<c_void>(),
+                2
+            )
+            .is_null());
+        }
+        SocketAddr::V6(sa) => {
+            assert!(!VSA_BuildFAP(
+                p,
+                PF_INET6 as sa_family_t,
+                sa.ip().octets().as_slice().as_ptr().cast::<c_void>(),
+                16,
+                ptr::from_ref::<u16>(&sa.port().to_be()).cast::<c_void>(),
+                2
+            )
+            .is_null());
+        }
+    }
+}
+
+pub(crate) unsafe fn write_ip_to_buf(ip: SocketAddr, buf: &mut [c_void]) {
+    unsafe {
+        assert_eq!(buf.len(), vsa_suckaddr_len);
+        write_ip_to_ptr(ip, buf.as_mut_ptr());
+    }
+}
 impl IntoVCL<VCL_IP> for SocketAddr {
     fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_IP, VclError> {
         unsafe {
@@ -450,30 +483,10 @@ impl IntoVCL<VCL_IP> for SocketAddr {
             if p.is_null() {
                 Err(VclError::WsOutOfMemory(size))?;
             }
-            match self {
-                SocketAddr::V4(sa) => {
-                    assert!(!VSA_BuildFAP(
-                        p,
-                        PF_INET as sa_family_t,
-                        sa.ip().octets().as_slice().as_ptr().cast::<c_void>(),
-                        4,
-                        ptr::from_ref::<u16>(&sa.port().to_be()).cast::<c_void>(),
-                        2
-                    )
-                    .is_null());
-                }
-                SocketAddr::V6(sa) => {
-                    assert!(!VSA_BuildFAP(
-                        p,
-                        PF_INET6 as sa_family_t,
-                        sa.ip().octets().as_slice().as_ptr().cast::<c_void>(),
-                        16,
-                        ptr::from_ref::<u16>(&sa.port().to_be()).cast::<c_void>(),
-                        2
-                    )
-                    .is_null());
-                }
-            }
+
+            let buf = std::slice::from_raw_parts_mut(p, vsa_suckaddr_len);
+            write_ip_to_buf(self, buf);
+
             Ok(VCL_IP(p.cast()))
         }
     }
