@@ -7,7 +7,9 @@ use std::ptr;
 use std::ptr::{null, null_mut};
 use std::time::SystemTime;
 
-use crate::ffi::{VclEvent, VfpStatus, VCL_BACKEND, VCL_BOOL, VCL_IP, VCL_TIME};
+use crate::ffi::{
+    vrt_ctx, VclEvent, VfpStatus, VCL_BACKEND, VCL_BOOL, VCL_IP, VCL_TIME, VCL_VCL, VRT_CTX_MAGIC,
+};
 #[cfg(varnishsys_90_sslflags)]
 use crate::ffi::{BSSL_F_ENABLE, BSSL_F_NOVERIFY, BSSL_F_VERIFY_HOST};
 use crate::utils::get_backend;
@@ -506,6 +508,29 @@ impl<'a> NativeBackendBuilder<'a> {
         self
     }
 
+    /// Build the native backend with a VCL. This can be use in cases where there's no [Ctx], linke
+    /// in a background thread.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that vcl is valid during the whole execution of the function.
+    /// Internally the function creates a dummy [Ctx] with `vcl` as this is the only value that
+    /// matters to [`VRT_new_backend`] used underneath.
+    ///
+    /// We use [`ffi::vcl`] here are `VCL_VCL` isn't [Send], and the function is unsafe anyway.
+    pub unsafe fn build_with_vcl(
+        self,
+        vcl: *mut ffi::vcl,
+    ) -> VclResult<Backend<NativeVclBackendShim, NativeVclResponseShim>> {
+        let raw_ctx = vrt_ctx {
+            magic: VRT_CTX_MAGIC,
+            vcl: VCL_VCL(vcl),
+            ..Default::default()
+        };
+        let mut ctx = Ctx::from_ptr(&raw const raw_ctx);
+        self.build(&mut ctx)
+    }
+
     /// Build the native backend
     pub fn build(
         self,
@@ -533,15 +558,19 @@ impl<'a> NativeBackendBuilder<'a> {
         });
 
         // Set endpoint based on type
+        // in case of an IP, we need a buffer that'll live until we've pass endpoint to VRT_new_backend
+        let mut sa_buf: [c_void; std::mem::size_of::<ffi::suckaddr>()] = [];
         match endpoint_type {
             BackendEndpoint::Uds(path) => {
                 endpoint.uds_path = path.as_ptr();
             }
             BackendEndpoint::Ip(addr) => {
-                let sa = addr.into_vcl(&mut ctx.ws)?;
+                unsafe {
+                    crate::vcl::convert::write_ip_to_buf(addr, &mut sa_buf);
+                }
                 match addr {
-                    SocketAddr::V4(_) => endpoint.ipv4 = sa,
-                    SocketAddr::V6(_) => endpoint.ipv6 = sa,
+                    SocketAddr::V4(_) => endpoint.ipv4 = VCL_IP(sa_buf.as_ptr().cast()),
+                    SocketAddr::V6(_) => endpoint.ipv6 = VCL_IP(sa_buf.as_ptr().cast()),
                 }
             }
         }
@@ -653,7 +682,7 @@ unsafe extern "C" fn wrap_event<S: VclBackend<T>, T: VclResponse>(be: VCL_BACKEN
 }
 
 unsafe extern "C" fn wrap_list<S: VclBackend<T>, T: VclResponse>(
-    ctxp: *const ffi::vrt_ctx,
+    ctxp: *const vrt_ctx,
     be: VCL_BACKEND,
     vsbp: *mut ffi::vsb,
     detailed: i32,
@@ -680,7 +709,7 @@ unsafe extern "C" fn wrap_panic<S: VclBackend<T>, T: VclResponse>(
 }
 
 unsafe extern "C" fn wrap_pipe<S: VclBackend<T>, T: VclResponse>(
-    ctxp: *const ffi::vrt_ctx,
+    ctxp: *const vrt_ctx,
     be: VCL_BACKEND,
 ) -> ffi::stream_close_t {
     let mut ctx = Ctx::from_ptr(ctxp);
@@ -718,7 +747,7 @@ impl VCL_BACKEND {
 
 #[allow(clippy::too_many_lines)] // fixme
 unsafe extern "C" fn wrap_gethdrs<S: VclBackend<T>, T: VclResponse>(
-    ctxp: *const ffi::vrt_ctx,
+    ctxp: *const vrt_ctx,
     bep: VCL_BACKEND,
 ) -> c_int {
     let mut ctx = Ctx::from_ptr(ctxp);
@@ -823,7 +852,7 @@ unsafe extern "C" fn wrap_gethdrs<S: VclBackend<T>, T: VclResponse>(
 }
 
 unsafe extern "C" fn wrap_healthy<S: VclBackend<T>, T: VclResponse>(
-    ctxp: *const ffi::vrt_ctx,
+    ctxp: *const vrt_ctx,
     be: VCL_BACKEND,
     changed: *mut VCL_TIME,
 ) -> VCL_BOOL {
@@ -841,10 +870,7 @@ unsafe extern "C" fn wrap_healthy<S: VclBackend<T>, T: VclResponse>(
     healthy.into()
 }
 
-unsafe extern "C" fn wrap_getip<T: VclResponse>(
-    ctxp: *const ffi::vrt_ctx,
-    _be: VCL_BACKEND,
-) -> VCL_IP {
+unsafe extern "C" fn wrap_getip<T: VclResponse>(ctxp: *const vrt_ctx, _be: VCL_BACKEND) -> VCL_IP {
     let ctxp = validate_vrt_ctx(ctxp);
     let bo = ctxp
         .bo
@@ -878,7 +904,7 @@ unsafe extern "C" fn wrap_getip<T: VclResponse>(
 }
 
 unsafe extern "C" fn wrap_finish<S: VclBackend<T>, T: VclResponse>(
-    ctxp: *const ffi::vrt_ctx,
+    ctxp: *const vrt_ctx,
     be: VCL_BACKEND,
 ) {
     let prev_backend: &S = get_backend(validate_director(be));
