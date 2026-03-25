@@ -5,6 +5,7 @@
 #include "cache/cache_varnishd.h"
 #include "cache/cache_backend.h"
 #include "cache/cache_director.h"
+#include "vrt_obj.h"
 #include "cache/cache_filter.h"
 #include "vmod_abi.h"
 #include "vsb.h"
@@ -14,6 +15,3 @@
 
 
 struct vfp_entry *VFP_Push(struct vfp_ctx *, const struct vfp *);
-
-/* From vrt_obj.h - VCL variable accessors for session/connection info */
-VCL_STRING VRT_r_local_socket(VRT_CTX);
