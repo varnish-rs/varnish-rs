@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1](https://github.com/varnish-rs/varnish-rs/compare/varnish-sys-v0.6.0...varnish-sys-v0.6.1) - 2026-03-25
+
+### Other
+
+- [internal] cleanup version_after_v6 blocks ([#262](https://github.com/varnish-rs/varnish-rs/pull/262))
+
 ## [0.6.0](https://github.com/varnish-rs/varnish-rs/compare/varnish-sys-v0.5.5...varnish-sys-v0.6.0) - 2026-03-23
 
 ### Other
