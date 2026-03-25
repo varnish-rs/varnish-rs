@@ -57,6 +57,10 @@ import rustest from "path/to/librustest.so";
 
 ### Function `STRING rustest.probe_prop([PROBE probe])`
 
+### Function `BOOL rustest.hash_always_miss()`
+
+### Function `VOID rustest.set_hash_always_miss(BOOL val)`
+
 ### Function `STRING rustest.merge_all_names()`
 
 ### Function `VOID rustest.ws_tests()`

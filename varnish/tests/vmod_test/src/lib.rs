@@ -150,6 +150,16 @@ mod rustest {
         }
     }
 
+    pub fn hash_always_miss(ctx: &Ctx) -> bool {
+        ctx.req().map_or(false, |r| r.hash_always_miss())
+    }
+
+    pub fn set_hash_always_miss(ctx: &mut Ctx, val: bool) {
+        if let Some(r) = ctx.req_mut() {
+            r.set_hash_always_miss(val);
+        }
+    }
+
     pub fn merge_all_names(ctx: &Ctx) -> String {
         let mut s = String::new();
         for (k, _) in ctx

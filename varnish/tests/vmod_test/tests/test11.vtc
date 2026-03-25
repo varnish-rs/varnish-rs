@@ -1,0 +1,40 @@
+varnishtest "hash_always_miss getter and setter"
+
+server s1 {
+    rxreq
+    txresp -body "first"
+
+    rxreq
+    txresp -body "second"
+} -start
+
+
+varnish v1 -vcl+backend {
+    import rustest from "${vmod}";
+
+    sub vcl_recv {
+        # default is false
+        set req.http.before = rustest.hash_always_miss();
+        rustest.set_hash_always_miss(true);
+        set req.http.after = rustest.hash_always_miss();
+    }
+
+    sub vcl_deliver {
+        set resp.http.before = req.http.before;
+        set resp.http.after = req.http.after;
+    }
+} -start
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.status == 200
+    expect resp.body == "first"
+    expect resp.http.before == "false"
+    expect resp.http.after == "true"
+
+    txreq
+    rxresp
+    expect resp.status == 200
+    expect resp.body == "second"
+} -run
