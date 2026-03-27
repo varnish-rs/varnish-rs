@@ -5,6 +5,7 @@
 #include "cache/cache_varnishd.h"
 #include "cache/cache_backend.h"
 #include "cache/cache_director.h"
+#include "vrt_obj.h"
 #include "cache/cache_filter.h"
 #include "vmod_abi.h"
 #include "vsb.h"
