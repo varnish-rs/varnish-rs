@@ -161,9 +161,7 @@ impl ParamType {
                 _ => error! { "#[vcl_name] params must be declared as `&str` or `&CStr`" },
             };
             Self::VclName(ParamInfo::new(arg_ty, Value::Null, ParamKind::Regular))
-        } else if as_simple_ty(arg_ty)
-            .filter(|ident| *ident == "Event")
-            .is_some()
+        } else if as_simple_ty(arg_ty).as_ref().is_some_and(|ident| *ident == "Event")
         {
             only_in! { Event, "Event parameters are only allowed in event handlers. Try adding `#[event]` to this function." }
             unique! { has_event, "Event param is allowed only once in a function args list" }
@@ -189,9 +187,7 @@ impl ParamType {
                 Self::Workspace { is_mut: true }
             }
         } else if as_ref_mut_ty(arg_ty)
-            .and_then(as_simple_ty)
-            .filter(|ident| *ident == "FetchFilters")
-            .is_some()
+            .and_then(as_simple_ty).as_ref().is_some_and(|ident| *ident == "FetchFilters")
         {
             only_in! { Constructor | Event, if let Function = status.func_type {
                 "FetchFilters parameters are only allowed in object constructors and event handlers. Is this function missing `#[event]`?"
@@ -201,9 +197,7 @@ impl ParamType {
             unique! { has_fetch_filters, "A FetchFilters param is allowed only once in a function args list" }
             Self::FetchFilters
         } else if as_ref_mut_ty(arg_ty)
-            .and_then(as_simple_ty)
-            .filter(|ident| *ident == "DeliveryFilters")
-            .is_some()
+            .and_then(as_simple_ty).as_ref().is_some_and(|ident| *ident == "DeliveryFilters")
         {
             only_in! { Constructor | Event, if let Function = status.func_type {
                 "DeliveryFilters parameters are only allowed in object constructors and event handlers. Is this function missing `#[event]`?"
