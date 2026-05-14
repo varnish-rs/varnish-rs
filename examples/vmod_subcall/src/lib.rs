@@ -22,7 +22,7 @@ mod subcall {
     use std::collections::HashMap;
     use std::ffi::CStr;
 
-    use varnish::ffi::{VCL_SUB, VRT_call};
+    use varnish::ffi::{VRT_call, VCL_SUB};
     use varnish::vcl::{Ctx, Subroutine, VclError};
 
     use super::TaskVars;
