@@ -59,7 +59,7 @@ use crate::ffi::{
 };
 
 use crate::vcl::{
-    from_vcl_probe, into_vcl_probe, BackendRef, CowProbe, Probe, VclError, Workspace,
+    from_vcl_probe, into_vcl_probe, BackendRef, CowProbe, Probe, Subroutine, VclError, Workspace,
 };
 
 /// Convert a Rust type into a VCL one
@@ -436,7 +436,20 @@ impl From<VCL_BACKEND> for Option<BackendRef> {
     }
 }
 
+// VCL_SUB
 default_null_ptr!(VCL_SUB);
+impl From<VCL_SUB> for Subroutine {
+    fn from(value: VCL_SUB) -> Self {
+        debug_assert!(!value.0.is_null(), "VCL_SUB must not be null");
+        Subroutine(value)
+    }
+}
+from_vcl_to_opt_rust!(VCL_SUB, Subroutine);
+impl IntoVCL<VCL_SUB> for Subroutine {
+    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_SUB, VclError> {
+        Ok(self.vcl_ptr())
+    }
+}
 
 default_null_ptr!(VCL_REGEX);
 

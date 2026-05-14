@@ -202,6 +202,7 @@ impl Generator {
             VCL_PROBE,
             VCL_REAL,
             VCL_STRING,
+            VCL_SUB,
             VCL_TIME,
             VCL_VOID,
             VMOD_ABI_Version,

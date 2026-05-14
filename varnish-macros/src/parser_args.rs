@@ -348,6 +348,10 @@ impl ParamTy {
                 return Some(Self::SocketAddr);
             } else if ident == "VCL_BACKEND" {
                 return Some(Self::VclType("VCL_BACKEND"));
+            } else if ident == "Subroutine" {
+                return Some(Self::Sub);
+            } else if ident == "VCL_SUB" {
+                return Some(Self::VclType("VCL_SUB"));
             }
         }
 

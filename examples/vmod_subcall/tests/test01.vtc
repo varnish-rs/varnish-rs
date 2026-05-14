@@ -1,0 +1,35 @@
+varnishtest "subcall: call_for_each, var, and call_unsafe"
+
+varnish v1 -vcl {
+    import subcall from "${vmod}";
+
+    backend default none;
+
+    sub vcl_recv {
+        return (synth(200));
+    }
+
+    sub vcl_synth {
+        subcall.call_for_each(req.http.alpha, "alpha", outer_sub);
+    }
+
+    sub outer_sub {
+        subcall.call_for_each(req.http.num, "num", inner_sub);
+    }
+
+    sub inner_sub {
+        if (resp.http.alphanum) {
+            set resp.http.alphanum = resp.http.alphanum + " ";
+        }
+        set resp.http.alphanum = resp.http.alphanum + subcall.var("alpha") + subcall.var("num");
+    }
+
+
+} -start
+
+# call_for_each calls the sub for each word.
+client c1 {
+    txreq -hdr "alpha: a b c" -hdr "num: 1 2 3 4"
+    rxresp
+    expect resp.http.alphanum == "a1 a2 a3 a4 b1 b2 b3 b4 c1 c2 c3 c4"
+} -run

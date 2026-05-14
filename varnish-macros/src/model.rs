@@ -177,6 +177,7 @@ pub enum ParamTy {
     SocketAddr,
     Str,
     CStr,
+    Sub,
     VclType(&'static str),
 }
 
@@ -193,6 +194,7 @@ impl ParamTy {
             Self::Probe | Self::ProbeCow => "PROBE",
             Self::SocketAddr => "IP",
             Self::Str | Self::CStr => "STRING",
+            Self::Sub => "SUB",
             Self::VclType(ty) => &ty[4..],
         }
     }
@@ -211,6 +213,7 @@ impl ParamTy {
             Self::Probe | Self::ProbeCow => "VCL_PROBE",
             Self::SocketAddr => "VCL_IP",
             Self::Str | Self::CStr => "VCL_STRING",
+            Self::Sub => "VCL_SUB",
             Self::VclType(ty) => ty,
         }
     }
@@ -227,7 +230,7 @@ impl ParamTy {
             | Self::Str
             | Self::CStr => false,
             Self::BackendRef | Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
-            Self::VclType(_ty) => false,
+            Self::Sub | Self::VclType(_) => false,
         }
     }
 
@@ -246,7 +249,8 @@ impl ParamTy {
             | Self::ProbeCow
             | Self::SystemTime
             | Self::SocketAddr
-            | Self::VclType(_) => false,
+            | Self::Sub
+            | Self::VclType(_) => false, // _ty not needed here
             Self::Str => true,
         }
     }
