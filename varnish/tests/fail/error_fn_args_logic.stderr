@@ -4,13 +4,13 @@ error: unsupported argument type
 3 |     pub fn string(s: String) {}
   |                   ^
 
-error: This params must be declared as `Option<&...>`
+error: This parameter must be declared as `Option<&...>`
  --> tests/fail/error_fn_args_logic.rs:4:51
   |
 4 |     pub fn task_arg_non_mut(#[shared_per_task] a: Option<i64>) {}
   |                                                   ^^^^^^
 
-error: This params must be declared as `Option<&...>`
+error: This parameter must be declared as `Option<&...>`
  --> tests/fail/error_fn_args_logic.rs:5:49
   |
 5 |     pub fn vcl_arg_non_ref(#[shared_per_vcl] a: Option<i64>) {}
@@ -34,7 +34,7 @@ error: Event functions must not have any #[shared_per_task] arguments.
 10 |     pub fn on_event_arg_task(#[shared_per_task] a: Option<Box<i64>>) {}
    |                                                 ^
 
-error: This params must be declared as `&mut Option<Box<...>>`
+error: This parameter must be declared as `&mut Option<Box<...>>`
   --> tests/fail/error_fn_args_logic.rs:12:50
    |
 12 |     pub fn on_event_arg_vcl(#[shared_per_vcl] a: Option<&i64>) {}
