@@ -9,6 +9,9 @@ mod err_fn {
     pub fn ret_vcl() -> Result<VCL_STRING, &'static str> {
         Err("error")
     }
+    pub fn ret_opt_sub() -> Option<Subroutine> {
+        None
+    }
 }
 
 fn main() {}

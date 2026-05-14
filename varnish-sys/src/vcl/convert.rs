@@ -30,6 +30,7 @@
 //! | `Option<CowProbe>` | <-> | `VCL_PROBE` |
 //! | `Option<Probe>` | <-> | `VCL_PROBE` |
 //! | `Option<std::net::SocketAddr>` | -> | `VCL_IP` |
+//! | `Subroutine` | <-> | `VCL_SUB` |
 //!
 //! For all the other types, which are pointers, you will need to use the native types.
 //!
@@ -59,7 +60,8 @@ use crate::ffi::{
 };
 
 use crate::vcl::{
-    from_vcl_probe, into_vcl_probe, BackendRef, CowProbe, Probe, VclError, Workspace,
+    from_vcl_probe, into_vcl_probe, subroutine::Subroutine, BackendRef, CowProbe, Probe, VclError,
+    Workspace,
 };
 
 /// Convert a Rust type into a VCL one
@@ -419,7 +421,20 @@ impl From<VCL_BACKEND> for Option<BackendRef> {
     }
 }
 
+// VCL_SUB
 default_null_ptr!(VCL_SUB);
+impl From<VCL_SUB> for Subroutine {
+    fn from(value: VCL_SUB) -> Self {
+        assert!(!value.0.is_null(), "VCL_SUB must not be null");
+        Subroutine(value)
+    }
+}
+
+impl IntoVCL<VCL_SUB> for Subroutine {
+    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_SUB, VclError> {
+        Ok(self.vcl_ptr())
+    }
+}
 
 default_null_ptr!(VCL_REGEX);
 

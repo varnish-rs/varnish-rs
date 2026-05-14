@@ -11,6 +11,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "read",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [
@@ -34,6 +35,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "write",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [
@@ -57,6 +59,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "read_with_opt",
+            vcl_name: None,
             docs: "",
             has_optional_args: true,
             args: [

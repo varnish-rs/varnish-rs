@@ -1,0 +1,47 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VMOD_JSON_SPEC
+[
+  [
+    "$VMOD",
+    "2.0",
+    "args",
+    "Vmod_vmod_args_Func",
+    "34176cf6dcb520aaf98d4735d50abf7d0bdadaa2684e4fee87b6134a14e5f673",
+    "Varnish (version) (hash)",
+    "0",
+    "0"
+  ],
+  [
+    "$CPROTO",
+    "
+typedef VCL_VOID td_vmod_args_arg_subroutine(
+    VRT_CTX,
+    VCL_SUB
+);
+
+struct Vmod_vmod_args_Func {
+  td_vmod_args_arg_subroutine *f_arg_subroutine;
+};
+
+static struct Vmod_vmod_args_Func Vmod_vmod_args_Func;"
+  ],
+  [
+    "$FUNC",
+    "arg_subroutine",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_args_Func.f_arg_subroutine",
+      "",
+      [
+        "SUB",
+        "_sub",
+        "_sub"
+      ]
+    ]
+  ]
+]
+
