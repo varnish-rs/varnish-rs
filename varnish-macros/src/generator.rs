@@ -169,8 +169,10 @@ impl Generator {
         let c_name = self.names.mod_name().force_cstr();
         let file_id = &self.file_id;
         let mut priv_structs = Vec::new();
-        if let Some(s) = vmod.shared_types.shared_per_task_ty.as_ref() {
-            Self::gen_priv_struct(&mut priv_structs, "PRIV_TASK_METHODS", s, false);
+        if vmod.count_args(|a| matches!(a.ty, ParamType::SharedPerTaskMut)) > 0 {
+            if let Some(s) = vmod.shared_types.shared_per_task_ty.as_ref() {
+                Self::gen_priv_struct(&mut priv_structs, "PRIV_TASK_METHODS", s, false);
+            }
         }
         Self::gen_per_vcl_priv_struct(&mut priv_structs, vmod);
 

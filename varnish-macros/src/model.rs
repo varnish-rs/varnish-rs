@@ -127,7 +127,9 @@ pub enum ParamType {
     /// A `&str` or `&CStr` argument automatically passed for object creation representing a VCL name.
     VclName(ParamInfo),
     /// An argument `&mut Option<Box<T>>` representing any Rust name and type shared across tasks (i.e. `PRIV_TASK`)
-    SharedPerTask,
+    SharedPerTaskMut,
+    /// A readonly argument `Option<&T>` representing any Rust name and type shared across tasks (i.e. `PRIV_TASK`)
+    SharedPerTaskRef,
     /// A readonly argument `Option<&T>` representing any Rust name and type shared across VCL load (i.e. `PRIV_VCL`)
     SharedPerVclRef,
     /// A mutable argument `&mut Option<Box<T>>` representing any Rust name and type shared across VCL load (i.e. `PRIV_VCL`)

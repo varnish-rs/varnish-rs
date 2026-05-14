@@ -100,6 +100,28 @@ mod task {
             }
             __result
         }
+        unsafe extern "C" fn vmod_c_per_tsk_ref(
+            __ctx: *mut vrt_ctx,
+            tsk: *const vmod_priv,
+        ) {
+            super::per_tsk_ref(tsk.as_ref().and_then(|v| v.get_ref()))
+        }
+        #[repr(C)]
+        struct arg_vmod_task_per_tsk_ref_opt {
+            tsk: *const vmod_priv,
+            valid_op: c_char,
+            op: VCL_INT,
+        }
+        unsafe extern "C" fn vmod_c_per_tsk_ref_opt(
+            __ctx: *mut vrt_ctx,
+            __args: *const arg_vmod_task_per_tsk_ref_opt,
+        ) {
+            let __args = __args.as_ref().unwrap();
+            super::per_tsk_ref_opt(
+                __args.tsk.as_ref().and_then(|v| v.get_ref()),
+                if __args.valid_op != 0 { __args.op.into() } else { None },
+            )
+        }
         unsafe extern "C" fn vmod_c_PerVcl__init(
             __ctx: *mut vrt_ctx,
             __objp: *mut *mut PerVcl,
@@ -216,6 +238,15 @@ mod task {
                     __args: *const arg_vmod_task_per_tsk_opt,
                 ),
             >,
+            vmod_c_per_tsk_ref: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, tsk: *const vmod_priv),
+            >,
+            vmod_c_per_tsk_ref_opt: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __args: *const arg_vmod_task_per_tsk_ref_opt,
+                ),
+            >,
             vmod_c_PerVcl__init: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
@@ -256,6 +287,8 @@ mod task {
             vmod_c_per_vcl_opt: Some(vmod_c_per_vcl_opt),
             vmod_c_per_tsk_val: Some(vmod_c_per_tsk_val),
             vmod_c_per_tsk_opt: Some(vmod_c_per_tsk_opt),
+            vmod_c_per_tsk_ref: Some(vmod_c_per_tsk_ref),
+            vmod_c_per_tsk_ref_opt: Some(vmod_c_per_tsk_ref_opt),
             vmod_c_PerVcl__init: Some(vmod_c_PerVcl__init),
             vmod_c_PerVcl__fini: Some(vmod_c_PerVcl__fini),
             vmod_c_PerVcl_both: Some(vmod_c_PerVcl_both),
@@ -267,7 +300,7 @@ mod task {
         pub static Vmod_task_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"d3254ccf9860c2c9a8db4e739800906db26805bc168f4b8f497e3685770707e1"
+            file_id: c"1b4f8f74db7c125dbbd311dd74942e3c5223e09b63ff3999a03f526b24d67eb9"
                 .as_ptr(),
             name: c"task".as_ptr(),
             func_name: c"Vmod_vmod_task_Func".as_ptr(),
@@ -306,4 +339,6 @@ mod task {
     }
     pub fn per_tsk_val(tsk: &mut Option<Box<PerTask>>) {}
     pub fn per_tsk_opt(tsk: &mut Option<Box<PerTask>>, op: Option<i64>) {}
+    pub fn per_tsk_ref(tsk: Option<&PerTask>) {}
+    pub fn per_tsk_ref_opt(tsk: Option<&PerTask>, op: Option<i64>) {}
 }

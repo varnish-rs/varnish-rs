@@ -17,7 +17,7 @@ VmodInfo {
                 ParamTypeInfo {
                     ident: "tsk_vals",
                     docs: "",
-                    ty: SharedPerTask,
+                    ty: SharedPerTaskMut,
                 },
             ],
             output_ty: Bytes,
