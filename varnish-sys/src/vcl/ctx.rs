@@ -37,9 +37,8 @@ pub struct Ctx<'a> {
     pub http_resp: Option<HttpHeaders<'a>>,
     pub http_bereq: Option<HttpHeaders<'a>>,
     pub http_beresp: Option<HttpHeaders<'a>>,
+    pub req: Option<Req<'a>>,
     pub ws: Workspace<'a>,
-
-    req: Option<Req<'a>>,
 }
 
 impl<'a> Ctx<'a> {

@@ -168,6 +168,26 @@ mod rustest {
         }
     }
 
+    pub fn hash_ignore_busy(ctx: &Ctx) -> bool {
+        ctx.req().is_some_and(varnish::vcl::Req::hash_ignore_busy)
+    }
+
+    pub fn set_hash_ignore_busy(ctx: &mut Ctx, val: bool) {
+        if let Some(r) = ctx.req_mut() {
+            r.set_hash_ignore_busy(val);
+        }
+    }
+
+    pub fn hash_ignore_vary(ctx: &Ctx) -> bool {
+        ctx.req().is_some_and(varnish::vcl::Req::hash_ignore_vary)
+    }
+
+    pub fn set_hash_ignore_vary(ctx: &mut Ctx, val: bool) {
+        if let Some(r) = ctx.req_mut() {
+            r.set_hash_ignore_vary(val);
+        }
+    }
+
     pub fn merge_all_names(ctx: &Ctx) -> String {
         let mut s = String::new();
         for (k, _) in ctx
