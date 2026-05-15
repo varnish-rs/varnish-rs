@@ -57,6 +57,8 @@ import rustest from "path/to/librustest.so";
 
 ### Function `STRING rustest.probe_prop([PROBE probe])`
 
+### Function `VOID rustest.weaken_etag()`
+
 ### Function `STRING rustest.merge_all_names()`
 
 ### Function `BLOB rustest.copy_blob()`

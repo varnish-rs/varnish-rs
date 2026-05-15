@@ -150,6 +150,14 @@ mod rustest {
         }
     }
 
+    pub fn weaken_etag(ctx: &mut Ctx) -> Result<(), VclError> {
+        if let Some(ref mut req) = ctx.http_req {
+            req.weaken_etag()
+        } else {
+            Err("http_req isn't accessible".into())
+        }
+    }
+
     pub fn merge_all_names(ctx: &Ctx) -> String {
         let mut s = String::new();
         for (k, _) in ctx

@@ -17,7 +17,7 @@ use std::slice::from_raw_parts_mut;
 use crate::ffi;
 use crate::ffi::VslTag;
 use crate::vcl::str_or_bytes::StrOrBytes;
-use crate::vcl::{VclResult, Workspace};
+use crate::vcl::{VclError, VclResult, Workspace};
 
 // C constants pop up as u32, but header indexing uses u16, redefine
 // some stuff to avoid casting all the time
@@ -209,6 +209,27 @@ impl HttpHeaders<'_> {
     /// Set reason
     pub fn set_reason(&mut self, value: &str) -> VclResult<()> {
         self.change_header(HDR_REASON, value)
+    }
+
+    /// Weaken the ETag header if present and not already weak.
+    ///
+    /// Implements [RFC 2616 §3.11](https://www.rfc-editor.org/rfc/rfc2616#section-3.11) ETag
+    /// weakening: if the `ETag` header exists and does not already start with `W/`, it is
+    /// replaced with `W/<original-value>`.
+    pub fn weaken_etag(&mut self) -> VclResult<()> {
+        let etag = match self.header("ETag") {
+            None => return Ok(()),
+            Some(v) => v,
+        };
+        let bytes = etag.as_ref();
+        if bytes.starts_with(b"W/") {
+            return Ok(());
+        }
+        let owned = std::str::from_utf8(bytes)
+            .map_err(|_| VclError::from(c"non-utf8 ETag value"))?
+            .to_owned();
+        self.unset_header("ETag");
+        self.set_header("ETag", &format!("W/{owned}"))
     }
 
     /// Returns the value of a header based on its name

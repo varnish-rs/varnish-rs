@@ -1,0 +1,44 @@
+varnishtest "weaken_etag"
+
+server s1 {
+    # strong ETag gets weakened
+    rxreq
+    expect req.http.etag == {W/"abc"}
+    txresp
+
+    # already-weak ETag unchanged
+    rxreq
+    expect req.http.etag == {W/"abc"}
+    txresp
+
+    # no ETag: no-op
+    rxreq
+    expect req.http.etag == <undef>
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import rustest from "${vmod}";
+
+    sub vcl_recv {
+        rustest.weaken_etag();
+        return (pass);
+    }
+} -start
+
+client c1 {
+    # strong ETag
+    txreq -hdr {etag: "abc"}
+    rxresp
+    expect resp.status == 200
+
+    # already weak ETag
+    txreq -hdr {etag: W/"abc"}
+    rxresp
+    expect resp.status == 200
+
+    # no ETag
+    txreq
+    rxresp
+    expect resp.status == 200
+} -run
