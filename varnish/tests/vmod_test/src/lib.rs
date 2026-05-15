@@ -159,7 +159,7 @@ mod rustest {
     }
 
     pub fn hash_always_miss(ctx: &Ctx) -> bool {
-        ctx.req().map_or(false, |r| r.hash_always_miss())
+        ctx.req().is_some_and(varnish::vcl::Req::hash_always_miss)
     }
 
     pub fn set_hash_always_miss(ctx: &mut Ctx, val: bool) {
