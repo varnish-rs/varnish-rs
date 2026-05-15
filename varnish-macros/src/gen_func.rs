@@ -572,7 +572,8 @@ impl FuncProcessor {
             .restrict
             .iter()
             .map(|s| {
-                let const_name = format_ident!("{}", s.strip_prefix("vcl_").unwrap_or(s).to_uppercase());
+                let const_name =
+                    format_ident!("{}", s.strip_prefix("vcl_").unwrap_or(s).to_uppercase());
                 quote! { ::varnish::vcl::subroutine::bitmask::#const_name }
             })
             .collect();
@@ -629,4 +630,3 @@ impl FuncProcessor {
         }
     }
 }
-

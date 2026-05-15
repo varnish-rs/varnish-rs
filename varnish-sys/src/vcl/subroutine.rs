@@ -1,23 +1,11 @@
 pub mod bitmask {
     pub use crate::ffi::{
-        VCL_MET_BACKEND_ERROR as BACKEND_ERROR,
-        VCL_MET_BACKEND_FETCH as BACKEND_FETCH,
-        VCL_MET_BACKEND_REFRESH as BACKEND_REFRESH,
-        VCL_MET_BACKEND_RESPONSE as BACKEND_RESPONSE,
-        VCL_MET_DELIVER as DELIVER,
-        VCL_MET_FINI as FINI,
-        VCL_MET_HASH as HASH,
-        VCL_MET_HIT as HIT,
-        VCL_MET_INIT as INIT,
-        VCL_MET_MISS as MISS,
-        VCL_MET_PASS as PASS,
-        VCL_MET_PIPE as PIPE,
-        VCL_MET_PURGE as PURGE,
-        VCL_MET_RECV as RECV,
-        VCL_MET_SYNTH as SYNTH,
-        VCL_MET_TASK_B as BACKEND,
-        VCL_MET_TASK_C as CLIENT,
-        VCL_MET_TASK_H as HOUSEKEEPING,
+        VCL_MET_BACKEND_ERROR as BACKEND_ERROR, VCL_MET_BACKEND_FETCH as BACKEND_FETCH,
+        VCL_MET_BACKEND_REFRESH as BACKEND_REFRESH, VCL_MET_BACKEND_RESPONSE as BACKEND_RESPONSE,
+        VCL_MET_DELIVER as DELIVER, VCL_MET_FINI as FINI, VCL_MET_HASH as HASH, VCL_MET_HIT as HIT,
+        VCL_MET_INIT as INIT, VCL_MET_MISS as MISS, VCL_MET_PASS as PASS, VCL_MET_PIPE as PIPE,
+        VCL_MET_PURGE as PURGE, VCL_MET_RECV as RECV, VCL_MET_SYNTH as SYNTH,
+        VCL_MET_TASK_B as BACKEND, VCL_MET_TASK_C as CLIENT, VCL_MET_TASK_H as HOUSEKEEPING,
     };
 }
 
@@ -65,8 +53,21 @@ impl Id {
     pub fn from_bitfield(val: u32) -> Option<Self> {
         use Id::*;
         [
-            Recv, Pipe, Pass, Hash, Purge, Miss, Hit, Deliver, Synth,
-            BackendFetch, BackendRefresh, BackendResponse, BackendError, Init, Fini,
+            Recv,
+            Pipe,
+            Pass,
+            Hash,
+            Purge,
+            Miss,
+            Hit,
+            Deliver,
+            Synth,
+            BackendFetch,
+            BackendRefresh,
+            BackendResponse,
+            BackendError,
+            Init,
+            Fini,
         ]
         .into_iter()
         .find(|id| id.to_bitfield() == val)

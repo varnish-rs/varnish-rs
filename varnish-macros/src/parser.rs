@@ -328,10 +328,7 @@ const VALID_RESTRICT_SCOPES: &[&str] = &[
     "housekeeping",
 ];
 
-fn parse_restricted_attr(
-    attrs: &mut Vec<Attribute>,
-    errors: &mut Errors,
-) -> Vec<String> {
+fn parse_restricted_attr(attrs: &mut Vec<Attribute>, errors: &mut Errors) -> Vec<String> {
     let Some(attr) = parser_utils::remove_attr(attrs, "restricted") else {
         return Vec::new();
     };

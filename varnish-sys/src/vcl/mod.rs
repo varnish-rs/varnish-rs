@@ -33,13 +33,13 @@
 
 mod backend;
 mod convert;
-pub mod subroutine;
 mod ctx;
 mod error;
 mod http;
 mod probe;
 mod processor;
 mod str_or_bytes;
+pub mod subroutine;
 mod vsb;
 mod ws;
 mod ws_str_buffer;
