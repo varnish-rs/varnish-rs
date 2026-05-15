@@ -10,6 +10,7 @@ RUN    apt-get update \
         curl \
         git \
         gnupg \
+        jq \
         llvm \
         pkg-config \
         sudo `# allows dev to install more packages without switching to root or rebuilding container` \
