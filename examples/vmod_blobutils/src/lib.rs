@@ -51,10 +51,16 @@ mod blobutils {
     /// set req.http.checksum = blobutils.checksum(blob);
     /// ```
     pub fn checksum(data: &[u8]) -> String {
+        use std::fmt::Write as _;
+
         let mut hasher = Sha256::new();
         hasher.update(data);
         let hash = hasher.finalize();
-        format!("{:x}", hash)
+        let mut checksum = String::with_capacity(hash.len() * 2);
+        for byte in hash {
+            write!(&mut checksum, "{byte:02x}").expect("writing to String should not fail");
+        }
+        checksum
     }
 
     //    pub fn access_pointer(b: VCL_BLOB) {
