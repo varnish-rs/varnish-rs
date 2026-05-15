@@ -5,7 +5,9 @@
 use darling::ast::NestedMeta;
 use darling::FromMeta;
 use proc_macro2::TokenStream;
-use syn::{Attribute, ImplItem, Item, ItemImpl, ItemMod, ReturnType, Signature, Visibility};
+use syn::punctuated::Punctuated;
+use syn::token::Comma;
+use syn::{Attribute, Ident, ImplItem, Item, ItemImpl, ItemMod, ReturnType, Signature, Visibility};
 
 use crate::errors::Errors;
 use crate::model::{
@@ -207,6 +209,7 @@ impl ObjInfo {
                 args: Vec::new(),
                 output_ty: OutputTy::Default,
                 out_result: false,
+                restrict: Vec::new(),
             },
             funcs,
         })
@@ -232,6 +235,8 @@ impl FuncInfo {
         } else if signature.asyncness.is_some() {
             errors.add(signature, "async functions are not supported");
         }
+
+        let restrict = parse_restricted_attr(attrs, &mut errors);
 
         let func_type = if let Some(attr) = parser_utils::remove_attr(attrs, "event") {
             if is_object {
@@ -296,6 +301,65 @@ impl FuncInfo {
             output_ty,
             out_result,
             args,
+            restrict,
         })
     }
+}
+
+// mirrors the constants in varnish::vcl::subroutine::bitmask
+const VALID_RESTRICT_SCOPES: &[&str] = &[
+    "vcl_recv",
+    "vcl_pipe",
+    "vcl_pass",
+    "vcl_hash",
+    "vcl_purge",
+    "vcl_miss",
+    "vcl_hit",
+    "vcl_deliver",
+    "vcl_synth",
+    "vcl_backend_fetch",
+    "vcl_backend_refresh",
+    "vcl_backend_response",
+    "vcl_backend_error",
+    "vcl_init",
+    "vcl_fini",
+    "client",
+    "backend",
+    "housekeeping",
+];
+
+fn parse_restricted_attr(
+    attrs: &mut Vec<Attribute>,
+    errors: &mut Errors,
+) -> Vec<String> {
+    let Some(attr) = parser_utils::remove_attr(attrs, "restricted") else {
+        return Vec::new();
+    };
+    let scopes = match attr.parse_args_with(Punctuated::<Ident, Comma>::parse_terminated) {
+        Ok(v) => v,
+        Err(e) => {
+            errors.add(&attr, &format!("#[restricted] parse error: {e}"));
+            return Vec::new();
+        }
+    };
+    if scopes.is_empty() {
+        errors.add(&attr, "#[restricted] requires at least one scope argument");
+        return Vec::new();
+    }
+    let mut result = Vec::new();
+    for scope in scopes {
+        let name = scope.to_string();
+        if VALID_RESTRICT_SCOPES.contains(&name.as_str()) {
+            result.push(name);
+        } else {
+            errors.add(
+                &scope,
+                &format!(
+                    "Invalid scope '{name}'. Valid scopes: {}",
+                    VALID_RESTRICT_SCOPES.join(", ")
+                ),
+            );
+        }
+    }
+    result
 }

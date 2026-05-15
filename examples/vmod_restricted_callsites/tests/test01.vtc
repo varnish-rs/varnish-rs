@@ -1,0 +1,57 @@
+varnishtest "restricted callsites"
+
+server s1 {} -start
+
+varnish v1 -vcl+backend {
+	import restricted_callsites from "${vmod}";
+
+	sub vcl_recv {
+		# client_only, recv_or_hash, and client_or_backend are allowed in vcl_recv
+		if (restricted_callsites.client_only() != 1) {
+			return (synth(500, "client_only failed"));
+		}
+		if (restricted_callsites.recv_or_hash() != 3) {
+			return (synth(500, "recv_or_hash failed"));
+		}
+		if (restricted_callsites.client_or_backend() != 4) {
+			return (synth(500, "client_or_backend failed"));
+		}
+		return (synth(200));
+	}
+} -start
+
+client c1 {
+	txreq
+	rxresp
+	expect resp.status == 200
+} -run
+
+# Calling a client-only function from a backend sub must fail to compile
+varnish v1 -errvcl "Not available in subroutine" {
+	vcl 4.1;
+	import restricted_callsites from "${vmod}";
+	backend be none;
+	sub vcl_backend_response {
+		set beresp.http.x-test = restricted_callsites.client_only();
+	}
+}
+
+# Calling a backend-only function from a client sub must fail to compile
+varnish v1 -errvcl "Not available in subroutine" {
+	vcl 4.1;
+	import restricted_callsites from "${vmod}";
+	backend be none;
+	sub vcl_recv {
+		set req.http.x-test = restricted_callsites.backend_only();
+	}
+}
+
+# recv_or_hash is not allowed in vcl_pass
+varnish v1 -errvcl "Not available in subroutine" {
+	vcl 4.1;
+	import restricted_callsites from "${vmod}";
+	backend be none;
+	sub vcl_pass {
+		set req.http.x-test = restricted_callsites.recv_or_hash();
+	}
+}

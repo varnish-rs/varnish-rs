@@ -33,6 +33,7 @@
 
 mod backend;
 mod convert;
+pub mod subroutine;
 mod ctx;
 mod error;
 mod http;
