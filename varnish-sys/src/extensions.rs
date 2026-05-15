@@ -1,7 +1,8 @@
 use std::ffi::c_void;
 use std::ptr;
 
-use crate::ffi::{vmod_data, vmod_priv};
+use crate::ffi::{vmod_data, vmod_priv, vmod_priv_methods, vrt_ctx};
+use crate::validate_vrt_ctx;
 use crate::vcl::PerVclState;
 
 /// SAFETY: ensured by Varnish itself
@@ -52,51 +53,42 @@ impl vmod_priv {
     }
 }
 
-mod version_after_v6 {
-    use std::ffi::c_void;
+/// SAFETY: ensured by Varnish itself
+unsafe impl Sync for vmod_priv_methods {}
 
-    use super::get_owned_bbox;
-    use crate::ffi::{vmod_priv, vmod_priv_methods, vrt_ctx};
-    use crate::validate_vrt_ctx;
-    use crate::vcl::PerVclState;
+impl vmod_priv {
+    /// Set the object and methods for the `vmod_priv`, and the corresponding static methods.
+    ///
+    /// SAFETY: The type of `obj` must match the type of the function pointers in `methods`.
+    pub unsafe fn put<T>(&mut self, obj: Box<T>, methods: &'static vmod_priv_methods) {
+        self.priv_ = Box::into_raw(obj).cast();
+        self.methods = methods;
+    }
 
-    /// SAFETY: ensured by Varnish itself
-    unsafe impl Sync for vmod_priv_methods {}
+    /// A Varnish callback function to free a `vmod_priv` object.
+    /// Here we take the ownership and immediately drop the object of type `T`.
+    /// Note that here we get `*priv_` directly, not the `*vmod_priv`
+    ///
+    /// SAFETY: `priv_` must be a valid pointer to a `T` object or `NULL`.
+    pub unsafe extern "C" fn on_fini<T>(_ctx: *const vrt_ctx, mut priv_: *mut c_void) {
+        drop(get_owned_bbox::<T>(&mut priv_));
+    }
 
-    impl vmod_priv {
-        /// Set the object and methods for the `vmod_priv`, and the corresponding static methods.
-        ///
-        /// SAFETY: The type of `obj` must match the type of the function pointers in `methods`.
-        pub unsafe fn put<T>(&mut self, obj: Box<T>, methods: &'static vmod_priv_methods) {
-            self.priv_ = Box::into_raw(obj).cast();
-            self.methods = methods;
-        }
-
-        /// A Varnish callback function to free a `vmod_priv` object.
-        /// Here we take the ownership and immediately drop the object of type `T`.
-        /// Note that here we get `*priv_` directly, not the `*vmod_priv`
-        ///
-        /// SAFETY: `priv_` must be a valid pointer to a `T` object or `NULL`.
-        pub unsafe extern "C" fn on_fini<T>(_ctx: *const vrt_ctx, mut priv_: *mut c_void) {
-            drop(get_owned_bbox::<T>(&mut priv_));
-        }
-
-        /// A Varnish callback function to clean up the `PerVclState` object.
-        /// Similar to `on_fini`, but also unregisters filters.
-        ///
-        /// SAFETY: `priv_` must be a valid pointer to a `T` object or `NULL`.
-        pub unsafe extern "C" fn on_fini_per_vcl<T>(ctx: *const vrt_ctx, mut priv_: *mut c_void) {
-            if let Some(obj) = get_owned_bbox::<PerVclState<T>>(&mut priv_) {
-                let PerVclState {
-                    mut fetch_filters,
-                    mut delivery_filters,
-                    user_data,
-                } = *obj;
-                let ctx = validate_vrt_ctx(ctx);
-                ctx.fetch_filters(&mut fetch_filters).unregister_all();
-                ctx.delivery_filters(&mut delivery_filters).unregister_all();
-                drop(user_data);
-            }
+    /// A Varnish callback function to clean up the `PerVclState` object.
+    /// Similar to `on_fini`, but also unregisters filters.
+    ///
+    /// SAFETY: `priv_` must be a valid pointer to a `T` object or `NULL`.
+    pub unsafe extern "C" fn on_fini_per_vcl<T>(ctx: *const vrt_ctx, mut priv_: *mut c_void) {
+        if let Some(obj) = get_owned_bbox::<PerVclState<T>>(&mut priv_) {
+            let PerVclState {
+                mut fetch_filters,
+                mut delivery_filters,
+                user_data,
+            } = *obj;
+            let ctx = validate_vrt_ctx(ctx);
+            ctx.fetch_filters(&mut fetch_filters).unregister_all();
+            ctx.delivery_filters(&mut delivery_filters).unregister_all();
+            drop(user_data);
         }
     }
 }

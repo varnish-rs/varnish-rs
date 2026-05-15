@@ -52,11 +52,15 @@ use std::ptr::{null, null_mut};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use crate::ffi::{
-    http, vtim_dur, vtim_real, VSA_GetPtr, VSA_Port, PF_INET, PF_INET6, VCL_ACL, VCL_BACKEND,
-    VCL_BLOB, VCL_BODY, VCL_BOOL, VCL_DURATION, VCL_ENUM, VCL_HEADER, VCL_HTTP, VCL_INT, VCL_IP,
-    VCL_PROBE, VCL_REAL, VCL_STEVEDORE, VCL_STRANDS, VCL_STRING, VCL_TIME, VCL_VCL,
+    http, sa_family_t, vsa_suckaddr_len, vtim_dur, vtim_real, VSA_BuildFAP, VSA_GetPtr, VSA_Port,
+    PF_INET, PF_INET6, VCL_ACL, VCL_BACKEND, VCL_BLOB, VCL_BODY, VCL_BOOL, VCL_DURATION, VCL_ENUM,
+    VCL_HEADER, VCL_HTTP, VCL_INT, VCL_IP, VCL_PROBE, VCL_REAL, VCL_REGEX, VCL_STEVEDORE,
+    VCL_STRANDS, VCL_STRING, VCL_SUB, VCL_TIME, VCL_VCL,
 };
-use crate::vcl::{from_vcl_probe, into_vcl_probe, CowProbe, Probe, VclError, Workspace};
+
+use crate::vcl::{
+    from_vcl_probe, into_vcl_probe, BackendRef, CowProbe, Probe, VclError, Workspace,
+};
 
 /// Convert a Rust type into a VCL one
 ///
@@ -410,78 +414,67 @@ default_null_ptr!(mut VCL_VCL);
 // VCL_BACKEND
 default_null_ptr!(VCL_BACKEND);
 
-mod version_after_v6 {
-    use std::ffi::c_void;
-    use std::net::SocketAddr;
-    use std::num::NonZeroUsize;
-    use std::ptr;
-    use std::ptr::null;
+use std::ffi::c_void;
+use std::num::NonZeroUsize;
+use std::ptr;
 
-    use super::IntoVCL;
-    use crate::ffi::{
-        sa_family_t, vsa_suckaddr_len, VSA_BuildFAP, PF_INET, PF_INET6, VCL_BACKEND, VCL_IP,
-        VCL_REGEX, VCL_SUB,
-    };
-    use crate::vcl::{BackendRef, VclError, Workspace};
-
-    impl IntoVCL<VCL_BACKEND> for BackendRef {
-        fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
-            unsafe { Ok(self.vcl_ptr()) }
-        }
+impl IntoVCL<VCL_BACKEND> for BackendRef {
+    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
+        unsafe { Ok(self.vcl_ptr()) }
     }
+}
 
-    impl IntoVCL<VCL_BACKEND> for Option<BackendRef> {
-        fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
-            unsafe { Ok(self.map_or(VCL_BACKEND(null()), |b: BackendRef| b.vcl_ptr())) }
-        }
+impl IntoVCL<VCL_BACKEND> for Option<BackendRef> {
+    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
+        unsafe { Ok(self.map_or(VCL_BACKEND(null()), |b: BackendRef| b.vcl_ptr())) }
     }
+}
 
-    impl From<VCL_BACKEND> for Option<BackendRef> {
-        fn from(value: VCL_BACKEND) -> Self {
-            unsafe { BackendRef::new(value) }
-        }
+impl From<VCL_BACKEND> for Option<BackendRef> {
+    fn from(value: VCL_BACKEND) -> Self {
+        unsafe { BackendRef::new(value) }
     }
+}
 
-    default_null_ptr!(VCL_SUB);
+default_null_ptr!(VCL_SUB);
 
-    default_null_ptr!(VCL_REGEX);
+default_null_ptr!(VCL_REGEX);
 
-    impl IntoVCL<VCL_IP> for SocketAddr {
-        fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_IP, VclError> {
-            unsafe {
-                // We cannot use sizeof::<suckaddr>() because suckaddr is a zero-sized
-                // struct from Rust's perspective
-                let size = NonZeroUsize::new(vsa_suckaddr_len).unwrap();
-                let p = ws.alloc(size);
-                if p.is_null() {
-                    Err(VclError::WsOutOfMemory(size))?;
-                }
-                match self {
-                    SocketAddr::V4(sa) => {
-                        assert!(!VSA_BuildFAP(
-                            p,
-                            PF_INET as sa_family_t,
-                            sa.ip().octets().as_slice().as_ptr().cast::<c_void>(),
-                            4,
-                            ptr::from_ref::<u16>(&sa.port().to_be()).cast::<c_void>(),
-                            2
-                        )
-                        .is_null());
-                    }
-                    SocketAddr::V6(sa) => {
-                        assert!(!VSA_BuildFAP(
-                            p,
-                            PF_INET6 as sa_family_t,
-                            sa.ip().octets().as_slice().as_ptr().cast::<c_void>(),
-                            16,
-                            ptr::from_ref::<u16>(&sa.port().to_be()).cast::<c_void>(),
-                            2
-                        )
-                        .is_null());
-                    }
-                }
-                Ok(VCL_IP(p.cast()))
+impl IntoVCL<VCL_IP> for SocketAddr {
+    fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_IP, VclError> {
+        unsafe {
+            // We cannot use sizeof::<suckaddr>() because suckaddr is a zero-sized
+            // struct from Rust's perspective
+            let size = NonZeroUsize::new(vsa_suckaddr_len).unwrap();
+            let p = ws.alloc(size);
+            if p.is_null() {
+                Err(VclError::WsOutOfMemory(size))?;
             }
+            match self {
+                SocketAddr::V4(sa) => {
+                    assert!(!VSA_BuildFAP(
+                        p,
+                        PF_INET as sa_family_t,
+                        sa.ip().octets().as_slice().as_ptr().cast::<c_void>(),
+                        4,
+                        ptr::from_ref::<u16>(&sa.port().to_be()).cast::<c_void>(),
+                        2
+                    )
+                    .is_null());
+                }
+                SocketAddr::V6(sa) => {
+                    assert!(!VSA_BuildFAP(
+                        p,
+                        PF_INET6 as sa_family_t,
+                        sa.ip().octets().as_slice().as_ptr().cast::<c_void>(),
+                        16,
+                        ptr::from_ref::<u16>(&sa.port().to_be()).cast::<c_void>(),
+                        2
+                    )
+                    .is_null());
+                }
+            }
+            Ok(VCL_IP(p.cast()))
         }
     }
 }
