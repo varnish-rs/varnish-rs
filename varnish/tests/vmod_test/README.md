@@ -59,4 +59,6 @@ import rustest from "path/to/librustest.so";
 
 ### Function `STRING rustest.merge_all_names()`
 
+### Function `BLOB rustest.copy_blob()`
+
 ### Function `VOID rustest.ws_tests()`

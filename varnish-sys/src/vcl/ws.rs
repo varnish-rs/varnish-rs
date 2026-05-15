@@ -174,6 +174,7 @@ impl<'ctx> Workspace<'ctx> {
     pub fn copy_blob(&mut self, value: impl AsRef<[u8]>) -> Result<VCL_BLOB, VclError> {
         let buf = self.copy_bytes(value)?;
         let blob = self.copy_value(vrt_blob {
+            magic: ffi::VRT_BLOB_MAGIC,
             blob: ptr::from_ref(buf).cast::<c_void>(),
             len: buf.len(),
             ..Default::default()
