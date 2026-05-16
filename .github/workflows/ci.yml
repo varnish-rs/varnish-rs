@@ -51,7 +51,7 @@ jobs:
         with: { tool: just }
       - name: Install Varnish (trunk)
         if: matrix.ver == 'trunk'
-        run: just install-varnish trunk "$VARNISH_INSTALL_DIR"
+        run: just install-varnish trunk
       - name: Install Varnish (non-trunk)
         if: matrix.ver != 'trunk'
         run: just install-varnish ${{ matrix.ver }}
