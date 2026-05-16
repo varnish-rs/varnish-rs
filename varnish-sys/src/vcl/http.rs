@@ -17,7 +17,7 @@ use std::slice::from_raw_parts_mut;
 use crate::ffi;
 use crate::ffi::VslTag;
 use crate::vcl::str_or_bytes::StrOrBytes;
-use crate::vcl::{VclError, VclResult, Workspace};
+use crate::vcl::{VclResult, Workspace};
 
 // C constants pop up as u32, but header indexing uses u16, redefine
 // some stuff to avoid casting all the time
@@ -57,18 +57,14 @@ impl HttpHeaders<'_> {
         Ok(())
     }
 
-    /// Append a new header using `name` and `value`. This can fail if we run out of internal slots
-    /// to store the new header
-    pub fn set_header(&mut self, name: &str, value: &str) -> VclResult<()> {
+    fn set_header_raw<'a>(&mut self, raw: impl Into<StrOrBytes<'a>>) -> VclResult<()> {
         assert!(self.raw.nhd <= self.raw.shd);
         if self.raw.nhd == self.raw.shd {
             return Err(c"no more header slot".into());
         }
-
         let idx = self.raw.nhd;
         self.raw.nhd += 1;
-        // FIXME: optimize this to avoid allocating a temporary string
-        let res = self.change_header(idx, &format!("{name}: {value}"));
+        let res = self.change_header(idx, raw);
         if res.is_ok() {
             unsafe {
                 ffi::VSLbt(
@@ -81,6 +77,13 @@ impl HttpHeaders<'_> {
             self.raw.nhd -= 1;
         }
         res
+    }
+
+    /// Append a new header using `name` and `value`. This can fail if we run out of internal slots
+    /// to store the new header
+    pub fn set_header(&mut self, name: &str, value: &str) -> VclResult<()> {
+        // FIXME: optimize this to avoid allocating a temporary string
+        self.set_header_raw(&format!("{name}: {value}"))
     }
 
     pub fn unset_header(&mut self, name: &str) {
@@ -221,15 +224,15 @@ impl HttpHeaders<'_> {
             None => return Ok(()),
             Some(v) => v,
         };
-        let bytes = etag.as_ref();
-        if bytes.starts_with(b"W/") {
+        let value = etag.as_ref();
+        if value.starts_with(b"W/") {
             return Ok(());
         }
-        let owned = std::str::from_utf8(bytes)
-            .map_err(|_| VclError::from(c"non-utf8 ETag value"))?
-            .to_owned();
+        let mut new_hdr = Vec::with_capacity(b"ETag: W/".len() + value.len());
+        new_hdr.extend_from_slice(b"ETag: W/");
+        new_hdr.extend_from_slice(value);
         self.unset_header("ETag");
-        self.set_header("ETag", &format!("W/{owned}"))
+        self.set_header_raw(new_hdr.as_slice())
     }
 
     /// Returns the value of a header based on its name
