@@ -162,10 +162,16 @@ impl<'a> Ctx<'a> {
         }
     }
 
+    /// Return a shared reference to the client request object, if present.
+    ///
+    /// Returns `None` outside of client-facing VCL contexts (e.g. in backend subroutines).
     pub fn req(&self) -> Option<&Req<'_>> {
         self.req.as_ref()
     }
 
+    /// Return a mutable reference to the client request object, if present.
+    ///
+    /// Returns `None` outside of client-facing VCL contexts (e.g. in backend subroutines).
     pub fn req_mut(&mut self) -> Option<&mut Req<'a>> {
         self.req.as_mut()
     }
@@ -187,26 +193,44 @@ impl Req<'_> {
         })
     }
 
+    /// Return whether this request bypasses the cache lookup and is always treated as a miss.
+    ///
+    /// Equivalent to `req.hash_always_miss` in VCL.
     pub fn hash_always_miss(&self) -> bool {
         self.raw.hash_always_miss() == 1
     }
 
+    /// Force this request to be treated as a cache miss, skipping any existing cached object.
+    ///
+    /// Equivalent to setting `req.hash_always_miss` in VCL.
     pub fn set_hash_always_miss(&mut self, val: bool) {
         self.raw.set_hash_always_miss(val.into());
     }
 
+    /// Return whether this request ignores busy (locked) cache objects and fetches from the backend instead of waiting.
+    ///
+    /// Equivalent to `req.hash_ignore_busy` in VCL.
     pub fn hash_ignore_busy(&self) -> bool {
         self.raw.hash_ignore_busy() == 1
     }
 
+    /// Make this request skip waiting on busy cache objects and go straight to the backend.
+    ///
+    /// Equivalent to setting `req.hash_ignore_busy` in VCL.
     pub fn set_hash_ignore_busy(&mut self, val: bool) {
         self.raw.set_hash_ignore_busy(val.into());
     }
 
+    /// Return whether this request ignores `Vary` headers during cache lookup.
+    ///
+    /// Equivalent to `req.hash_ignore_vary` in VCL.
     pub fn hash_ignore_vary(&self) -> bool {
         self.raw.hash_ignore_vary() == 1
     }
 
+    /// Make this request ignore `Vary` headers during cache lookup, collapsing all variants into one cache key.
+    ///
+    /// Equivalent to setting `req.hash_ignore_vary` in VCL.
     pub fn set_hash_ignore_vary(&mut self, val: bool) {
         self.raw.set_hash_ignore_vary(val.into());
     }
