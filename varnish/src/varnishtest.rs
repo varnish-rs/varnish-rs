@@ -8,6 +8,16 @@ use std::process::Command;
 
 use glob::glob;
 
+/// Name of the env var Cargo populates with the dynamic-library search path for
+/// test binaries. macOS uses `DYLD_FALLBACK_LIBRARY_PATH`; other Unix-likes use
+/// `LD_LIBRARY_PATH`. (Windows is not a supported VMOD host.)
+#[doc(hidden)]
+pub const CARGO_DYLIB_PATH_ENV: &str = if cfg!(target_os = "macos") {
+    "DYLD_FALLBACK_LIBRARY_PATH"
+} else {
+    "LD_LIBRARY_PATH"
+};
+
 /// Run all tests that match the glob pattern
 pub fn run_all_tests(
     ld_library_paths: &str,
