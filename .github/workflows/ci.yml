@@ -97,10 +97,29 @@ jobs:
       - name: Ensure docs can be built at docs.rs without varnish dependencies
         run: just test-doc
 
+  # Smoke test on macOS. brew ships current Varnish (9.0.x) with arm64 bottles,
+  # so installation is fast. We bypass `just ci-test` because the Justfile's
+  # version-detection and Varnish install recipes are Debian-specific (dpkg/apt).
+  test-macos:
+    name: Test on macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Stable Rust
+        uses: dtolnay/rust-toolchain@stable
+      - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+        uses: Swatinem/rust-cache@v2
+      - name: Install Varnish
+        run: brew install varnish
+      - name: Build workspace
+        run: cargo build --workspace --all-features --all-targets
+      - name: Run tests
+        run: cargo test --workspace --all-features
+
   # This job checks if any of the previous jobs failed or were canceled.
   # This approach also allows some jobs to be skipped if they are not needed.
   ci-passed:
-    needs: [ test, test-varnish-ver, test-msrv, test-docs-rs ]
+    needs: [ test, test-varnish-ver, test-msrv, test-docs-rs, test-macos ]
     if: always()
     runs-on: ubuntu-latest
     steps:
