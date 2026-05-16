@@ -76,10 +76,10 @@ pub fn run_varnish_test(
     if debug || !output.status.success() {
         stdout()
             .write_all(&output.stdout)
-            .expect("failed to write varnishtest stdout");
+            .map_err(|e| format!("failed to write varnishtest stdout: {e}"))?;
         stderr()
             .write_all(&output.stderr)
-            .expect("failed to write varnishtest stderr");
+            .map_err(|e| format!("failed to write varnishtest stderr: {e}"))?;
     }
 
     if output.status.success() {

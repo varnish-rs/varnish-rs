@@ -832,9 +832,11 @@ unsafe extern "C" fn wrap_healthy<S: VclBackend<T>, T: VclResponse>(
     let mut ctx = Ctx::from_ptr(ctxp);
     let (healthy, when) = backend.probe(&mut ctx);
     if !changed.is_null() {
-        *changed = when
-            .try_into()
-            .expect("probe SystemTime must be convertible to VCL_TIME"); // FIXME: on error?
+        // SystemTime->VCL_TIME can fail for times before UNIX_EPOCH. Avoid panicking
+        // across the FFI boundary; leave `*changed` untouched on conversion failure.
+        if let Ok(t) = when.try_into() {
+            *changed = t;
+        }
     }
     healthy.into()
 }

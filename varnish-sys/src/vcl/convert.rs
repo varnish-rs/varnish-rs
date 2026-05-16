@@ -233,7 +233,7 @@ impl From<VCL_IP> for Option<SocketAddr> {
                 PF_INET6 => {
                     let buf: &[u8; 16] = std::slice::from_raw_parts(ptr.cast::<u8>(), 16)
                         .try_into()
-                        .expect("IPv6 address bytes slice always be 16 bytes");
+                        .expect("IPv6 address bytes slice must always be 16 bytes");
                     Some(SocketAddr::new(IpAddr::V6(Ipv6Addr::from(*buf)), port))
                 }
                 _ => None,

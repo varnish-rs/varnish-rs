@@ -208,11 +208,10 @@ pub unsafe extern "C" fn wrap_vfp_pull<T: FetchProcessor>(
     } else {
         std::slice::from_raw_parts_mut(ptr.cast::<u8>(), *len as usize)
     };
-    let obj = vfe
-        .priv1
-        .cast::<T>()
-        .as_mut()
-        .expect("vfp_entry priv1 must not be null");
+    let Some(obj) = vfe.priv1.cast::<T>().as_mut() else {
+        // Avoid panicking across the FFI boundary if the invariant is violated.
+        return VfpStatus::Error;
+    };
     match obj.pull(&mut FetchProcCtx::from_ptr(ctx), buf) {
         PullResult::Err => VfpStatus::Error, // TODO: log error
         PullResult::Ok(l) => {

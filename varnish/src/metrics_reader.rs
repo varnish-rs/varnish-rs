@@ -198,12 +198,10 @@ pub enum Semantics {
 
 impl From<c_int> for Semantics {
     fn from(value: c_int) -> Self {
-        let c = char::from_u32(value as u32)
-            .expect("VSC semantics value must be a valid Unicode scalar");
-        match c {
-            'c' => Semantics::Counter,
-            'g' => Semantics::Gauge,
-            'b' => Semantics::Bitmap,
+        match char::from_u32(value as u32) {
+            Some('c') => Semantics::Counter,
+            Some('g') => Semantics::Gauge,
+            Some('b') => Semantics::Bitmap,
             _ => Semantics::Unknown,
         }
     }
@@ -238,12 +236,11 @@ pub enum MetricFormat {
 
 impl From<c_int> for MetricFormat {
     fn from(value: c_int) -> Self {
-        match char::from_u32(value as u32).expect("VSC format value must be a valid Unicode scalar")
-        {
-            'i' => MetricFormat::Integer,
-            'B' => MetricFormat::Bytes,
-            'b' => MetricFormat::Bitmap,
-            'd' => MetricFormat::Duration,
+        match char::from_u32(value as u32) {
+            Some('i') => MetricFormat::Integer,
+            Some('B') => MetricFormat::Bytes,
+            Some('b') => MetricFormat::Bitmap,
+            Some('d') => MetricFormat::Duration,
             _ => MetricFormat::Unknown,
         }
     }
