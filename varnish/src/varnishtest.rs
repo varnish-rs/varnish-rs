@@ -74,8 +74,12 @@ pub fn run_varnish_test(
         .map_err(|e| format!("Failed to run varnishtest:\n{cmd:?}\n{e}"))?;
 
     if debug || !output.status.success() {
-        stdout().write_all(&output.stdout).unwrap();
-        stderr().write_all(&output.stderr).unwrap();
+        stdout()
+            .write_all(&output.stdout)
+            .expect("failed to write varnishtest stdout");
+        stderr()
+            .write_all(&output.stderr)
+            .expect("failed to write varnishtest stderr");
     }
 
     if output.status.success() {

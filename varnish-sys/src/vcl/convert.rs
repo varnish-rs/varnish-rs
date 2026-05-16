@@ -227,13 +227,13 @@ impl From<VCL_IP> for Option<SocketAddr> {
                 PF_INET => {
                     let buf: &[u8; 4] = std::slice::from_raw_parts(ptr.cast::<u8>(), 4)
                         .try_into()
-                        .unwrap();
+                        .expect("IPv4 address bytes slice must always be 4 bytes");
                     Some(SocketAddr::new(IpAddr::V4(Ipv4Addr::from(*buf)), port))
                 }
                 PF_INET6 => {
                     let buf: &[u8; 16] = std::slice::from_raw_parts(ptr.cast::<u8>(), 16)
                         .try_into()
-                        .unwrap();
+                        .expect("IPv6 address bytes slice always be 16 bytes");
                     Some(SocketAddr::new(IpAddr::V6(Ipv6Addr::from(*buf)), port))
                 }
                 _ => None,
@@ -445,7 +445,8 @@ impl IntoVCL<VCL_IP> for SocketAddr {
         unsafe {
             // We cannot use sizeof::<suckaddr>() because suckaddr is a zero-sized
             // struct from Rust's perspective
-            let size = NonZeroUsize::new(vsa_suckaddr_len).unwrap();
+            let size =
+                NonZeroUsize::new(vsa_suckaddr_len).expect("vsa_suckaddr_len must be non-zero");
             let p = ws.alloc(size);
             if p.is_null() {
                 Err(VclError::WsOutOfMemory(size))?;

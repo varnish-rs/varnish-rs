@@ -142,7 +142,7 @@ impl DeliveryProcCtx<'_> {
     ///
     /// The caller is in charge of making sure the structure doesn't outlive the pointer.
     pub(crate) unsafe fn from_ptr(raw: *mut vdp_ctx) -> Self {
-        let raw = raw.as_mut().unwrap();
+        let raw = raw.as_mut().expect("vdp_ctx pointer must not be null");
         assert_eq!(raw.magic, ffi::VDP_CTX_MAGIC);
         Self { raw }
     }
@@ -208,7 +208,11 @@ pub unsafe extern "C" fn wrap_vfp_pull<T: FetchProcessor>(
     } else {
         std::slice::from_raw_parts_mut(ptr.cast::<u8>(), *len as usize)
     };
-    let obj = vfe.priv1.cast::<T>().as_mut().unwrap();
+    let obj = vfe
+        .priv1
+        .cast::<T>()
+        .as_mut()
+        .expect("vfp_entry priv1 must not be null");
     match obj.pull(&mut FetchProcCtx::from_ptr(ctx), buf) {
         PullResult::Err => VfpStatus::Error, // TODO: log error
         PullResult::Ok(l) => {

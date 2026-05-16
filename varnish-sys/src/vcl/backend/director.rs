@@ -201,7 +201,10 @@ unsafe extern "C" fn wrap_director_healthy<D: VclDirector>(
     let dir_impl: &D = &*dir.priv_.cast::<D>();
     let result = dir_impl.probe(&mut ctx);
     if !changed.is_null() {
-        *changed = result.last_changed.try_into().unwrap();
+        *changed = result
+            .last_changed
+            .try_into()
+            .expect("probe SystemTime must be convertible to VCL_TIME");
     }
     result.healthy.into()
 }
