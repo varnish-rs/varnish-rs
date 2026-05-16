@@ -15,7 +15,7 @@ mod rustest {
     use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
     use std::time::Duration;
 
-    use varnish::ffi::VCL_STRING;
+    use varnish::ffi::{VCL_BLOB, VCL_STRING};
     use varnish::vcl::{
         CowProbe, Ctx, Event, FetchFilters, IntoVCL, Probe, Request, VclError, Workspace,
     };
@@ -160,6 +160,10 @@ mod rustest {
             s += k;
         }
         s
+    }
+
+    pub unsafe fn copy_blob(ws: &mut Workspace) -> Result<VCL_BLOB, VclError> {
+        ws.copy_blob(b"hello blob")
     }
 
     pub fn ws_tests(ctx: &mut Ctx) {
