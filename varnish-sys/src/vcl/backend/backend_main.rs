@@ -475,18 +475,23 @@ impl<'a> NativeBackendBuilder<'a> {
     );
 
     /// Use the `PROXY` protocol v1 to connect to the backend.
-    pub fn proxy_v1(&mut self) {
+    #[must_use]
+    pub fn proxy_v1(mut self) -> Self {
         self.proxy_header = Some(1);
+        self
     }
 
     /// Use the `PROXY` protocol v2 to connect to the backend.
-    pub fn proxy_v2(&mut self) {
+    #[must_use]
+    pub fn proxy_v2(mut self) -> Self {
         self.proxy_header = Some(2);
+        self
     }
 
     #[cfg(varnishsys_90_sslflags)]
     /// Use TLS for the backend connection.
-    pub fn tls(mut self, verify_host: bool, verify_peer: bool) {
+    #[must_use]
+    pub fn tls(mut self, verify_host: bool, verify_peer: bool) -> Self {
         if verify_host {
             self.sslflags |= BSSL_F_VERIFY_HOST;
         } else {
@@ -497,6 +502,7 @@ impl<'a> NativeBackendBuilder<'a> {
         } else {
             self.sslflags |= BSSL_F_NOVERIFY;
         }
+        self
     }
 
     /// Build the native backend
