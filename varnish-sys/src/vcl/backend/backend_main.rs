@@ -9,7 +9,7 @@ use std::time::SystemTime;
 
 use crate::ffi::{VclEvent, VfpStatus, VCL_BACKEND, VCL_BOOL, VCL_IP, VCL_TIME};
 #[cfg(varnishsys_90_sslflags)]
-use crate::ffi::{BSSL_F_NOVERIFY, BSSL_F_VERIFY_HOST};
+use crate::ffi::{BSSL_F_ENABLE, BSSL_F_NOVERIFY, BSSL_F_VERIFY_HOST};
 use crate::utils::get_backend;
 use crate::vcl::{Buffer, Ctx, IntoVCL, LogTag, VclError, VclResult, Workspace};
 use crate::{
@@ -492,6 +492,7 @@ impl<'a> NativeBackendBuilder<'a> {
     /// Use TLS for the backend connection.
     #[must_use]
     pub fn tls(mut self, verify_host: bool, verify_peer: bool) -> Self {
+        self.sslflags |= BSSL_F_ENABLE;
         if verify_host {
             self.sslflags |= BSSL_F_VERIFY_HOST;
         } else {
@@ -866,4 +867,55 @@ unsafe extern "C" fn wrap_finish<S: VclBackend<T>, T: VclResponse>(
 
     // FIXME?: should _prev be set to NULL?
     prev_backend.finish(&mut Ctx::from_ptr(ctx));
+}
+
+#[cfg(all(test, varnishsys_90_sslflags))]
+mod tests {
+    use std::net::SocketAddr;
+
+    use super::*;
+    use crate::ffi::BSSL_F_ENABLE;
+
+    fn builder() -> NativeBackendBuilder<'static> {
+        let addr: SocketAddr = "127.0.0.1:8080".parse().unwrap();
+        NativeBackendBuilder::new_ip(c"test", addr)
+    }
+
+    #[test]
+    fn fresh_builder_has_tls_disabled() {
+        assert_eq!(builder().sslflags & BSSL_F_ENABLE, 0);
+    }
+
+    #[test]
+    fn tls_sets_enable_flag_when_verify_all() {
+        let b = builder().tls(true, true);
+        assert_ne!(
+            b.sslflags & BSSL_F_ENABLE,
+            0,
+            "tls(true, true) must set BSSL_F_ENABLE, got sslflags={:#x}",
+            b.sslflags,
+        );
+    }
+
+    #[test]
+    fn tls_sets_enable_flag_when_verify_none() {
+        let b = builder().tls(false, false);
+        assert_ne!(
+            b.sslflags & BSSL_F_ENABLE,
+            0,
+            "tls(false, false) must set BSSL_F_ENABLE, got sslflags={:#x}",
+            b.sslflags,
+        );
+    }
+
+    #[test]
+    fn tls_sets_enable_flag_when_verify_peer_only() {
+        let b = builder().tls(false, true);
+        assert_ne!(
+            b.sslflags & BSSL_F_ENABLE,
+            0,
+            "tls(false, true) must set BSSL_F_ENABLE, got sslflags={:#x}",
+            b.sslflags,
+        );
+    }
 }
