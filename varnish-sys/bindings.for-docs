@@ -182,7 +182,7 @@ pub const __USE_ISOC99: u32 = 1;
 pub const __USE_ISOC95: u32 = 1;
 pub const __USE_POSIX_IMPLICITLY: u32 = 1;
 pub const _POSIX_SOURCE: u32 = 1;
-pub const _POSIX_C_SOURCE: u32 = 200809;
+pub const _POSIX_C_SOURCE: u32 = 202405;
 pub const __USE_POSIX: u32 = 1;
 pub const __USE_POSIX2: u32 = 1;
 pub const __USE_POSIX199309: u32 = 1;
@@ -190,6 +190,7 @@ pub const __USE_POSIX199506: u32 = 1;
 pub const __USE_XOPEN2K: u32 = 1;
 pub const __USE_XOPEN2K8: u32 = 1;
 pub const _ATFILE_SOURCE: u32 = 1;
+pub const __USE_XOPEN2K24: u32 = 1;
 pub const __WORDSIZE: u32 = 64;
 pub const __WORDSIZE_TIME64_COMPAT32: u32 = 1;
 pub const __SYSCALL_WORDSIZE: u32 = 64;
@@ -209,7 +210,7 @@ pub const __STDC_IEC_60559_COMPLEX__: u32 = 201404;
 pub const __STDC_ISO_10646__: u32 = 201706;
 pub const __GNU_LIBRARY__: u32 = 6;
 pub const __GLIBC__: u32 = 2;
-pub const __GLIBC_MINOR__: u32 = 42;
+pub const __GLIBC_MINOR__: u32 = 43;
 pub const _SYS_CDEFS_H: u32 = 1;
 pub const __glibc_c99_flexarr_available: u32 = 1;
 pub const __LDOUBLE_REDIRECTS_TO_FLOAT128_ABI: u32 = 0;
@@ -634,12 +635,16 @@ pub const WINT_MIN: u32 = 0;
 pub const WINT_MAX: u32 = 4294967295;
 pub const VRT_INTEGER_MAX: u64 = 999999999999999;
 pub const VRT_INTEGER_MIN: i64 = -999999999999999;
-pub const VRT_MAJOR_VERSION: u32 = 22;
-pub const VRT_MINOR_VERSION: u32 = 0;
+pub const VRT_MAJOR_VERSION: u32 = 23;
+pub const VRT_MINOR_VERSION: u32 = 1;
 pub const STRANDS_MAGIC: u32 = 1566224790;
 pub const VRT_BLOB_MAGIC: u32 = 3776240542;
 pub const VRT_NULL_BLOB_TYPE: u32 = 4208873376;
 pub const VRT_CTX_MAGIC: u32 = 1807282395;
+pub const BSSL_F_ENABLE: u32 = 1;
+pub const BSSL_F_NOSNI: u32 = 2;
+pub const BSSL_F_NOVERIFY: u32 = 4;
+pub const BSSL_F_VERIFY_HOST: u32 = 8;
 pub const VRT_ENDPOINT_MAGIC: u32 = 3426849607;
 pub const VRT_BACKEND_MAGIC: u32 = 1201262188;
 pub const VRT_BACKEND_PROBE_MAGIC: u32 = 2224653456;
@@ -813,6 +818,8 @@ pub const WS_ID_SIZE: u32 = 4;
 pub const WS_MAGIC: u32 = 905626964;
 pub const HTTP_MAGIC: u32 = 1680389577;
 pub const HDF_FILTER: u32 = 1;
+pub const VSL_LOG_MAGIC: u32 = 40756;
+pub const VSL_LOG_F_MALLOCED: u32 = 1;
 pub const WORKER_MAGIC: u32 = 1670491599;
 pub const BOC_MAGIC: u32 = 1892254838;
 pub const OBJCORE_MAGIC: u32 = 1294996226;
@@ -835,14 +842,6 @@ pub const OBJ_ITER_END: u32 = 2;
 pub const VSCARAB_MAGIC: u32 = 97155760;
 pub const VSCARAB_F_END: u32 = 1;
 pub const VSCARET_MAGIC: u32 = 2619293051;
-pub const VCLDIR_MAGIC: u32 = 3211947133;
-pub const VDIR_FLG_NOREFCNT: u32 = 1;
-pub const VFP_ENTRY_MAGIC: u32 = 3190988839;
-pub const VFP_CTX_MAGIC: u32 = 1641665509;
-pub const VDP_ENTRY_MAGIC: u32 = 893302657;
-pub const VDP_CTX_MAGIC: u32 = 3998227959;
-pub const VMOD_ABI_Version: &::std::ffi::CStr =
-    c"Varnish 8.0.0 71d4d75665f4d1949f7eeca28092a12df7037f3a";
 pub const VSB_MAGIC: u32 = 1250090378;
 pub const VSB_FIXEDLEN: u32 = 0;
 pub const VSB_AUTOEXTEND: u32 = 1;
@@ -857,6 +856,215 @@ pub const VSB_QUOTE_CSTR: u32 = 8;
 pub const VSB_QUOTE_UNSAFE: u32 = 16;
 pub const VSB_QUOTE_NONL: u32 = 1;
 pub const VSB_QUOTE_ESCHEX: u32 = 32;
+pub const VSB_QUOTE_ABBREVIATE: u32 = 64;
+pub const _LIBC_LIMITS_H_: u32 = 1;
+pub const MB_LEN_MAX: u32 = 16;
+pub const _BITS_POSIX1_LIM_H: u32 = 1;
+pub const _POSIX_AIO_LISTIO_MAX: u32 = 2;
+pub const _POSIX_AIO_MAX: u32 = 1;
+pub const _POSIX_ARG_MAX: u32 = 4096;
+pub const _POSIX_CHILD_MAX: u32 = 25;
+pub const _POSIX_DELAYTIMER_MAX: u32 = 32;
+pub const _POSIX_HOST_NAME_MAX: u32 = 255;
+pub const _POSIX_LINK_MAX: u32 = 8;
+pub const _POSIX_LOGIN_NAME_MAX: u32 = 9;
+pub const _POSIX_MAX_CANON: u32 = 255;
+pub const _POSIX_MAX_INPUT: u32 = 255;
+pub const _POSIX_MQ_OPEN_MAX: u32 = 8;
+pub const _POSIX_MQ_PRIO_MAX: u32 = 32;
+pub const _POSIX_NAME_MAX: u32 = 14;
+pub const _POSIX_NGROUPS_MAX: u32 = 8;
+pub const _POSIX_OPEN_MAX: u32 = 20;
+pub const _POSIX_PATH_MAX: u32 = 256;
+pub const _POSIX_PIPE_BUF: u32 = 512;
+pub const _POSIX_RE_DUP_MAX: u32 = 255;
+pub const _POSIX_RTSIG_MAX: u32 = 8;
+pub const _POSIX_SEM_NSEMS_MAX: u32 = 256;
+pub const _POSIX_SEM_VALUE_MAX: u32 = 32767;
+pub const _POSIX_SIGQUEUE_MAX: u32 = 32;
+pub const _POSIX_SSIZE_MAX: u32 = 32767;
+pub const _POSIX_STREAM_MAX: u32 = 8;
+pub const _POSIX_SYMLINK_MAX: u32 = 255;
+pub const _POSIX_SYMLOOP_MAX: u32 = 8;
+pub const _POSIX_TIMER_MAX: u32 = 32;
+pub const _POSIX_TTY_NAME_MAX: u32 = 9;
+pub const _POSIX_TZNAME_MAX: u32 = 6;
+pub const _POSIX_CLOCKRES_MIN: u32 = 20000000;
+pub const NR_OPEN: u32 = 1024;
+pub const NGROUPS_MAX: u32 = 65536;
+pub const ARG_MAX: u32 = 131072;
+pub const LINK_MAX: u32 = 127;
+pub const MAX_CANON: u32 = 255;
+pub const MAX_INPUT: u32 = 255;
+pub const NAME_MAX: u32 = 255;
+pub const PATH_MAX: u32 = 4096;
+pub const PIPE_BUF: u32 = 4096;
+pub const XATTR_NAME_MAX: u32 = 255;
+pub const XATTR_SIZE_MAX: u32 = 65536;
+pub const XATTR_LIST_MAX: u32 = 65536;
+pub const RTSIG_MAX: u32 = 32;
+pub const _POSIX_THREAD_KEYS_MAX: u32 = 128;
+pub const PTHREAD_KEYS_MAX: u32 = 1024;
+pub const _POSIX_THREAD_DESTRUCTOR_ITERATIONS: u32 = 4;
+pub const PTHREAD_DESTRUCTOR_ITERATIONS: u32 = 4;
+pub const _POSIX_THREAD_THREADS_MAX: u32 = 64;
+pub const AIO_PRIO_DELTA_MAX: u32 = 20;
+pub const DELAYTIMER_MAX: u32 = 2147483647;
+pub const TTY_NAME_MAX: u32 = 32;
+pub const LOGIN_NAME_MAX: u32 = 256;
+pub const HOST_NAME_MAX: u32 = 64;
+pub const MQ_PRIO_MAX: u32 = 32768;
+pub const SEM_VALUE_MAX: u32 = 2147483647;
+pub const _BITS_POSIX2_LIM_H: u32 = 1;
+pub const _POSIX2_BC_BASE_MAX: u32 = 99;
+pub const _POSIX2_BC_DIM_MAX: u32 = 2048;
+pub const _POSIX2_BC_SCALE_MAX: u32 = 99;
+pub const _POSIX2_BC_STRING_MAX: u32 = 1000;
+pub const _POSIX2_COLL_WEIGHTS_MAX: u32 = 2;
+pub const _POSIX2_EXPR_NEST_MAX: u32 = 32;
+pub const _POSIX2_LINE_MAX: u32 = 2048;
+pub const _POSIX2_RE_DUP_MAX: u32 = 255;
+pub const _POSIX2_CHARCLASS_NAME_MAX: u32 = 14;
+pub const BC_BASE_MAX: u32 = 99;
+pub const BC_DIM_MAX: u32 = 2048;
+pub const BC_SCALE_MAX: u32 = 99;
+pub const BC_STRING_MAX: u32 = 1000;
+pub const COLL_WEIGHTS_MAX: u32 = 255;
+pub const EXPR_NEST_MAX: u32 = 32;
+pub const LINE_MAX: u32 = 2048;
+pub const CHARCLASS_NAME_MAX: u32 = 2048;
+pub const RE_DUP_MAX: u32 = 32767;
+pub const _UNISTD_H: u32 = 1;
+pub const _POSIX_VERSION: u32 = 200809;
+pub const __POSIX2_THIS_VERSION: u32 = 200809;
+pub const _POSIX2_VERSION: u32 = 200809;
+pub const _POSIX2_C_VERSION: u32 = 200809;
+pub const _POSIX2_C_BIND: u32 = 200809;
+pub const _POSIX2_C_DEV: u32 = 200809;
+pub const _POSIX2_SW_DEV: u32 = 200809;
+pub const _POSIX2_LOCALEDEF: u32 = 200809;
+pub const _XOPEN_VERSION: u32 = 700;
+pub const _XOPEN_XCU_VERSION: u32 = 4;
+pub const _XOPEN_XPG2: u32 = 1;
+pub const _XOPEN_XPG3: u32 = 1;
+pub const _XOPEN_XPG4: u32 = 1;
+pub const _XOPEN_UNIX: u32 = 1;
+pub const _XOPEN_ENH_I18N: u32 = 1;
+pub const _XOPEN_LEGACY: u32 = 1;
+pub const _BITS_POSIX_OPT_H: u32 = 1;
+pub const _POSIX_JOB_CONTROL: u32 = 1;
+pub const _POSIX_SAVED_IDS: u32 = 1;
+pub const _POSIX_PRIORITY_SCHEDULING: u32 = 200809;
+pub const _POSIX_SYNCHRONIZED_IO: u32 = 200809;
+pub const _POSIX_FSYNC: u32 = 200809;
+pub const _POSIX_MAPPED_FILES: u32 = 200809;
+pub const _POSIX_MEMLOCK: u32 = 200809;
+pub const _POSIX_MEMLOCK_RANGE: u32 = 200809;
+pub const _POSIX_MEMORY_PROTECTION: u32 = 200809;
+pub const _POSIX_CHOWN_RESTRICTED: u32 = 0;
+pub const _POSIX_VDISABLE: u32 = 0;
+pub const _POSIX_NO_TRUNC: u32 = 1;
+pub const _XOPEN_REALTIME: u32 = 1;
+pub const _XOPEN_REALTIME_THREADS: u32 = 1;
+pub const _XOPEN_SHM: u32 = 1;
+pub const _POSIX_THREADS: u32 = 200809;
+pub const _POSIX_REENTRANT_FUNCTIONS: u32 = 1;
+pub const _POSIX_THREAD_SAFE_FUNCTIONS: u32 = 200809;
+pub const _POSIX_THREAD_PRIORITY_SCHEDULING: u32 = 200809;
+pub const _POSIX_THREAD_ATTR_STACKSIZE: u32 = 200809;
+pub const _POSIX_THREAD_ATTR_STACKADDR: u32 = 200809;
+pub const _POSIX_THREAD_PRIO_INHERIT: u32 = 200809;
+pub const _POSIX_THREAD_PRIO_PROTECT: u32 = 200809;
+pub const _POSIX_THREAD_ROBUST_PRIO_INHERIT: u32 = 200809;
+pub const _POSIX_THREAD_ROBUST_PRIO_PROTECT: i32 = -1;
+pub const _POSIX_SEMAPHORES: u32 = 200809;
+pub const _POSIX_REALTIME_SIGNALS: u32 = 200809;
+pub const _POSIX_ASYNCHRONOUS_IO: u32 = 200809;
+pub const _POSIX_ASYNC_IO: u32 = 1;
+pub const _LFS_ASYNCHRONOUS_IO: u32 = 1;
+pub const _POSIX_PRIORITIZED_IO: u32 = 200809;
+pub const _LFS64_ASYNCHRONOUS_IO: u32 = 1;
+pub const _LFS_LARGEFILE: u32 = 1;
+pub const _LFS64_LARGEFILE: u32 = 1;
+pub const _LFS64_STDIO: u32 = 1;
+pub const _POSIX_SHARED_MEMORY_OBJECTS: u32 = 200809;
+pub const _POSIX_CPUTIME: u32 = 0;
+pub const _POSIX_THREAD_CPUTIME: u32 = 0;
+pub const _POSIX_REGEXP: u32 = 1;
+pub const _POSIX_READER_WRITER_LOCKS: u32 = 200809;
+pub const _POSIX_SHELL: u32 = 1;
+pub const _POSIX_TIMEOUTS: u32 = 200809;
+pub const _POSIX_SPIN_LOCKS: u32 = 200809;
+pub const _POSIX_SPAWN: u32 = 200809;
+pub const _POSIX_TIMERS: u32 = 200809;
+pub const _POSIX_BARRIERS: u32 = 200809;
+pub const _POSIX_MESSAGE_PASSING: u32 = 200809;
+pub const _POSIX_THREAD_PROCESS_SHARED: u32 = 200809;
+pub const _POSIX_MONOTONIC_CLOCK: u32 = 0;
+pub const _POSIX_CLOCK_SELECTION: u32 = 200809;
+pub const _POSIX_ADVISORY_INFO: u32 = 200809;
+pub const _POSIX_IPV6: u32 = 200809;
+pub const _POSIX_RAW_SOCKETS: u32 = 200809;
+pub const _POSIX2_CHAR_TERM: u32 = 200809;
+pub const _POSIX_SPORADIC_SERVER: i32 = -1;
+pub const _POSIX_THREAD_SPORADIC_SERVER: i32 = -1;
+pub const _POSIX_TRACE: i32 = -1;
+pub const _POSIX_TRACE_EVENT_FILTER: i32 = -1;
+pub const _POSIX_TRACE_INHERIT: i32 = -1;
+pub const _POSIX_TRACE_LOG: i32 = -1;
+pub const _POSIX_TYPED_MEMORY_OBJECTS: i32 = -1;
+pub const _POSIX_V7_LPBIG_OFFBIG: i32 = -1;
+pub const _POSIX_V6_LPBIG_OFFBIG: i32 = -1;
+pub const _XBS5_LPBIG_OFFBIG: i32 = -1;
+pub const _POSIX_V7_LP64_OFF64: u32 = 1;
+pub const _POSIX_V6_LP64_OFF64: u32 = 1;
+pub const _XBS5_LP64_OFF64: u32 = 1;
+pub const __ILP32_OFF32_CFLAGS: &::std::ffi::CStr = c"-m32";
+pub const __ILP32_OFF32_LDFLAGS: &::std::ffi::CStr = c"-m32";
+pub const __ILP32_OFFBIG_CFLAGS: &::std::ffi::CStr =
+    c"-m32 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64";
+pub const __ILP32_OFFBIG_LDFLAGS: &::std::ffi::CStr = c"-m32";
+pub const __LP64_OFF64_CFLAGS: &::std::ffi::CStr = c"-m64";
+pub const __LP64_OFF64_LDFLAGS: &::std::ffi::CStr = c"-m64";
+pub const STDIN_FILENO: u32 = 0;
+pub const STDOUT_FILENO: u32 = 1;
+pub const STDERR_FILENO: u32 = 2;
+pub const R_OK: u32 = 4;
+pub const W_OK: u32 = 2;
+pub const X_OK: u32 = 1;
+pub const F_OK: u32 = 0;
+pub const SEEK_SET: u32 = 0;
+pub const SEEK_CUR: u32 = 1;
+pub const SEEK_END: u32 = 2;
+pub const L_SET: u32 = 0;
+pub const L_INCR: u32 = 1;
+pub const L_XTND: u32 = 2;
+pub const _GETOPT_POSIX_H: u32 = 1;
+pub const _GETOPT_CORE_H: u32 = 1;
+pub const F_ULOCK: u32 = 0;
+pub const F_LOCK: u32 = 1;
+pub const F_TLOCK: u32 = 2;
+pub const F_TEST: u32 = 3;
+pub const VRE_ERROR_LEN: u32 = 128;
+pub const VSM_CLASS_PARAM: &::std::ffi::CStr = c"Params";
+pub const H2_RR_INFO : & :: std :: ffi :: CStr = c"Changes to this parameter affect the default for new HTTP2 sessions. vmod_h2(3) can be used to adjust it from VCL." ;
+pub const WORKER_PRIV_MAGIC: u32 = 810015641;
+pub const HTTP_CONN_MAGIC: u32 = 1041886673;
+pub const VCF_MAGIC: u32 = 405964241;
+pub const OEV_INSERT: u32 = 2;
+pub const OEV_BANCHG: u32 = 4;
+pub const OEV_TTLCHG: u32 = 8;
+pub const OEV_EXPIRE: u32 = 16;
+pub const OEV_MASK: u32 = 30;
+pub const BACKEND_MAGIC: u32 = 1690617798;
+pub const VCLDIR_MAGIC: u32 = 3211947133;
+pub const VDIR_FLG_NOREFCNT: u32 = 1;
+pub const VFP_ENTRY_MAGIC: u32 = 3190988839;
+pub const VFP_CTX_MAGIC: u32 = 1641665509;
+pub const VDP_ENTRY_MAGIC: u32 = 893302657;
+pub const VDP_CTX_MAGIC: u32 = 3998227959;
+pub const VMOD_ABI_Version: &::std::ffi::CStr =
+    c"Varnish 9.0.0 ce1b315b0c35477c666e4c8d8e1c9174df87eb61";
 pub const VSM_n_USAGE: &::std::ffi::CStr = c"[-n varnish_name]";
 pub const VSM_t_USAGE: &::std::ffi::CStr = c"[-t <seconds|off>]";
 pub const VSM_MGT_RUNNING: u32 = 2;
@@ -867,7 +1075,6 @@ pub const VSM_WRK_CHANGED: u32 = 1024;
 pub const VSM_WRK_RESTARTED: u32 = 2048;
 pub const VSM_MGT_MASK: u32 = 255;
 pub const VSM_WRK_MASK: u32 = 65280;
-pub const HTTP_CONN_MAGIC: u32 = 1041886673;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct iovec {
@@ -1171,7 +1378,7 @@ pub struct __pthread_mutex_s {
     pub __nusers: ::std::ffi::c_uint,
     pub __kind: ::std::ffi::c_int,
     pub __spins: ::std::ffi::c_short,
-    pub __elision: ::std::ffi::c_short,
+    pub __unused: ::std::ffi::c_short,
     pub __list: __pthread_list_t,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
@@ -1190,8 +1397,8 @@ const _: () = {
         [::std::mem::offset_of!(__pthread_mutex_s, __kind) - 16usize];
     ["Offset of field: __pthread_mutex_s::__spins"]
         [::std::mem::offset_of!(__pthread_mutex_s, __spins) - 20usize];
-    ["Offset of field: __pthread_mutex_s::__elision"]
-        [::std::mem::offset_of!(__pthread_mutex_s, __elision) - 22usize];
+    ["Offset of field: __pthread_mutex_s::__unused"]
+        [::std::mem::offset_of!(__pthread_mutex_s, __unused) - 22usize];
     ["Offset of field: __pthread_mutex_s::__list"]
         [::std::mem::offset_of!(__pthread_mutex_s, __list) - 24usize];
 };
@@ -1215,8 +1422,7 @@ pub struct __pthread_rwlock_arch_t {
     pub __pad4: ::std::ffi::c_uint,
     pub __cur_writer: ::std::ffi::c_int,
     pub __shared: ::std::ffi::c_int,
-    pub __rwelision: ::std::ffi::c_schar,
-    pub __pad1: [::std::ffi::c_uchar; 7usize],
+    pub __pad1: ::std::ffi::c_ulong,
     pub __pad2: ::std::ffi::c_ulong,
     pub __flags: ::std::ffi::c_uint,
 }
@@ -1241,10 +1447,8 @@ const _: () = {
         [::std::mem::offset_of!(__pthread_rwlock_arch_t, __cur_writer) - 24usize];
     ["Offset of field: __pthread_rwlock_arch_t::__shared"]
         [::std::mem::offset_of!(__pthread_rwlock_arch_t, __shared) - 28usize];
-    ["Offset of field: __pthread_rwlock_arch_t::__rwelision"]
-        [::std::mem::offset_of!(__pthread_rwlock_arch_t, __rwelision) - 32usize];
     ["Offset of field: __pthread_rwlock_arch_t::__pad1"]
-        [::std::mem::offset_of!(__pthread_rwlock_arch_t, __pad1) - 33usize];
+        [::std::mem::offset_of!(__pthread_rwlock_arch_t, __pad1) - 32usize];
     ["Offset of field: __pthread_rwlock_arch_t::__pad2"]
         [::std::mem::offset_of!(__pthread_rwlock_arch_t, __pad2) - 40usize];
     ["Offset of field: __pthread_rwlock_arch_t::__flags"]
@@ -1714,6 +1918,7 @@ const _: () = {
 };
 pub type __kernel_off_t = __kernel_long_t;
 pub type __kernel_loff_t = ::std::ffi::c_longlong;
+pub type __kernel_uoff_t = ::std::ffi::c_ulonglong;
 pub type __kernel_old_time_t = __kernel_long_t;
 pub type __kernel_time_t = __kernel_long_t;
 pub type __kernel_time64_t = ::std::ffi::c_longlong;
@@ -1911,6 +2116,13 @@ unsafe extern "C" {
         __s: *mut ::std::ffi::c_void,
         __c: ::std::ffi::c_int,
         __n: ::std::ffi::c_ulong,
+    ) -> *mut ::std::ffi::c_void;
+}
+unsafe extern "C" {
+    pub fn memset_explicit(
+        __s: *mut ::std::ffi::c_void,
+        __c: ::std::ffi::c_int,
+        __n: usize,
     ) -> *mut ::std::ffi::c_void;
 }
 unsafe extern "C" {
@@ -5033,6 +5245,9 @@ unsafe extern "C" {
     pub fn VRT_IP_string(ctx: *const vrt_ctx, arg1: VCL_IP) -> VCL_STRING;
 }
 unsafe extern "C" {
+    pub fn VRT_PROBE_string(arg1: VCL_PROBE) -> VCL_STRING;
+}
+unsafe extern "C" {
     pub fn VRT_REAL_string(ctx: *const vrt_ctx, arg1: VCL_REAL) -> VCL_STRING;
 }
 unsafe extern "C" {
@@ -5057,7 +5272,6 @@ unsafe extern "C" {
         len: ::std::ffi::c_uint,
     );
 }
-#[doc = " We want the VCC to spit this structs out as const, but when VMODs\n come up with them we want to clone them into malloc'ed space which\n we can free again.\n We collect all the knowledge here by macroizing the fields and make\n a macro for handling them all.\n See also:  cache_backend.h & cache_backend_cfg.c\n One of those things..."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct vrt_endpoint {
@@ -5066,10 +5280,12 @@ pub struct vrt_endpoint {
     pub ipv6: VCL_IP,
     pub uds_path: *const ::std::ffi::c_char,
     pub preamble: *const vrt_blob,
+    pub sslflags: ::std::ffi::c_uint,
+    pub hosthdr: *const ::std::ffi::c_char,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of vrt_endpoint"][::std::mem::size_of::<vrt_endpoint>() - 40usize];
+    ["Size of vrt_endpoint"][::std::mem::size_of::<vrt_endpoint>() - 56usize];
     ["Alignment of vrt_endpoint"][::std::mem::align_of::<vrt_endpoint>() - 8usize];
     ["Offset of field: vrt_endpoint::magic"][::std::mem::offset_of!(vrt_endpoint, magic) - 0usize];
     ["Offset of field: vrt_endpoint::ipv4"][::std::mem::offset_of!(vrt_endpoint, ipv4) - 8usize];
@@ -5078,6 +5294,10 @@ const _: () = {
         [::std::mem::offset_of!(vrt_endpoint, uds_path) - 24usize];
     ["Offset of field: vrt_endpoint::preamble"]
         [::std::mem::offset_of!(vrt_endpoint, preamble) - 32usize];
+    ["Offset of field: vrt_endpoint::sslflags"]
+        [::std::mem::offset_of!(vrt_endpoint, sslflags) - 40usize];
+    ["Offset of field: vrt_endpoint::hosthdr"]
+        [::std::mem::offset_of!(vrt_endpoint, hosthdr) - 48usize];
 };
 impl Default for vrt_endpoint {
     fn default() -> Self {
@@ -5156,10 +5376,11 @@ pub struct vrt_backend_probe {
     pub threshold: ::std::ffi::c_uint,
     pub initial: ::std::ffi::c_uint,
     pub exp_close: ::std::ffi::c_uint,
+    pub vcl_name: *const ::std::ffi::c_char,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of vrt_backend_probe"][::std::mem::size_of::<vrt_backend_probe>() - 64usize];
+    ["Size of vrt_backend_probe"][::std::mem::size_of::<vrt_backend_probe>() - 72usize];
     ["Alignment of vrt_backend_probe"][::std::mem::align_of::<vrt_backend_probe>() - 8usize];
     ["Offset of field: vrt_backend_probe::magic"]
         [::std::mem::offset_of!(vrt_backend_probe, magic) - 0usize];
@@ -5181,6 +5402,8 @@ const _: () = {
         [::std::mem::offset_of!(vrt_backend_probe, initial) - 52usize];
     ["Offset of field: vrt_backend_probe::exp_close"]
         [::std::mem::offset_of!(vrt_backend_probe, exp_close) - 56usize];
+    ["Offset of field: vrt_backend_probe::vcl_name"]
+        [::std::mem::offset_of!(vrt_backend_probe, vcl_name) - 64usize];
 };
 impl Default for vrt_backend_probe {
     fn default() -> Self {
@@ -5686,92 +5909,95 @@ pub enum VslTag {
     SessClose = 5,
     BackendOpen = 6,
     BackendClose = 7,
-    HttpGarbage = 8,
-    Proxy = 9,
-    ProxyGarbage = 10,
-    Length = 11,
-    FetchError = 12,
-    ReqMethod = 13,
-    ReqUrl = 14,
-    ReqProtocol = 15,
-    ReqStatus = 16,
-    ReqReason = 17,
-    ReqHeader = 18,
-    ReqUnset = 19,
-    ReqLost = 20,
-    RespMethod = 21,
-    RespUrl = 22,
-    RespProtocol = 23,
-    RespStatus = 24,
-    RespReason = 25,
-    RespHeader = 26,
-    RespUnset = 27,
-    RespLost = 28,
-    BereqMethod = 29,
-    BereqUrl = 30,
-    BereqProtocol = 31,
-    BereqStatus = 32,
-    BereqReason = 33,
-    BereqHeader = 34,
-    BereqUnset = 35,
-    BereqLost = 36,
-    BerespMethod = 37,
-    BerespUrl = 38,
-    BerespProtocol = 39,
-    BerespStatus = 40,
-    BerespReason = 41,
-    BerespHeader = 42,
-    BerespUnset = 43,
-    BerespLost = 44,
-    ObjMethod = 45,
-    ObjUrl = 46,
-    ObjProtocol = 47,
-    ObjStatus = 48,
-    ObjReason = 49,
-    ObjHeader = 50,
-    ObjUnset = 51,
-    ObjLost = 52,
-    BogoHeader = 53,
-    LostHeader = 54,
-    Ttl = 55,
-    FetchBody = 56,
-    VclAcl = 57,
-    VclCall = 58,
-    VclTrace = 59,
-    VclReturn = 60,
-    ReqStart = 61,
-    Hit = 62,
-    HitPass = 63,
-    ExpBan = 64,
-    ExpKill = 65,
-    WorkThread = 66,
-    EsiXmlerror = 67,
-    Hash = 68,
-    BackendHealth = 69,
-    VclLog = 70,
-    VclError = 71,
-    Gzip = 72,
-    Link = 73,
-    Begin = 74,
-    End = 75,
-    Vsl = 76,
-    Storage = 77,
-    Timestamp = 78,
-    ReqAcct = 79,
-    PipeAcct = 80,
-    BereqAcct = 81,
-    VfpAcct = 82,
-    Witness = 83,
-    H2RxHdr = 84,
-    H2RxBody = 85,
-    H2TxHdr = 86,
-    H2TxBody = 87,
-    HitMiss = 88,
-    Filters = 89,
-    SessError = 90,
-    VclUse = 91,
-    Notice = 92,
-    VdpAcct = 93,
+    BackendSsl = 8,
+    Tls = 9,
+    HttpGarbage = 10,
+    Proxy = 11,
+    ProxyGarbage = 12,
+    Length = 13,
+    FetchError = 14,
+    ReqMethod = 15,
+    ReqUrl = 16,
+    ReqProtocol = 17,
+    ReqStatus = 18,
+    ReqReason = 19,
+    ReqHeader = 20,
+    ReqUnset = 21,
+    ReqLost = 22,
+    RespMethod = 23,
+    RespUrl = 24,
+    RespProtocol = 25,
+    RespStatus = 26,
+    RespReason = 27,
+    RespHeader = 28,
+    RespUnset = 29,
+    RespLost = 30,
+    BereqMethod = 31,
+    BereqUrl = 32,
+    BereqProtocol = 33,
+    BereqStatus = 34,
+    BereqReason = 35,
+    BereqHeader = 36,
+    BereqUnset = 37,
+    BereqLost = 38,
+    BerespMethod = 39,
+    BerespUrl = 40,
+    BerespProtocol = 41,
+    BerespStatus = 42,
+    BerespReason = 43,
+    BerespHeader = 44,
+    BerespUnset = 45,
+    BerespLost = 46,
+    ObjMethod = 47,
+    ObjUrl = 48,
+    ObjProtocol = 49,
+    ObjStatus = 50,
+    ObjReason = 51,
+    ObjHeader = 52,
+    ObjUnset = 53,
+    ObjLost = 54,
+    BogoHeader = 55,
+    LostHeader = 56,
+    Ttl = 57,
+    FetchBody = 58,
+    VclAcl = 59,
+    VclCall = 60,
+    VclTrace = 61,
+    VclReturn = 62,
+    ReqStart = 63,
+    Hit = 64,
+    HitPass = 65,
+    ExpBan = 66,
+    ExpKill = 67,
+    WorkThread = 68,
+    EsiXmlerror = 69,
+    Hash = 70,
+    BackendHealth = 71,
+    VclLog = 72,
+    VclError = 73,
+    Gzip = 74,
+    Link = 75,
+    Begin = 76,
+    End = 77,
+    Vsl = 78,
+    Storage = 79,
+    Timestamp = 80,
+    ReqAcct = 81,
+    PipeAcct = 82,
+    BereqAcct = 83,
+    VfpAcct = 84,
+    Witness = 85,
+    H2RxHdr = 86,
+    H2RxBody = 87,
+    H2TxHdr = 88,
+    H2TxBody = 89,
+    HitMiss = 90,
+    Filters = 91,
+    SessError = 92,
+    VclUse = 93,
+    Notice = 94,
+    VdpAcct = 95,
+    ReqTarget = 96,
     Reserved = 254,
     Batch = 255,
 }
@@ -5974,17 +6200,7 @@ pub struct pool {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct req_step {
-    _unused: [u8; 0],
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
 pub struct transport {
-    _unused: [u8; 0],
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct vcf {
     _unused: [u8; 0],
 }
 #[repr(C)]
@@ -5999,7 +6215,7 @@ pub struct VSC_main_wrk {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct worker_priv {
+pub struct vtls_sess {
     _unused: [u8; 0],
 }
 #[repr(C)]
@@ -6052,6 +6268,17 @@ impl Default for ws {
         }
     }
 }
+pub const well_known_method_WKM_GET: well_known_method = 1;
+pub const well_known_method_WKM_HEAD: well_known_method = 2;
+pub const well_known_method_WKM_POST: well_known_method = 4;
+pub const well_known_method_WKM_PUT: well_known_method = 8;
+pub const well_known_method_WKM_DELETE: well_known_method = 16;
+pub const well_known_method_WKM_OPTIONS: well_known_method = 32;
+pub const well_known_method_WKM_TRACE: well_known_method = 64;
+pub const well_known_method_WKM_PATCH: well_known_method = 128;
+pub const well_known_method_WKM_CONNECT: well_known_method = 256;
+pub const well_known_method_WKM_UNKNOWN: well_known_method = 1073741824;
+pub type well_known_method = ::std::ffi::c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct http {
@@ -6065,6 +6292,7 @@ pub struct http {
     pub ws: *mut ws,
     pub status: u16,
     pub protover: u8,
+    pub wkm: well_known_method,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
@@ -6080,6 +6308,7 @@ const _: () = {
     ["Offset of field: http::ws"][::std::mem::offset_of!(http, ws) - 40usize];
     ["Offset of field: http::status"][::std::mem::offset_of!(http, status) - 48usize];
     ["Offset of field: http::protover"][::std::mem::offset_of!(http, protover) - 50usize];
+    ["Offset of field: http::wkm"][::std::mem::offset_of!(http, wkm) - 52usize];
 };
 impl Default for http {
     fn default() -> Self {
@@ -6135,21 +6364,25 @@ const _: () = {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct vsl_log {
+    pub magic: u16,
+    pub flags: u16,
+    pub wlr: ::std::ffi::c_uint,
     pub wlb: *mut u32,
     pub wlp: *mut u32,
     pub wle: *mut u32,
     pub wid: vxid_t,
-    pub wlr: ::std::ffi::c_uint,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
     ["Size of vsl_log"][::std::mem::size_of::<vsl_log>() - 40usize];
     ["Alignment of vsl_log"][::std::mem::align_of::<vsl_log>() - 8usize];
-    ["Offset of field: vsl_log::wlb"][::std::mem::offset_of!(vsl_log, wlb) - 0usize];
-    ["Offset of field: vsl_log::wlp"][::std::mem::offset_of!(vsl_log, wlp) - 8usize];
-    ["Offset of field: vsl_log::wle"][::std::mem::offset_of!(vsl_log, wle) - 16usize];
-    ["Offset of field: vsl_log::wid"][::std::mem::offset_of!(vsl_log, wid) - 24usize];
-    ["Offset of field: vsl_log::wlr"][::std::mem::offset_of!(vsl_log, wlr) - 32usize];
+    ["Offset of field: vsl_log::magic"][::std::mem::offset_of!(vsl_log, magic) - 0usize];
+    ["Offset of field: vsl_log::flags"][::std::mem::offset_of!(vsl_log, flags) - 2usize];
+    ["Offset of field: vsl_log::wlr"][::std::mem::offset_of!(vsl_log, wlr) - 4usize];
+    ["Offset of field: vsl_log::wlb"][::std::mem::offset_of!(vsl_log, wlb) - 8usize];
+    ["Offset of field: vsl_log::wlp"][::std::mem::offset_of!(vsl_log, wlp) - 16usize];
+    ["Offset of field: vsl_log::wle"][::std::mem::offset_of!(vsl_log, wle) - 24usize];
+    ["Offset of field: vsl_log::wid"][::std::mem::offset_of!(vsl_log, wid) - 32usize];
 };
 impl Default for vsl_log {
     fn default() -> Self {
@@ -7092,6 +7325,9 @@ impl busyobj {
         __bindgen_bitfield_unit
     }
 }
+unsafe extern "C" {
+    pub static mut retry_disabled: *const ::std::ffi::c_char;
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct reqtop {
@@ -7801,10 +8037,11 @@ pub struct sess {
     pub timeout_linger: vtim_dur,
     pub send_timeout: vtim_dur,
     pub idle_send_timeout: vtim_dur,
+    pub tls: *mut vtls_sess,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of sess"][::std::mem::size_of::<sess>() - 152usize];
+    ["Size of sess"][::std::mem::size_of::<sess>() - 160usize];
     ["Alignment of sess"][::std::mem::align_of::<sess>() - 8usize];
     ["Offset of field: sess::magic"][::std::mem::offset_of!(sess, magic) - 0usize];
     ["Offset of field: sess::sattr"][::std::mem::offset_of!(sess, sattr) - 4usize];
@@ -7823,6 +8060,7 @@ const _: () = {
     ["Offset of field: sess::send_timeout"][::std::mem::offset_of!(sess, send_timeout) - 136usize];
     ["Offset of field: sess::idle_send_timeout"]
         [::std::mem::offset_of!(sess, idle_send_timeout) - 144usize];
+    ["Offset of field: sess::tls"][::std::mem::offset_of!(sess, tls) - 152usize];
 };
 impl Default for sess {
     fn default() -> Self {
@@ -8043,6 +8281,9 @@ unsafe extern "C" {
         u: ::std::ffi::c_uint,
         how: ::std::ffi::c_uint,
     ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn http_SetWellKnownMethod(hp: *mut http);
 }
 unsafe extern "C" {
     pub static mut H_Accept: hdr_t;
@@ -8474,6 +8715,9 @@ unsafe extern "C" {
     pub fn ObjVAIreturn(arg1: *mut worker, arg2: vai_hdl, arg3: *mut vscaret);
 }
 unsafe extern "C" {
+    pub fn ObjVAInotify(arg1: *mut worker, arg2: vai_hdl);
+}
+unsafe extern "C" {
     pub fn ObjVAIfini(arg1: *mut worker, arg2: *mut vai_hdl);
 }
 unsafe extern "C" {
@@ -8688,6 +8932,2876 @@ unsafe extern "C" {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct vsb {
+    pub magic: ::std::ffi::c_uint,
+    pub s_error: ::std::ffi::c_int,
+    pub s_buf: *mut ::std::ffi::c_char,
+    pub s_size: isize,
+    pub s_len: isize,
+    pub s_flags: ::std::ffi::c_int,
+    pub s_indent: ::std::ffi::c_int,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of vsb"][::std::mem::size_of::<vsb>() - 40usize];
+    ["Alignment of vsb"][::std::mem::align_of::<vsb>() - 8usize];
+    ["Offset of field: vsb::magic"][::std::mem::offset_of!(vsb, magic) - 0usize];
+    ["Offset of field: vsb::s_error"][::std::mem::offset_of!(vsb, s_error) - 4usize];
+    ["Offset of field: vsb::s_buf"][::std::mem::offset_of!(vsb, s_buf) - 8usize];
+    ["Offset of field: vsb::s_size"][::std::mem::offset_of!(vsb, s_size) - 16usize];
+    ["Offset of field: vsb::s_len"][::std::mem::offset_of!(vsb, s_len) - 24usize];
+    ["Offset of field: vsb::s_flags"][::std::mem::offset_of!(vsb, s_flags) - 32usize];
+    ["Offset of field: vsb::s_indent"][::std::mem::offset_of!(vsb, s_indent) - 36usize];
+};
+impl Default for vsb {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+unsafe extern "C" {
+    pub fn VSB_init(arg1: *mut vsb, arg2: *mut ::std::ffi::c_void, arg3: isize) -> *mut vsb;
+}
+unsafe extern "C" {
+    pub fn VSB_new_auto() -> *mut vsb;
+}
+unsafe extern "C" {
+    pub fn VSB_clear(arg1: *mut vsb);
+}
+unsafe extern "C" {
+    pub fn VSB_bcat(
+        arg1: *mut vsb,
+        arg2: *const ::std::ffi::c_void,
+        arg3: isize,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSB_cat(arg1: *mut vsb, arg2: *const ::std::ffi::c_char) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSB_printf(arg1: *mut vsb, arg2: *const ::std::ffi::c_char, ...) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSB_vprintf(
+        arg1: *mut vsb,
+        arg2: *const ::std::ffi::c_char,
+        arg3: *mut __va_list_tag,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSB_putc(arg1: *mut vsb, arg2: ::std::ffi::c_int) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSB_error(arg1: *const vsb) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSB_finish(arg1: *mut vsb) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSB_data(arg1: *const vsb) -> *mut ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn VSB_len(arg1: *const vsb) -> isize;
+}
+unsafe extern "C" {
+    pub fn VSB_fini(arg1: *mut vsb);
+}
+unsafe extern "C" {
+    pub fn VSB_destroy(arg1: *mut *mut vsb);
+}
+unsafe extern "C" {
+    pub fn VSB_quote_pfx(
+        arg1: *mut vsb,
+        arg2: *const ::std::ffi::c_char,
+        arg3: *const ::std::ffi::c_void,
+        len: ::std::ffi::c_int,
+        how: ::std::ffi::c_int,
+    );
+}
+unsafe extern "C" {
+    pub fn VSB_quote(
+        arg1: *mut vsb,
+        arg2: *const ::std::ffi::c_void,
+        len: ::std::ffi::c_int,
+        how: ::std::ffi::c_int,
+    );
+}
+unsafe extern "C" {
+    pub fn VSB_indent(arg1: *mut vsb, arg2: ::std::ffi::c_int);
+}
+unsafe extern "C" {
+    pub fn VSB_tofile(arg1: *const vsb, fd: ::std::ffi::c_int) -> ::std::ffi::c_int;
+}
+pub type useconds_t = __useconds_t;
+unsafe extern "C" {
+    pub fn access(
+        __name: *const ::std::ffi::c_char,
+        __type: ::std::ffi::c_int,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn faccessat(
+        __fd: ::std::ffi::c_int,
+        __file: *const ::std::ffi::c_char,
+        __type: ::std::ffi::c_int,
+        __flag: ::std::ffi::c_int,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn lseek(
+        __fd: ::std::ffi::c_int,
+        __offset: __off_t,
+        __whence: ::std::ffi::c_int,
+    ) -> __off_t;
+}
+unsafe extern "C" {
+    pub fn close(__fd: ::std::ffi::c_int) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn closefrom(__lowfd: ::std::ffi::c_int);
+}
+unsafe extern "C" {
+    pub fn read(__fd: ::std::ffi::c_int, __buf: *mut ::std::ffi::c_void, __nbytes: usize) -> isize;
+}
+unsafe extern "C" {
+    pub fn write(__fd: ::std::ffi::c_int, __buf: *const ::std::ffi::c_void, __n: usize) -> isize;
+}
+unsafe extern "C" {
+    pub fn pread(
+        __fd: ::std::ffi::c_int,
+        __buf: *mut ::std::ffi::c_void,
+        __nbytes: usize,
+        __offset: __off_t,
+    ) -> isize;
+}
+unsafe extern "C" {
+    pub fn pwrite(
+        __fd: ::std::ffi::c_int,
+        __buf: *const ::std::ffi::c_void,
+        __n: usize,
+        __offset: __off_t,
+    ) -> isize;
+}
+unsafe extern "C" {
+    pub fn pipe(__pipedes: *mut ::std::ffi::c_int) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn alarm(__seconds: ::std::ffi::c_uint) -> ::std::ffi::c_uint;
+}
+unsafe extern "C" {
+    pub fn sleep(__seconds: ::std::ffi::c_uint) -> ::std::ffi::c_uint;
+}
+unsafe extern "C" {
+    pub fn ualarm(__value: __useconds_t, __interval: __useconds_t) -> __useconds_t;
+}
+unsafe extern "C" {
+    pub fn usleep(__useconds: __useconds_t) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn pause() -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn chown(
+        __file: *const ::std::ffi::c_char,
+        __owner: __uid_t,
+        __group: __gid_t,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn fchown(__fd: ::std::ffi::c_int, __owner: __uid_t, __group: __gid_t)
+    -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn lchown(
+        __file: *const ::std::ffi::c_char,
+        __owner: __uid_t,
+        __group: __gid_t,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn fchownat(
+        __fd: ::std::ffi::c_int,
+        __file: *const ::std::ffi::c_char,
+        __owner: __uid_t,
+        __group: __gid_t,
+        __flag: ::std::ffi::c_int,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn chdir(__path: *const ::std::ffi::c_char) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn fchdir(__fd: ::std::ffi::c_int) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn getcwd(__buf: *mut ::std::ffi::c_char, __size: usize) -> *mut ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn getwd(__buf: *mut ::std::ffi::c_char) -> *mut ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn dup(__fd: ::std::ffi::c_int) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn dup2(__fd: ::std::ffi::c_int, __fd2: ::std::ffi::c_int) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub static mut __environ: *mut *mut ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn execve(
+        __path: *const ::std::ffi::c_char,
+        __argv: *const *mut ::std::ffi::c_char,
+        __envp: *const *mut ::std::ffi::c_char,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn fexecve(
+        __fd: ::std::ffi::c_int,
+        __argv: *const *mut ::std::ffi::c_char,
+        __envp: *const *mut ::std::ffi::c_char,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn execv(
+        __path: *const ::std::ffi::c_char,
+        __argv: *const *mut ::std::ffi::c_char,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn execle(
+        __path: *const ::std::ffi::c_char,
+        __arg: *const ::std::ffi::c_char,
+        ...
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn execl(
+        __path: *const ::std::ffi::c_char,
+        __arg: *const ::std::ffi::c_char,
+        ...
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn execvp(
+        __file: *const ::std::ffi::c_char,
+        __argv: *const *mut ::std::ffi::c_char,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn execlp(
+        __file: *const ::std::ffi::c_char,
+        __arg: *const ::std::ffi::c_char,
+        ...
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn nice(__inc: ::std::ffi::c_int) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn _exit(__status: ::std::ffi::c_int) -> !;
+}
+pub const _PC_LINK_MAX: _bindgen_ty_17 = 0;
+pub const _PC_MAX_CANON: _bindgen_ty_17 = 1;
+pub const _PC_MAX_INPUT: _bindgen_ty_17 = 2;
+pub const _PC_NAME_MAX: _bindgen_ty_17 = 3;
+pub const _PC_PATH_MAX: _bindgen_ty_17 = 4;
+pub const _PC_PIPE_BUF: _bindgen_ty_17 = 5;
+pub const _PC_CHOWN_RESTRICTED: _bindgen_ty_17 = 6;
+pub const _PC_NO_TRUNC: _bindgen_ty_17 = 7;
+pub const _PC_VDISABLE: _bindgen_ty_17 = 8;
+pub const _PC_SYNC_IO: _bindgen_ty_17 = 9;
+pub const _PC_ASYNC_IO: _bindgen_ty_17 = 10;
+pub const _PC_PRIO_IO: _bindgen_ty_17 = 11;
+pub const _PC_SOCK_MAXBUF: _bindgen_ty_17 = 12;
+pub const _PC_FILESIZEBITS: _bindgen_ty_17 = 13;
+pub const _PC_REC_INCR_XFER_SIZE: _bindgen_ty_17 = 14;
+pub const _PC_REC_MAX_XFER_SIZE: _bindgen_ty_17 = 15;
+pub const _PC_REC_MIN_XFER_SIZE: _bindgen_ty_17 = 16;
+pub const _PC_REC_XFER_ALIGN: _bindgen_ty_17 = 17;
+pub const _PC_ALLOC_SIZE_MIN: _bindgen_ty_17 = 18;
+pub const _PC_SYMLINK_MAX: _bindgen_ty_17 = 19;
+pub const _PC_2_SYMLINKS: _bindgen_ty_17 = 20;
+pub type _bindgen_ty_17 = ::std::ffi::c_uint;
+pub const _SC_ARG_MAX: _bindgen_ty_18 = 0;
+pub const _SC_CHILD_MAX: _bindgen_ty_18 = 1;
+pub const _SC_CLK_TCK: _bindgen_ty_18 = 2;
+pub const _SC_NGROUPS_MAX: _bindgen_ty_18 = 3;
+pub const _SC_OPEN_MAX: _bindgen_ty_18 = 4;
+pub const _SC_STREAM_MAX: _bindgen_ty_18 = 5;
+pub const _SC_TZNAME_MAX: _bindgen_ty_18 = 6;
+pub const _SC_JOB_CONTROL: _bindgen_ty_18 = 7;
+pub const _SC_SAVED_IDS: _bindgen_ty_18 = 8;
+pub const _SC_REALTIME_SIGNALS: _bindgen_ty_18 = 9;
+pub const _SC_PRIORITY_SCHEDULING: _bindgen_ty_18 = 10;
+pub const _SC_TIMERS: _bindgen_ty_18 = 11;
+pub const _SC_ASYNCHRONOUS_IO: _bindgen_ty_18 = 12;
+pub const _SC_PRIORITIZED_IO: _bindgen_ty_18 = 13;
+pub const _SC_SYNCHRONIZED_IO: _bindgen_ty_18 = 14;
+pub const _SC_FSYNC: _bindgen_ty_18 = 15;
+pub const _SC_MAPPED_FILES: _bindgen_ty_18 = 16;
+pub const _SC_MEMLOCK: _bindgen_ty_18 = 17;
+pub const _SC_MEMLOCK_RANGE: _bindgen_ty_18 = 18;
+pub const _SC_MEMORY_PROTECTION: _bindgen_ty_18 = 19;
+pub const _SC_MESSAGE_PASSING: _bindgen_ty_18 = 20;
+pub const _SC_SEMAPHORES: _bindgen_ty_18 = 21;
+pub const _SC_SHARED_MEMORY_OBJECTS: _bindgen_ty_18 = 22;
+pub const _SC_AIO_LISTIO_MAX: _bindgen_ty_18 = 23;
+pub const _SC_AIO_MAX: _bindgen_ty_18 = 24;
+pub const _SC_AIO_PRIO_DELTA_MAX: _bindgen_ty_18 = 25;
+pub const _SC_DELAYTIMER_MAX: _bindgen_ty_18 = 26;
+pub const _SC_MQ_OPEN_MAX: _bindgen_ty_18 = 27;
+pub const _SC_MQ_PRIO_MAX: _bindgen_ty_18 = 28;
+pub const _SC_VERSION: _bindgen_ty_18 = 29;
+pub const _SC_PAGESIZE: _bindgen_ty_18 = 30;
+pub const _SC_RTSIG_MAX: _bindgen_ty_18 = 31;
+pub const _SC_SEM_NSEMS_MAX: _bindgen_ty_18 = 32;
+pub const _SC_SEM_VALUE_MAX: _bindgen_ty_18 = 33;
+pub const _SC_SIGQUEUE_MAX: _bindgen_ty_18 = 34;
+pub const _SC_TIMER_MAX: _bindgen_ty_18 = 35;
+pub const _SC_BC_BASE_MAX: _bindgen_ty_18 = 36;
+pub const _SC_BC_DIM_MAX: _bindgen_ty_18 = 37;
+pub const _SC_BC_SCALE_MAX: _bindgen_ty_18 = 38;
+pub const _SC_BC_STRING_MAX: _bindgen_ty_18 = 39;
+pub const _SC_COLL_WEIGHTS_MAX: _bindgen_ty_18 = 40;
+pub const _SC_EQUIV_CLASS_MAX: _bindgen_ty_18 = 41;
+pub const _SC_EXPR_NEST_MAX: _bindgen_ty_18 = 42;
+pub const _SC_LINE_MAX: _bindgen_ty_18 = 43;
+pub const _SC_RE_DUP_MAX: _bindgen_ty_18 = 44;
+pub const _SC_CHARCLASS_NAME_MAX: _bindgen_ty_18 = 45;
+pub const _SC_2_VERSION: _bindgen_ty_18 = 46;
+pub const _SC_2_C_BIND: _bindgen_ty_18 = 47;
+pub const _SC_2_C_DEV: _bindgen_ty_18 = 48;
+pub const _SC_2_FORT_DEV: _bindgen_ty_18 = 49;
+pub const _SC_2_FORT_RUN: _bindgen_ty_18 = 50;
+pub const _SC_2_SW_DEV: _bindgen_ty_18 = 51;
+pub const _SC_2_LOCALEDEF: _bindgen_ty_18 = 52;
+pub const _SC_PII: _bindgen_ty_18 = 53;
+pub const _SC_PII_XTI: _bindgen_ty_18 = 54;
+pub const _SC_PII_SOCKET: _bindgen_ty_18 = 55;
+pub const _SC_PII_INTERNET: _bindgen_ty_18 = 56;
+pub const _SC_PII_OSI: _bindgen_ty_18 = 57;
+pub const _SC_POLL: _bindgen_ty_18 = 58;
+pub const _SC_SELECT: _bindgen_ty_18 = 59;
+pub const _SC_UIO_MAXIOV: _bindgen_ty_18 = 60;
+pub const _SC_IOV_MAX: _bindgen_ty_18 = 60;
+pub const _SC_PII_INTERNET_STREAM: _bindgen_ty_18 = 61;
+pub const _SC_PII_INTERNET_DGRAM: _bindgen_ty_18 = 62;
+pub const _SC_PII_OSI_COTS: _bindgen_ty_18 = 63;
+pub const _SC_PII_OSI_CLTS: _bindgen_ty_18 = 64;
+pub const _SC_PII_OSI_M: _bindgen_ty_18 = 65;
+pub const _SC_T_IOV_MAX: _bindgen_ty_18 = 66;
+pub const _SC_THREADS: _bindgen_ty_18 = 67;
+pub const _SC_THREAD_SAFE_FUNCTIONS: _bindgen_ty_18 = 68;
+pub const _SC_GETGR_R_SIZE_MAX: _bindgen_ty_18 = 69;
+pub const _SC_GETPW_R_SIZE_MAX: _bindgen_ty_18 = 70;
+pub const _SC_LOGIN_NAME_MAX: _bindgen_ty_18 = 71;
+pub const _SC_TTY_NAME_MAX: _bindgen_ty_18 = 72;
+pub const _SC_THREAD_DESTRUCTOR_ITERATIONS: _bindgen_ty_18 = 73;
+pub const _SC_THREAD_KEYS_MAX: _bindgen_ty_18 = 74;
+pub const _SC_THREAD_STACK_MIN: _bindgen_ty_18 = 75;
+pub const _SC_THREAD_THREADS_MAX: _bindgen_ty_18 = 76;
+pub const _SC_THREAD_ATTR_STACKADDR: _bindgen_ty_18 = 77;
+pub const _SC_THREAD_ATTR_STACKSIZE: _bindgen_ty_18 = 78;
+pub const _SC_THREAD_PRIORITY_SCHEDULING: _bindgen_ty_18 = 79;
+pub const _SC_THREAD_PRIO_INHERIT: _bindgen_ty_18 = 80;
+pub const _SC_THREAD_PRIO_PROTECT: _bindgen_ty_18 = 81;
+pub const _SC_THREAD_PROCESS_SHARED: _bindgen_ty_18 = 82;
+pub const _SC_NPROCESSORS_CONF: _bindgen_ty_18 = 83;
+pub const _SC_NPROCESSORS_ONLN: _bindgen_ty_18 = 84;
+pub const _SC_PHYS_PAGES: _bindgen_ty_18 = 85;
+pub const _SC_AVPHYS_PAGES: _bindgen_ty_18 = 86;
+pub const _SC_ATEXIT_MAX: _bindgen_ty_18 = 87;
+pub const _SC_PASS_MAX: _bindgen_ty_18 = 88;
+pub const _SC_XOPEN_VERSION: _bindgen_ty_18 = 89;
+pub const _SC_XOPEN_XCU_VERSION: _bindgen_ty_18 = 90;
+pub const _SC_XOPEN_UNIX: _bindgen_ty_18 = 91;
+pub const _SC_XOPEN_CRYPT: _bindgen_ty_18 = 92;
+pub const _SC_XOPEN_ENH_I18N: _bindgen_ty_18 = 93;
+pub const _SC_XOPEN_SHM: _bindgen_ty_18 = 94;
+pub const _SC_2_CHAR_TERM: _bindgen_ty_18 = 95;
+pub const _SC_2_C_VERSION: _bindgen_ty_18 = 96;
+pub const _SC_2_UPE: _bindgen_ty_18 = 97;
+pub const _SC_XOPEN_XPG2: _bindgen_ty_18 = 98;
+pub const _SC_XOPEN_XPG3: _bindgen_ty_18 = 99;
+pub const _SC_XOPEN_XPG4: _bindgen_ty_18 = 100;
+pub const _SC_CHAR_BIT: _bindgen_ty_18 = 101;
+pub const _SC_CHAR_MAX: _bindgen_ty_18 = 102;
+pub const _SC_CHAR_MIN: _bindgen_ty_18 = 103;
+pub const _SC_INT_MAX: _bindgen_ty_18 = 104;
+pub const _SC_INT_MIN: _bindgen_ty_18 = 105;
+pub const _SC_LONG_BIT: _bindgen_ty_18 = 106;
+pub const _SC_WORD_BIT: _bindgen_ty_18 = 107;
+pub const _SC_MB_LEN_MAX: _bindgen_ty_18 = 108;
+pub const _SC_NZERO: _bindgen_ty_18 = 109;
+pub const _SC_SSIZE_MAX: _bindgen_ty_18 = 110;
+pub const _SC_SCHAR_MAX: _bindgen_ty_18 = 111;
+pub const _SC_SCHAR_MIN: _bindgen_ty_18 = 112;
+pub const _SC_SHRT_MAX: _bindgen_ty_18 = 113;
+pub const _SC_SHRT_MIN: _bindgen_ty_18 = 114;
+pub const _SC_UCHAR_MAX: _bindgen_ty_18 = 115;
+pub const _SC_UINT_MAX: _bindgen_ty_18 = 116;
+pub const _SC_ULONG_MAX: _bindgen_ty_18 = 117;
+pub const _SC_USHRT_MAX: _bindgen_ty_18 = 118;
+pub const _SC_NL_ARGMAX: _bindgen_ty_18 = 119;
+pub const _SC_NL_LANGMAX: _bindgen_ty_18 = 120;
+pub const _SC_NL_MSGMAX: _bindgen_ty_18 = 121;
+pub const _SC_NL_NMAX: _bindgen_ty_18 = 122;
+pub const _SC_NL_SETMAX: _bindgen_ty_18 = 123;
+pub const _SC_NL_TEXTMAX: _bindgen_ty_18 = 124;
+pub const _SC_XBS5_ILP32_OFF32: _bindgen_ty_18 = 125;
+pub const _SC_XBS5_ILP32_OFFBIG: _bindgen_ty_18 = 126;
+pub const _SC_XBS5_LP64_OFF64: _bindgen_ty_18 = 127;
+pub const _SC_XBS5_LPBIG_OFFBIG: _bindgen_ty_18 = 128;
+pub const _SC_XOPEN_LEGACY: _bindgen_ty_18 = 129;
+pub const _SC_XOPEN_REALTIME: _bindgen_ty_18 = 130;
+pub const _SC_XOPEN_REALTIME_THREADS: _bindgen_ty_18 = 131;
+pub const _SC_ADVISORY_INFO: _bindgen_ty_18 = 132;
+pub const _SC_BARRIERS: _bindgen_ty_18 = 133;
+pub const _SC_BASE: _bindgen_ty_18 = 134;
+pub const _SC_C_LANG_SUPPORT: _bindgen_ty_18 = 135;
+pub const _SC_C_LANG_SUPPORT_R: _bindgen_ty_18 = 136;
+pub const _SC_CLOCK_SELECTION: _bindgen_ty_18 = 137;
+pub const _SC_CPUTIME: _bindgen_ty_18 = 138;
+pub const _SC_THREAD_CPUTIME: _bindgen_ty_18 = 139;
+pub const _SC_DEVICE_IO: _bindgen_ty_18 = 140;
+pub const _SC_DEVICE_SPECIFIC: _bindgen_ty_18 = 141;
+pub const _SC_DEVICE_SPECIFIC_R: _bindgen_ty_18 = 142;
+pub const _SC_FD_MGMT: _bindgen_ty_18 = 143;
+pub const _SC_FIFO: _bindgen_ty_18 = 144;
+pub const _SC_PIPE: _bindgen_ty_18 = 145;
+pub const _SC_FILE_ATTRIBUTES: _bindgen_ty_18 = 146;
+pub const _SC_FILE_LOCKING: _bindgen_ty_18 = 147;
+pub const _SC_FILE_SYSTEM: _bindgen_ty_18 = 148;
+pub const _SC_MONOTONIC_CLOCK: _bindgen_ty_18 = 149;
+pub const _SC_MULTI_PROCESS: _bindgen_ty_18 = 150;
+pub const _SC_SINGLE_PROCESS: _bindgen_ty_18 = 151;
+pub const _SC_NETWORKING: _bindgen_ty_18 = 152;
+pub const _SC_READER_WRITER_LOCKS: _bindgen_ty_18 = 153;
+pub const _SC_SPIN_LOCKS: _bindgen_ty_18 = 154;
+pub const _SC_REGEXP: _bindgen_ty_18 = 155;
+pub const _SC_REGEX_VERSION: _bindgen_ty_18 = 156;
+pub const _SC_SHELL: _bindgen_ty_18 = 157;
+pub const _SC_SIGNALS: _bindgen_ty_18 = 158;
+pub const _SC_SPAWN: _bindgen_ty_18 = 159;
+pub const _SC_SPORADIC_SERVER: _bindgen_ty_18 = 160;
+pub const _SC_THREAD_SPORADIC_SERVER: _bindgen_ty_18 = 161;
+pub const _SC_SYSTEM_DATABASE: _bindgen_ty_18 = 162;
+pub const _SC_SYSTEM_DATABASE_R: _bindgen_ty_18 = 163;
+pub const _SC_TIMEOUTS: _bindgen_ty_18 = 164;
+pub const _SC_TYPED_MEMORY_OBJECTS: _bindgen_ty_18 = 165;
+pub const _SC_USER_GROUPS: _bindgen_ty_18 = 166;
+pub const _SC_USER_GROUPS_R: _bindgen_ty_18 = 167;
+pub const _SC_2_PBS: _bindgen_ty_18 = 168;
+pub const _SC_2_PBS_ACCOUNTING: _bindgen_ty_18 = 169;
+pub const _SC_2_PBS_LOCATE: _bindgen_ty_18 = 170;
+pub const _SC_2_PBS_MESSAGE: _bindgen_ty_18 = 171;
+pub const _SC_2_PBS_TRACK: _bindgen_ty_18 = 172;
+pub const _SC_SYMLOOP_MAX: _bindgen_ty_18 = 173;
+pub const _SC_STREAMS: _bindgen_ty_18 = 174;
+pub const _SC_2_PBS_CHECKPOINT: _bindgen_ty_18 = 175;
+pub const _SC_V6_ILP32_OFF32: _bindgen_ty_18 = 176;
+pub const _SC_V6_ILP32_OFFBIG: _bindgen_ty_18 = 177;
+pub const _SC_V6_LP64_OFF64: _bindgen_ty_18 = 178;
+pub const _SC_V6_LPBIG_OFFBIG: _bindgen_ty_18 = 179;
+pub const _SC_HOST_NAME_MAX: _bindgen_ty_18 = 180;
+pub const _SC_TRACE: _bindgen_ty_18 = 181;
+pub const _SC_TRACE_EVENT_FILTER: _bindgen_ty_18 = 182;
+pub const _SC_TRACE_INHERIT: _bindgen_ty_18 = 183;
+pub const _SC_TRACE_LOG: _bindgen_ty_18 = 184;
+pub const _SC_LEVEL1_ICACHE_SIZE: _bindgen_ty_18 = 185;
+pub const _SC_LEVEL1_ICACHE_ASSOC: _bindgen_ty_18 = 186;
+pub const _SC_LEVEL1_ICACHE_LINESIZE: _bindgen_ty_18 = 187;
+pub const _SC_LEVEL1_DCACHE_SIZE: _bindgen_ty_18 = 188;
+pub const _SC_LEVEL1_DCACHE_ASSOC: _bindgen_ty_18 = 189;
+pub const _SC_LEVEL1_DCACHE_LINESIZE: _bindgen_ty_18 = 190;
+pub const _SC_LEVEL2_CACHE_SIZE: _bindgen_ty_18 = 191;
+pub const _SC_LEVEL2_CACHE_ASSOC: _bindgen_ty_18 = 192;
+pub const _SC_LEVEL2_CACHE_LINESIZE: _bindgen_ty_18 = 193;
+pub const _SC_LEVEL3_CACHE_SIZE: _bindgen_ty_18 = 194;
+pub const _SC_LEVEL3_CACHE_ASSOC: _bindgen_ty_18 = 195;
+pub const _SC_LEVEL3_CACHE_LINESIZE: _bindgen_ty_18 = 196;
+pub const _SC_LEVEL4_CACHE_SIZE: _bindgen_ty_18 = 197;
+pub const _SC_LEVEL4_CACHE_ASSOC: _bindgen_ty_18 = 198;
+pub const _SC_LEVEL4_CACHE_LINESIZE: _bindgen_ty_18 = 199;
+pub const _SC_IPV6: _bindgen_ty_18 = 235;
+pub const _SC_RAW_SOCKETS: _bindgen_ty_18 = 236;
+pub const _SC_V7_ILP32_OFF32: _bindgen_ty_18 = 237;
+pub const _SC_V7_ILP32_OFFBIG: _bindgen_ty_18 = 238;
+pub const _SC_V7_LP64_OFF64: _bindgen_ty_18 = 239;
+pub const _SC_V7_LPBIG_OFFBIG: _bindgen_ty_18 = 240;
+pub const _SC_SS_REPL_MAX: _bindgen_ty_18 = 241;
+pub const _SC_TRACE_EVENT_NAME_MAX: _bindgen_ty_18 = 242;
+pub const _SC_TRACE_NAME_MAX: _bindgen_ty_18 = 243;
+pub const _SC_TRACE_SYS_MAX: _bindgen_ty_18 = 244;
+pub const _SC_TRACE_USER_EVENT_MAX: _bindgen_ty_18 = 245;
+pub const _SC_XOPEN_STREAMS: _bindgen_ty_18 = 246;
+pub const _SC_THREAD_ROBUST_PRIO_INHERIT: _bindgen_ty_18 = 247;
+pub const _SC_THREAD_ROBUST_PRIO_PROTECT: _bindgen_ty_18 = 248;
+pub const _SC_MINSIGSTKSZ: _bindgen_ty_18 = 249;
+pub const _SC_SIGSTKSZ: _bindgen_ty_18 = 250;
+pub type _bindgen_ty_18 = ::std::ffi::c_uint;
+pub const _CS_PATH: _bindgen_ty_19 = 0;
+pub const _CS_V6_WIDTH_RESTRICTED_ENVS: _bindgen_ty_19 = 1;
+pub const _CS_GNU_LIBC_VERSION: _bindgen_ty_19 = 2;
+pub const _CS_GNU_LIBPTHREAD_VERSION: _bindgen_ty_19 = 3;
+pub const _CS_V5_WIDTH_RESTRICTED_ENVS: _bindgen_ty_19 = 4;
+pub const _CS_V7_WIDTH_RESTRICTED_ENVS: _bindgen_ty_19 = 5;
+pub const _CS_LFS_CFLAGS: _bindgen_ty_19 = 1000;
+pub const _CS_LFS_LDFLAGS: _bindgen_ty_19 = 1001;
+pub const _CS_LFS_LIBS: _bindgen_ty_19 = 1002;
+pub const _CS_LFS_LINTFLAGS: _bindgen_ty_19 = 1003;
+pub const _CS_LFS64_CFLAGS: _bindgen_ty_19 = 1004;
+pub const _CS_LFS64_LDFLAGS: _bindgen_ty_19 = 1005;
+pub const _CS_LFS64_LIBS: _bindgen_ty_19 = 1006;
+pub const _CS_LFS64_LINTFLAGS: _bindgen_ty_19 = 1007;
+pub const _CS_XBS5_ILP32_OFF32_CFLAGS: _bindgen_ty_19 = 1100;
+pub const _CS_XBS5_ILP32_OFF32_LDFLAGS: _bindgen_ty_19 = 1101;
+pub const _CS_XBS5_ILP32_OFF32_LIBS: _bindgen_ty_19 = 1102;
+pub const _CS_XBS5_ILP32_OFF32_LINTFLAGS: _bindgen_ty_19 = 1103;
+pub const _CS_XBS5_ILP32_OFFBIG_CFLAGS: _bindgen_ty_19 = 1104;
+pub const _CS_XBS5_ILP32_OFFBIG_LDFLAGS: _bindgen_ty_19 = 1105;
+pub const _CS_XBS5_ILP32_OFFBIG_LIBS: _bindgen_ty_19 = 1106;
+pub const _CS_XBS5_ILP32_OFFBIG_LINTFLAGS: _bindgen_ty_19 = 1107;
+pub const _CS_XBS5_LP64_OFF64_CFLAGS: _bindgen_ty_19 = 1108;
+pub const _CS_XBS5_LP64_OFF64_LDFLAGS: _bindgen_ty_19 = 1109;
+pub const _CS_XBS5_LP64_OFF64_LIBS: _bindgen_ty_19 = 1110;
+pub const _CS_XBS5_LP64_OFF64_LINTFLAGS: _bindgen_ty_19 = 1111;
+pub const _CS_XBS5_LPBIG_OFFBIG_CFLAGS: _bindgen_ty_19 = 1112;
+pub const _CS_XBS5_LPBIG_OFFBIG_LDFLAGS: _bindgen_ty_19 = 1113;
+pub const _CS_XBS5_LPBIG_OFFBIG_LIBS: _bindgen_ty_19 = 1114;
+pub const _CS_XBS5_LPBIG_OFFBIG_LINTFLAGS: _bindgen_ty_19 = 1115;
+pub const _CS_POSIX_V6_ILP32_OFF32_CFLAGS: _bindgen_ty_19 = 1116;
+pub const _CS_POSIX_V6_ILP32_OFF32_LDFLAGS: _bindgen_ty_19 = 1117;
+pub const _CS_POSIX_V6_ILP32_OFF32_LIBS: _bindgen_ty_19 = 1118;
+pub const _CS_POSIX_V6_ILP32_OFF32_LINTFLAGS: _bindgen_ty_19 = 1119;
+pub const _CS_POSIX_V6_ILP32_OFFBIG_CFLAGS: _bindgen_ty_19 = 1120;
+pub const _CS_POSIX_V6_ILP32_OFFBIG_LDFLAGS: _bindgen_ty_19 = 1121;
+pub const _CS_POSIX_V6_ILP32_OFFBIG_LIBS: _bindgen_ty_19 = 1122;
+pub const _CS_POSIX_V6_ILP32_OFFBIG_LINTFLAGS: _bindgen_ty_19 = 1123;
+pub const _CS_POSIX_V6_LP64_OFF64_CFLAGS: _bindgen_ty_19 = 1124;
+pub const _CS_POSIX_V6_LP64_OFF64_LDFLAGS: _bindgen_ty_19 = 1125;
+pub const _CS_POSIX_V6_LP64_OFF64_LIBS: _bindgen_ty_19 = 1126;
+pub const _CS_POSIX_V6_LP64_OFF64_LINTFLAGS: _bindgen_ty_19 = 1127;
+pub const _CS_POSIX_V6_LPBIG_OFFBIG_CFLAGS: _bindgen_ty_19 = 1128;
+pub const _CS_POSIX_V6_LPBIG_OFFBIG_LDFLAGS: _bindgen_ty_19 = 1129;
+pub const _CS_POSIX_V6_LPBIG_OFFBIG_LIBS: _bindgen_ty_19 = 1130;
+pub const _CS_POSIX_V6_LPBIG_OFFBIG_LINTFLAGS: _bindgen_ty_19 = 1131;
+pub const _CS_POSIX_V7_ILP32_OFF32_CFLAGS: _bindgen_ty_19 = 1132;
+pub const _CS_POSIX_V7_ILP32_OFF32_LDFLAGS: _bindgen_ty_19 = 1133;
+pub const _CS_POSIX_V7_ILP32_OFF32_LIBS: _bindgen_ty_19 = 1134;
+pub const _CS_POSIX_V7_ILP32_OFF32_LINTFLAGS: _bindgen_ty_19 = 1135;
+pub const _CS_POSIX_V7_ILP32_OFFBIG_CFLAGS: _bindgen_ty_19 = 1136;
+pub const _CS_POSIX_V7_ILP32_OFFBIG_LDFLAGS: _bindgen_ty_19 = 1137;
+pub const _CS_POSIX_V7_ILP32_OFFBIG_LIBS: _bindgen_ty_19 = 1138;
+pub const _CS_POSIX_V7_ILP32_OFFBIG_LINTFLAGS: _bindgen_ty_19 = 1139;
+pub const _CS_POSIX_V7_LP64_OFF64_CFLAGS: _bindgen_ty_19 = 1140;
+pub const _CS_POSIX_V7_LP64_OFF64_LDFLAGS: _bindgen_ty_19 = 1141;
+pub const _CS_POSIX_V7_LP64_OFF64_LIBS: _bindgen_ty_19 = 1142;
+pub const _CS_POSIX_V7_LP64_OFF64_LINTFLAGS: _bindgen_ty_19 = 1143;
+pub const _CS_POSIX_V7_LPBIG_OFFBIG_CFLAGS: _bindgen_ty_19 = 1144;
+pub const _CS_POSIX_V7_LPBIG_OFFBIG_LDFLAGS: _bindgen_ty_19 = 1145;
+pub const _CS_POSIX_V7_LPBIG_OFFBIG_LIBS: _bindgen_ty_19 = 1146;
+pub const _CS_POSIX_V7_LPBIG_OFFBIG_LINTFLAGS: _bindgen_ty_19 = 1147;
+pub const _CS_V6_ENV: _bindgen_ty_19 = 1148;
+pub const _CS_V7_ENV: _bindgen_ty_19 = 1149;
+pub type _bindgen_ty_19 = ::std::ffi::c_uint;
+unsafe extern "C" {
+    pub fn pathconf(
+        __path: *const ::std::ffi::c_char,
+        __name: ::std::ffi::c_int,
+    ) -> ::std::ffi::c_long;
+}
+unsafe extern "C" {
+    pub fn fpathconf(__fd: ::std::ffi::c_int, __name: ::std::ffi::c_int) -> ::std::ffi::c_long;
+}
+unsafe extern "C" {
+    pub fn sysconf(__name: ::std::ffi::c_int) -> ::std::ffi::c_long;
+}
+unsafe extern "C" {
+    pub fn confstr(
+        __name: ::std::ffi::c_int,
+        __buf: *mut ::std::ffi::c_char,
+        __len: usize,
+    ) -> usize;
+}
+unsafe extern "C" {
+    pub fn getpid() -> __pid_t;
+}
+unsafe extern "C" {
+    pub fn getppid() -> __pid_t;
+}
+unsafe extern "C" {
+    pub fn getpgrp() -> __pid_t;
+}
+unsafe extern "C" {
+    pub fn __getpgid(__pid: __pid_t) -> __pid_t;
+}
+unsafe extern "C" {
+    pub fn getpgid(__pid: __pid_t) -> __pid_t;
+}
+unsafe extern "C" {
+    pub fn setpgid(__pid: __pid_t, __pgid: __pid_t) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn setpgrp() -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn setsid() -> __pid_t;
+}
+unsafe extern "C" {
+    pub fn getsid(__pid: __pid_t) -> __pid_t;
+}
+unsafe extern "C" {
+    pub fn getuid() -> __uid_t;
+}
+unsafe extern "C" {
+    pub fn geteuid() -> __uid_t;
+}
+unsafe extern "C" {
+    pub fn getgid() -> __gid_t;
+}
+unsafe extern "C" {
+    pub fn getegid() -> __gid_t;
+}
+unsafe extern "C" {
+    pub fn getgroups(__size: ::std::ffi::c_int, __list: *mut __gid_t) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn setuid(__uid: __uid_t) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn setreuid(__ruid: __uid_t, __euid: __uid_t) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn seteuid(__uid: __uid_t) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn setgid(__gid: __gid_t) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn setregid(__rgid: __gid_t, __egid: __gid_t) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn setegid(__gid: __gid_t) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn fork() -> __pid_t;
+}
+unsafe extern "C" {
+    pub fn vfork() -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn ttyname(__fd: ::std::ffi::c_int) -> *mut ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn ttyname_r(
+        __fd: ::std::ffi::c_int,
+        __buf: *mut ::std::ffi::c_char,
+        __buflen: usize,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn isatty(__fd: ::std::ffi::c_int) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn ttyslot() -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn link(
+        __from: *const ::std::ffi::c_char,
+        __to: *const ::std::ffi::c_char,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn linkat(
+        __fromfd: ::std::ffi::c_int,
+        __from: *const ::std::ffi::c_char,
+        __tofd: ::std::ffi::c_int,
+        __to: *const ::std::ffi::c_char,
+        __flags: ::std::ffi::c_int,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn symlink(
+        __from: *const ::std::ffi::c_char,
+        __to: *const ::std::ffi::c_char,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn readlink(
+        __path: *const ::std::ffi::c_char,
+        __buf: *mut ::std::ffi::c_char,
+        __len: usize,
+    ) -> isize;
+}
+unsafe extern "C" {
+    pub fn symlinkat(
+        __from: *const ::std::ffi::c_char,
+        __tofd: ::std::ffi::c_int,
+        __to: *const ::std::ffi::c_char,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn readlinkat(
+        __fd: ::std::ffi::c_int,
+        __path: *const ::std::ffi::c_char,
+        __buf: *mut ::std::ffi::c_char,
+        __len: usize,
+    ) -> isize;
+}
+unsafe extern "C" {
+    pub fn unlink(__name: *const ::std::ffi::c_char) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn unlinkat(
+        __fd: ::std::ffi::c_int,
+        __name: *const ::std::ffi::c_char,
+        __flag: ::std::ffi::c_int,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn rmdir(__path: *const ::std::ffi::c_char) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn tcgetpgrp(__fd: ::std::ffi::c_int) -> __pid_t;
+}
+unsafe extern "C" {
+    pub fn tcsetpgrp(__fd: ::std::ffi::c_int, __pgrp_id: __pid_t) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn getlogin() -> *mut ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn getlogin_r(__name: *mut ::std::ffi::c_char, __name_len: usize) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn setlogin(__name: *const ::std::ffi::c_char) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub static mut optarg: *mut ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub static mut optind: ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub static mut opterr: ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub static mut optopt: ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn getopt(
+        ___argc: ::std::ffi::c_int,
+        ___argv: *const *mut ::std::ffi::c_char,
+        __shortopts: *const ::std::ffi::c_char,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn gethostname(__name: *mut ::std::ffi::c_char, __len: usize) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn sethostname(__name: *const ::std::ffi::c_char, __len: usize) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn sethostid(__id: ::std::ffi::c_long) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn getdomainname(__name: *mut ::std::ffi::c_char, __len: usize) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn setdomainname(__name: *const ::std::ffi::c_char, __len: usize) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn vhangup() -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn revoke(__file: *const ::std::ffi::c_char) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn profil(
+        __sample_buffer: *mut ::std::ffi::c_ushort,
+        __size: usize,
+        __offset: usize,
+        __scale: ::std::ffi::c_uint,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn acct(__name: *const ::std::ffi::c_char) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn getusershell() -> *mut ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn endusershell();
+}
+unsafe extern "C" {
+    pub fn setusershell();
+}
+unsafe extern "C" {
+    pub fn daemon(__nochdir: ::std::ffi::c_int, __noclose: ::std::ffi::c_int) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn chroot(__path: *const ::std::ffi::c_char) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn getpass(__prompt: *const ::std::ffi::c_char) -> *mut ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn fsync(__fd: ::std::ffi::c_int) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn gethostid() -> ::std::ffi::c_long;
+}
+unsafe extern "C" {
+    pub fn sync();
+}
+unsafe extern "C" {
+    pub fn getpagesize() -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn getdtablesize() -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn truncate(__file: *const ::std::ffi::c_char, __length: __off_t) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn ftruncate(__fd: ::std::ffi::c_int, __length: __off_t) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn brk(__addr: *mut ::std::ffi::c_void) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn sbrk(__delta: isize) -> *mut ::std::ffi::c_void;
+}
+unsafe extern "C" {
+    pub fn syscall(__sysno: ::std::ffi::c_long, ...) -> ::std::ffi::c_long;
+}
+unsafe extern "C" {
+    pub fn lockf(
+        __fd: ::std::ffi::c_int,
+        __cmd: ::std::ffi::c_int,
+        __len: __off_t,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn fdatasync(__fildes: ::std::ffi::c_int) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn crypt(
+        __key: *const ::std::ffi::c_char,
+        __salt: *const ::std::ffi::c_char,
+    ) -> *mut ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn getentropy(__buffer: *mut ::std::ffi::c_void, __length: usize) -> ::std::ffi::c_int;
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct vre_limits {
+    pub match_: ::std::ffi::c_uint,
+    pub depth: ::std::ffi::c_uint,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of vre_limits"][::std::mem::size_of::<vre_limits>() - 8usize];
+    ["Alignment of vre_limits"][::std::mem::align_of::<vre_limits>() - 4usize];
+    ["Offset of field: vre_limits::match_"][::std::mem::offset_of!(vre_limits, match_) - 0usize];
+    ["Offset of field: vre_limits::depth"][::std::mem::offset_of!(vre_limits, depth) - 4usize];
+};
+pub type vre_t = vre;
+unsafe extern "C" {
+    pub static VRE_ERROR_NOMATCH: ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub static VRE_CASELESS: ::std::ffi::c_uint;
+}
+unsafe extern "C" {
+    pub static VRE_NO_AUTO_CAPTURE: ::std::ffi::c_uint;
+}
+unsafe extern "C" {
+    pub fn VRE_compile(
+        arg1: *const ::std::ffi::c_char,
+        arg2: ::std::ffi::c_uint,
+        arg3: *mut ::std::ffi::c_int,
+        arg4: *mut ::std::ffi::c_int,
+        arg5: ::std::ffi::c_uint,
+    ) -> *mut vre_t;
+}
+unsafe extern "C" {
+    pub fn VRE_export(arg1: *const vre_t, arg2: *mut usize) -> *mut vre_t;
+}
+unsafe extern "C" {
+    pub fn VRE_error(arg1: *mut vsb, err: ::std::ffi::c_int) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VRE_match(
+        code: *const vre_t,
+        subject: *const ::std::ffi::c_char,
+        length: usize,
+        options: ::std::ffi::c_int,
+        lim: *const vre_limits,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VRE_capture(
+        code: *const vre_t,
+        subject: *const ::std::ffi::c_char,
+        length: usize,
+        options: ::std::ffi::c_int,
+        groups: *mut txt,
+        count: usize,
+        lim: *const vre_limits,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VRE_sub(
+        code: *const vre_t,
+        subject: *const ::std::ffi::c_char,
+        replacement: *const ::std::ffi::c_char,
+        vsb: *mut vsb,
+        lim: *const vre_limits,
+        all: ::std::ffi::c_int,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VRE_free(arg1: *mut *mut vre_t);
+}
+unsafe extern "C" {
+    pub fn VRE_quote(arg1: *mut vsb, arg2: *const ::std::ffi::c_char);
+}
+pub const debug_bits_DBG_REQ_STATE: debug_bits = 0;
+pub const debug_bits_DBG_WORKSPACE: debug_bits = 1;
+pub const debug_bits_DBG_WAITINGLIST: debug_bits = 2;
+pub const debug_bits_DBG_SYNCVSL: debug_bits = 3;
+pub const debug_bits_DBG_HASHEDGE: debug_bits = 4;
+pub const debug_bits_DBG_VCLREL: debug_bits = 5;
+pub const debug_bits_DBG_LURKER: debug_bits = 6;
+pub const debug_bits_DBG_ESI_CHOP: debug_bits = 7;
+pub const debug_bits_DBG_FLUSH_HEAD: debug_bits = 8;
+pub const debug_bits_DBG_VTC_MODE: debug_bits = 9;
+pub const debug_bits_DBG_WITNESS: debug_bits = 10;
+pub const debug_bits_DBG_VSM_KEEP: debug_bits = 11;
+pub const debug_bits_DBG_SLOW_ACCEPTOR: debug_bits = 12;
+pub const debug_bits_DBG_H2_NOCHECK: debug_bits = 13;
+pub const debug_bits_DBG_VMOD_SO_KEEP: debug_bits = 14;
+pub const debug_bits_DBG_PROCESSORS: debug_bits = 15;
+pub const debug_bits_DBG_PROTOCOL: debug_bits = 16;
+pub const debug_bits_DBG_VCL_KEEP: debug_bits = 17;
+pub const debug_bits_DBG_LCK: debug_bits = 18;
+pub const debug_bits_DBG_CLI_SHOW_SENSITIVE: debug_bits = 19;
+pub const debug_bits_DBG_Reserved: debug_bits = 20;
+pub type debug_bits = ::std::ffi::c_uint;
+pub const experimental_bits_EXPERIMENT_DROP_POOLS: experimental_bits = 0;
+pub const experimental_bits_EXPERIMENT_Reserved: experimental_bits = 1;
+pub type experimental_bits = ::std::ffi::c_uint;
+pub const feature_bits_FEATURE_HTTP2: feature_bits = 0;
+pub const feature_bits_FEATURE_SHORT_PANIC: feature_bits = 1;
+pub const feature_bits_FEATURE_NO_COREDUMP: feature_bits = 2;
+pub const feature_bits_FEATURE_HTTPS_SCHEME: feature_bits = 3;
+pub const feature_bits_FEATURE_HTTP_DATE_POSTEL: feature_bits = 4;
+pub const feature_bits_FEATURE_ESI_IGNORE_HTTPS: feature_bits = 5;
+pub const feature_bits_FEATURE_ESI_DISABLE_XML_CHECK: feature_bits = 6;
+pub const feature_bits_FEATURE_ESI_IGNORE_OTHER_ELEMENTS: feature_bits = 7;
+pub const feature_bits_FEATURE_ESI_REMOVE_BOM: feature_bits = 8;
+pub const feature_bits_FEATURE_ESI_INCLUDE_ONERROR: feature_bits = 9;
+pub const feature_bits_FEATURE_WAIT_SILO: feature_bits = 10;
+pub const feature_bits_FEATURE_VALIDATE_HEADERS: feature_bits = 11;
+pub const feature_bits_FEATURE_BUSY_STATS_RATE: feature_bits = 12;
+pub const feature_bits_FEATURE_TRACE: feature_bits = 13;
+pub const feature_bits_FEATURE_VCL_REQ_RESET: feature_bits = 14;
+pub const feature_bits_FEATURE_Reserved: feature_bits = 15;
+pub type feature_bits = ::std::ffi::c_uint;
+pub const vcc_feature_bits_VCC_FEATURE_ERR_UNREF: vcc_feature_bits = 0;
+pub const vcc_feature_bits_VCC_FEATURE_ALLOW_INLINE_C: vcc_feature_bits = 1;
+pub const vcc_feature_bits_VCC_FEATURE_UNSAFE_PATH: vcc_feature_bits = 2;
+pub const vcc_feature_bits_VCC_FEATURE_Reserved: vcc_feature_bits = 3;
+pub type vcc_feature_bits = ::std::ffi::c_uint;
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct poolparam {
+    pub min_pool: ::std::ffi::c_uint,
+    pub max_pool: ::std::ffi::c_uint,
+    pub max_age: vtim_dur,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of poolparam"][::std::mem::size_of::<poolparam>() - 16usize];
+    ["Alignment of poolparam"][::std::mem::align_of::<poolparam>() - 8usize];
+    ["Offset of field: poolparam::min_pool"][::std::mem::offset_of!(poolparam, min_pool) - 0usize];
+    ["Offset of field: poolparam::max_pool"][::std::mem::offset_of!(poolparam, max_pool) - 4usize];
+    ["Offset of field: poolparam::max_age"][::std::mem::offset_of!(poolparam, max_age) - 8usize];
+};
+pub type vsl_mask_t = [u8; 32usize];
+pub type debug_t = [u8; 3usize];
+pub type experimental_t = [u8; 1usize];
+pub type feature_t = [u8; 2usize];
+pub type vcc_feature_t = [u8; 1usize];
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct params {
+    pub accept_filter: ::std::ffi::c_uint,
+    pub acceptor_sleep_decay: f64,
+    pub acceptor_sleep_incr: vtim_dur,
+    pub acceptor_sleep_max: vtim_dur,
+    pub auto_restart: ::std::ffi::c_uint,
+    pub ban_dups: ::std::ffi::c_uint,
+    pub ban_cutoff: ::std::ffi::c_uint,
+    pub ban_lurker_age: vtim_dur,
+    pub ban_lurker_batch: ::std::ffi::c_uint,
+    pub ban_lurker_sleep: vtim_dur,
+    pub ban_lurker_holdoff: vtim_dur,
+    pub first_byte_timeout: vtim_dur,
+    pub between_bytes_timeout: vtim_dur,
+    pub backend_idle_timeout: vtim_dur,
+    pub backend_local_error_holddown: vtim_dur,
+    pub backend_remote_error_holddown: vtim_dur,
+    pub backend_wait_timeout: vtim_dur,
+    pub backend_wait_limit: ::std::ffi::c_uint,
+    pub cli_limit: ::std::ffi::c_uint,
+    pub cli_timeout: vtim_dur,
+    pub startup_timeout: vtim_dur,
+    pub clock_skew: ::std::ffi::c_uint,
+    pub clock_step: vtim_dur,
+    pub connect_timeout: vtim_dur,
+    pub critbit_cooloff: vtim_dur,
+    pub default_grace: vtim_dur,
+    pub default_keep: vtim_dur,
+    pub default_ttl: vtim_dur,
+    pub uncacheable_ttl: vtim_dur,
+    pub http1_iovs: ::std::ffi::c_uint,
+    pub fetch_chunksize: isize,
+    pub fetch_maxchunksize: isize,
+    pub gzip_buffer: ::std::ffi::c_uint,
+    pub gzip_level: ::std::ffi::c_uint,
+    pub gzip_memlevel: ::std::ffi::c_uint,
+    pub http_gzip_support: ::std::ffi::c_uint,
+    pub http_max_hdr: ::std::ffi::c_uint,
+    pub http_range_support: ::std::ffi::c_uint,
+    pub http_req_hdr_len: ::std::ffi::c_uint,
+    pub http_req_size: ::std::ffi::c_uint,
+    pub http_req_overflow_status: ::std::ffi::c_uint,
+    pub http_resp_hdr_len: ::std::ffi::c_uint,
+    pub http_resp_size: ::std::ffi::c_uint,
+    pub idle_send_timeout: vtim_dur,
+    pub listen_depth: ::std::ffi::c_uint,
+    pub lru_interval: vtim_dur,
+    pub ban_any_variant: ::std::ffi::c_uint,
+    pub max_esi_depth: ::std::ffi::c_uint,
+    pub max_restarts: ::std::ffi::c_uint,
+    pub max_retries: ::std::ffi::c_uint,
+    pub nuke_limit: ::std::ffi::c_uint,
+    pub panic_buffer: ::std::ffi::c_uint,
+    pub pcre2_jit_compilation: ::std::ffi::c_uint,
+    pub ping_interval: ::std::ffi::c_uint,
+    pub pipe_sess_max: ::std::ffi::c_uint,
+    pub pipe_task_deadline: vtim_dur,
+    pub pipe_timeout: vtim_dur,
+    pub prefer_ipv6: ::std::ffi::c_uint,
+    pub rush_exponent: ::std::ffi::c_uint,
+    pub send_timeout: vtim_dur,
+    pub shortlived: vtim_dur,
+    pub sigsegv_handler: ::std::ffi::c_uint,
+    pub syslog_cli_traffic: ::std::ffi::c_uint,
+    pub tcp_fastopen: ::std::ffi::c_uint,
+    pub tcp_keepalive_intvl: vtim_dur,
+    pub tcp_keepalive_probes: ::std::ffi::c_uint,
+    pub tcp_keepalive_time: vtim_dur,
+    pub timeout_idle: vtim_dur,
+    pub timeout_linger: vtim_dur,
+    pub tls_handshake_timeout: vtim_dur,
+    pub tls_ja3: ::std::ffi::c_uint,
+    pub tls_cleanup_batch: ::std::ffi::c_uint,
+    pub tls_err_dup_servername: ::std::ffi::c_uint,
+    pub transit_buffer: isize,
+    pub vary_notice: ::std::ffi::c_uint,
+    pub vcl_cooldown: vtim_dur,
+    pub max_vcl_handling: ::std::ffi::c_uint,
+    pub max_vcl: ::std::ffi::c_uint,
+    pub vsm_free_cooldown: vtim_dur,
+    pub vsl_buffer: ::std::ffi::c_uint,
+    pub vsl_reclen: ::std::ffi::c_uint,
+    pub vsl_space: isize,
+    pub workspace_backend: ::std::ffi::c_uint,
+    pub workspace_client: ::std::ffi::c_uint,
+    pub workspace_session: ::std::ffi::c_uint,
+    pub workspace_thread: ::std::ffi::c_uint,
+    pub h2_rx_window_low_water: ::std::ffi::c_uint,
+    pub h2_rx_window_increment: ::std::ffi::c_uint,
+    pub h2_window_timeout: vtim_dur,
+    pub h2_header_table_size: ::std::ffi::c_uint,
+    pub h2_max_concurrent_streams: ::std::ffi::c_uint,
+    pub h2_initial_window_size: ::std::ffi::c_uint,
+    pub h2_max_frame_size: ::std::ffi::c_uint,
+    pub h2_max_header_list_size: ::std::ffi::c_uint,
+    pub h2_rapid_reset: vtim_dur,
+    pub h2_rapid_reset_limit: ::std::ffi::c_uint,
+    pub h2_rapid_reset_period: vtim_dur,
+    pub pool_req: poolparam,
+    pub pool_sess: poolparam,
+    pub pool_vbo: poolparam,
+    pub sslbuf_pool: poolparam,
+    pub ssl_buffer: ::std::ffi::c_uint,
+    pub wthread_pools: ::std::ffi::c_uint,
+    pub wthread_max: ::std::ffi::c_uint,
+    pub wthread_min: ::std::ffi::c_uint,
+    pub wthread_reserve: ::std::ffi::c_uint,
+    pub wthread_timeout: vtim_dur,
+    pub wthread_watchdog: vtim_dur,
+    pub wthread_destroy_delay: vtim_dur,
+    pub wthread_add_delay: vtim_dur,
+    pub wthread_fail_delay: vtim_dur,
+    pub wthread_stats_rate: ::std::ffi::c_uint,
+    pub wthread_queue_limit: ::std::ffi::c_uint,
+    pub wthread_stacksize: isize,
+    pub debug_bits: debug_t,
+    pub experimental_bits: experimental_t,
+    pub feature_bits: feature_t,
+    pub vcc_feature_bits: vcc_feature_t,
+    pub vsl_mask: vsl_mask_t,
+    pub vre_limits: vre_limits,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of params"][::std::mem::size_of::<params>() - 800usize];
+    ["Alignment of params"][::std::mem::align_of::<params>() - 8usize];
+    ["Offset of field: params::accept_filter"]
+        [::std::mem::offset_of!(params, accept_filter) - 0usize];
+    ["Offset of field: params::acceptor_sleep_decay"]
+        [::std::mem::offset_of!(params, acceptor_sleep_decay) - 8usize];
+    ["Offset of field: params::acceptor_sleep_incr"]
+        [::std::mem::offset_of!(params, acceptor_sleep_incr) - 16usize];
+    ["Offset of field: params::acceptor_sleep_max"]
+        [::std::mem::offset_of!(params, acceptor_sleep_max) - 24usize];
+    ["Offset of field: params::auto_restart"]
+        [::std::mem::offset_of!(params, auto_restart) - 32usize];
+    ["Offset of field: params::ban_dups"][::std::mem::offset_of!(params, ban_dups) - 36usize];
+    ["Offset of field: params::ban_cutoff"][::std::mem::offset_of!(params, ban_cutoff) - 40usize];
+    ["Offset of field: params::ban_lurker_age"]
+        [::std::mem::offset_of!(params, ban_lurker_age) - 48usize];
+    ["Offset of field: params::ban_lurker_batch"]
+        [::std::mem::offset_of!(params, ban_lurker_batch) - 56usize];
+    ["Offset of field: params::ban_lurker_sleep"]
+        [::std::mem::offset_of!(params, ban_lurker_sleep) - 64usize];
+    ["Offset of field: params::ban_lurker_holdoff"]
+        [::std::mem::offset_of!(params, ban_lurker_holdoff) - 72usize];
+    ["Offset of field: params::first_byte_timeout"]
+        [::std::mem::offset_of!(params, first_byte_timeout) - 80usize];
+    ["Offset of field: params::between_bytes_timeout"]
+        [::std::mem::offset_of!(params, between_bytes_timeout) - 88usize];
+    ["Offset of field: params::backend_idle_timeout"]
+        [::std::mem::offset_of!(params, backend_idle_timeout) - 96usize];
+    ["Offset of field: params::backend_local_error_holddown"]
+        [::std::mem::offset_of!(params, backend_local_error_holddown) - 104usize];
+    ["Offset of field: params::backend_remote_error_holddown"]
+        [::std::mem::offset_of!(params, backend_remote_error_holddown) - 112usize];
+    ["Offset of field: params::backend_wait_timeout"]
+        [::std::mem::offset_of!(params, backend_wait_timeout) - 120usize];
+    ["Offset of field: params::backend_wait_limit"]
+        [::std::mem::offset_of!(params, backend_wait_limit) - 128usize];
+    ["Offset of field: params::cli_limit"][::std::mem::offset_of!(params, cli_limit) - 132usize];
+    ["Offset of field: params::cli_timeout"]
+        [::std::mem::offset_of!(params, cli_timeout) - 136usize];
+    ["Offset of field: params::startup_timeout"]
+        [::std::mem::offset_of!(params, startup_timeout) - 144usize];
+    ["Offset of field: params::clock_skew"][::std::mem::offset_of!(params, clock_skew) - 152usize];
+    ["Offset of field: params::clock_step"][::std::mem::offset_of!(params, clock_step) - 160usize];
+    ["Offset of field: params::connect_timeout"]
+        [::std::mem::offset_of!(params, connect_timeout) - 168usize];
+    ["Offset of field: params::critbit_cooloff"]
+        [::std::mem::offset_of!(params, critbit_cooloff) - 176usize];
+    ["Offset of field: params::default_grace"]
+        [::std::mem::offset_of!(params, default_grace) - 184usize];
+    ["Offset of field: params::default_keep"]
+        [::std::mem::offset_of!(params, default_keep) - 192usize];
+    ["Offset of field: params::default_ttl"]
+        [::std::mem::offset_of!(params, default_ttl) - 200usize];
+    ["Offset of field: params::uncacheable_ttl"]
+        [::std::mem::offset_of!(params, uncacheable_ttl) - 208usize];
+    ["Offset of field: params::http1_iovs"][::std::mem::offset_of!(params, http1_iovs) - 216usize];
+    ["Offset of field: params::fetch_chunksize"]
+        [::std::mem::offset_of!(params, fetch_chunksize) - 224usize];
+    ["Offset of field: params::fetch_maxchunksize"]
+        [::std::mem::offset_of!(params, fetch_maxchunksize) - 232usize];
+    ["Offset of field: params::gzip_buffer"]
+        [::std::mem::offset_of!(params, gzip_buffer) - 240usize];
+    ["Offset of field: params::gzip_level"][::std::mem::offset_of!(params, gzip_level) - 244usize];
+    ["Offset of field: params::gzip_memlevel"]
+        [::std::mem::offset_of!(params, gzip_memlevel) - 248usize];
+    ["Offset of field: params::http_gzip_support"]
+        [::std::mem::offset_of!(params, http_gzip_support) - 252usize];
+    ["Offset of field: params::http_max_hdr"]
+        [::std::mem::offset_of!(params, http_max_hdr) - 256usize];
+    ["Offset of field: params::http_range_support"]
+        [::std::mem::offset_of!(params, http_range_support) - 260usize];
+    ["Offset of field: params::http_req_hdr_len"]
+        [::std::mem::offset_of!(params, http_req_hdr_len) - 264usize];
+    ["Offset of field: params::http_req_size"]
+        [::std::mem::offset_of!(params, http_req_size) - 268usize];
+    ["Offset of field: params::http_req_overflow_status"]
+        [::std::mem::offset_of!(params, http_req_overflow_status) - 272usize];
+    ["Offset of field: params::http_resp_hdr_len"]
+        [::std::mem::offset_of!(params, http_resp_hdr_len) - 276usize];
+    ["Offset of field: params::http_resp_size"]
+        [::std::mem::offset_of!(params, http_resp_size) - 280usize];
+    ["Offset of field: params::idle_send_timeout"]
+        [::std::mem::offset_of!(params, idle_send_timeout) - 288usize];
+    ["Offset of field: params::listen_depth"]
+        [::std::mem::offset_of!(params, listen_depth) - 296usize];
+    ["Offset of field: params::lru_interval"]
+        [::std::mem::offset_of!(params, lru_interval) - 304usize];
+    ["Offset of field: params::ban_any_variant"]
+        [::std::mem::offset_of!(params, ban_any_variant) - 312usize];
+    ["Offset of field: params::max_esi_depth"]
+        [::std::mem::offset_of!(params, max_esi_depth) - 316usize];
+    ["Offset of field: params::max_restarts"]
+        [::std::mem::offset_of!(params, max_restarts) - 320usize];
+    ["Offset of field: params::max_retries"]
+        [::std::mem::offset_of!(params, max_retries) - 324usize];
+    ["Offset of field: params::nuke_limit"][::std::mem::offset_of!(params, nuke_limit) - 328usize];
+    ["Offset of field: params::panic_buffer"]
+        [::std::mem::offset_of!(params, panic_buffer) - 332usize];
+    ["Offset of field: params::pcre2_jit_compilation"]
+        [::std::mem::offset_of!(params, pcre2_jit_compilation) - 336usize];
+    ["Offset of field: params::ping_interval"]
+        [::std::mem::offset_of!(params, ping_interval) - 340usize];
+    ["Offset of field: params::pipe_sess_max"]
+        [::std::mem::offset_of!(params, pipe_sess_max) - 344usize];
+    ["Offset of field: params::pipe_task_deadline"]
+        [::std::mem::offset_of!(params, pipe_task_deadline) - 352usize];
+    ["Offset of field: params::pipe_timeout"]
+        [::std::mem::offset_of!(params, pipe_timeout) - 360usize];
+    ["Offset of field: params::prefer_ipv6"]
+        [::std::mem::offset_of!(params, prefer_ipv6) - 368usize];
+    ["Offset of field: params::rush_exponent"]
+        [::std::mem::offset_of!(params, rush_exponent) - 372usize];
+    ["Offset of field: params::send_timeout"]
+        [::std::mem::offset_of!(params, send_timeout) - 376usize];
+    ["Offset of field: params::shortlived"][::std::mem::offset_of!(params, shortlived) - 384usize];
+    ["Offset of field: params::sigsegv_handler"]
+        [::std::mem::offset_of!(params, sigsegv_handler) - 392usize];
+    ["Offset of field: params::syslog_cli_traffic"]
+        [::std::mem::offset_of!(params, syslog_cli_traffic) - 396usize];
+    ["Offset of field: params::tcp_fastopen"]
+        [::std::mem::offset_of!(params, tcp_fastopen) - 400usize];
+    ["Offset of field: params::tcp_keepalive_intvl"]
+        [::std::mem::offset_of!(params, tcp_keepalive_intvl) - 408usize];
+    ["Offset of field: params::tcp_keepalive_probes"]
+        [::std::mem::offset_of!(params, tcp_keepalive_probes) - 416usize];
+    ["Offset of field: params::tcp_keepalive_time"]
+        [::std::mem::offset_of!(params, tcp_keepalive_time) - 424usize];
+    ["Offset of field: params::timeout_idle"]
+        [::std::mem::offset_of!(params, timeout_idle) - 432usize];
+    ["Offset of field: params::timeout_linger"]
+        [::std::mem::offset_of!(params, timeout_linger) - 440usize];
+    ["Offset of field: params::tls_handshake_timeout"]
+        [::std::mem::offset_of!(params, tls_handshake_timeout) - 448usize];
+    ["Offset of field: params::tls_ja3"][::std::mem::offset_of!(params, tls_ja3) - 456usize];
+    ["Offset of field: params::tls_cleanup_batch"]
+        [::std::mem::offset_of!(params, tls_cleanup_batch) - 460usize];
+    ["Offset of field: params::tls_err_dup_servername"]
+        [::std::mem::offset_of!(params, tls_err_dup_servername) - 464usize];
+    ["Offset of field: params::transit_buffer"]
+        [::std::mem::offset_of!(params, transit_buffer) - 472usize];
+    ["Offset of field: params::vary_notice"]
+        [::std::mem::offset_of!(params, vary_notice) - 480usize];
+    ["Offset of field: params::vcl_cooldown"]
+        [::std::mem::offset_of!(params, vcl_cooldown) - 488usize];
+    ["Offset of field: params::max_vcl_handling"]
+        [::std::mem::offset_of!(params, max_vcl_handling) - 496usize];
+    ["Offset of field: params::max_vcl"][::std::mem::offset_of!(params, max_vcl) - 500usize];
+    ["Offset of field: params::vsm_free_cooldown"]
+        [::std::mem::offset_of!(params, vsm_free_cooldown) - 504usize];
+    ["Offset of field: params::vsl_buffer"][::std::mem::offset_of!(params, vsl_buffer) - 512usize];
+    ["Offset of field: params::vsl_reclen"][::std::mem::offset_of!(params, vsl_reclen) - 516usize];
+    ["Offset of field: params::vsl_space"][::std::mem::offset_of!(params, vsl_space) - 520usize];
+    ["Offset of field: params::workspace_backend"]
+        [::std::mem::offset_of!(params, workspace_backend) - 528usize];
+    ["Offset of field: params::workspace_client"]
+        [::std::mem::offset_of!(params, workspace_client) - 532usize];
+    ["Offset of field: params::workspace_session"]
+        [::std::mem::offset_of!(params, workspace_session) - 536usize];
+    ["Offset of field: params::workspace_thread"]
+        [::std::mem::offset_of!(params, workspace_thread) - 540usize];
+    ["Offset of field: params::h2_rx_window_low_water"]
+        [::std::mem::offset_of!(params, h2_rx_window_low_water) - 544usize];
+    ["Offset of field: params::h2_rx_window_increment"]
+        [::std::mem::offset_of!(params, h2_rx_window_increment) - 548usize];
+    ["Offset of field: params::h2_window_timeout"]
+        [::std::mem::offset_of!(params, h2_window_timeout) - 552usize];
+    ["Offset of field: params::h2_header_table_size"]
+        [::std::mem::offset_of!(params, h2_header_table_size) - 560usize];
+    ["Offset of field: params::h2_max_concurrent_streams"]
+        [::std::mem::offset_of!(params, h2_max_concurrent_streams) - 564usize];
+    ["Offset of field: params::h2_initial_window_size"]
+        [::std::mem::offset_of!(params, h2_initial_window_size) - 568usize];
+    ["Offset of field: params::h2_max_frame_size"]
+        [::std::mem::offset_of!(params, h2_max_frame_size) - 572usize];
+    ["Offset of field: params::h2_max_header_list_size"]
+        [::std::mem::offset_of!(params, h2_max_header_list_size) - 576usize];
+    ["Offset of field: params::h2_rapid_reset"]
+        [::std::mem::offset_of!(params, h2_rapid_reset) - 584usize];
+    ["Offset of field: params::h2_rapid_reset_limit"]
+        [::std::mem::offset_of!(params, h2_rapid_reset_limit) - 592usize];
+    ["Offset of field: params::h2_rapid_reset_period"]
+        [::std::mem::offset_of!(params, h2_rapid_reset_period) - 600usize];
+    ["Offset of field: params::pool_req"][::std::mem::offset_of!(params, pool_req) - 608usize];
+    ["Offset of field: params::pool_sess"][::std::mem::offset_of!(params, pool_sess) - 624usize];
+    ["Offset of field: params::pool_vbo"][::std::mem::offset_of!(params, pool_vbo) - 640usize];
+    ["Offset of field: params::sslbuf_pool"]
+        [::std::mem::offset_of!(params, sslbuf_pool) - 656usize];
+    ["Offset of field: params::ssl_buffer"][::std::mem::offset_of!(params, ssl_buffer) - 672usize];
+    ["Offset of field: params::wthread_pools"]
+        [::std::mem::offset_of!(params, wthread_pools) - 676usize];
+    ["Offset of field: params::wthread_max"]
+        [::std::mem::offset_of!(params, wthread_max) - 680usize];
+    ["Offset of field: params::wthread_min"]
+        [::std::mem::offset_of!(params, wthread_min) - 684usize];
+    ["Offset of field: params::wthread_reserve"]
+        [::std::mem::offset_of!(params, wthread_reserve) - 688usize];
+    ["Offset of field: params::wthread_timeout"]
+        [::std::mem::offset_of!(params, wthread_timeout) - 696usize];
+    ["Offset of field: params::wthread_watchdog"]
+        [::std::mem::offset_of!(params, wthread_watchdog) - 704usize];
+    ["Offset of field: params::wthread_destroy_delay"]
+        [::std::mem::offset_of!(params, wthread_destroy_delay) - 712usize];
+    ["Offset of field: params::wthread_add_delay"]
+        [::std::mem::offset_of!(params, wthread_add_delay) - 720usize];
+    ["Offset of field: params::wthread_fail_delay"]
+        [::std::mem::offset_of!(params, wthread_fail_delay) - 728usize];
+    ["Offset of field: params::wthread_stats_rate"]
+        [::std::mem::offset_of!(params, wthread_stats_rate) - 736usize];
+    ["Offset of field: params::wthread_queue_limit"]
+        [::std::mem::offset_of!(params, wthread_queue_limit) - 740usize];
+    ["Offset of field: params::wthread_stacksize"]
+        [::std::mem::offset_of!(params, wthread_stacksize) - 744usize];
+    ["Offset of field: params::debug_bits"][::std::mem::offset_of!(params, debug_bits) - 752usize];
+    ["Offset of field: params::experimental_bits"]
+        [::std::mem::offset_of!(params, experimental_bits) - 755usize];
+    ["Offset of field: params::feature_bits"]
+        [::std::mem::offset_of!(params, feature_bits) - 756usize];
+    ["Offset of field: params::vcc_feature_bits"]
+        [::std::mem::offset_of!(params, vcc_feature_bits) - 758usize];
+    ["Offset of field: params::vsl_mask"][::std::mem::offset_of!(params, vsl_mask) - 759usize];
+    ["Offset of field: params::vre_limits"][::std::mem::offset_of!(params, vre_limits) - 792usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct cli_proto {
+    _unused: [u8; 0],
+}
+pub type req_state_f =
+    ::std::option::Option<unsafe extern "C" fn(arg1: *mut worker, arg2: *mut req) -> req_fsm_nxt>;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct req_step {
+    pub name: *const ::std::ffi::c_char,
+    pub func: req_state_f,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of req_step"][::std::mem::size_of::<req_step>() - 16usize];
+    ["Alignment of req_step"][::std::mem::align_of::<req_step>() - 8usize];
+    ["Offset of field: req_step::name"][::std::mem::offset_of!(req_step, name) - 0usize];
+    ["Offset of field: req_step::func"][::std::mem::offset_of!(req_step, func) - 8usize];
+};
+impl Default for req_step {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+unsafe extern "C" {
+    pub static R_STP_TRANSPORT: [req_step; 1usize];
+}
+unsafe extern "C" {
+    pub static R_STP_RECV: [req_step; 1usize];
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct vxid_pool {
+    pub next: u64,
+    pub count: u32,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of vxid_pool"][::std::mem::size_of::<vxid_pool>() - 16usize];
+    ["Alignment of vxid_pool"][::std::mem::align_of::<vxid_pool>() - 8usize];
+    ["Offset of field: vxid_pool::next"][::std::mem::offset_of!(vxid_pool, next) - 0usize];
+    ["Offset of field: vxid_pool::count"][::std::mem::offset_of!(vxid_pool, count) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct worker_priv {
+    pub magic: ::std::ffi::c_uint,
+    pub nobjhead: *mut objhead,
+    pub nobjcore: *mut objcore,
+    pub nhashpriv: *mut ::std::ffi::c_void,
+    pub vxid_pool: [vxid_pool; 1usize],
+    pub vcl: *mut vcl,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of worker_priv"][::std::mem::size_of::<worker_priv>() - 56usize];
+    ["Alignment of worker_priv"][::std::mem::align_of::<worker_priv>() - 8usize];
+    ["Offset of field: worker_priv::magic"][::std::mem::offset_of!(worker_priv, magic) - 0usize];
+    ["Offset of field: worker_priv::nobjhead"]
+        [::std::mem::offset_of!(worker_priv, nobjhead) - 8usize];
+    ["Offset of field: worker_priv::nobjcore"]
+        [::std::mem::offset_of!(worker_priv, nobjcore) - 16usize];
+    ["Offset of field: worker_priv::nhashpriv"]
+        [::std::mem::offset_of!(worker_priv, nhashpriv) - 24usize];
+    ["Offset of field: worker_priv::vxid_pool"]
+        [::std::mem::offset_of!(worker_priv, vxid_pool) - 32usize];
+    ["Offset of field: worker_priv::vcl"][::std::mem::offset_of!(worker_priv, vcl) - 48usize];
+};
+impl Default for worker_priv {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct vco {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct http_conn {
+    pub magic: ::std::ffi::c_uint,
+    pub rfd: *mut ::std::ffi::c_int,
+    pub doclose: stream_close_t,
+    pub body_status: body_status_t,
+    pub ws: *mut ws,
+    pub rxbuf_b: *mut ::std::ffi::c_char,
+    pub rxbuf_e: *mut ::std::ffi::c_char,
+    pub pipeline_b: *mut ::std::ffi::c_char,
+    pub pipeline_e: *mut ::std::ffi::c_char,
+    pub pipeline_snap: usize,
+    pub content_length: isize,
+    pub priv_: *mut ::std::ffi::c_void,
+    pub oper: *const vco,
+    pub oper_priv: *mut ::std::ffi::c_void,
+    pub first_byte_timeout: vtim_dur,
+    pub between_bytes_timeout: vtim_dur,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of http_conn"][::std::mem::size_of::<http_conn>() - 128usize];
+    ["Alignment of http_conn"][::std::mem::align_of::<http_conn>() - 8usize];
+    ["Offset of field: http_conn::magic"][::std::mem::offset_of!(http_conn, magic) - 0usize];
+    ["Offset of field: http_conn::rfd"][::std::mem::offset_of!(http_conn, rfd) - 8usize];
+    ["Offset of field: http_conn::doclose"][::std::mem::offset_of!(http_conn, doclose) - 16usize];
+    ["Offset of field: http_conn::body_status"]
+        [::std::mem::offset_of!(http_conn, body_status) - 24usize];
+    ["Offset of field: http_conn::ws"][::std::mem::offset_of!(http_conn, ws) - 32usize];
+    ["Offset of field: http_conn::rxbuf_b"][::std::mem::offset_of!(http_conn, rxbuf_b) - 40usize];
+    ["Offset of field: http_conn::rxbuf_e"][::std::mem::offset_of!(http_conn, rxbuf_e) - 48usize];
+    ["Offset of field: http_conn::pipeline_b"]
+        [::std::mem::offset_of!(http_conn, pipeline_b) - 56usize];
+    ["Offset of field: http_conn::pipeline_e"]
+        [::std::mem::offset_of!(http_conn, pipeline_e) - 64usize];
+    ["Offset of field: http_conn::pipeline_snap"]
+        [::std::mem::offset_of!(http_conn, pipeline_snap) - 72usize];
+    ["Offset of field: http_conn::content_length"]
+        [::std::mem::offset_of!(http_conn, content_length) - 80usize];
+    ["Offset of field: http_conn::priv_"][::std::mem::offset_of!(http_conn, priv_) - 88usize];
+    ["Offset of field: http_conn::oper"][::std::mem::offset_of!(http_conn, oper) - 96usize];
+    ["Offset of field: http_conn::oper_priv"]
+        [::std::mem::offset_of!(http_conn, oper_priv) - 104usize];
+    ["Offset of field: http_conn::first_byte_timeout"]
+        [::std::mem::offset_of!(http_conn, first_byte_timeout) - 112usize];
+    ["Offset of field: http_conn::between_bytes_timeout"]
+        [::std::mem::offset_of!(http_conn, between_bytes_timeout) - 120usize];
+};
+impl Default for http_conn {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub const htc_status_e_HTC_S_JUNK: htc_status_e = -5;
+pub const htc_status_e_HTC_S_CLOSE: htc_status_e = -4;
+pub const htc_status_e_HTC_S_TIMEOUT: htc_status_e = -3;
+pub const htc_status_e_HTC_S_OVERFLOW: htc_status_e = -2;
+pub const htc_status_e_HTC_S_EOF: htc_status_e = -1;
+pub const htc_status_e_HTC_S_EMPTY: htc_status_e = 0;
+pub const htc_status_e_HTC_S_MORE: htc_status_e = 1;
+pub const htc_status_e_HTC_S_COMPLETE: htc_status_e = 2;
+pub const htc_status_e_HTC_S_IDLE: htc_status_e = 3;
+pub type htc_status_e = ::std::ffi::c_int;
+pub type htc_complete_f =
+    ::std::option::Option<unsafe extern "C" fn(arg1: *mut http_conn) -> htc_status_e>;
+unsafe extern "C" {
+    pub static mut cache_param: *mut params;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct vcf_return {
+    pub name: *const ::std::ffi::c_char,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of vcf_return"][::std::mem::size_of::<vcf_return>() - 8usize];
+    ["Alignment of vcf_return"][::std::mem::align_of::<vcf_return>() - 8usize];
+    ["Offset of field: vcf_return::name"][::std::mem::offset_of!(vcf_return, name) - 0usize];
+};
+impl Default for vcf_return {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+unsafe extern "C" {
+    pub static VCF_CONTINUE: [vcf_return; 1usize];
+}
+unsafe extern "C" {
+    pub static VCF_DEFAULT: [vcf_return; 1usize];
+}
+unsafe extern "C" {
+    pub static VCF_MISS: [vcf_return; 1usize];
+}
+unsafe extern "C" {
+    pub static VCF_HIT: [vcf_return; 1usize];
+}
+pub type vcf_func_f = ::std::option::Option<
+    unsafe extern "C" fn(
+        req: *mut req,
+        oc: *mut *mut objcore,
+        oc_exp: *mut *mut objcore,
+        state: ::std::ffi::c_int,
+    ) -> *const vcf_return,
+>;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct vcf {
+    pub magic: ::std::ffi::c_uint,
+    pub func: vcf_func_f,
+    pub priv_: *mut ::std::ffi::c_void,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of vcf"][::std::mem::size_of::<vcf>() - 24usize];
+    ["Alignment of vcf"][::std::mem::align_of::<vcf>() - 8usize];
+    ["Offset of field: vcf::magic"][::std::mem::offset_of!(vcf, magic) - 0usize];
+    ["Offset of field: vcf::func"][::std::mem::offset_of!(vcf, func) - 8usize];
+    ["Offset of field: vcf::priv_"][::std::mem::offset_of!(vcf, priv_) - 16usize];
+};
+impl Default for vcf {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+unsafe extern "C" {
+    pub fn VBE_InitCfg();
+}
+unsafe extern "C" {
+    pub fn BAN_Hold();
+}
+unsafe extern "C" {
+    pub fn BAN_Release();
+}
+unsafe extern "C" {
+    pub fn BAN_Reload(ban: *const u8, len: ::std::ffi::c_uint);
+}
+unsafe extern "C" {
+    pub fn BAN_FindBan(t0: vtim_real) -> *mut ban;
+}
+unsafe extern "C" {
+    pub fn BAN_RefBan(oc: *mut objcore, arg1: *mut ban);
+}
+unsafe extern "C" {
+    pub fn BAN_Time(ban: *const ban) -> vtim_real;
+}
+unsafe extern "C" {
+    pub fn VBO_GetBusyObj(arg1: *const worker, arg2: *const req) -> *mut busyobj;
+}
+unsafe extern "C" {
+    pub fn VBO_ReleaseBusyObj(wrk: *mut worker, busyobj: *mut *mut busyobj);
+}
+unsafe extern "C" {
+    pub fn VBO_SetState(wrk: *mut worker, bo: *mut busyobj, next: BocState);
+}
+unsafe extern "C" {
+    pub fn VDI_GetHdr(arg1: *mut busyobj) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VDI_GetIP(arg1: *mut busyobj) -> VCL_IP;
+}
+unsafe extern "C" {
+    pub fn VDI_Finish(bo: *mut busyobj);
+}
+unsafe extern "C" {
+    pub fn VDI_Http1Pipe(arg1: *mut req, arg2: *mut busyobj) -> stream_close_t;
+}
+unsafe extern "C" {
+    pub fn VDI_Panic(arg1: *const director, arg2: *mut vsb, nm: *const ::std::ffi::c_char);
+}
+unsafe extern "C" {
+    pub fn VDI_Event(d: *const director, ev: VclEvent);
+}
+unsafe extern "C" {
+    pub fn VDI_Init();
+}
+unsafe extern "C" {
+    pub fn VDP_Fini(vdc: *const vdp_ctx);
+}
+unsafe extern "C" {
+    pub fn VDP_Init(
+        vdc: *mut vdp_ctx,
+        wrk: *mut worker,
+        vsl: *mut vsl_log,
+        req: *const req,
+        bo: *const busyobj,
+        cl: *mut intmax_t,
+    );
+}
+unsafe extern "C" {
+    pub fn VDP_Close(arg1: *mut vdp_ctx, arg2: *mut objcore, arg3: *mut boc) -> u64;
+}
+unsafe extern "C" {
+    pub fn VDP_Panic(vsb: *mut vsb, vdc: *const vdp_ctx);
+}
+unsafe extern "C" {
+    pub fn VDP_Push(
+        ctx: *const vrt_ctx,
+        arg1: *mut vdp_ctx,
+        arg2: *mut ws,
+        arg3: *const vdp,
+        priv_: *mut ::std::ffi::c_void,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VDP_ObjIterate(
+        priv_: *mut ::std::ffi::c_void,
+        flush: ::std::ffi::c_uint,
+        ptr: *const ::std::ffi::c_void,
+        len: isize,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VDP_DeliverObj(vdc: *mut vdp_ctx, oc: *mut objcore) -> ::std::ffi::c_int;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct vdp {
+    pub name: *const ::std::ffi::c_char,
+    pub init: vdp_init_f,
+    pub bytes: vdp_bytes_f,
+    pub fini: vdp_fini_f,
+    pub priv1: *const ::std::ffi::c_void,
+    pub io_init: vdpio_init_f,
+    pub io_upgrade: vdpio_init_f,
+    pub io_lease: vdpio_lease_f,
+    pub io_fini: vdpio_fini_f,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of vdp"][::std::mem::size_of::<vdp>() - 72usize];
+    ["Alignment of vdp"][::std::mem::align_of::<vdp>() - 8usize];
+    ["Offset of field: vdp::name"][::std::mem::offset_of!(vdp, name) - 0usize];
+    ["Offset of field: vdp::init"][::std::mem::offset_of!(vdp, init) - 8usize];
+    ["Offset of field: vdp::bytes"][::std::mem::offset_of!(vdp, bytes) - 16usize];
+    ["Offset of field: vdp::fini"][::std::mem::offset_of!(vdp, fini) - 24usize];
+    ["Offset of field: vdp::priv1"][::std::mem::offset_of!(vdp, priv1) - 32usize];
+    ["Offset of field: vdp::io_init"][::std::mem::offset_of!(vdp, io_init) - 40usize];
+    ["Offset of field: vdp::io_upgrade"][::std::mem::offset_of!(vdp, io_upgrade) - 48usize];
+    ["Offset of field: vdp::io_lease"][::std::mem::offset_of!(vdp, io_lease) - 56usize];
+    ["Offset of field: vdp::io_fini"][::std::mem::offset_of!(vdp, io_fini) - 64usize];
+};
+impl Default for vdp {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+unsafe extern "C" {
+    pub static VDP_gunzip: vdp;
+}
+unsafe extern "C" {
+    pub static VDP_esi: vdp;
+}
+unsafe extern "C" {
+    pub static VDP_range: vdp;
+}
+unsafe extern "C" {
+    pub fn VDPIO_Close(arg1: *mut vdp_ctx, arg2: *mut objcore, arg3: *mut boc) -> u64;
+}
+unsafe extern "C" {
+    pub fn VDPIO_Upgrade(ctx: *const vrt_ctx, vdc: *mut vdp_ctx) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VDPIO_Push(
+        ctx: *const vrt_ctx,
+        arg1: *mut vdp_ctx,
+        arg2: *mut ws,
+        arg3: *const vdp,
+        priv_: *mut ::std::ffi::c_void,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn EXP_Ttl(arg1: *const req, arg2: *const objcore) -> vtim_real;
+}
+unsafe extern "C" {
+    pub fn EXP_Ttl_grace(arg1: *const req, oc: *const objcore) -> vtim_real;
+}
+unsafe extern "C" {
+    pub fn EXP_RefNewObjcore(arg1: *mut objcore);
+}
+unsafe extern "C" {
+    pub fn EXP_Insert(wrk: *mut worker, oc: *mut objcore);
+}
+unsafe extern "C" {
+    pub fn EXP_Remove(arg1: *mut objcore, arg2: *const objcore);
+}
+unsafe extern "C" {
+    pub fn EXP_Rearm(
+        oc: *mut objcore,
+        now: vtim_real,
+        ttl: vtim_dur,
+        grace: vtim_dur,
+        keep: vtim_dur,
+    );
+}
+unsafe extern "C" {
+    pub fn EXP_Reduce(
+        oc: *mut objcore,
+        now: vtim_real,
+        ttl: vtim_dur,
+        grace: vtim_dur,
+        keep: vtim_dur,
+    );
+}
+unsafe extern "C" {
+    pub fn BAN_Init();
+}
+unsafe extern "C" {
+    pub fn BAN_Compile();
+}
+unsafe extern "C" {
+    pub fn BAN_Shutdown();
+}
+unsafe extern "C" {
+    pub fn BAN_NewObjCore(oc: *mut objcore);
+}
+unsafe extern "C" {
+    pub fn BAN_DestroyObj(oc: *mut objcore);
+}
+unsafe extern "C" {
+    pub fn BAN_CheckObject(
+        arg1: *mut worker,
+        arg2: *mut objcore,
+        arg3: *mut req,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VBO_Init();
+}
+unsafe extern "C" {
+    pub fn CLI_Init();
+}
+unsafe extern "C" {
+    pub fn CLI_Run();
+}
+unsafe extern "C" {
+    pub fn CLI_AddFuncs(p: *mut cli_proto);
+}
+unsafe extern "C" {
+    pub fn EXP_Init();
+}
+unsafe extern "C" {
+    pub fn EXP_Shutdown();
+}
+pub const vbf_fetch_mode_e_VBF_NORMAL: vbf_fetch_mode_e = 0;
+pub const vbf_fetch_mode_e_VBF_PASS: vbf_fetch_mode_e = 1;
+pub const vbf_fetch_mode_e_VBF_BACKGROUND: vbf_fetch_mode_e = 2;
+pub type vbf_fetch_mode_e = ::std::ffi::c_uint;
+unsafe extern "C" {
+    pub fn VBF_Fetch(
+        wrk: *mut worker,
+        req: *mut req,
+        oc: *mut objcore,
+        oldoc: *mut objcore,
+        arg1: vbf_fetch_mode_e,
+    );
+}
+unsafe extern "C" {
+    pub fn VBF_Get_Filter_List(arg1: *mut busyobj) -> *const ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn Bereq_Rollback(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VFP_Init();
+}
+unsafe extern "C" {
+    pub fn VFP_Push(arg1: *mut vfp_ctx, arg2: *const vfp) -> *mut vfp_entry;
+}
+unsafe extern "C" {
+    pub fn VFP_GetStorage(arg1: *mut vfp_ctx, sz: *mut isize, ptr: *mut *mut u8) -> VfpStatus;
+}
+unsafe extern "C" {
+    pub fn VFP_Extend(arg1: *const vfp_ctx, sz: isize, arg2: VfpStatus);
+}
+unsafe extern "C" {
+    pub fn VFP_Setup(vc: *mut vfp_ctx, wrk: *mut worker);
+}
+unsafe extern "C" {
+    pub fn VFP_Open(ctx: *const vrt_ctx, arg1: *mut vfp_ctx) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VFP_Close(arg1: *mut vfp_ctx) -> u64;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct vfp {
+    pub name: *const ::std::ffi::c_char,
+    pub init: vfp_init_f,
+    pub pull: vfp_pull_f,
+    pub fini: vfp_fini_f,
+    pub priv1: *const ::std::ffi::c_void,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of vfp"][::std::mem::size_of::<vfp>() - 40usize];
+    ["Alignment of vfp"][::std::mem::align_of::<vfp>() - 8usize];
+    ["Offset of field: vfp::name"][::std::mem::offset_of!(vfp, name) - 0usize];
+    ["Offset of field: vfp::init"][::std::mem::offset_of!(vfp, init) - 8usize];
+    ["Offset of field: vfp::pull"][::std::mem::offset_of!(vfp, pull) - 16usize];
+    ["Offset of field: vfp::fini"][::std::mem::offset_of!(vfp, fini) - 24usize];
+    ["Offset of field: vfp::priv1"][::std::mem::offset_of!(vfp, priv1) - 32usize];
+};
+impl Default for vfp {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+unsafe extern "C" {
+    pub static VFP_gunzip: vfp;
+}
+unsafe extern "C" {
+    pub static VFP_gzip: vfp;
+}
+unsafe extern "C" {
+    pub static VFP_testgunzip: vfp;
+}
+unsafe extern "C" {
+    pub static VFP_esi: vfp;
+}
+unsafe extern "C" {
+    pub static VFP_esi_gzip: vfp;
+}
+unsafe extern "C" {
+    pub fn HTTP_Init();
+}
+unsafe extern "C" {
+    pub fn HTTP1_Complete(arg1: *mut http_conn) -> htc_status_e;
+}
+unsafe extern "C" {
+    pub fn HTTP1_DissectRequest(arg1: *mut http_conn, arg2: *mut http) -> u16;
+}
+unsafe extern "C" {
+    pub fn HTTP1_DissectResponse(arg1: *mut http_conn, resp: *mut http, req: *const http) -> u16;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct v1l {
+    _unused: [u8; 0],
+}
+unsafe extern "C" {
+    pub fn HTTP1_Write(
+        v1l: *mut v1l,
+        hp: *const http,
+        arg1: *const ::std::ffi::c_int,
+    ) -> ::std::ffi::c_uint;
+}
+unsafe extern "C" {
+    pub fn VXID_Get(arg1: *const worker, marker: u64) -> vxid_t;
+}
+unsafe extern "C" {
+    pub static mut panic_key: pthread_key_t;
+}
+unsafe extern "C" {
+    pub static mut witness_key: pthread_key_t;
+}
+unsafe extern "C" {
+    pub fn THR_SetName(name: *const ::std::ffi::c_char);
+}
+unsafe extern "C" {
+    pub fn THR_GetName() -> *const ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn THR_SetBusyobj(arg1: *const busyobj);
+}
+unsafe extern "C" {
+    pub fn THR_GetBusyobj() -> *mut busyobj;
+}
+unsafe extern "C" {
+    pub fn THR_SetRequest(arg1: *const req);
+}
+unsafe extern "C" {
+    pub fn THR_GetRequest() -> *mut req;
+}
+unsafe extern "C" {
+    pub fn THR_SetWorker(arg1: *const worker);
+}
+unsafe extern "C" {
+    pub fn THR_GetWorker() -> *mut worker;
+}
+unsafe extern "C" {
+    pub fn THR_Init();
+}
+unsafe extern "C" {
+    pub fn LCK_Init();
+}
+unsafe extern "C" {
+    pub fn MPL_AssertSane(item: *const ::std::ffi::c_void);
+}
+unsafe extern "C" {
+    pub fn MPL_New(
+        name: *const ::std::ffi::c_char,
+        pp: *mut poolparam,
+        cur_size: *mut ::std::ffi::c_uint,
+    ) -> *mut mempool;
+}
+unsafe extern "C" {
+    pub fn MPL_Destroy(mpp: *mut *mut mempool);
+}
+unsafe extern "C" {
+    pub fn MPL_Get(mpl: *mut mempool, size: *mut ::std::ffi::c_uint) -> *mut ::std::ffi::c_void;
+}
+unsafe extern "C" {
+    pub fn MPL_Free(mpl: *mut mempool, item: *mut ::std::ffi::c_void);
+}
+unsafe extern "C" {
+    pub fn ObjInit();
+}
+unsafe extern "C" {
+    pub fn ObjNew(arg1: *const worker) -> *mut objcore;
+}
+unsafe extern "C" {
+    pub fn ObjDestroy(arg1: *const worker, arg2: *mut *mut objcore);
+}
+unsafe extern "C" {
+    pub fn ObjGetSpace(
+        arg1: *mut worker,
+        arg2: *mut objcore,
+        sz: *mut isize,
+        ptr: *mut *mut u8,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn ObjExtend(arg1: *mut worker, arg2: *mut objcore, l: isize, final_: ::std::ffi::c_int);
+}
+unsafe extern "C" {
+    pub fn ObjWaitExtend(
+        arg1: *const worker,
+        arg2: *const objcore,
+        l: u64,
+        statep: *mut BocState,
+    ) -> u64;
+}
+unsafe extern "C" {
+    pub fn ObjSetState(
+        arg1: *mut worker,
+        arg2: *mut objcore,
+        next: BocState,
+        broadcast: ::std::ffi::c_uint,
+    );
+}
+unsafe extern "C" {
+    pub fn ObjWaitState(arg1: *const objcore, want: BocState) -> BocState;
+}
+unsafe extern "C" {
+    pub fn ObjTouch(arg1: *mut worker, arg2: *mut objcore, now: vtim_real);
+}
+unsafe extern "C" {
+    pub fn ObjFreeObj(arg1: *mut worker, arg2: *mut objcore);
+}
+unsafe extern "C" {
+    pub fn ObjSlim(arg1: *mut worker, arg2: *mut objcore);
+}
+unsafe extern "C" {
+    pub fn ObjSetAttr(
+        arg1: *mut worker,
+        arg2: *mut objcore,
+        arg3: obj_attr,
+        len: isize,
+        arg4: *const ::std::ffi::c_void,
+    ) -> *mut ::std::ffi::c_void;
+}
+unsafe extern "C" {
+    pub fn ObjCopyAttr(
+        arg1: *mut worker,
+        arg2: *mut objcore,
+        arg3: *mut objcore,
+        attr: obj_attr,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn ObjBocDone(arg1: *mut worker, arg2: *mut objcore, arg3: *mut *mut boc);
+}
+unsafe extern "C" {
+    pub fn ObjVAIGetExtend(
+        arg1: *mut worker,
+        arg2: *const objcore,
+        arg3: u64,
+        arg4: *mut BocState,
+        arg5: *mut vai_qe,
+    ) -> u64;
+}
+unsafe extern "C" {
+    pub fn ObjVAICancel(arg1: *mut worker, arg2: *mut boc, arg3: *mut vai_qe);
+}
+unsafe extern "C" {
+    pub fn ObjSetDouble(
+        arg1: *mut worker,
+        arg2: *mut objcore,
+        arg3: obj_attr,
+        arg4: f64,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn ObjSetU64(
+        arg1: *mut worker,
+        arg2: *mut objcore,
+        arg3: obj_attr,
+        arg4: u64,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn ObjSetXID(arg1: *mut worker, arg2: *mut objcore, arg3: vxid_t) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn ObjSetFlag(arg1: *mut worker, arg2: *mut objcore, of: obj_flags, val: ::std::ffi::c_int);
+}
+unsafe extern "C" {
+    pub fn ObjSendEvent(arg1: *mut worker, oc: *mut objcore, event: ::std::ffi::c_uint);
+}
+pub type obj_event_f = ::std::option::Option<
+    unsafe extern "C" fn(
+        arg1: *mut worker,
+        priv_: *mut ::std::ffi::c_void,
+        arg2: *mut objcore,
+        arg3: ::std::ffi::c_uint,
+    ),
+>;
+unsafe extern "C" {
+    pub fn ObjSubscribeEvents(
+        arg1: obj_event_f,
+        arg2: *mut ::std::ffi::c_void,
+        mask: ::std::ffi::c_uint,
+    ) -> usize;
+}
+unsafe extern "C" {
+    pub fn ObjUnsubscribeEvents(arg1: *mut usize);
+}
+unsafe extern "C" {
+    pub fn PAN_Init();
+}
+unsafe extern "C" {
+    pub fn PAN__DumpStruct(
+        vsb: *mut vsb,
+        block: ::std::ffi::c_int,
+        track: ::std::ffi::c_int,
+        ptr: *const ::std::ffi::c_void,
+        smagic: *const ::std::ffi::c_char,
+        magic: ::std::ffi::c_uint,
+        fmt: *const ::std::ffi::c_char,
+        ...
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn Pool_Init();
+}
+unsafe extern "C" {
+    pub fn Pool_Task(pp: *mut pool, task: *mut pool_task, prio: TaskPriority) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn Pool_Task_Arg(
+        arg1: *mut worker,
+        arg2: TaskPriority,
+        arg3: task_func_t,
+        arg: *const ::std::ffi::c_void,
+        arg_len: usize,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn Pool_Sumstat(w: *const worker);
+}
+unsafe extern "C" {
+    pub fn Pool_TrySumstat(wrk: *const worker) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn Pool_PurgeStat(nobj: ::std::ffi::c_uint);
+}
+unsafe extern "C" {
+    pub fn Pool_Task_Any(task: *mut pool_task, prio: TaskPriority) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn pan_pool(arg1: *mut vsb);
+}
+unsafe extern "C" {
+    pub fn VRG_CheckBo(arg1: *mut busyobj) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn Req_New(arg1: *mut sess, arg2: *const req) -> *mut req;
+}
+unsafe extern "C" {
+    pub fn Req_Release(arg1: *mut req);
+}
+unsafe extern "C" {
+    pub fn Req_Rollback(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn Req_Cleanup(sp: *mut sess, wrk: *mut worker, req: *mut req);
+}
+unsafe extern "C" {
+    pub fn Req_Fail(req: *mut req, reason: stream_close_t);
+}
+unsafe extern "C" {
+    pub fn Req_AcctLogCharge(arg1: *mut VSC_main_wrk, arg2: *mut req);
+}
+unsafe extern "C" {
+    pub fn Req_LogHit(arg1: *mut worker, arg2: *mut req, arg3: *mut objcore, arg4: intmax_t);
+}
+unsafe extern "C" {
+    pub fn Req_LogStart(arg1: *const worker, arg2: *mut req) -> *const ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn VRB_Ignore(arg1: *mut req) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VRB_Cache(arg1: *mut req, maxsize: isize) -> isize;
+}
+unsafe extern "C" {
+    pub fn VRB_Free(arg1: *mut req);
+}
+unsafe extern "C" {
+    pub fn Resp_Setup_Deliver(arg1: *mut req) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn Resp_Setup_Synth(arg1: *mut req);
+}
+pub const req_fsm_nxt_REQ_FSM_MORE: req_fsm_nxt = 0;
+pub const req_fsm_nxt_REQ_FSM_DONE: req_fsm_nxt = 1;
+pub const req_fsm_nxt_REQ_FSM_DISEMBARK: req_fsm_nxt = 2;
+pub type req_fsm_nxt = i32;
+unsafe extern "C" {
+    pub fn CNT_Embark(arg1: *mut worker, arg2: *mut req);
+}
+unsafe extern "C" {
+    pub fn CNT_Request(arg1: *mut req) -> req_fsm_nxt;
+}
+unsafe extern "C" {
+    pub fn SES_NewPool(arg1: *mut pool, pool_no: ::std::ffi::c_uint);
+}
+unsafe extern "C" {
+    pub fn SES_DestroyPool(arg1: *mut pool);
+}
+unsafe extern "C" {
+    pub fn SES_Wait(arg1: *mut sess, arg2: *const transport);
+}
+unsafe extern "C" {
+    pub fn SES_Ref(sp: *mut sess);
+}
+unsafe extern "C" {
+    pub fn SES_Rel(sp: *mut sess);
+}
+unsafe extern "C" {
+    pub fn HTC_Status(
+        arg1: htc_status_e,
+        arg2: *mut *const ::std::ffi::c_char,
+        arg3: *mut *const ::std::ffi::c_char,
+    );
+}
+unsafe extern "C" {
+    pub fn HTC_RxInit(htc: *mut http_conn, ws: *mut ws);
+}
+unsafe extern "C" {
+    pub fn HTC_RxPipeline(htc: *mut http_conn, arg1: *mut ::std::ffi::c_char);
+}
+unsafe extern "C" {
+    pub fn HTC_RxStuff(
+        arg1: *mut http_conn,
+        arg2: htc_complete_f,
+        t1: *mut vtim_real,
+        t2: *mut vtim_real,
+        ti: vtim_real,
+        tn: vtim_real,
+        td: vtim_dur,
+        maxbytes: ::std::ffi::c_int,
+    ) -> htc_status_e;
+}
+unsafe extern "C" {
+    pub fn HTC_Read(
+        htc: *mut http_conn,
+        buf: *mut ::std::ffi::c_void,
+        len: usize,
+        tmo: vtim_dur,
+    ) -> isize;
+}
+unsafe extern "C" {
+    pub fn VIOV_prune(iov: *mut iovec, n: *mut ::std::ffi::c_uint, l: usize);
+}
+unsafe extern "C" {
+    pub fn SES_Set_transport(sp: *const sess, src: *const ::std::ffi::c_void) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Reserve_transport(
+        sp: *mut sess,
+        dst: *mut *mut ::std::ffi::c_void,
+        sz: *mut isize,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Set_remote_addr(sp: *const sess, src: *const suckaddr) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Reserve_remote_addr(
+        sp: *mut sess,
+        dst: *mut *mut suckaddr,
+        sz: *mut isize,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Set_local_addr(sp: *const sess, src: *const suckaddr) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Reserve_local_addr(
+        sp: *mut sess,
+        dst: *mut *mut suckaddr,
+        sz: *mut isize,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Set_client_addr(sp: *const sess, src: *const suckaddr) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Reserve_client_addr(
+        sp: *mut sess,
+        dst: *mut *mut suckaddr,
+        sz: *mut isize,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Set_server_addr(sp: *const sess, src: *const suckaddr) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Reserve_server_addr(
+        sp: *mut sess,
+        dst: *mut *mut suckaddr,
+        sz: *mut isize,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Set_client_ip(sp: *const sess, src: *const ::std::ffi::c_char) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Reserve_client_ip(
+        sp: *mut sess,
+        dst: *mut *mut ::std::ffi::c_char,
+        sz: *mut isize,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Set_client_port(
+        sp: *const sess,
+        src: *const ::std::ffi::c_char,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Reserve_client_port(
+        sp: *mut sess,
+        dst: *mut *mut ::std::ffi::c_char,
+        sz: *mut isize,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Set_proxy_tlv(sp: *const sess, src: *const usize) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Reserve_proxy_tlv(
+        sp: *mut sess,
+        dst: *mut *mut usize,
+        sz: *mut isize,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Set_proto_priv(sp: *const sess, src: *const usize) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Reserve_proto_priv(
+        sp: *mut sess,
+        dst: *mut *mut usize,
+        sz: *mut isize,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn SES_Set_String_Attr(
+        sp: *mut sess,
+        a: SessionAttr,
+        src: *const ::std::ffi::c_char,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub static mut VSC_C_main: *mut VSC_main;
+}
+unsafe extern "C" {
+    pub fn VSM_Init();
+}
+unsafe extern "C" {
+    pub fn VSL_Init(vsl: *mut vsl_log, ptr: *mut ::std::ffi::c_void, len: usize);
+}
+unsafe extern "C" {
+    pub fn VSL_Alloc(vsl: *mut vsl_log);
+}
+unsafe extern "C" {
+    pub fn VSL_Free(vsl: *mut vsl_log);
+}
+unsafe extern "C" {
+    pub fn VSL_ChgId(
+        vsl: *mut vsl_log,
+        typ: *const ::std::ffi::c_char,
+        why: *const ::std::ffi::c_char,
+        vxid: vxid_t,
+    );
+}
+unsafe extern "C" {
+    pub fn VSL_End(vsl: *mut vsl_log);
+}
+unsafe extern "C" {
+    pub fn VSL_Flush(arg1: *mut vsl_log, overflow: ::std::ffi::c_int);
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct conn_pool {
+    _unused: [u8; 0],
+}
+unsafe extern "C" {
+    pub fn VCP_Init();
+}
+unsafe extern "C" {
+    pub fn VCP_Panic(arg1: *mut vsb, arg2: *mut conn_pool);
+}
+unsafe extern "C" {
+    pub fn VCP_RelPoll();
+}
+unsafe extern "C" {
+    pub fn VBP_Init();
+}
+unsafe extern "C" {
+    pub fn VRY_Create(bo: *mut busyobj, psb: *mut *mut vsb) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VRY_Match(arg1: *const req, vary: *const u8) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VRY_Prep(arg1: *mut req);
+}
+unsafe extern "C" {
+    pub fn VRY_Clear(arg1: *mut req);
+}
+pub const vry_finish_flag_KEEP: vry_finish_flag = 0;
+pub const vry_finish_flag_DISCARD: vry_finish_flag = 1;
+pub type vry_finish_flag = ::std::ffi::c_uint;
+unsafe extern "C" {
+    pub fn VRY_Finish(req: *mut req, arg1: vry_finish_flag);
+}
+unsafe extern "C" {
+    pub fn VCL_Bo2Ctx(arg1: *mut vrt_ctx, arg2: *mut busyobj);
+}
+unsafe extern "C" {
+    pub fn VCL_Req2Ctx(arg1: *mut vrt_ctx, arg2: *mut req);
+}
+unsafe extern "C" {
+    pub fn VCL_Get_CliCtx(arg1: ::std::ffi::c_int) -> *mut vrt_ctx;
+}
+unsafe extern "C" {
+    pub fn VCL_Rel_CliCtx(arg1: *mut *mut vrt_ctx) -> *mut vsb;
+}
+unsafe extern "C" {
+    pub fn VCL_Panic(arg1: *mut vsb, nm: *const ::std::ffi::c_char, arg2: *const vcl);
+}
+unsafe extern "C" {
+    pub fn VCL_Poll();
+}
+unsafe extern "C" {
+    pub fn VCL_Init();
+}
+unsafe extern "C" {
+    pub fn VCL_Shutdown();
+}
+unsafe extern "C" {
+    pub fn VCL_backend_error_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VCL_backend_fetch_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VCL_backend_refresh_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VCL_backend_response_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VCL_deliver_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VCL_fini_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VCL_hash_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VCL_hit_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VCL_init_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VCL_miss_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VCL_pass_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VCL_pipe_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VCL_purge_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VCL_recv_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VCL_synth_method(
+        arg1: *mut vcl,
+        arg2: *mut worker,
+        arg3: *mut req,
+        bo: *mut busyobj,
+        specific: *mut ::std::ffi::c_void,
+    );
+}
+pub type vcl_be_func = ::std::option::Option<
+    unsafe extern "C" fn(
+        arg1: *mut cli,
+        arg2: *mut director,
+        arg3: *mut ::std::ffi::c_void,
+    ) -> ::std::ffi::c_int,
+>;
+unsafe extern "C" {
+    pub fn VCL_IterDirector(
+        arg1: *mut cli,
+        arg2: *const ::std::ffi::c_char,
+        arg3: vcl_be_func,
+        arg4: *mut ::std::ffi::c_void,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn pan_privs(arg1: *mut vsb, arg2: *const vrt_privs);
+}
+unsafe extern "C" {
+    pub fn VCL_StackVFP(
+        arg1: *mut vfp_ctx,
+        arg2: *const vcl,
+        arg3: *const ::std::ffi::c_char,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VCL_StackVDP(
+        vdc: *mut vdp_ctx,
+        vcl: *const vcl,
+        fl: *const ::std::ffi::c_char,
+        req: *mut req,
+        bo: *mut busyobj,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn resp_Get_Filter_List(req: *mut req) -> *const ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn VCL_VRT_Init();
+}
+unsafe extern "C" {
+    pub fn VCL_Return_Name(arg1: ::std::ffi::c_uint) -> *const ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn VCL_Method_Name(arg1: ::std::ffi::c_uint) -> *const ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn VCL_Refresh(arg1: *mut *mut vcl);
+}
+unsafe extern "C" {
+    pub fn VCL_Recache(arg1: *const worker, arg2: *mut *mut vcl);
+}
+unsafe extern "C" {
+    pub fn VCL_Ref(arg1: *mut vcl);
+}
+unsafe extern "C" {
+    pub fn VCL_Rel(arg1: *mut *mut vcl);
+}
+unsafe extern "C" {
+    pub fn VCL_DefaultDirector(arg1: *const vcl) -> VCL_BACKEND;
+}
+unsafe extern "C" {
+    pub fn VCL_DefaultProbe(arg1: *const vcl) -> *const vrt_backend_probe;
+}
+unsafe extern "C" {
+    pub static mut cli_task_privs: [vrt_privs; 1usize];
+}
+unsafe extern "C" {
+    pub fn VCL_TaskEnter(arg1: *mut vrt_privs);
+}
+unsafe extern "C" {
+    pub fn VCL_TaskLeave(ctx: *const vrt_ctx, arg1: *mut vrt_privs);
+}
+unsafe extern "C" {
+    pub fn VMOD_Init();
+}
+unsafe extern "C" {
+    pub fn VMOD_Panic(arg1: *mut vsb);
+}
+unsafe extern "C" {
+    pub fn WRK_Init();
+}
+unsafe extern "C" {
+    pub fn WRK_AddStat(arg1: *const worker);
+}
+unsafe extern "C" {
+    pub fn WRK_Log(arg1: VslTag, arg2: *const ::std::ffi::c_char, ...);
+}
+unsafe extern "C" {
+    pub static vpi_wrk_len: usize;
+}
+unsafe extern "C" {
+    pub fn VPI_wrk_init(arg1: *mut worker, arg2: *mut ::std::ffi::c_void, arg3: usize);
+}
+unsafe extern "C" {
+    pub fn VPI_Panic(arg1: *mut vsb, arg2: *const wrk_vpi, arg3: *const vcl);
+}
+unsafe extern "C" {
+    pub fn WS_Panic(arg1: *mut vsb, arg2: *const ws);
+}
+unsafe extern "C" {
+    pub fn WS_AtOffset(
+        ws: *const ws,
+        off: ::std::ffi::c_uint,
+        len: ::std::ffi::c_uint,
+    ) -> *mut ::std::ffi::c_void;
+}
+unsafe extern "C" {
+    pub fn WS_ReservationOffset(ws: *const ws) -> ::std::ffi::c_uint;
+}
+unsafe extern "C" {
+    pub static ws_pipeline_rollback: usize;
+}
+unsafe extern "C" {
+    pub fn WS_Pipeline(
+        arg1: *mut ws,
+        b: *const ::std::ffi::c_void,
+        e: *const ::std::ffi::c_void,
+        snap: usize,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn WS_Id(ws: *const ws, id: *mut ::std::ffi::c_char);
+}
+unsafe extern "C" {
+    pub fn WS_Rollback(arg1: *mut ws, arg2: usize);
+}
+unsafe extern "C" {
+    pub fn V1P_Init();
+}
+unsafe extern "C" {
+    pub fn V2D_Init();
+}
+unsafe extern "C" {
+    pub fn STV_open();
+}
+unsafe extern "C" {
+    pub fn STV_warn();
+}
+unsafe extern "C" {
+    pub fn STV_close();
+}
+unsafe extern "C" {
+    pub fn STV_next() -> *const stevedore;
+}
+unsafe extern "C" {
+    pub fn STV_BanInfoDrop(ban: *const u8, len: ::std::ffi::c_uint) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn STV_BanInfoNew(ban: *const u8, len: ::std::ffi::c_uint) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn STV_BanExport(banlist: *const u8, len: ::std::ffi::c_uint);
+}
+unsafe extern "C" {
+    pub fn STV_NewObject(
+        arg1: *mut worker,
+        arg2: *mut objcore,
+        arg3: *const stevedore,
+        len: ::std::ffi::c_uint,
+    ) -> ::std::ffi::c_int;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct stv_buffer {
+    _unused: [u8; 0],
+}
+unsafe extern "C" {
+    pub fn STV_AllocBuf(wrk: *mut worker, stv: *const stevedore, size: usize) -> *mut stv_buffer;
+}
+unsafe extern "C" {
+    pub fn STV_FreeBuf(wrk: *mut worker, pstvbuf: *mut *mut stv_buffer);
+}
+unsafe extern "C" {
+    pub fn STV_GetBufPtr(stvbuf: *mut stv_buffer, psize: *mut usize) -> *mut ::std::ffi::c_void;
+}
+unsafe extern "C" {
+    pub fn VTLS_Poll();
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct vbp_target {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct connwait {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct backend {
+    pub magic: ::std::ffi::c_uint,
+    pub n_conn: ::std::ffi::c_uint,
+    pub endpoint: *mut vrt_endpoint,
+    pub vcl_name: *mut ::std::ffi::c_char,
+    pub hosthdr: *mut ::std::ffi::c_char,
+    pub authority: *mut ::std::ffi::c_char,
+    pub connect_timeout: vtim_dur,
+    pub first_byte_timeout: vtim_dur,
+    pub between_bytes_timeout: vtim_dur,
+    pub backend_wait_timeout: vtim_dur,
+    pub max_connections: ::std::ffi::c_uint,
+    pub proxy_header: ::std::ffi::c_uint,
+    pub backend_wait_limit: ::std::ffi::c_uint,
+    pub sick: ::std::ffi::c_uint,
+    pub changed: vtim_real,
+    pub probe: *mut vbp_target,
+    pub vsc_seg: *mut vsc_seg,
+    pub vsc: *mut VSC_vbe,
+    pub conn_pool: *mut conn_pool,
+    pub director: VCL_BACKEND,
+    pub cw_head: backend__bindgen_ty_1,
+    pub cw_count: ::std::ffi::c_uint,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct backend__bindgen_ty_1 {
+    pub vtqh_first: *mut connwait,
+    pub vtqh_last: *mut *mut connwait,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of backend__bindgen_ty_1"][::std::mem::size_of::<backend__bindgen_ty_1>() - 16usize];
+    ["Alignment of backend__bindgen_ty_1"]
+        [::std::mem::align_of::<backend__bindgen_ty_1>() - 8usize];
+    ["Offset of field: backend__bindgen_ty_1::vtqh_first"]
+        [::std::mem::offset_of!(backend__bindgen_ty_1, vtqh_first) - 0usize];
+    ["Offset of field: backend__bindgen_ty_1::vtqh_last"]
+        [::std::mem::offset_of!(backend__bindgen_ty_1, vtqh_last) - 8usize];
+};
+impl Default for backend__bindgen_ty_1 {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of backend"][::std::mem::size_of::<backend>() - 160usize];
+    ["Alignment of backend"][::std::mem::align_of::<backend>() - 8usize];
+    ["Offset of field: backend::magic"][::std::mem::offset_of!(backend, magic) - 0usize];
+    ["Offset of field: backend::n_conn"][::std::mem::offset_of!(backend, n_conn) - 4usize];
+    ["Offset of field: backend::endpoint"][::std::mem::offset_of!(backend, endpoint) - 8usize];
+    ["Offset of field: backend::vcl_name"][::std::mem::offset_of!(backend, vcl_name) - 16usize];
+    ["Offset of field: backend::hosthdr"][::std::mem::offset_of!(backend, hosthdr) - 24usize];
+    ["Offset of field: backend::authority"][::std::mem::offset_of!(backend, authority) - 32usize];
+    ["Offset of field: backend::connect_timeout"]
+        [::std::mem::offset_of!(backend, connect_timeout) - 40usize];
+    ["Offset of field: backend::first_byte_timeout"]
+        [::std::mem::offset_of!(backend, first_byte_timeout) - 48usize];
+    ["Offset of field: backend::between_bytes_timeout"]
+        [::std::mem::offset_of!(backend, between_bytes_timeout) - 56usize];
+    ["Offset of field: backend::backend_wait_timeout"]
+        [::std::mem::offset_of!(backend, backend_wait_timeout) - 64usize];
+    ["Offset of field: backend::max_connections"]
+        [::std::mem::offset_of!(backend, max_connections) - 72usize];
+    ["Offset of field: backend::proxy_header"]
+        [::std::mem::offset_of!(backend, proxy_header) - 76usize];
+    ["Offset of field: backend::backend_wait_limit"]
+        [::std::mem::offset_of!(backend, backend_wait_limit) - 80usize];
+    ["Offset of field: backend::sick"][::std::mem::offset_of!(backend, sick) - 84usize];
+    ["Offset of field: backend::changed"][::std::mem::offset_of!(backend, changed) - 88usize];
+    ["Offset of field: backend::probe"][::std::mem::offset_of!(backend, probe) - 96usize];
+    ["Offset of field: backend::vsc_seg"][::std::mem::offset_of!(backend, vsc_seg) - 104usize];
+    ["Offset of field: backend::vsc"][::std::mem::offset_of!(backend, vsc) - 112usize];
+    ["Offset of field: backend::conn_pool"][::std::mem::offset_of!(backend, conn_pool) - 120usize];
+    ["Offset of field: backend::director"][::std::mem::offset_of!(backend, director) - 128usize];
+    ["Offset of field: backend::cw_head"][::std::mem::offset_of!(backend, cw_head) - 136usize];
+    ["Offset of field: backend::cw_count"][::std::mem::offset_of!(backend, cw_count) - 152usize];
+};
+impl Default for backend {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+unsafe extern "C" {
+    pub fn VBP_Update_Backend(vt: *mut vbp_target);
+}
+unsafe extern "C" {
+    pub fn VBP_Insert(b: *mut backend, p: *const vrt_backend_probe, arg1: *mut conn_pool);
+}
+unsafe extern "C" {
+    pub fn VBP_Remove(b: *mut backend);
+}
+unsafe extern "C" {
+    pub fn VBP_Control(b: *const backend, stop: ::std::ffi::c_int);
+}
+unsafe extern "C" {
+    pub fn VBP_Status(
+        arg1: *mut vsb,
+        arg2: *const backend,
+        details: ::std::ffi::c_int,
+        json: ::std::ffi::c_int,
+    );
+}
+unsafe extern "C" {
+    pub fn VBE_Connect_Error(arg1: *mut VSC_vbe, err: ::std::ffi::c_int);
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct vcldir {
     pub magic: ::std::ffi::c_uint,
     pub refcnt: ::std::ffi::c_int,
@@ -8698,7 +11812,7 @@ pub struct vcldir {
     pub methods: *const vdi_methods,
     pub directors_list: vcldir__bindgen_ty_1,
     pub resigning_list: vcldir__bindgen_ty_2,
-    pub admin_health: *mut vdi_ahealth,
+    pub admin_health: *const vdi_ahealth,
     pub health_changed: vtim_real,
     pub cli_name: *mut ::std::ffi::c_char,
 }
@@ -8792,6 +11906,685 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub static VDI_AH_DELETED: *const vdi_ahealth;
 }
+unsafe extern "C" {
+    pub fn VRT_r_client_identity(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_client_identity(
+        ctx: *const vrt_ctx,
+        arg1: *const ::std::ffi::c_char,
+        arg2: VCL_STRANDS,
+    );
+}
+unsafe extern "C" {
+    pub fn VRT_r_client_ip(ctx: *const vrt_ctx) -> VCL_IP;
+}
+unsafe extern "C" {
+    pub fn VRT_r_server_hostname(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_r_server_identity(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_r_server_ip(ctx: *const vrt_ctx) -> VCL_IP;
+}
+unsafe extern "C" {
+    pub fn VRT_r_remote_ip(ctx: *const vrt_ctx) -> VCL_IP;
+}
+unsafe extern "C" {
+    pub fn VRT_r_local_endpoint(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_r_local_ip(ctx: *const vrt_ctx) -> VCL_IP;
+}
+unsafe extern "C" {
+    pub fn VRT_r_local_socket(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_r_req(ctx: *const vrt_ctx) -> VCL_HTTP;
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_backend_hint(ctx: *const vrt_ctx) -> VCL_BACKEND;
+}
+unsafe extern "C" {
+    pub fn VRT_l_req_backend_hint(ctx: *const vrt_ctx, arg1: VCL_BACKEND);
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_can_gzip(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_esi(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_l_req_esi(ctx: *const vrt_ctx, arg1: VCL_BOOL);
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_esi_level(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_filters(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_req_filters(
+        ctx: *const vrt_ctx,
+        arg1: *const ::std::ffi::c_char,
+        arg2: VCL_STRANDS,
+    );
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_grace(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_l_req_grace(ctx: *const vrt_ctx, arg1: VCL_DURATION);
+}
+unsafe extern "C" {
+    pub fn VRT_u_req_grace(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_hash(ctx: *const vrt_ctx) -> VCL_BLOB;
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_hash_always_miss(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_l_req_hash_always_miss(ctx: *const vrt_ctx, arg1: VCL_BOOL);
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_hash_ignore_busy(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_l_req_hash_ignore_busy(ctx: *const vrt_ctx, arg1: VCL_BOOL);
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_hash_ignore_vary(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_l_req_hash_ignore_vary(ctx: *const vrt_ctx, arg1: VCL_BOOL);
+}
+unsafe extern "C" {
+    pub fn VRT_u_req_http(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_is_hitmiss(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_is_hitpass(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_method(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_req_method(
+        ctx: *const vrt_ctx,
+        arg1: *const ::std::ffi::c_char,
+        arg2: VCL_STRANDS,
+    );
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_proto(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_req_proto(ctx: *const vrt_ctx, arg1: *const ::std::ffi::c_char, arg2: VCL_STRANDS);
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_restarts(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_storage(ctx: *const vrt_ctx) -> VCL_STEVEDORE;
+}
+unsafe extern "C" {
+    pub fn VRT_l_req_storage(ctx: *const vrt_ctx, arg1: VCL_STEVEDORE);
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_time(ctx: *const vrt_ctx) -> VCL_TIME;
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_trace(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_l_req_trace(ctx: *const vrt_ctx, arg1: VCL_BOOL);
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_transport(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_max_age(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_l_req_max_age(ctx: *const vrt_ctx, arg1: VCL_DURATION);
+}
+unsafe extern "C" {
+    pub fn VRT_u_req_max_age(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_ttl(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_l_req_ttl(ctx: *const vrt_ctx, arg1: VCL_DURATION);
+}
+unsafe extern "C" {
+    pub fn VRT_u_req_ttl(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_url(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_req_url(ctx: *const vrt_ctx, arg1: *const ::std::ffi::c_char, arg2: VCL_STRANDS);
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_xid(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_top_method(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_top_proto(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_top_time(ctx: *const vrt_ctx) -> VCL_TIME;
+}
+unsafe extern "C" {
+    pub fn VRT_r_req_top_url(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq(ctx: *const vrt_ctx) -> VCL_HTTP;
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_backend(ctx: *const vrt_ctx) -> VCL_BACKEND;
+}
+unsafe extern "C" {
+    pub fn VRT_l_bereq_backend(ctx: *const vrt_ctx, arg1: VCL_BACKEND);
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_between_bytes_timeout(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_l_bereq_between_bytes_timeout(ctx: *const vrt_ctx, arg1: VCL_DURATION);
+}
+unsafe extern "C" {
+    pub fn VRT_u_bereq_between_bytes_timeout(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_u_bereq_body(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_connect_timeout(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_l_bereq_connect_timeout(ctx: *const vrt_ctx, arg1: VCL_DURATION);
+}
+unsafe extern "C" {
+    pub fn VRT_u_bereq_connect_timeout(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_filters(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_bereq_filters(
+        ctx: *const vrt_ctx,
+        arg1: *const ::std::ffi::c_char,
+        arg2: VCL_STRANDS,
+    );
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_first_byte_timeout(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_l_bereq_first_byte_timeout(ctx: *const vrt_ctx, arg1: VCL_DURATION);
+}
+unsafe extern "C" {
+    pub fn VRT_u_bereq_first_byte_timeout(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_hash(ctx: *const vrt_ctx) -> VCL_BLOB;
+}
+unsafe extern "C" {
+    pub fn VRT_u_bereq_http(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_is_bgfetch(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_is_hitmiss(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_is_hitpass(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_method(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_bereq_method(
+        ctx: *const vrt_ctx,
+        arg1: *const ::std::ffi::c_char,
+        arg2: VCL_STRANDS,
+    );
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_proto(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_bereq_proto(
+        ctx: *const vrt_ctx,
+        arg1: *const ::std::ffi::c_char,
+        arg2: VCL_STRANDS,
+    );
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_retries(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_retry_connect(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_l_bereq_retry_connect(ctx: *const vrt_ctx, arg1: VCL_BOOL);
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_task_deadline(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_l_bereq_task_deadline(ctx: *const vrt_ctx, arg1: VCL_DURATION);
+}
+unsafe extern "C" {
+    pub fn VRT_u_bereq_task_deadline(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_time(ctx: *const vrt_ctx) -> VCL_TIME;
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_trace(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_l_bereq_trace(ctx: *const vrt_ctx, arg1: VCL_BOOL);
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_uncacheable(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_url(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_bereq_url(ctx: *const vrt_ctx, arg1: *const ::std::ffi::c_char, arg2: VCL_STRANDS);
+}
+unsafe extern "C" {
+    pub fn VRT_r_bereq_xid(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp(ctx: *const vrt_ctx) -> VCL_HTTP;
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_age(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_backend(ctx: *const vrt_ctx) -> VCL_BACKEND;
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_backend_ip(ctx: *const vrt_ctx) -> VCL_IP;
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_backend_name(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_body(
+        ctx: *const vrt_ctx,
+        arg1: Body,
+        arg2: *const ::std::ffi::c_char,
+        arg3: *const ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_do_esi(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_do_esi(ctx: *const vrt_ctx, arg1: VCL_BOOL);
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_do_gunzip(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_do_gunzip(ctx: *const vrt_ctx, arg1: VCL_BOOL);
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_do_gzip(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_do_gzip(ctx: *const vrt_ctx, arg1: VCL_BOOL);
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_do_stream(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_do_stream(ctx: *const vrt_ctx, arg1: VCL_BOOL);
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_filters(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_filters(
+        ctx: *const vrt_ctx,
+        arg1: *const ::std::ffi::c_char,
+        arg2: VCL_STRANDS,
+    );
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_grace(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_grace(ctx: *const vrt_ctx, arg1: VCL_DURATION);
+}
+unsafe extern "C" {
+    pub fn VRT_u_beresp_http(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_keep(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_keep(ctx: *const vrt_ctx, arg1: VCL_DURATION);
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_proto(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_proto(
+        ctx: *const vrt_ctx,
+        arg1: *const ::std::ffi::c_char,
+        arg2: VCL_STRANDS,
+    );
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_reason(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_reason(
+        ctx: *const vrt_ctx,
+        arg1: *const ::std::ffi::c_char,
+        arg2: VCL_STRANDS,
+    );
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_status(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_status(ctx: *const vrt_ctx, arg1: VCL_INT);
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_storage(ctx: *const vrt_ctx) -> VCL_STEVEDORE;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_storage(ctx: *const vrt_ctx, arg1: VCL_STEVEDORE);
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_time(ctx: *const vrt_ctx) -> VCL_TIME;
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_transit_buffer(ctx: *const vrt_ctx) -> VCL_BYTES;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_transit_buffer(ctx: *const vrt_ctx, arg1: VCL_BYTES);
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_ttl(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_ttl(ctx: *const vrt_ctx, arg1: VCL_DURATION);
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_uncacheable(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_l_beresp_uncacheable(ctx: *const vrt_ctx, arg1: VCL_BOOL);
+}
+unsafe extern "C" {
+    pub fn VRT_r_beresp_was_304(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_stale_age(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_stale_can_esi(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_stale_grace(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_stale_hits(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_stale_keep(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_stale_proto(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_stale_reason(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_stale_status(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_stale_storage(ctx: *const vrt_ctx) -> VCL_STEVEDORE;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_stale_time(ctx: *const vrt_ctx) -> VCL_TIME;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_stale_ttl(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_stale_uncacheable(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_stale_is_valid(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_age(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_can_esi(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_grace(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_hits(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_keep(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_proto(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_reason(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_status(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_storage(ctx: *const vrt_ctx) -> VCL_STEVEDORE;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_time(ctx: *const vrt_ctx) -> VCL_TIME;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_ttl(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_obj_uncacheable(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_r_resp(ctx: *const vrt_ctx) -> VCL_HTTP;
+}
+unsafe extern "C" {
+    pub fn VRT_l_resp_body(
+        ctx: *const vrt_ctx,
+        arg1: Body,
+        arg2: *const ::std::ffi::c_char,
+        arg3: *const ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VRT_r_resp_do_esi(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_l_resp_do_esi(ctx: *const vrt_ctx, arg1: VCL_BOOL);
+}
+unsafe extern "C" {
+    pub fn VRT_r_resp_filters(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_resp_filters(
+        ctx: *const vrt_ctx,
+        arg1: *const ::std::ffi::c_char,
+        arg2: VCL_STRANDS,
+    );
+}
+unsafe extern "C" {
+    pub fn VRT_u_resp_http(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_resp_is_streaming(ctx: *const vrt_ctx) -> VCL_BOOL;
+}
+unsafe extern "C" {
+    pub fn VRT_r_resp_proto(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_resp_proto(
+        ctx: *const vrt_ctx,
+        arg1: *const ::std::ffi::c_char,
+        arg2: VCL_STRANDS,
+    );
+}
+unsafe extern "C" {
+    pub fn VRT_r_resp_reason(ctx: *const vrt_ctx) -> VCL_STRING;
+}
+unsafe extern "C" {
+    pub fn VRT_l_resp_reason(
+        ctx: *const vrt_ctx,
+        arg1: *const ::std::ffi::c_char,
+        arg2: VCL_STRANDS,
+    );
+}
+unsafe extern "C" {
+    pub fn VRT_r_resp_status(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_l_resp_status(ctx: *const vrt_ctx, arg1: VCL_INT);
+}
+unsafe extern "C" {
+    pub fn VRT_r_resp_time(ctx: *const vrt_ctx) -> VCL_TIME;
+}
+unsafe extern "C" {
+    pub fn VRT_r_now(ctx: *const vrt_ctx) -> VCL_TIME;
+}
+unsafe extern "C" {
+    pub fn VRT_r_sess_idle_send_timeout(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_l_sess_idle_send_timeout(ctx: *const vrt_ctx, arg1: VCL_DURATION);
+}
+unsafe extern "C" {
+    pub fn VRT_u_sess_idle_send_timeout(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_sess_send_timeout(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_l_sess_send_timeout(ctx: *const vrt_ctx, arg1: VCL_DURATION);
+}
+unsafe extern "C" {
+    pub fn VRT_u_sess_send_timeout(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_sess_timeout_idle(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_l_sess_timeout_idle(ctx: *const vrt_ctx, arg1: VCL_DURATION);
+}
+unsafe extern "C" {
+    pub fn VRT_u_sess_timeout_idle(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_sess_timeout_linger(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_l_sess_timeout_linger(ctx: *const vrt_ctx, arg1: VCL_DURATION);
+}
+unsafe extern "C" {
+    pub fn VRT_u_sess_timeout_linger(ctx: *const vrt_ctx);
+}
+unsafe extern "C" {
+    pub fn VRT_r_sess_xid(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_backend_idle_timeout(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_backend_wait_limit(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_backend_wait_timeout(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_between_bytes_timeout(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_connect_timeout(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_default_grace(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_default_keep(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_default_ttl(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_first_byte_timeout(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_idle_send_timeout(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_max_esi_depth(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_max_restarts(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_max_retries(ctx: *const vrt_ctx) -> VCL_INT;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_pipe_task_deadline(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_pipe_timeout(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_send_timeout(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_shortlived(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_timeout_idle(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_transit_buffer(ctx: *const vrt_ctx) -> VCL_BYTES;
+}
+unsafe extern "C" {
+    pub fn VRT_r_param_uncacheable_ttl(ctx: *const vrt_ctx) -> VCL_DURATION;
+}
+unsafe extern "C" {
+    pub fn VRT_stevedore_free_space(arg1: VCL_STEVEDORE) -> VCL_BYTES;
+}
+unsafe extern "C" {
+    pub fn VRT_stevedore_used_space(arg1: VCL_STEVEDORE) -> VCL_BYTES;
+}
+unsafe extern "C" {
+    pub fn VRT_stevedore_happy(arg1: VCL_STEVEDORE) -> VCL_BOOL;
+}
 #[repr(i32)]
 #[non_exhaustive]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -8818,34 +12611,6 @@ pub type vfp_pull_f = ::std::option::Option<
 >;
 pub type vfp_fini_f =
     ::std::option::Option<unsafe extern "C" fn(arg1: *mut vfp_ctx, arg2: *mut vfp_entry)>;
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct vfp {
-    pub name: *const ::std::ffi::c_char,
-    pub init: vfp_init_f,
-    pub pull: vfp_pull_f,
-    pub fini: vfp_fini_f,
-    pub priv1: *const ::std::ffi::c_void,
-}
-#[allow(clippy::unnecessary_operation, clippy::identity_op)]
-const _: () = {
-    ["Size of vfp"][::std::mem::size_of::<vfp>() - 40usize];
-    ["Alignment of vfp"][::std::mem::align_of::<vfp>() - 8usize];
-    ["Offset of field: vfp::name"][::std::mem::offset_of!(vfp, name) - 0usize];
-    ["Offset of field: vfp::init"][::std::mem::offset_of!(vfp, init) - 8usize];
-    ["Offset of field: vfp::pull"][::std::mem::offset_of!(vfp, pull) - 16usize];
-    ["Offset of field: vfp::fini"][::std::mem::offset_of!(vfp, fini) - 24usize];
-    ["Offset of field: vfp::priv1"][::std::mem::offset_of!(vfp, priv1) - 32usize];
-};
-impl Default for vfp {
-    fn default() -> Self {
-        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
-        unsafe {
-            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
-    }
-}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct vfp_entry {
@@ -9022,42 +12787,6 @@ pub type vdpio_fini_f = ::std::option::Option<
 >;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct vdp {
-    pub name: *const ::std::ffi::c_char,
-    pub init: vdp_init_f,
-    pub bytes: vdp_bytes_f,
-    pub fini: vdp_fini_f,
-    pub priv1: *const ::std::ffi::c_void,
-    pub io_init: vdpio_init_f,
-    pub io_upgrade: vdpio_init_f,
-    pub io_lease: vdpio_lease_f,
-    pub io_fini: vdpio_fini_f,
-}
-#[allow(clippy::unnecessary_operation, clippy::identity_op)]
-const _: () = {
-    ["Size of vdp"][::std::mem::size_of::<vdp>() - 72usize];
-    ["Alignment of vdp"][::std::mem::align_of::<vdp>() - 8usize];
-    ["Offset of field: vdp::name"][::std::mem::offset_of!(vdp, name) - 0usize];
-    ["Offset of field: vdp::init"][::std::mem::offset_of!(vdp, init) - 8usize];
-    ["Offset of field: vdp::bytes"][::std::mem::offset_of!(vdp, bytes) - 16usize];
-    ["Offset of field: vdp::fini"][::std::mem::offset_of!(vdp, fini) - 24usize];
-    ["Offset of field: vdp::priv1"][::std::mem::offset_of!(vdp, priv1) - 32usize];
-    ["Offset of field: vdp::io_init"][::std::mem::offset_of!(vdp, io_init) - 40usize];
-    ["Offset of field: vdp::io_upgrade"][::std::mem::offset_of!(vdp, io_upgrade) - 48usize];
-    ["Offset of field: vdp::io_lease"][::std::mem::offset_of!(vdp, io_lease) - 56usize];
-    ["Offset of field: vdp::io_fini"][::std::mem::offset_of!(vdp, io_fini) - 64usize];
-};
-impl Default for vdp {
-    fn default() -> Self {
-        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
-        unsafe {
-            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
-    }
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
 pub struct vdp_entry {
     pub magic: ::std::ffi::c_uint,
     pub end: VdpAction,
@@ -9204,6 +12933,9 @@ unsafe extern "C" {
     pub fn VDPIO_Return(vdc: *const vdp_ctx);
 }
 unsafe extern "C" {
+    pub fn VDPIO_Notify(arg1: *mut worker, vdc: *const vdp_ctx);
+}
+unsafe extern "C" {
     pub fn VDPIO_Fini(vdc: *mut vdp_ctx);
 }
 unsafe extern "C" {
@@ -9215,111 +12947,6 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn VRT_RemoveFilter(ctx: *const vrt_ctx, arg1: *const vfp, arg2: *const vdp);
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct vsb {
-    pub magic: ::std::ffi::c_uint,
-    pub s_error: ::std::ffi::c_int,
-    pub s_buf: *mut ::std::ffi::c_char,
-    pub s_size: isize,
-    pub s_len: isize,
-    pub s_flags: ::std::ffi::c_int,
-    pub s_indent: ::std::ffi::c_int,
-}
-#[allow(clippy::unnecessary_operation, clippy::identity_op)]
-const _: () = {
-    ["Size of vsb"][::std::mem::size_of::<vsb>() - 40usize];
-    ["Alignment of vsb"][::std::mem::align_of::<vsb>() - 8usize];
-    ["Offset of field: vsb::magic"][::std::mem::offset_of!(vsb, magic) - 0usize];
-    ["Offset of field: vsb::s_error"][::std::mem::offset_of!(vsb, s_error) - 4usize];
-    ["Offset of field: vsb::s_buf"][::std::mem::offset_of!(vsb, s_buf) - 8usize];
-    ["Offset of field: vsb::s_size"][::std::mem::offset_of!(vsb, s_size) - 16usize];
-    ["Offset of field: vsb::s_len"][::std::mem::offset_of!(vsb, s_len) - 24usize];
-    ["Offset of field: vsb::s_flags"][::std::mem::offset_of!(vsb, s_flags) - 32usize];
-    ["Offset of field: vsb::s_indent"][::std::mem::offset_of!(vsb, s_indent) - 36usize];
-};
-impl Default for vsb {
-    fn default() -> Self {
-        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
-        unsafe {
-            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
-    }
-}
-unsafe extern "C" {
-    pub fn VSB_init(arg1: *mut vsb, arg2: *mut ::std::ffi::c_void, arg3: isize) -> *mut vsb;
-}
-unsafe extern "C" {
-    pub fn VSB_new_auto() -> *mut vsb;
-}
-unsafe extern "C" {
-    pub fn VSB_clear(arg1: *mut vsb);
-}
-unsafe extern "C" {
-    pub fn VSB_bcat(
-        arg1: *mut vsb,
-        arg2: *const ::std::ffi::c_void,
-        arg3: isize,
-    ) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSB_cat(arg1: *mut vsb, arg2: *const ::std::ffi::c_char) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSB_printf(arg1: *mut vsb, arg2: *const ::std::ffi::c_char, ...) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSB_vprintf(
-        arg1: *mut vsb,
-        arg2: *const ::std::ffi::c_char,
-        arg3: *mut __va_list_tag,
-    ) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSB_putc(arg1: *mut vsb, arg2: ::std::ffi::c_int) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSB_error(arg1: *const vsb) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSB_finish(arg1: *mut vsb) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSB_data(arg1: *const vsb) -> *mut ::std::ffi::c_char;
-}
-unsafe extern "C" {
-    pub fn VSB_len(arg1: *const vsb) -> isize;
-}
-unsafe extern "C" {
-    pub fn VSB_fini(arg1: *mut vsb);
-}
-unsafe extern "C" {
-    pub fn VSB_destroy(arg1: *mut *mut vsb);
-}
-unsafe extern "C" {
-    pub fn VSB_quote_pfx(
-        arg1: *mut vsb,
-        arg2: *const ::std::ffi::c_char,
-        arg3: *const ::std::ffi::c_void,
-        len: ::std::ffi::c_int,
-        how: ::std::ffi::c_int,
-    );
-}
-unsafe extern "C" {
-    pub fn VSB_quote(
-        arg1: *mut vsb,
-        arg2: *const ::std::ffi::c_void,
-        len: ::std::ffi::c_int,
-        how: ::std::ffi::c_int,
-    );
-}
-unsafe extern "C" {
-    pub fn VSB_indent(arg1: *mut vsb, arg2: ::std::ffi::c_int);
-}
-unsafe extern "C" {
-    pub fn VSB_tofile(arg1: *const vsb, fd: ::std::ffi::c_int) -> ::std::ffi::c_int;
 }
 unsafe extern "C" {
     pub static vsa_suckaddr_len: usize;
@@ -9639,71 +13266,6 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn VSC_IsRaw(arg1: *const vsc) -> ::std::ffi::c_uint;
 }
-unsafe extern "C" {
-    pub fn VFP_Push(arg1: *mut vfp_ctx, arg2: *const vfp) -> *mut vfp_entry;
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct http_conn {
-    pub magic: ::std::ffi::c_uint,
-    pub rfd: *mut ::std::ffi::c_int,
-    pub doclose: stream_close_t,
-    pub body_status: body_status_t,
-    pub ws: *mut ws,
-    pub rxbuf_b: *mut ::std::ffi::c_char,
-    pub rxbuf_e: *mut ::std::ffi::c_char,
-    pub pipeline_b: *mut ::std::ffi::c_char,
-    pub pipeline_e: *mut ::std::ffi::c_char,
-    pub content_length: isize,
-    pub priv_: *mut ::std::ffi::c_void,
-    pub first_byte_timeout: vtim_dur,
-    pub between_bytes_timeout: vtim_dur,
-}
-#[allow(clippy::unnecessary_operation, clippy::identity_op)]
-const _: () = {
-    ["Size of http_conn"][::std::mem::size_of::<http_conn>() - 104usize];
-    ["Alignment of http_conn"][::std::mem::align_of::<http_conn>() - 8usize];
-    ["Offset of field: http_conn::magic"][::std::mem::offset_of!(http_conn, magic) - 0usize];
-    ["Offset of field: http_conn::rfd"][::std::mem::offset_of!(http_conn, rfd) - 8usize];
-    ["Offset of field: http_conn::doclose"][::std::mem::offset_of!(http_conn, doclose) - 16usize];
-    ["Offset of field: http_conn::body_status"]
-        [::std::mem::offset_of!(http_conn, body_status) - 24usize];
-    ["Offset of field: http_conn::ws"][::std::mem::offset_of!(http_conn, ws) - 32usize];
-    ["Offset of field: http_conn::rxbuf_b"][::std::mem::offset_of!(http_conn, rxbuf_b) - 40usize];
-    ["Offset of field: http_conn::rxbuf_e"][::std::mem::offset_of!(http_conn, rxbuf_e) - 48usize];
-    ["Offset of field: http_conn::pipeline_b"]
-        [::std::mem::offset_of!(http_conn, pipeline_b) - 56usize];
-    ["Offset of field: http_conn::pipeline_e"]
-        [::std::mem::offset_of!(http_conn, pipeline_e) - 64usize];
-    ["Offset of field: http_conn::content_length"]
-        [::std::mem::offset_of!(http_conn, content_length) - 72usize];
-    ["Offset of field: http_conn::priv_"][::std::mem::offset_of!(http_conn, priv_) - 80usize];
-    ["Offset of field: http_conn::first_byte_timeout"]
-        [::std::mem::offset_of!(http_conn, first_byte_timeout) - 88usize];
-    ["Offset of field: http_conn::between_bytes_timeout"]
-        [::std::mem::offset_of!(http_conn, between_bytes_timeout) - 96usize];
-};
-impl Default for http_conn {
-    fn default() -> Self {
-        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
-        unsafe {
-            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
-    }
-}
-unsafe extern "C" {
-    pub fn VRT_VSC_AllocVariadic(
-        vc: *mut vsmw_cluster,
-        sg: *mut *mut vsc_seg,
-        nm: *const ::std::ffi::c_char,
-        sd: usize,
-        jp: *const ::std::ffi::c_uchar,
-        sj: usize,
-        fmt: *const ::std::ffi::c_char,
-        ...
-    ) -> *mut ::std::ffi::c_void;
-}
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct __locale_data {
@@ -9743,6 +13305,11 @@ impl Default for __va_list_tag {
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct vrt_priv {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct VSC_vbe {
     pub _address: u8,
 }
 #[repr(C)]

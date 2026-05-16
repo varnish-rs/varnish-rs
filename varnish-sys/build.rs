@@ -6,7 +6,7 @@ use bindgen_helpers as bindgen;
 use bindgen_helpers::{rename_enum, Renamer};
 
 static BINDINGS_FILE: &str = "bindings.for-docs";
-static BINDINGS_FILE_VER: &str = "7.7.1";
+static BINDINGS_FILE_VER: &str = "9.0.0";
 
 struct VarnishInfo {
     bindings: PathBuf,
@@ -16,29 +16,29 @@ struct VarnishInfo {
 
 impl VarnishInfo {
     fn parse(bindings: PathBuf, varnish_paths: Vec<PathBuf>, version: String) -> Self {
-        if version == "trunk" {
-            // Treat trunk at least as latest Varnish
-            println!("cargo::rustc-cfg=varnishsys_90_sslflags");
-            return Self {
-                bindings,
-                varnish_paths,
-                version,
-            };
-        }
-        let ver = semver::Version::parse(&version)
-            .unwrap_or_else(|_| panic!("varnishapi invalid version: {version}"));
-        if ver >= semver::Version::new(9, 0, 0) {
-            println!("cargo::rustc-cfg=varnishsys_90_sslflags");
-        } else if ver < semver::Version::new(8, 0, 0) {
-            println!(
-                "cargo::warning=Varnish {version} is not supported and may not work with this crate"
-            );
-        }
+        emit_version_cfgs(&version);
         Self {
             bindings,
             varnish_paths,
             version,
         }
+    }
+}
+
+fn emit_version_cfgs(version: &str) {
+    if version == "trunk" {
+        // Treat trunk at least as latest Varnish
+        println!("cargo::rustc-cfg=varnishsys_90_sslflags");
+        return;
+    }
+    let ver = semver::Version::parse(version)
+        .unwrap_or_else(|_| panic!("varnishapi invalid version: {version}"));
+    if ver >= semver::Version::new(9, 0, 0) {
+        println!("cargo::rustc-cfg=varnishsys_90_sslflags");
+    } else if ver < semver::Version::new(8, 0, 0) {
+        println!(
+            "cargo::warning=Varnish {version} is not supported and may not work with this crate"
+        );
     }
 }
 
@@ -164,6 +164,11 @@ fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
                 eprintln!("libvarnish not found, using saved bindings for the doc.rs: {e}");
                 fs::copy(BINDINGS_FILE, out_path).unwrap();
                 println!("cargo::metadata=version_number={BINDINGS_FILE_VER}");
+                // detect_varnish() short-circuits when this returns None, so
+                // VarnishInfo::parse never runs. Emit the version cfgs here so
+                // the checked-in bindings.for-docs (Varnish BINDINGS_FILE_VER)
+                // is compiled with matching #[cfg(varnishsys_*)] gates.
+                emit_version_cfgs(BINDINGS_FILE_VER);
                 None
             } else {
                 // FIXME: we should give a URL describing how to install varnishapi
