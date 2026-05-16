@@ -214,15 +214,14 @@ impl HttpHeaders<'_> {
         self.change_header(HDR_REASON, value)
     }
 
-    /// Weaken the ETag header if present and not already weak.
+    /// Weaken the `ETag` header if present and not already weak.
     ///
-    /// Implements [RFC 2616 §3.11](https://www.rfc-editor.org/rfc/rfc2616#section-3.11) ETag
+    /// Implements [RFC 2616 §3.11](https://www.rfc-editor.org/rfc/rfc2616#section-3.11) `ETag`
     /// weakening: if the `ETag` header exists and does not already start with `W/`, it is
     /// replaced with `W/<original-value>`.
     pub fn weaken_etag(&mut self) -> VclResult<()> {
-        let etag = match self.header("ETag") {
-            None => return Ok(()),
-            Some(v) => v,
+        let Some(etag) = self.header("ETag") else {
+            return Ok(());
         };
         let value = etag.as_ref();
         if value.starts_with(b"W/") {
