@@ -45,7 +45,11 @@ impl<'a> Ctx<'a> {
     ///
     /// The pointer must be non-null, and the magic must match
     pub unsafe fn from_ptr(ptr: *const vrt_ctx) -> Self {
-        Self::from_ref(ptr.cast_mut().as_mut().unwrap())
+        Self::from_ref(
+            ptr.cast_mut()
+                .as_mut()
+                .expect("vrt_ctx pointer must not be null"),
+        )
     }
 
     /// Instantiate from a mutable reference to a [`vrt_ctx`].
@@ -125,7 +129,10 @@ impl<'a> Ctx<'a> {
             ptr: *const c_void,
             len: isize,
         ) -> c_int {
-            let v = priv_.cast::<Vec<&[u8]>>().as_mut().unwrap();
+            let v = priv_
+                .cast::<Vec<&[u8]>>()
+                .as_mut()
+                .expect("cached_req_body callback priv pointer must not be null");
             let buf = std::slice::from_raw_parts(ptr.cast::<u8>(), len as usize);
             v.push(buf);
             0

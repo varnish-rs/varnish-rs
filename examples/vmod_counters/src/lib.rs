@@ -53,12 +53,14 @@ mod stats {
                 .foo
                 .load(std::sync::atomic::Ordering::Relaxed)
                 .try_into()
-                .unwrap()
+                .expect("counter value must fit in i64")
         }
 
         pub fn update_temperature(&self, value: i64) {
             self.stats.temperature.store(
-                value.try_into().unwrap(),
+                value
+                    .try_into()
+                    .expect("temperature value must be non-negative"),
                 std::sync::atomic::Ordering::Relaxed,
             );
         }
@@ -68,7 +70,7 @@ mod stats {
                 .temperature
                 .load(std::sync::atomic::Ordering::Relaxed)
                 .try_into()
-                .unwrap()
+                .expect("temperature value must fit in i64")
         }
 
         pub fn get_memory(&self) -> i64 {
@@ -76,12 +78,12 @@ mod stats {
                 .memory
                 .load(std::sync::atomic::Ordering::Relaxed)
                 .try_into()
-                .unwrap()
+                .expect("memory value must fit in i64")
         }
 
         pub fn update_memory(&self, value: i64) {
             self.stats.memory.store(
-                value.try_into().unwrap(),
+                value.try_into().expect("memory value must be non-negative"),
                 std::sync::atomic::Ordering::Relaxed,
             );
         }
@@ -105,7 +107,7 @@ mod stats {
                 .flags
                 .load(std::sync::atomic::Ordering::Relaxed)
                 .try_into()
-                .unwrap()
+                .expect("flags value must fit in i64")
         }
     }
 }

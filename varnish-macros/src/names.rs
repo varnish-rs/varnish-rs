@@ -53,11 +53,11 @@ impl Names {
     }
 
     pub fn obj_name(&self) -> &str {
-        self.object.as_ref().unwrap()
+        self.object.as_ref().expect("object name is not set")
     }
 
     pub fn fn_name(&self) -> &str {
-        let (ty, name) = self.function.as_ref().unwrap();
+        let (ty, name) = self.function.as_ref().expect("function is not set");
         match *ty {
             FuncType::Constructor => "_init",
             FuncType::Destructor => "_fini",
@@ -66,7 +66,11 @@ impl Names {
     }
 
     pub fn fn_name_user(&self) -> &str {
-        self.function.as_ref().unwrap().1.as_str()
+        self.function
+            .as_ref()
+            .expect("function is not set")
+            .1
+            .as_str()
     }
 
     pub fn fn_callable_name(&self, func: FuncType) -> TokenStream {
@@ -142,13 +146,13 @@ pub trait ForceCstr {
 
 impl ForceCstr for String {
     fn force_cstr(&self) -> CString {
-        CString::new(self.as_str()).unwrap()
+        CString::new(self.as_str()).expect("String must not contain null bytes")
     }
 }
 
 impl ForceCstr for str {
     fn force_cstr(&self) -> CString {
-        CString::new(self).unwrap()
+        CString::new(self).expect("str must not contain null bytes")
     }
 }
 

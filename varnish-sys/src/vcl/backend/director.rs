@@ -201,7 +201,11 @@ unsafe extern "C" fn wrap_director_healthy<D: VclDirector>(
     let dir_impl: &D = &*dir.priv_.cast::<D>();
     let result = dir_impl.probe(&mut ctx);
     if !changed.is_null() {
-        *changed = result.last_changed.try_into().unwrap();
+        // SystemTime->VCL_TIME can fail for times before UNIX_EPOCH. Avoid panicking
+        // across the FFI boundary; leave `*changed` untouched on conversion failure.
+        if let Ok(t) = result.last_changed.try_into() {
+            *changed = t;
+        }
     }
     result.healthy.into()
 }

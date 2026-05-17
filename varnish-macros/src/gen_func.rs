@@ -113,7 +113,7 @@ impl FuncProcessor {
         }
         if info.has_optional_args {
             self.func_pre_call
-                .push(quote! { let __args = __args.as_ref().unwrap(); });
+                .push(quote! { let __args = __args.as_ref().expect("optional args pointer must not be null"); });
             let ty = self.opt_args_ty_name.to_ident();
             self.wrap_fn_arg_decl.push(quote! { __args: *const #ty });
         }
@@ -225,7 +225,7 @@ impl FuncProcessor {
             }
             ParamType::SelfType => {
                 self.func_pre_call
-                    .push(quote! { let __obj = __obj.as_ref().unwrap(); });
+                    .push(quote! { let __obj = __obj.as_ref().expect("object pointer must not be null"); });
             }
             ParamType::Event => {
                 self.func_call_vars.push(quote! { __ev });
