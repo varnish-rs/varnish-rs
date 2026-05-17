@@ -62,7 +62,9 @@ fn detect_varnish() -> Option<VarnishInfo> {
     // 9.0 adds ssl_flags to the backend SSL struct
     println!("cargo::rustc-check-cfg=cfg(varnishsys_90_sslflags)");
 
-    let bindings = PathBuf::from(env::var("OUT_DIR").unwrap()).join("bindings.rs");
+    let bindings =
+        PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR environment variable must be set"))
+            .join("bindings.rs");
 
     println!("cargo:rerun-if-env-changed=VARNISH_INCLUDE_PATHS");
     let (varnish_paths, version) = find_include_dir(&bindings)?;
@@ -95,11 +97,13 @@ fn generate_bindings(info: &VarnishInfo) {
         .blocklist_item("FP_.*")
         .blocklist_item("FILE")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
-        .clang_args(
-            info.varnish_paths
-                .iter()
-                .map(|i| format!("-I{}", i.to_str().unwrap())),
-        )
+        .clang_args(info.varnish_paths.iter().map(|i| {
+            format!(
+                "-I{}",
+                i.to_str()
+                    .expect("varnish include path must be valid UTF-8")
+            )
+        }))
         .ctypes_prefix("::std::ffi")
         .derive_copy(true)
         .derive_debug(true)
@@ -128,7 +132,8 @@ fn generate_bindings(info: &VarnishInfo) {
 
     // Compare generated file to the checked-in `bindings.for-docs` file,
     // and if they differ, raise a warning.
-    let generated = fs::read_to_string(&info.bindings).unwrap();
+    let generated =
+        fs::read_to_string(&info.bindings).expect("failed to read generated bindings file");
     let checked_in = fs::read_to_string(BINDINGS_FILE).unwrap_or_default();
     if generated != checked_in {
         println!(
@@ -162,7 +167,8 @@ fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
             // See https://docs.rs/about/builds#detecting-docsrs
             if env::var("DOCS_RS").is_ok() {
                 eprintln!("libvarnish not found, using saved bindings for the doc.rs: {e}");
-                fs::copy(BINDINGS_FILE, out_path).unwrap();
+                fs::copy(BINDINGS_FILE, out_path)
+                    .expect("failed to copy bindings file for docs.rs");
                 println!("cargo::metadata=version_number={BINDINGS_FILE_VER}");
                 // detect_varnish() short-circuits when this returns None, so
                 // VarnishInfo::parse never runs. Emit the version cfgs here so

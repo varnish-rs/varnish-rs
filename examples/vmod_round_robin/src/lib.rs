@@ -71,7 +71,9 @@ struct RoundRobinDirector {
 impl RoundRobinDirector {
     /// Helper function to access the locked state
     fn state(&self) -> std::sync::MutexGuard<'_, RoundRobinState> {
-        self.state.lock().unwrap()
+        self.state
+            .lock()
+            .expect("round-robin director state mutex was poisoned")
     }
 
     /// Get backend health statistics
@@ -150,7 +152,10 @@ impl VclDirector for RoundRobinDirector {
         let _ = vsb.write(&format!("{:<30}{}\n", "Backend", "Health"));
         for backend in &state.backends {
             let probe = backend.probe(ctx);
-            let name = backend.name().to_str().unwrap();
+            let name = backend
+                .name()
+                .to_str()
+                .expect("backend name must be valid UTF-8");
             let health = if probe.healthy { "healthy" } else { "sick" };
             let _ = vsb.write(&format!("{name:<30}{health}\n"));
         }
@@ -170,7 +175,10 @@ impl VclDirector for RoundRobinDirector {
             .iter()
             .map(|backend| {
                 let probe = backend.probe(ctx);
-                let name = backend.name().to_str().unwrap();
+                let name = backend
+                    .name()
+                    .to_str()
+                    .expect("backend name must be valid UTF-8");
                 let health_info = serde_json::json!({
                     "healthy": probe.healthy
                 });

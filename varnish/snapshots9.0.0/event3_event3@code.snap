@@ -73,7 +73,7 @@ mod event3 {
             __obj: *const super::Obj1,
             vcl: *const vmod_priv,
         ) {
-            let __obj = __obj.as_ref().unwrap();
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
             __obj
                 .obj_access(
                     vcl
@@ -106,7 +106,7 @@ mod event3 {
             __ctx: *mut vrt_ctx,
             __obj: *const super::Obj2,
         ) {
-            let __obj = __obj.as_ref().unwrap();
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
             __obj.obj_access()
         }
         #[repr(C)]

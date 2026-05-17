@@ -32,7 +32,9 @@ mod obj2 {
             __vcl_name: *const c_char,
             __args: *const arg_vmod_obj2_Obj1__init,
         ) {
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             let mut __obj_per_vcl = (*__args.__vp).take_per_vcl::<PerVcl>();
             let __result = Box::new(
                 super::Obj1::new(
@@ -78,7 +80,9 @@ mod obj2 {
             __args: *const arg_vmod_obj2_Obj3__init,
         ) {
             let mut __ctx = Ctx::from_ptr(__ctx);
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             let mut __obj_per_vcl = (*__args.__vp).take_per_vcl::<PerVcl>();
             let __result = Box::new(
                 super::Obj3::new(

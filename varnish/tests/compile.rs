@@ -21,7 +21,7 @@ fn compile_valid_ffi_code() {
 
 fn compile_pass(pattern: &str) {
     let t = trybuild::TestCases::new();
-    for file in glob::glob(pattern).unwrap() {
-        t.pass(file.unwrap());
+    for file in glob::glob(pattern).expect("glob pattern must be valid") {
+        t.pass(file.expect("glob entry must be accessible"));
     }
 }
