@@ -1,0 +1,26 @@
+varnishtest "copy_blob"
+
+server s1 {
+    rxreq
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import rustest from "${vmod}";
+    import blob;
+
+    sub vcl_recv {
+        # "hello blob" in hex
+        if (!blob.equal(
+            rustest.copy_blob(),
+            blob.decode(HEX, encoded="68656c6c6f20626c6f62"))) {
+            return (synth(500, "blobs not equal"));
+        }
+    }
+} -start
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.status == 200
+} -run

@@ -26,7 +26,9 @@ mod obj {
             __vcl_name: *const c_char,
             __args: *const arg_vmod_obj_kv1__init,
         ) {
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             let __result = Box::new(
                 super::kv1::new(
                     if __args.valid_cap != 0 { __args.cap.into() } else { None },
@@ -45,7 +47,7 @@ mod obj {
             value: VCL_STRING,
         ) {
             let mut __ctx = Ctx::from_ptr(__ctx);
-            let __obj = __obj.as_ref().unwrap();
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
             let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
                 Ok(__obj.set(key.try_into()?, value.try_into()?))
             };
@@ -60,7 +62,7 @@ mod obj {
             key: VCL_STRING,
         ) -> VCL_STRING {
             let mut __ctx = Ctx::from_ptr(__ctx);
-            let __obj = __obj.as_ref().unwrap();
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
             let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
                 Ok(__obj.get(key.try_into()?).into_vcl(&mut __ctx.ws)?)
             };
@@ -82,7 +84,9 @@ mod obj {
             __args: *const arg_vmod_obj_kv2__init,
         ) {
             let mut __ctx = Ctx::from_ptr(__ctx);
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
                 let __result = Box::new(
                     super::kv2::new(
@@ -114,8 +118,10 @@ mod obj {
             __args: *const arg_vmod_obj_kv2_set,
         ) {
             let mut __ctx = Ctx::from_ptr(__ctx);
-            let __args = __args.as_ref().unwrap();
-            let __obj = __obj.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
             let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
                 Ok(
                     __obj
@@ -146,7 +152,9 @@ mod obj {
             __args: *const arg_vmod_obj_kv3__init,
         ) {
             let mut __ctx = Ctx::from_ptr(__ctx);
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
                 let __result = Box::new(
                     super::kv3::new(
@@ -179,8 +187,10 @@ mod obj {
             __args: *const arg_vmod_obj_kv3_set,
         ) {
             let mut __ctx = Ctx::from_ptr(__ctx);
-            let __args = __args.as_ref().unwrap();
-            let __obj = __obj.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
             let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
                 Ok(
                     __obj

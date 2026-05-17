@@ -17,12 +17,13 @@ use crate::parser_utils::remove_attr;
 static RE_VARNISH_VER: LazyLock<Regex> = LazyLock::new(|| {
     // Use regex to remove "Varnish 7.5.0 eef25264e5ca5f96a77129308edb83ccf84cb1b1" and similar.
     // Also removes any pre-builds and other versions because we assume a double-quote at the end.
-    Regex::new(r"Varnish (\d+\.|trunk )[-+. 0-9a-z]+").unwrap()
+    Regex::new(r"Varnish (\d+\.|trunk )[-+. 0-9a-z]+").expect("Varnish version regex must be valid")
 });
 
 static RE_STR_BLOB: LazyLock<Regex> = LazyLock::new(|| {
     // Use regex to remove "const JSON: &CStr = c\"...\";"  and  "const cproto: &CStr = c\"...\";"
-    Regex::new(r#"const ([a-zA-Z0-9_]+): &CStr = c"([^\n]+)";\n"#).unwrap()
+    Regex::new(r#"const ([a-zA-Z0-9_]+): &CStr = c"([^\n]+)";\n"#)
+        .expect("CStr constant regex must be valid")
 });
 
 /// Read the content of the `../../varnish/tests/pass` directory that should also pass full compilation tests,
@@ -42,14 +43,16 @@ fn run_parse_tests(path: &str) {
     let snapshot_path = format!("../../varnish/snapshots{version}");
     with_settings!({ snapshot_path => snapshot_path, omit_expression => true, prepend_module_to_snapshot => false }, {
         let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(path);
-        for file in glob::glob(path.to_str().unwrap()).unwrap() {
-            test_file(&file.unwrap());
+        for file in glob::glob(path.to_str().expect("test path must be valid UTF-8")).expect("test path glob must be valid") {
+            test_file(&file.expect("test file path must be accessible"));
         }
     });
 }
 
 fn test_file(filepath: &Path) {
-    let file = filepath.to_str().unwrap();
+    let file = filepath
+        .to_str()
+        .expect("test file path must be valid UTF-8");
     eprintln!("Processing file: {file}");
     let src = read_to_string(filepath).expect("unable to read file");
     let syntax = syn::parse_file(&src).expect("unable to parse file");
@@ -60,10 +63,14 @@ fn test_file(filepath: &Path) {
             assert!(!has_vmod, "Multiple vmod modules found in {file}");
             has_vmod = true;
             // FIXME: use this attribute as an arg for the test
-            let _arg = remove_attr(&mut item.attrs, "vmod").unwrap();
+            let _arg =
+                remove_attr(&mut item.attrs, "vmod").expect("vmod attribute must be present");
             let name = format!(
                 "{}_{}",
-                filepath.file_stem().unwrap().to_string_lossy(),
+                filepath
+                    .file_stem()
+                    .expect("test file must have a name")
+                    .to_string_lossy(),
                 item.ident
             );
             test(&name, quote! {}, item);
@@ -81,7 +88,10 @@ fn test_file(filepath: &Path) {
                             has_metrics = true;
                             let name = format!(
                                 "{}_{}",
-                                filepath.file_stem().unwrap().to_string_lossy(),
+                                filepath
+                                    .file_stem()
+                                    .expect("test file must have a name")
+                                    .to_string_lossy(),
                                 item.ident
                             );
                             test_metric(&name, item);
@@ -153,8 +163,16 @@ fn test(name: &str, args: TokenStream, mut item_mod: ItemMod) {
 
     // Extract a JSON and cproto strings, and remove them from the original to avoid recording it twice
     let replacement = |caps: &Captures| -> String {
-        let func = caps.get(1).unwrap().as_str().to_string();
-        let value = caps.get(2).unwrap().as_str().to_string();
+        let func = caps
+            .get(1)
+            .expect("regex capture group 1 must exist")
+            .as_str()
+            .to_string();
+        let value = caps
+            .get(2)
+            .expect("regex capture group 2 must exist")
+            .as_str()
+            .to_string();
 
         let value = &value
             .replace("\\\"", "\"")

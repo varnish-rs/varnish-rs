@@ -1,6 +1,6 @@
 //! Expose the Varnish context [`vrt_ctx`] as a Rust object
 //!
-use std::ffi::{c_int, c_uint, c_void};
+use std::ffi::{c_int, c_uint, c_void, CStr};
 
 use crate::ffi;
 use crate::ffi::{vrt_ctx, VRT_fail, VRT_CTX_MAGIC};
@@ -45,7 +45,11 @@ impl<'a> Ctx<'a> {
     ///
     /// The pointer must be non-null, and the magic must match
     pub unsafe fn from_ptr(ptr: *const vrt_ctx) -> Self {
-        Self::from_ref(ptr.cast_mut().as_mut().unwrap())
+        Self::from_ref(
+            ptr.cast_mut()
+                .as_mut()
+                .expect("vrt_ctx pointer must not be null"),
+        )
     }
 
     /// Instantiate from a mutable reference to a [`vrt_ctx`].
@@ -86,6 +90,38 @@ impl<'a> Ctx<'a> {
             }
         }
     }
+
+    /// Return the name of the listener socket that received the current request.
+    ///
+    /// This corresponds to the VCL variable `local.socket` and returns the `-a` socket
+    /// name (e.g., `"a0"`, `"http-80"`). Returns an `Err` in backend context where the
+    /// session isn't available, or if the name is non-UTF-8.
+    pub fn local_socket(&self) -> Result<&'a str, VclError> {
+        // we're breaking abstraction here, but the other ways are to just reimplement the
+        // whole logic in rust (which is admittedly short), or to let the user crash
+        if self.raw.req.is_null() && self.raw.bo.is_null() {
+            return Err("local.socket isn't available in this context".into());
+        }
+        let raw = unsafe { ffi::VRT_r_local_socket(self.raw) };
+        let cstr = <&CStr>::from(raw);
+        Ok(cstr.to_str()?)
+    }
+
+    /// Return the address of the local endpoint that received the current request.
+    ///
+    /// This corresponds to the VCL variable `local.endpoint` and returns the address
+    /// string (e.g., `"127.0.0.1:8080"`, `"/var/run/varnish.sock"`). Returns an `Err` in
+    /// backend context where the session isn't available, or if the value is non-UTF-8.
+    // same notes as for local_socket
+    pub fn local_endpoint(&self) -> Result<&'a str, VclError> {
+        if self.raw.req.is_null() && self.raw.bo.is_null() {
+            return Err("local.endpoint isn't available in this context".into());
+        }
+        let raw = unsafe { ffi::VRT_r_local_endpoint(self.raw) };
+        let cstr = <&CStr>::from(raw);
+        Ok(cstr.to_str()?)
+    }
+
     pub fn cached_req_body(&mut self) -> Result<Vec<&'a [u8]>, VclError> {
         unsafe extern "C" fn chunk_collector(
             priv_: *mut c_void,
@@ -93,7 +129,10 @@ impl<'a> Ctx<'a> {
             ptr: *const c_void,
             len: isize,
         ) -> c_int {
-            let v = priv_.cast::<Vec<&[u8]>>().as_mut().unwrap();
+            let v = priv_
+                .cast::<Vec<&[u8]>>()
+                .as_mut()
+                .expect("cached_req_body callback priv pointer must not be null");
             let buf = std::slice::from_raw_parts(ptr.cast::<u8>(), len as usize);
             v.push(buf);
             0

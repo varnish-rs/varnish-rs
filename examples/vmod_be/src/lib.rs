@@ -59,7 +59,7 @@ struct ParrotBackend {
 /// - [`Self::get_response`] that actually builds the response headers, and returns a Body
 impl VclBackend<ResponseBody> for ParrotBackend {
     fn get_response(&self, ctx: &mut Ctx) -> Result<Option<ResponseBody>, VclError> {
-        let beresp = ctx.http_beresp.as_mut().unwrap();
+        let beresp = ctx.http_beresp.as_mut().expect("http_beresp must be set");
         beresp.set_status(200);
         beresp.set_header("server", "parrot")?;
 

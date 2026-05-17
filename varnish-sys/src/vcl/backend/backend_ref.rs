@@ -98,7 +98,7 @@ impl BackendRef {
 impl Clone for BackendRef {
     fn clone(&self) -> BackendRef {
         // self.vcl_ptr() will never be null
-        unsafe { BackendRef::new(self.vcl_ptr()).unwrap() }
+        unsafe { BackendRef::new(self.vcl_ptr()).expect("BackendRef vcl_ptr must not be null") }
     }
 }
 

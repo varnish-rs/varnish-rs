@@ -58,7 +58,9 @@ mod task {
             __ctx: *mut vrt_ctx,
             __args: *const arg_vmod_task_per_vcl_opt,
         ) {
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             super::per_vcl_opt(
                 __args
                     .vcl
@@ -89,7 +91,9 @@ mod task {
             __ctx: *mut vrt_ctx,
             __args: *const arg_vmod_task_per_tsk_opt,
         ) {
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             let mut __obj_per_task = (*__args.tsk).take();
             let __result = super::per_tsk_opt(
                 &mut __obj_per_task,
@@ -143,7 +147,7 @@ mod task {
             tsk: *mut vmod_priv,
             vcl: *const vmod_priv,
         ) {
-            let __obj = __obj.as_ref().unwrap();
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
             let mut __obj_per_task = (*tsk).take();
             let __result = __obj
                 .both(
@@ -165,7 +169,7 @@ mod task {
             vcl: *const vmod_priv,
             val: VCL_INT,
         ) {
-            let __obj = __obj.as_ref().unwrap();
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
             let mut __obj_per_task = (*tsk).take();
             let __result = __obj
                 .both_pos(
@@ -193,8 +197,10 @@ mod task {
             __obj: *const super::PerVcl,
             __args: *const arg_vmod_task_PerVcl_both_opt,
         ) {
-            let __args = __args.as_ref().unwrap();
-            let __obj = __obj.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
             let mut __obj_per_task = (*__args.tsk).take();
             let __result = __obj
                 .both_opt(

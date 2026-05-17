@@ -268,15 +268,20 @@ impl ParamType {
             }
             Lit::CStr(v) => {
                 only! { ParamTy::Str | ParamTy::CStr, "Only `&str` and `&CStr` arguments can have a default string value" }
-                Value::String(v.value().to_str().unwrap().to_string())
+                Value::String(
+                    v.value()
+                        .to_str()
+                        .expect("CStr literal must be valid UTF-8")
+                        .to_string(),
+                )
             }
             Lit::Int(v) => {
                 only! { ParamTy::I64, "Only `i64` arguments can have a default integer value" }
-                serde_json::from_str(&v.to_string()).unwrap()
+                serde_json::from_str(&v.to_string()).expect("integer literal must be valid JSON")
             }
             Lit::Float(v) => {
                 only! { ParamTy::F64, "Only `f64` arguments can have a default float value" }
-                serde_json::from_str(&v.to_string()).unwrap()
+                serde_json::from_str(&v.to_string()).expect("float literal must be valid JSON")
             }
             Lit::Bool(v) => {
                 only! { ParamTy::Bool, "Only `bool` arguments can have a default boolean value" }
