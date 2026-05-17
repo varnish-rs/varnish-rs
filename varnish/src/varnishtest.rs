@@ -48,6 +48,19 @@ pub fn run_all_tests(
     }
 }
 
+/// Run a single varnishtest after locating the vmod shared library.
+pub fn run_one_test(
+    vmod_name: &str,
+    ld_library_paths: &str,
+    testfile: &Path,
+    timeout: &str,
+    debug: bool,
+) -> Result<(), String> {
+    let vmod_lib_name = format!("{DLL_PREFIX}{vmod_name}{DLL_SUFFIX}");
+    let vmod_path = find_vmod_lib(&vmod_lib_name, ld_library_paths)?;
+    run_varnish_test(&vmod_path, testfile, timeout, debug)
+}
+
 pub fn run_varnish_test(
     vmod_path: &Path,
     testfile: &Path,
