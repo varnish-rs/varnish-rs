@@ -223,14 +223,15 @@ impl ParamTy {
         match self {
             Self::Bool
             | Self::Blob
+            | Self::CStr
             | Self::Duration
             | Self::F64
             | Self::I64
             | Self::SystemTime
             | Self::Str
-            | Self::CStr => false,
+            | Self::Sub
+            | Self::VclType(_) => false,
             Self::BackendRef | Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
-            Self::Sub | Self::VclType(_) => false,
         }
     }
 
