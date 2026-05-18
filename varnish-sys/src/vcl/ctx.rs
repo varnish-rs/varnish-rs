@@ -126,7 +126,6 @@ impl<'a> Ctx<'a> {
 
     /// Call a VCL subroutine.
     pub fn call_sub(&mut self, sub: Subroutine) -> bool {
-        eprintln!("VRT_call {:p}", self.raw);
         unsafe { VRT_call(self.raw, sub.vcl_ptr()) }
         self.is_handled()
     }
