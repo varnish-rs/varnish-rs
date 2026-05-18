@@ -32,7 +32,7 @@ jobs:
     name: Test Varnish ${{ matrix.ver }}
     runs-on: ubuntu-latest
     env:
-      VARNISH_INSTALL_DIR: '/tmp/varnish-install'
+      VARNISH_INSTALL_DIR: '/tmp/varnish-trunk'
     strategy:
       fail-fast: false  # Run all the tests even if some fail
       matrix:
@@ -51,30 +51,7 @@ jobs:
         with: { tool: just }
       - name: Install Varnish (trunk)
         if: matrix.ver == 'trunk'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            autoconf \
-            automake \
-            build-essential \
-            ca-certificates \
-            cpio \
-            git \
-            libedit-dev \
-            libjemalloc-dev \
-            libncurses-dev \
-            libpcre2-dev \
-            libssl-dev \
-            libtool \
-            libunwind-dev \
-            pkg-config \
-            python3-sphinx
-          git clone --recursive https://github.com/varnish/varnish.git varnish-c
-          cd varnish-c
-          ./autogen.sh
-          ./configure --prefix=$VARNISH_INSTALL_DIR
-          make -j
-          make install -j
+        run: just install-varnish trunk
       - name: Install Varnish (non-trunk)
         if: matrix.ver != 'trunk'
         run: just install-varnish ${{ matrix.ver }}
@@ -120,10 +97,32 @@ jobs:
       - name: Ensure docs can be built at docs.rs without varnish dependencies
         run: just test-doc
 
+  # Smoke test on macOS. brew ships current Varnish (9.0.x) with arm64 bottles,
+  # so installation is fast. We install Varnish via brew (the Justfile's
+  # install-varnish recipe is Debian-specific) but otherwise use `just build`
+  # and `just test`, which work cross-platform.
+  test-macos:
+    name: Test on macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Stable Rust
+        uses: dtolnay/rust-toolchain@stable
+      - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+        uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with: { tool: just }
+      - name: Install Varnish
+        run: brew install varnish
+      - name: Build workspace
+        run: just build
+      - name: Run tests
+        run: just test
+
   # This job checks if any of the previous jobs failed or were canceled.
   # This approach also allows some jobs to be skipped if they are not needed.
   ci-passed:
-    needs: [ test, test-varnish-ver, test-msrv, test-docs-rs ]
+    needs: [ test, test-varnish-ver, test-msrv, test-docs-rs, test-macos ]
     if: always()
     runs-on: ubuntu-latest
     steps:

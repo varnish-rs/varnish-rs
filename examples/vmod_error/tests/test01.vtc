@@ -1,9 +1,10 @@
 varnishtest "error()"
 
 # create the files we'll use in the tests
+# (use printf, not `echo -n`: macOS /bin/sh writes the `-n` literally)
 shell {
-    echo -n 123456 > ${tmpdir}/good_file
-    echo -n not a number > ${tmpdir}/bad_file
+    printf 123456 > ${tmpdir}/good_file
+    printf "not a number" > ${tmpdir}/bad_file
 }
 
 # VCL, no backend needed

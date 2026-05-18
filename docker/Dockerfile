@@ -8,6 +8,7 @@ RUN    apt-get update \
         clang \
         cmake \
         curl \
+        flex \
         git \
         gnupg \
         jq \
@@ -20,6 +21,8 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash 
 
 # Pass in the VARNISH_VERSION build arg to specify the version of Varnish to install
 ARG VARNISH_VERSION=""
+ARG VARNISH_INSTALL_DIR=
+ENV VARNISH_INSTALL_DIR=$VARNISH_INSTALL_DIR
 
 # We need to copy justfile to a temporary directory to install Varnish.
 # Note that during the regular usage, we use justfile mapped from the host machine.

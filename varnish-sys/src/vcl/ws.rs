@@ -68,16 +68,27 @@ impl ffi::ws {
         let ws = validate_ws(self);
         assert!(ws.r.is_null());
         ws.r = ws.e;
-        ws.e.offset_from(ws.f).try_into().unwrap()
+        ws.e.offset_from(ws.f)
+            .try_into()
+            .expect("workspace free space must fit in u32")
     }
 
     #[allow(clippy::unused_self)]
     pub(crate) unsafe fn release(&mut self, size: u32) {
         let ws = validate_ws(self);
-        assert!(isize::try_from(size).unwrap() <= ws.e.offset_from(ws.f));
-        assert!(isize::try_from(size).unwrap() <= ws.r.offset_from(ws.f));
+        assert!(
+            isize::try_from(size).expect("workspace size must fit in isize")
+                <= ws.e.offset_from(ws.f)
+        );
+        assert!(
+            isize::try_from(size).expect("workspace size must fit in isize")
+                <= ws.r.offset_from(ws.f)
+        );
         assert!(!ws.r.is_null());
-        let aligned_sz = usize::try_from(size).unwrap().div_ceil(Self::ALIGN) * Self::ALIGN;
+        let aligned_sz = usize::try_from(size)
+            .expect("workspace size must fit in usize")
+            .div_ceil(Self::ALIGN)
+            * Self::ALIGN;
         ws.f = ws.f.add(aligned_sz);
         assert!(ws.f.is_aligned());
         ws.r = ptr::null_mut::<c_char>();
@@ -174,6 +185,7 @@ impl<'ctx> Workspace<'ctx> {
     pub fn copy_blob(&mut self, value: impl AsRef<[u8]>) -> Result<VCL_BLOB, VclError> {
         let buf = self.copy_bytes(value)?;
         let blob = self.copy_value(vrt_blob {
+            magic: ffi::VRT_BLOB_MAGIC,
             blob: ptr::from_ref(buf).cast::<c_void>(),
             len: buf.len(),
             ..Default::default()
@@ -319,11 +331,13 @@ mod tests {
         let mut ws = test_ws.workspace();
         for _ in 0..10 {
             unsafe {
-                assert!(!ws.alloc(NonZero::new(16).unwrap()).is_null());
+                assert!(!ws
+                    .alloc(NonZero::new(16).expect("16 is non-zero"))
+                    .is_null());
             }
         }
         unsafe {
-            assert!(ws.alloc(NonZero::new(1).unwrap()).is_null());
+            assert!(ws.alloc(NonZero::new(1).expect("1 is non-zero")).is_null());
         }
     }
 }

@@ -1,0 +1,7 @@
+# On macOS, VMODs reference symbols (VRT_*, VSL*, WS_*, BS_*, ...) that live in
+# the `varnishd` executable rather than libvarnishapi. Linux's flat namespace
+# resolves these at dlopen time from the host process; macOS's two-level
+# namespace requires every symbol be resolved at link time. `dynamic_lookup`
+# defers resolution to runtime, matching Linux behavior.
+[target.'cfg(target_os = "macos")']
+rustflags = ["-C", "link-arg=-Wl,-undefined,dynamic_lookup"]

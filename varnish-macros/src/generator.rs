@@ -19,7 +19,7 @@ pub fn render_model(mut item_mod: ItemMod, info: &VmodInfo) -> TokenStream {
     item_mod
         .content
         .as_mut()
-        .unwrap()
+        .expect("vmod module must have content")
         .1
         .insert(0, Item::Verbatim(output));
 
@@ -113,7 +113,10 @@ impl Generator {
         header.extend(vec![
             self.names.mod_name().into(),
             self.names.func_struct_name().into(),
-            self.file_id.to_str().unwrap().into(),
+            self.file_id
+                .to_str()
+                .expect("file_id must be valid UTF-8")
+                .into(),
             // Ohh the irony, this string from VMOD_ABI_Version is the reason
             // why `varnish-sys` must exist. Without it, we could run bindgen
             // from the `varnish` crate directly.  Ohh well.
@@ -121,7 +124,10 @@ impl Generator {
             // FIXME: figure out a way to assert that the version string used by varnish_macro is the same
             //        as the value accessible by generated code from varnish::ffi::VMOD_ABI_Version.
             //        Currently it seems not possible to do a constant assert at compile time on b-str/c-str equality.
-            varnish_sys::ffi::VMOD_ABI_Version.to_str().unwrap().into(),
+            varnish_sys::ffi::VMOD_ABI_Version
+                .to_str()
+                .expect("VMOD_ABI_Version must be valid UTF-8")
+                .into(),
             "0".into(),
             "0".into(),
         ]);
@@ -137,7 +143,8 @@ impl Generator {
             json.push(obj.json.clone());
         }
 
-        let mut json = serde_json::to_string_pretty(&json! {json}).unwrap();
+        let mut json = serde_json::to_string_pretty(&json! {json})
+            .expect("VMOD JSON serialization must succeed");
         // Wrap the JSON in a special format
         json = format!("VMOD_JSON_SPEC\u{2}\n{json}\n\u{3}");
 

@@ -5,26 +5,26 @@ use crate::ffi::{
 use crate::vcl::{DeliveryFilters, FetchFilters};
 
 pub unsafe fn validate_vrt_ctx(ctxp: *const vrt_ctx) -> &'static vrt_ctx {
-    let val = ctxp.as_ref().unwrap();
+    let val = ctxp.as_ref().expect("vrt_ctx pointer must not be null");
     assert_eq!(val.magic, VRT_CTX_MAGIC);
     val
 }
 
 pub unsafe fn validate_director(be: VCL_BACKEND) -> &'static director {
-    let val = be.0.as_ref().unwrap();
+    let val = be.0.as_ref().expect("director pointer must not be null");
     assert_eq!(val.magic, DIRECTOR_MAGIC);
     val
 }
 
 pub unsafe fn validate_ws(wsp: *mut ws) -> &'static mut ws {
-    let val = wsp.as_mut().unwrap();
+    let val = wsp.as_mut().expect("workspace pointer must not be null");
     assert_eq!(val.magic, WS_MAGIC);
     val
 }
 
 impl vrt_ctx {
     pub fn validated_req(&mut self) -> &mut req {
-        let val = unsafe { self.req.as_mut().unwrap() };
+        let val = unsafe { self.req.as_mut().expect("req pointer must not be null") };
         assert_eq!(val.magic, REQ_MAGIC);
         val
     }
@@ -32,26 +32,29 @@ impl vrt_ctx {
 
 impl req {
     pub fn validated_session(&mut self) -> &sess {
-        let val = unsafe { self.sp.as_ref().unwrap() };
+        let val = unsafe { self.sp.as_ref().expect("session pointer must not be null") };
         assert_eq!(val.magic, SESS_MAGIC);
         val
     }
 }
 
 pub unsafe fn validate_vfp_ctx(ctxp: *mut vfp_ctx) -> &'static mut vfp_ctx {
-    let val = ctxp.as_mut().unwrap();
+    let val = ctxp.as_mut().expect("vfp_ctx pointer must not be null");
     assert_eq!(val.magic, VFP_CTX_MAGIC);
     val
 }
 
 pub unsafe fn validate_vfp_entry(vfep: *mut vfp_entry) -> &'static mut vfp_entry {
-    let val = vfep.as_mut().unwrap();
+    let val = vfep.as_mut().expect("vfp_entry pointer must not be null");
     assert_eq!(val.magic, VFP_ENTRY_MAGIC);
     val
 }
 
 pub unsafe fn validate_vdir(be: &director) -> &'static mut vcldir {
-    let val = be.vdir.as_mut().unwrap();
+    let val = be
+        .vdir
+        .as_mut()
+        .expect("director vdir pointer must not be null");
     assert_eq!(val.magic, VCLDIR_MAGIC);
     val
 }
