@@ -98,8 +98,9 @@ jobs:
         run: just test-doc
 
   # Smoke test on macOS. brew ships current Varnish (9.0.x) with arm64 bottles,
-  # so installation is fast. We bypass `just ci-test` because the Justfile's
-  # version-detection and Varnish install recipes are Debian-specific (dpkg/apt).
+  # so installation is fast. We install Varnish via brew (the Justfile's
+  # install-varnish recipe is Debian-specific) but otherwise use `just build`
+  # and `just test`, which work cross-platform.
   test-macos:
     name: Test on macOS
     runs-on: macos-latest
@@ -109,12 +110,14 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
         uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with: { tool: just }
       - name: Install Varnish
         run: brew install varnish
       - name: Build workspace
-        run: cargo build --workspace --all-features --all-targets
+        run: just build
       - name: Run tests
-        run: cargo test --workspace --all-features
+        run: just test
 
   # This job checks if any of the previous jobs failed or were canceled.
   # This approach also allows some jobs to be skipped if they are not needed.
