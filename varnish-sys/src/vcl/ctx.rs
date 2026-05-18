@@ -37,8 +37,9 @@ pub struct Ctx<'a> {
     pub http_resp: Option<HttpHeaders<'a>>,
     pub http_bereq: Option<HttpHeaders<'a>>,
     pub http_beresp: Option<HttpHeaders<'a>>,
-    pub req: Option<Req<'a>>,
     pub ws: Workspace<'a>,
+
+    req: Option<Req<'a>>,
 }
 
 impl<'a> Ctx<'a> {
@@ -63,7 +64,7 @@ impl<'a> Ctx<'a> {
             http_bereq: HttpHeaders::from_ptr(raw.http_bereq),
             http_beresp: HttpHeaders::from_ptr(raw.http_beresp),
             ws: Workspace::from_ptr(raw.ws),
-            req: Req::from_ptr(raw.req),
+            req: unsafe { Req::from_ptr(raw.req) },
             raw,
         }
     }
@@ -187,10 +188,8 @@ pub struct Req<'a> {
 
 impl Req<'_> {
     /// Wrap a raw pointer into an object we can use.
-    pub(crate) fn from_ptr(p: *mut ffi::req) -> Option<Self> {
-        Some(Req {
-            raw: unsafe { p.as_mut()? },
-        })
+    pub(crate) unsafe fn from_ptr(p: *mut ffi::req) -> Option<Self> {
+        Some(Req { raw: p.as_mut()? })
     }
 
     /// Return whether this request bypasses the cache lookup and is always treated as a miss.
