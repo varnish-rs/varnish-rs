@@ -32,3 +32,16 @@ Delete the top 2 lines with `mod try_to_build {` and the last `}`,  and reformat
 # Using Docker
 
 Docker allows multiple Varnish versions on the same machine.  To use it, run `just docker-run` with an optional version number.  On the first run, it will build the image, install necessary dependencies, and start the container.  The container will have the git root directory mounted as `/app`, so you can run `cargo build` and `cargo test` as usual. All work is preserved in the `docker/.cache/<version>`, so restarting container would not need re-install everything.
+
+# Building VMODs on macOS
+
+VMODs reference symbols (`VRT_*`, `VSL*`, `WS_*`, `BS_*`, ...) that live in the `varnishd` executable rather than in `libvarnishapi`. On Linux these resolve at `dlopen` time against the host process's flat namespace; macOS uses a two-level namespace and requires every symbol be resolved at link time. The workaround is to pass `-undefined,dynamic_lookup` to the linker.
+
+This repo's `.cargo/config.toml` already sets this for in-tree builds (workspace + examples). Downstream VMOD crates need the same snippet in their own `.cargo/config.toml`:
+
+```toml
+[target.'cfg(target_os = "macos")']
+rustflags = ["-C", "link-arg=-Wl,-undefined,dynamic_lookup"]
+```
+
+Install Varnish via Homebrew (`brew install varnish`). The `just` recipes (`just ci-test`, `just install-varnish`, ...) are currently Debian-specific; on macOS use `cargo build` and `cargo test` directly.

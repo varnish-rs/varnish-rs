@@ -135,8 +135,17 @@ macro_rules! run_vtc_tests {
         #[cfg(test)]
         #[test]
         fn run_vtc_tests() {
+            // Cargo names the dylib search path differently per platform
+            // (DYLD_FALLBACK_LIBRARY_PATH on macOS, LD_LIBRARY_PATH elsewhere), so read it
+            // at runtime rather than via env!() — which would fail to compile on macOS.
+            let dylib_path_var = if cfg!(target_os = "macos") {
+                "DYLD_FALLBACK_LIBRARY_PATH"
+            } else {
+                "LD_LIBRARY_PATH"
+            };
+            let dylib_path = ::std::env::var(dylib_path_var).unwrap_or_default();
             if let Err(err) = $crate::varnishtest::run_all_tests(
-                env!("LD_LIBRARY_PATH"),
+                &dylib_path,
                 env!("CARGO_PKG_NAME"),
                 $glob_path,
                 option_env!("VARNISHTEST_DURATION").unwrap_or("5s"),
