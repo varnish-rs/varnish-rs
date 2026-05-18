@@ -49,7 +49,7 @@ mod event2 {
         pub static Vmod_event2_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"12c0145150bdb078f1e8f5f2186f8beaf799d5163796db1e68583cf35e74472e"
+            file_id: c"3f9a35edbd9d31f20e0e49c9cf2e8cbad94d5566bfa2c4ac9d7e0ee8734ccf7f"
                 .as_ptr(),
             name: c"event2".as_ptr(),
             func_name: c"Vmod_vmod_event2_Func".as_ptr(),

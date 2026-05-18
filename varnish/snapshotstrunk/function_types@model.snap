@@ -16,6 +16,7 @@ VmodInfo {
             args: [],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -25,6 +26,7 @@ VmodInfo {
             args: [],
             output_ty: Default,
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -34,6 +36,7 @@ VmodInfo {
             args: [],
             output_ty: Default,
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -43,6 +46,7 @@ VmodInfo {
             args: [],
             output_ty: Default,
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -64,6 +68,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -85,6 +90,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -106,6 +112,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -127,6 +134,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -148,6 +156,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -159,6 +168,7 @@ VmodInfo {
                 Bool,
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -170,6 +180,7 @@ VmodInfo {
                 Bool,
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -191,6 +202,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -212,6 +224,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -233,6 +246,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -254,6 +268,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -275,6 +290,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -296,6 +312,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -317,6 +334,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -328,6 +346,7 @@ VmodInfo {
                 CStr,
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -339,6 +358,7 @@ VmodInfo {
                 CStr,
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -350,6 +370,7 @@ VmodInfo {
                 CStr,
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -371,6 +392,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -392,6 +414,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -403,6 +426,7 @@ VmodInfo {
                 Duration,
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -414,6 +438,7 @@ VmodInfo {
                 Duration,
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -435,6 +460,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -456,6 +482,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -477,6 +504,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -488,6 +516,7 @@ VmodInfo {
                 F64,
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -499,6 +528,7 @@ VmodInfo {
                 F64,
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -520,6 +550,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -541,6 +572,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -562,6 +594,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -573,6 +606,7 @@ VmodInfo {
                 I64,
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -584,6 +618,7 @@ VmodInfo {
                 I64,
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -605,6 +640,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -626,6 +662,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -647,6 +684,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -668,6 +706,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -689,6 +728,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -700,6 +740,7 @@ VmodInfo {
                 Str,
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -711,6 +752,7 @@ VmodInfo {
                 Str,
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -720,6 +762,7 @@ VmodInfo {
             args: [],
             output_ty: String,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -729,6 +772,7 @@ VmodInfo {
             args: [],
             output_ty: String,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -738,6 +782,7 @@ VmodInfo {
             args: [],
             output_ty: String,
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -747,6 +792,7 @@ VmodInfo {
             args: [],
             output_ty: String,
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -768,6 +814,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -789,6 +836,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -800,6 +848,7 @@ VmodInfo {
                 Probe,
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -811,6 +860,7 @@ VmodInfo {
                 Probe,
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -832,6 +882,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -853,6 +904,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -864,6 +916,7 @@ VmodInfo {
                 ProbeCow,
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -875,6 +928,7 @@ VmodInfo {
                 ProbeCow,
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -896,6 +950,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -917,6 +972,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -928,6 +984,7 @@ VmodInfo {
                 SocketAddr,
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -939,6 +996,7 @@ VmodInfo {
                 SocketAddr,
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -950,6 +1008,7 @@ VmodInfo {
                 "VCL_STRING",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -961,6 +1020,7 @@ VmodInfo {
                 "VCL_STRING",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -1004,6 +1064,7 @@ VmodInfo {
             ],
             output_ty: String,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -1021,6 +1082,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -1038,6 +1100,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
     ],
     objects: [],

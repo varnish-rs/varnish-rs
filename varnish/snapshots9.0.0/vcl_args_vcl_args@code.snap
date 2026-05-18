@@ -35,7 +35,7 @@ mod vcl_args {
         pub static Vmod_vcl_args_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"c19f59f7347c90e481cebb6aec0f4cd0a7f4d5e113e4c7fd2ae8266cf04c86fa"
+            file_id: c"ee8898379f31cd5cec110a335128253112cc2dc3ab11006919872264ab2f3688"
                 .as_ptr(),
             name: c"vcl_args".as_ptr(),
             func_name: c"Vmod_vmod_vcl_args_Func".as_ptr(),

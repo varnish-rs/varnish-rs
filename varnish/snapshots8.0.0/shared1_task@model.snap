@@ -34,6 +34,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -49,6 +50,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -75,6 +77,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -90,6 +93,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -116,6 +120,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -131,6 +136,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -157,6 +163,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
     ],
     objects: [
@@ -177,6 +184,7 @@ VmodInfo {
                 ],
                 output_ty: SelfType,
                 out_result: false,
+                restrict: [],
             },
             destructor: FuncInfo {
                 func_type: Destructor,
@@ -186,6 +194,7 @@ VmodInfo {
                 args: [],
                 output_ty: Default,
                 out_result: false,
+                restrict: [],
             },
             funcs: [
                 FuncInfo {
@@ -212,6 +221,7 @@ VmodInfo {
                     ],
                     output_ty: Default,
                     out_result: false,
+                    restrict: [],
                 },
                 FuncInfo {
                     func_type: Method,
@@ -248,6 +258,7 @@ VmodInfo {
                     ],
                     output_ty: Default,
                     out_result: false,
+                    restrict: [],
                 },
                 FuncInfo {
                     func_type: Method,
@@ -284,6 +295,7 @@ VmodInfo {
                     ],
                     output_ty: Default,
                     out_result: false,
+                    restrict: [],
                 },
             ],
         },

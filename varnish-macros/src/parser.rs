@@ -306,41 +306,21 @@ impl FuncInfo {
     }
 }
 
-// mirrors the constants in varnish::vcl::subroutine::bitmask
-const VALID_RESTRICT_SCOPES: &[&str] = &[
-    "vcl_recv",
-    "vcl_pipe",
-    "vcl_pass",
-    "vcl_hash",
-    "vcl_purge",
-    "vcl_miss",
-    "vcl_hit",
-    "vcl_deliver",
-    "vcl_synth",
-    "vcl_backend_fetch",
-    "vcl_backend_refresh",
-    "vcl_backend_response",
-    "vcl_backend_error",
-    "vcl_init",
-    "vcl_fini",
-    "client",
-    "backend",
-    "housekeeping",
-];
+use varnish_sys::vcl::subroutine::VALID_RESTRICT_SCOPES;
 
 fn parse_restricted_attr(attrs: &mut Vec<Attribute>, errors: &mut Errors) -> Vec<String> {
-    let Some(attr) = parser_utils::remove_attr(attrs, "restricted") else {
+    let Some(attr) = parser_utils::remove_attr(attrs, "restrict") else {
         return Vec::new();
     };
     let scopes = match attr.parse_args_with(Punctuated::<Ident, Comma>::parse_terminated) {
         Ok(v) => v,
         Err(e) => {
-            errors.add(&attr, &format!("#[restricted] parse error: {e}"));
+            errors.add(&attr, &format!("#[restrict] parse error: {e}"));
             return Vec::new();
         }
     };
     if scopes.is_empty() {
-        errors.add(&attr, "#[restricted] requires at least one scope argument");
+        errors.add(&attr, "#[restrict] requires at least one scope argument");
         return Vec::new();
     }
     let mut result = Vec::new();

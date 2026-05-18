@@ -37,6 +37,7 @@ VmodInfo {
                 ],
                 output_ty: SelfType,
                 out_result: false,
+                restrict: [],
             },
             destructor: FuncInfo {
                 func_type: Destructor,
@@ -46,6 +47,7 @@ VmodInfo {
                 args: [],
                 output_ty: Default,
                 out_result: false,
+                restrict: [],
             },
             funcs: [],
         },
@@ -77,6 +79,7 @@ VmodInfo {
                 ],
                 output_ty: SelfType,
                 out_result: false,
+                restrict: [],
             },
             destructor: FuncInfo {
                 func_type: Destructor,
@@ -86,6 +89,7 @@ VmodInfo {
                 args: [],
                 output_ty: Default,
                 out_result: false,
+                restrict: [],
             },
             funcs: [],
         },
@@ -124,6 +128,7 @@ VmodInfo {
                 ],
                 output_ty: SelfType,
                 out_result: false,
+                restrict: [],
             },
             destructor: FuncInfo {
                 func_type: Destructor,
@@ -133,6 +138,7 @@ VmodInfo {
                 args: [],
                 output_ty: Default,
                 out_result: false,
+                restrict: [],
             },
             funcs: [],
         },
@@ -171,6 +177,7 @@ VmodInfo {
                 ],
                 output_ty: SelfType,
                 out_result: false,
+                restrict: [],
             },
             destructor: FuncInfo {
                 func_type: Destructor,
@@ -180,6 +187,7 @@ VmodInfo {
                 args: [],
                 output_ty: Default,
                 out_result: false,
+                restrict: [],
             },
             funcs: [],
         },

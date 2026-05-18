@@ -22,6 +22,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -42,6 +43,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
     ],
     objects: [],
