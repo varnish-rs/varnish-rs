@@ -27,6 +27,16 @@ macro_rules! define_subroutines {
             $( $enum_id, )*
         }
 
+        /// Maps a `#[restrict(...)]` scope name to the exact bitmask constant identifier.
+        /// Used by varnish-macros codegen to avoid fragile string-manipulation heuristics.
+        pub fn bitmask_const_name(scope: &str) -> Option<&'static str> {
+            match scope {
+                $( $sub_name => Some(stringify!($bitmask_name)), )*
+                $( $group_name => Some(stringify!($group_bitmask)), )*
+                _ => None,
+            }
+        }
+
         impl Id {
             pub fn to_bitfield(self) -> u32 {
                 use bitmask::*;

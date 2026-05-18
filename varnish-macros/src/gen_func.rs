@@ -572,8 +572,11 @@ impl FuncProcessor {
             .restrict
             .iter()
             .map(|s| {
-                let const_name =
-                    format_ident!("{}", s.strip_prefix("vcl_").unwrap_or(s).to_uppercase());
+                let const_name = format_ident!(
+                    "{}",
+                    varnish_sys::vcl::subroutine::bitmask_const_name(s)
+                        .expect("invalid scope — should have been caught by parse_restrict_attr")
+                );
                 quote! { ::varnish::vcl::subroutine::bitmask::#const_name }
             })
             .collect();

@@ -1,0 +1,11 @@
+error: Invalid scope 'not_a_scope'. Valid scopes: vcl_recv, vcl_pipe, vcl_pass, vcl_hash, vcl_purge, vcl_miss, vcl_hit, vcl_deliver, vcl_synth, vcl_backend_fetch, vcl_backend_refresh, vcl_backend_response, vcl_backend_error, vcl_init, vcl_fini, client, backend, housekeeping
+ --> tests/fail/error_restrict.rs:3:26
+  |
+3 |     #[restrict(vcl_recv, not_a_scope)]
+  |                          ^^^^^^^^^^^
+
+error: #[restrict] requires at least one scope argument
+  --> tests/fail/error_restrict.rs:11:5
+   |
+11 |     #[restrict()]
+   |     ^

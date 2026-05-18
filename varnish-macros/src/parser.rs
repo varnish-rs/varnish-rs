@@ -17,6 +17,8 @@ use crate::model::{
 use crate::parser_args::FuncStatus;
 use crate::{parser_utils, ProcResult};
 
+use varnish_sys::vcl::subroutine::VALID_RESTRICT_SCOPES;
+
 pub fn tokens_to_model(args: TokenStream, item_mod: &mut ItemMod) -> ProcResult<VmodInfo> {
     let args = NestedMeta::parse_meta_list(args)?;
     let args = VmodParams::from_list(&args)?;
@@ -305,8 +307,6 @@ impl FuncInfo {
         })
     }
 }
-
-use varnish_sys::vcl::subroutine::VALID_RESTRICT_SCOPES;
 
 fn parse_restricted_attr(attrs: &mut Vec<Attribute>, errors: &mut Errors) -> Vec<String> {
     let Some(attr) = parser_utils::remove_attr(attrs, "restrict") else {
