@@ -123,6 +123,7 @@ impl<'a> Ctx<'a> {
         let raw = unsafe { ffi::VRT_r_local_endpoint(self.raw) };
         let cstr = <&CStr>::from(raw);
         Ok(cstr.to_str()?)
+    }
 
     /// Call a VCL subroutine.
     pub fn call_sub(&mut self, sub: Subroutine) -> bool {
