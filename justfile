@@ -18,7 +18,12 @@ ci_mode := if env('CI', '') != '' {'1'} else {''}
 # cargo-binstall needs a workaround due to caching
 # ci_mode might be manually set by user, so re-check the env var
 binstall_args := if env('CI', '') != '' {'--no-confirm --no-track --disable-telemetry'} else {''}
-export RUSTFLAGS := env('RUSTFLAGS', if ci_mode == '1' {'-D warnings'} else {''})
+# On macOS, .cargo/config.toml sets `-undefined,dynamic_lookup` so VMOD cdylibs
+# can defer host-symbol resolution to runtime. But cargo precedence drops
+# target.<cfg>.rustflags the moment RUSTFLAGS env is set — which we do below —
+# so the flag has to be in RUSTFLAGS too, otherwise `just build` fails to link.
+macos_link_arg := if os() == 'macos' {' -C link-arg=-Wl,-undefined,dynamic_lookup'} else {''}
+export RUSTFLAGS := env('RUSTFLAGS', (if ci_mode == '1' {'-D warnings'} else {''}) + macos_link_arg)
 export RUSTDOCFLAGS := env('RUSTDOCFLAGS', if ci_mode == '1' {'-D warnings'} else {''})
 export RUST_BACKTRACE := env('RUST_BACKTRACE', if ci_mode == '1' {'1'} else {''})
 
