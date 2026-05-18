@@ -59,6 +59,18 @@ import rustest from "path/to/librustest.so";
 
 ### Function `VOID rustest.weaken_etag()`
 
+### Function `BOOL rustest.hash_always_miss()`
+
+### Function `VOID rustest.set_hash_always_miss(BOOL val)`
+
+### Function `BOOL rustest.hash_ignore_busy()`
+
+### Function `VOID rustest.set_hash_ignore_busy(BOOL val)`
+
+### Function `BOOL rustest.hash_ignore_vary()`
+
+### Function `VOID rustest.set_hash_ignore_vary(BOOL val)`
+
 ### Function `STRING rustest.merge_all_names()`
 
 ### Function `BLOB rustest.copy_blob()`
