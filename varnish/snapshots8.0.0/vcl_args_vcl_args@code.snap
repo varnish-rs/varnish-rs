@@ -10,8 +10,9 @@ mod vcl_args {
         use std::ptr::null;
         use varnish::ffi::{
             VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE,
-            VCL_REAL, VCL_STRING, VCL_TIME, VCL_VOID, VMOD_ABI_Version, VclEvent,
-            vmod_data, vmod_priv, vrt_ctx, VMOD_PRIV_METHODS_MAGIC, vmod_priv_methods,
+            VCL_REAL, VCL_STRING, VCL_SUB, VCL_TIME, VCL_VOID, VMOD_ABI_Version,
+            VclEvent, vmod_data, vmod_priv, vrt_ctx, VMOD_PRIV_METHODS_MAGIC,
+            vmod_priv_methods,
         };
         use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
         use super::*;
@@ -21,21 +22,35 @@ mod vcl_args {
         ) {
             super::arg_vcl_backend(_backend.into())
         }
+        unsafe extern "C" fn vmod_c_arg_vcl_sub(__ctx: *mut vrt_ctx, _sub: VCL_SUB) {
+            super::arg_vcl_sub(_sub.into())
+        }
+        unsafe extern "C" fn vmod_c_arg_subroutine(__ctx: *mut vrt_ctx, _sub: VCL_SUB) {
+            super::arg_subroutine(_sub.into())
+        }
         #[repr(C)]
         pub struct VmodExports {
             vmod_c_arg_vcl_backend: Option<
                 unsafe extern "C" fn(__ctx: *mut vrt_ctx, _backend: VCL_BACKEND),
             >,
+            vmod_c_arg_vcl_sub: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, _sub: VCL_SUB),
+            >,
+            vmod_c_arg_subroutine: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, _sub: VCL_SUB),
+            >,
         }
         pub static VMOD_EXPORTS: VmodExports = VmodExports {
             vmod_c_arg_vcl_backend: Some(vmod_c_arg_vcl_backend),
+            vmod_c_arg_vcl_sub: Some(vmod_c_arg_vcl_sub),
+            vmod_c_arg_subroutine: Some(vmod_c_arg_subroutine),
         };
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_vcl_args_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"ee8898379f31cd5cec110a335128253112cc2dc3ab11006919872264ab2f3688"
+            file_id: c"45daefb9c914b93711dedc20857bd62dfa548a78e212a8c75945597e8339e22a"
                 .as_ptr(),
             name: c"vcl_args".as_ptr(),
             func_name: c"Vmod_vmod_vcl_args_Func".as_ptr(),
@@ -49,6 +64,9 @@ mod vcl_args {
         };
         const JSON: &CStr = c"(moved to @json.snap files)";
     }
-    use varnish::ffi::VCL_BACKEND;
+    use varnish::ffi::{VCL_BACKEND, VCL_SUB};
+    use varnish::vcl::Subroutine;
     pub fn arg_vcl_backend(_backend: VCL_BACKEND) {}
+    pub fn arg_vcl_sub(_sub: VCL_SUB) {}
+    pub fn arg_subroutine(_sub: Subroutine) {}
 }

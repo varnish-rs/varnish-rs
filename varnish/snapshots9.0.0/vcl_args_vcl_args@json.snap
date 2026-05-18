@@ -8,7 +8,7 @@ VMOD_JSON_SPEC
     "2.0",
     "vcl_args",
     "Vmod_vmod_vcl_args_Func",
-    "ee8898379f31cd5cec110a335128253112cc2dc3ab11006919872264ab2f3688",
+    "45daefb9c914b93711dedc20857bd62dfa548a78e212a8c75945597e8339e22a",
     "Varnish (version) (hash)",
     "0",
     "0"
@@ -21,8 +21,20 @@ typedef VCL_VOID td_vmod_vcl_args_arg_vcl_backend(
     VCL_BACKEND
 );
 
+typedef VCL_VOID td_vmod_vcl_args_arg_vcl_sub(
+    VRT_CTX,
+    VCL_SUB
+);
+
+typedef VCL_VOID td_vmod_vcl_args_arg_subroutine(
+    VRT_CTX,
+    VCL_SUB
+);
+
 struct Vmod_vmod_vcl_args_Func {
   td_vmod_vcl_args_arg_vcl_backend *f_arg_vcl_backend;
+  td_vmod_vcl_args_arg_vcl_sub *f_arg_vcl_sub;
+  td_vmod_vcl_args_arg_subroutine *f_arg_subroutine;
 };
 
 static struct Vmod_vmod_vcl_args_Func Vmod_vmod_vcl_args_Func;"
@@ -40,6 +52,38 @@ static struct Vmod_vmod_vcl_args_Func Vmod_vmod_vcl_args_Func;"
         "BACKEND",
         "_backend",
         "_backend"
+      ]
+    ]
+  ],
+  [
+    "$FUNC",
+    "arg_vcl_sub",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_vcl_args_Func.f_arg_vcl_sub",
+      "",
+      [
+        "SUB",
+        "_sub",
+        "_sub"
+      ]
+    ]
+  ],
+  [
+    "$FUNC",
+    "arg_subroutine",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_vcl_args_Func.f_arg_subroutine",
+      "",
+      [
+        "SUB",
+        "_sub",
+        "_sub"
       ]
     ]
   ]
