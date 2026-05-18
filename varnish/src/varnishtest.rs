@@ -5,8 +5,46 @@ use std::fmt::Write as _;
 use std::io::{stderr, stdout, Write};
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::{Condvar, Mutex, OnceLock};
 
 use glob::glob;
+
+/// Cap on concurrent `varnishtest` invocations within a single test binary.
+///
+/// Each varnishtest forks `varnishd`, which must complete a CLI handshake
+/// within a few seconds. Under heavy parallel load, that handshake can miss
+/// its deadline. Capping concurrency keeps startups responsive without
+/// requiring callers to pass `--test-threads`.
+const MAX_CONCURRENT_TESTS: usize = 2;
+
+static TEST_SLOTS: OnceLock<(Mutex<usize>, Condvar)> = OnceLock::new();
+
+fn test_slots() -> &'static (Mutex<usize>, Condvar) {
+    TEST_SLOTS.get_or_init(|| (Mutex::new(MAX_CONCURRENT_TESTS), Condvar::new()))
+}
+
+struct TestSlot;
+
+impl TestSlot {
+    fn acquire() -> Self {
+        let (lock, cvar) = test_slots();
+        let mut available = lock.lock().expect("test slot mutex poisoned");
+        while *available == 0 {
+            available = cvar.wait(available).expect("test slot condvar wait failed");
+        }
+        *available -= 1;
+        Self
+    }
+}
+
+impl Drop for TestSlot {
+    fn drop(&mut self) {
+        let (lock, cvar) = test_slots();
+        let mut available = lock.lock().expect("test slot mutex poisoned");
+        *available += 1;
+        cvar.notify_one();
+    }
+}
 
 /// Run all tests that match the glob pattern
 pub fn run_all_tests(
@@ -49,13 +87,17 @@ pub fn run_all_tests(
 }
 
 /// Run a single varnishtest after locating the vmod shared library.
+///
+/// Concurrency is capped per-process regardless of `cargo test`'s thread
+/// count, to avoid overwhelming `varnishd` CLI handshakes.
 pub fn run_one_test(
-    vmod_name: &str,
     ld_library_paths: &str,
+    vmod_name: &str,
     testfile: &Path,
     timeout: &str,
     debug: bool,
 ) -> Result<(), String> {
+    let _slot = TestSlot::acquire();
     let vmod_lib_name = format!("{DLL_PREFIX}{vmod_name}{DLL_SUFFIX}");
     let vmod_path = find_vmod_lib(&vmod_lib_name, ld_library_paths)?;
     run_varnish_test(&vmod_path, testfile, timeout, debug)

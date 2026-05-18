@@ -26,6 +26,7 @@ impl Parse for VtcTestsInput {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 pub fn generate(input: pm2::TokenStream) -> pm2::TokenStream {
     let parsed: VtcTestsInput = match syn::parse2(input) {
         Ok(v) => v,
@@ -38,8 +39,13 @@ pub fn generate(input: pm2::TokenStream) -> pm2::TokenStream {
         if p.is_absolute() {
             value
         } else {
-            let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
-                .expect("CARGO_MANIFEST_DIR set by cargo during macro expansion");
+            let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") else {
+                return syn::Error::new_spanned(
+                    &parsed.glob_pattern,
+                    "CARGO_MANIFEST_DIR is not set; run_vtc_tests! must be expanded by cargo",
+                )
+                .into_compile_error();
+            };
             PathBuf::from(manifest_dir)
                 .join(p)
                 .to_string_lossy()
@@ -47,8 +53,8 @@ pub fn generate(input: pm2::TokenStream) -> pm2::TokenStream {
         }
     };
 
-    let mut matched: Vec<PathBuf> = match glob::glob(&pattern_str) {
-        Ok(paths) => paths.filter_map(Result::ok).collect(),
+    let glob_iter = match glob::glob(&pattern_str) {
+        Ok(paths) => paths,
         Err(e) => {
             return syn::Error::new_spanned(
                 &parsed.glob_pattern,
@@ -57,6 +63,25 @@ pub fn generate(input: pm2::TokenStream) -> pm2::TokenStream {
             .into_compile_error();
         }
     };
+
+    let mut matched: Vec<PathBuf> = Vec::new();
+    let mut glob_errors: Vec<String> = Vec::new();
+    for entry in glob_iter {
+        match entry {
+            Ok(p) => matched.push(p),
+            Err(e) => glob_errors.push(format!("{}: {}", e.path().display(), e.error())),
+        }
+    }
+    if !glob_errors.is_empty() {
+        return syn::Error::new_spanned(
+            &parsed.glob_pattern,
+            format!(
+                "errors while expanding glob {pattern_str:?}: {}",
+                glob_errors.join("; ")
+            ),
+        )
+        .into_compile_error();
+    }
     matched.sort();
 
     if matched.is_empty() {
@@ -66,39 +91,62 @@ pub fn generate(input: pm2::TokenStream) -> pm2::TokenStream {
         return quote! {
             #[cfg(test)]
             #[test]
-            fn vtc_no_files_found() { panic!(#msg); }
+            fn vtc_no_files_found() { panic!("{}", #msg); }
         };
     }
 
     let debug = parsed.debug;
     let mut used: HashMap<String, u32> = HashMap::new();
-    let entries: Vec<(Ident, String)> = matched
-        .iter()
-        .map(|p| {
-            let stem = p.file_stem().and_then(|s| s.to_str()).unwrap();
-            let base = sanitize_ident(stem);
-            let n = used.entry(base.clone()).or_insert(0);
-            let suffix = if *n == 0 {
-                String::new()
-            } else {
-                format!("_{n}")
-            };
-            *n += 1;
-            let ident = Ident::new(&format!("vtc_{base}{suffix}"), pm2::Span::call_site());
-            (ident, p.to_string_lossy().into_owned())
-        })
-        .collect();
+    let mut entries: Vec<(Ident, String)> = Vec::with_capacity(matched.len());
+    for p in &matched {
+        let Some(stem) = p.file_stem().and_then(|s| s.to_str()) else {
+            return syn::Error::new_spanned(
+                &parsed.glob_pattern,
+                format!(
+                    "matched file {:?} has no valid UTF-8 file stem",
+                    p.display()
+                ),
+            )
+            .into_compile_error();
+        };
+        let Some(path_str) = p.to_str() else {
+            return syn::Error::new_spanned(
+                &parsed.glob_pattern,
+                format!("matched file path {:?} is not valid UTF-8", p.display()),
+            )
+            .into_compile_error();
+        };
+        let base = sanitize_ident(stem);
+        let n = used.entry(base.clone()).or_insert(0);
+        let suffix = if *n == 0 {
+            String::new()
+        } else {
+            format!("_{n}")
+        };
+        *n += 1;
+        let ident = Ident::new(&format!("vtc_{base}{suffix}"), pm2::Span::call_site());
+        entries.push((ident, path_str.to_string()));
+    }
 
     let tests = entries.iter().map(|(ident, path)| {
         quote! {
             #[cfg(test)]
             #[test]
             fn #ident() {
+                // Cargo names the dylib search path differently per platform
+                // (DYLD_FALLBACK_LIBRARY_PATH on macOS, LD_LIBRARY_PATH elsewhere), so read
+                // it at runtime rather than via env!() — which would fail to compile on macOS.
+                let dylib_path_var = if cfg!(target_os = "macos") {
+                    "DYLD_FALLBACK_LIBRARY_PATH"
+                } else {
+                    "LD_LIBRARY_PATH"
+                };
+                let dylib_path = ::std::env::var(dylib_path_var).unwrap_or_default();
                 if let Err(err) = ::varnish::varnishtest::run_one_test(
+                    &dylib_path,
                     env!("CARGO_PKG_NAME"),
-                    env!("LD_LIBRARY_PATH"),
                     ::std::path::Path::new(#path),
-                    option_env!("VARNISHTEST_DURATION").unwrap_or("5s"),
+                    option_env!("VARNISHTEST_DURATION").unwrap_or("10s"),
                     #debug,
                 ) {
                     panic!("{err}");
