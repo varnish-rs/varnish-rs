@@ -67,18 +67,14 @@ impl HttpHeaders<'_> {
         Ok(())
     }
 
-    /// Append a new header using `name` and `value`. This can fail if we run out of internal slots
-    /// to store the new header
-    pub fn set_header(&mut self, name: &str, value: &str) -> VclResult<()> {
+    fn set_header_raw<'a>(&mut self, raw: impl Into<StrOrBytes<'a>>) -> VclResult<()> {
         assert!(self.raw.nhd <= self.raw.shd);
         if self.raw.nhd == self.raw.shd {
             return Err(c"no more header slot".into());
         }
-
         let idx = self.raw.nhd;
         self.raw.nhd += 1;
-        // FIXME: optimize this to avoid allocating a temporary string
-        let res = self.change_header(idx, &format!("{name}: {value}"));
+        let res = self.change_header(idx, raw);
         if res.is_ok() {
             unsafe {
                 ffi::VSLbt(
@@ -91,6 +87,13 @@ impl HttpHeaders<'_> {
             self.raw.nhd -= 1;
         }
         res
+    }
+
+    /// Append a new header using `name` and `value`. This can fail if we run out of internal slots
+    /// to store the new header
+    pub fn set_header(&mut self, name: &str, value: &str) -> VclResult<()> {
+        // FIXME: optimize this to avoid allocating a temporary string
+        self.set_header_raw(&format!("{name}: {value}"))
     }
 
     pub fn unset_header(&mut self, name: &str) {
@@ -219,6 +222,26 @@ impl HttpHeaders<'_> {
     /// Set reason
     pub fn set_reason(&mut self, value: &str) -> VclResult<()> {
         self.change_header(HDR_REASON, value)
+    }
+
+    /// Weaken the `ETag` header if present and not already weak.
+    ///
+    /// Implements [RFC 2616 §3.11](https://www.rfc-editor.org/rfc/rfc2616#section-3.11) `ETag`
+    /// weakening: if the `ETag` header exists and does not already start with `W/`, it is
+    /// replaced with `W/<original-value>`.
+    pub fn weaken_etag(&mut self) -> VclResult<()> {
+        let Some(etag) = self.header("ETag") else {
+            return Ok(());
+        };
+        let value = etag.as_ref();
+        if value.starts_with(b"W/") {
+            return Ok(());
+        }
+        let mut new_hdr = Vec::with_capacity(b"ETag: W/".len() + value.len());
+        new_hdr.extend_from_slice(b"ETag: W/");
+        new_hdr.extend_from_slice(value);
+        self.unset_header("ETag");
+        self.set_header_raw(new_hdr.as_slice())
     }
 
     /// Returns the value of a header based on its name
