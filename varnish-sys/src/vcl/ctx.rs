@@ -140,7 +140,7 @@ impl<'a> Ctx<'a> {
             0
         }
 
-        let req = unsafe { self.raw.req.as_mut().ok_or("req object isn't available")? };
+        let req = &mut *self.req.as_mut().ok_or("req object isn't available")?.raw;
         unsafe {
             if req.req_body_status != ffi::BS_CACHED.as_ptr() {
                 return Err("request body hasn't been previously cached".into());
