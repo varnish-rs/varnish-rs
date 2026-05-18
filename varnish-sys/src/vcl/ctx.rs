@@ -38,6 +38,8 @@ pub struct Ctx<'a> {
     pub http_bereq: Option<HttpHeaders<'a>>,
     pub http_beresp: Option<HttpHeaders<'a>>,
     pub ws: Workspace<'a>,
+
+    req: Option<Req<'a>>,
 }
 
 impl<'a> Ctx<'a> {
@@ -62,6 +64,7 @@ impl<'a> Ctx<'a> {
             http_bereq: HttpHeaders::from_ptr(raw.http_bereq),
             http_beresp: HttpHeaders::from_ptr(raw.http_beresp),
             ws: Workspace::from_ptr(raw.ws),
+            req: unsafe { Req::from_ptr(raw.req) },
             raw,
         }
     }
@@ -138,7 +141,7 @@ impl<'a> Ctx<'a> {
             0
         }
 
-        let req = unsafe { self.raw.req.as_mut().ok_or("req object isn't available")? };
+        let req = &mut *self.req.as_mut().ok_or("req object isn't available")?.raw;
         unsafe {
             if req.req_body_status != ffi::BS_CACHED.as_ptr() {
                 return Err("request body hasn't been previously cached".into());
@@ -158,6 +161,77 @@ impl<'a> Ctx<'a> {
             0 => Ok(*v),
             _ => Err("req.body iteration failed".into()),
         }
+    }
+
+    /// Return a shared reference to the client request object, if present.
+    ///
+    /// Returns `None` outside of client-facing VCL contexts (e.g. in backend subroutines).
+    pub fn req(&self) -> Option<&Req<'_>> {
+        self.req.as_ref()
+    }
+
+    /// Return a mutable reference to the client request object, if present.
+    ///
+    /// Returns `None` outside of client-facing VCL contexts (e.g. in backend subroutines).
+    pub fn req_mut(&mut self) -> Option<&mut Req<'a>> {
+        self.req.as_mut()
+    }
+}
+
+/// Rust proxy for the C `req` struct.
+/// Its methods provide getters and setters for various fields that control how the client request
+/// is processed by Varnish.
+#[derive(Debug)]
+pub struct Req<'a> {
+    raw: &'a mut ffi::req,
+}
+
+impl Req<'_> {
+    /// Wrap a raw pointer into an object we can use.
+    pub(crate) unsafe fn from_ptr(p: *mut ffi::req) -> Option<Self> {
+        Some(Req { raw: p.as_mut()? })
+    }
+
+    /// Return whether this request bypasses the cache lookup and is always treated as a miss.
+    ///
+    /// Equivalent to `req.hash_always_miss` in VCL.
+    pub fn hash_always_miss(&self) -> bool {
+        self.raw.hash_always_miss() == 1
+    }
+
+    /// Force this request to be treated as a cache miss, skipping any existing cached object.
+    ///
+    /// Equivalent to setting `req.hash_always_miss` in VCL.
+    pub fn set_hash_always_miss(&mut self, val: bool) {
+        self.raw.set_hash_always_miss(val.into());
+    }
+
+    /// Return whether this request ignores busy (locked) cache objects and fetches from the backend instead of waiting.
+    ///
+    /// Equivalent to `req.hash_ignore_busy` in VCL.
+    pub fn hash_ignore_busy(&self) -> bool {
+        self.raw.hash_ignore_busy() == 1
+    }
+
+    /// Make this request skip waiting on busy cache objects and go straight to the backend.
+    ///
+    /// Equivalent to setting `req.hash_ignore_busy` in VCL.
+    pub fn set_hash_ignore_busy(&mut self, val: bool) {
+        self.raw.set_hash_ignore_busy(val.into());
+    }
+
+    /// Return whether this request ignores `Vary` headers during cache lookup.
+    ///
+    /// Equivalent to `req.hash_ignore_vary` in VCL.
+    pub fn hash_ignore_vary(&self) -> bool {
+        self.raw.hash_ignore_vary() == 1
+    }
+
+    /// Make this request ignore `Vary` headers during cache lookup, collapsing all variants into one cache key.
+    ///
+    /// Equivalent to setting `req.hash_ignore_vary` in VCL.
+    pub fn set_hash_ignore_vary(&mut self, val: bool) {
+        self.raw.set_hash_ignore_vary(val.into());
     }
 }
 

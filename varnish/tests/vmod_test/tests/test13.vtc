@@ -1,0 +1,38 @@
+varnishtest "hash_ignore_vary getter, setter, and cache behavior"
+
+server s1 {
+    rxreq
+    txresp -hdr "Vary: Accept-Encoding" -body "cached"
+} -start
+
+varnish v1 -vcl+backend {
+    import rustest from "${vmod}";
+
+    sub vcl_recv {
+        # default is false
+        set req.http.before = rustest.hash_ignore_vary();
+        rustest.set_hash_ignore_vary(true);
+        set req.http.after = rustest.hash_ignore_vary();
+    }
+
+    sub vcl_deliver {
+        set resp.http.x-before = req.http.before;
+        set resp.http.x-after = req.http.after;
+    }
+} -start
+
+client c1 {
+    # First request: Accept-Encoding gzip, populates cache
+    txreq -hdr "Accept-Encoding: gzip"
+    rxresp
+    expect resp.status == 200
+    expect resp.body == "cached"
+    expect resp.http.x-before == "false"
+    expect resp.http.x-after == "true"
+
+    # Second request: different Accept-Encoding, but hash_ignore_vary=true so it hits cache
+    txreq -hdr "Accept-Encoding: identity"
+    rxresp
+    expect resp.status == 200
+    expect resp.body == "cached"
+} -run
