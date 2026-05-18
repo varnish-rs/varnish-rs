@@ -9,7 +9,7 @@ use std::time::SystemTime;
 
 use crate::ffi::{VclEvent, VfpStatus, VCL_BACKEND, VCL_BOOL, VCL_IP, VCL_TIME};
 #[cfg(varnishsys_90_sslflags)]
-use crate::ffi::{BSSL_F_NOVERIFY, BSSL_F_VERIFY_HOST};
+use crate::ffi::{BSSL_F_ENABLE, BSSL_F_NOVERIFY, BSSL_F_VERIFY_HOST};
 use crate::utils::get_backend;
 use crate::vcl::{Buffer, Ctx, IntoVCL, LogTag, VclError, VclResult, Workspace};
 use crate::{
@@ -181,8 +181,8 @@ pub trait VclBackend<T: VclResponse> {
     /// Corresponds to the `list` callback in `vdi_methods` when neither `-p` nor `-j` is passed.
     fn report(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
         let state = if self.probe(ctx).0 { "healthy" } else { "sick" };
-        vsb.write(&"0/0\t").unwrap();
-        vsb.write(&state).unwrap();
+        vsb.write(&"0/0\t").expect("VSB write must succeed");
+        vsb.write(&state).expect("VSB write must succeed");
     }
 
     /// Generate detailed report output for `varnishadm backend.list -p`
@@ -195,9 +195,9 @@ pub trait VclBackend<T: VclResponse> {
     /// Corresponds to the `list` callback in `vdi_methods` when `-j` is passed.
     fn report_json(&self, ctx: &mut Ctx, vsb: &mut Buffer) {
         let state = if self.probe(ctx).0 { "healthy" } else { "sick" };
-        vsb.write(&"[0, 0, ").unwrap();
-        vsb.write(&state).unwrap();
-        vsb.write(&"]").unwrap();
+        vsb.write(&"[0, 0, ").expect("VSB write must succeed");
+        vsb.write(&state).expect("VSB write must succeed");
+        vsb.write(&"]").expect("VSB write must succeed");
     }
 
     /// Generate detailed JSON report output for `varnishadm backend.list -j -p`
@@ -492,6 +492,7 @@ impl<'a> NativeBackendBuilder<'a> {
     /// Use TLS for the backend connection.
     #[must_use]
     pub fn tls(mut self, verify_host: bool, verify_peer: bool) -> Self {
+        self.sslflags |= BSSL_F_ENABLE;
         if verify_host {
             self.sslflags |= BSSL_F_VERIFY_HOST;
         } else {
@@ -590,7 +591,7 @@ impl<'a> NativeBackendBuilder<'a> {
         Ok(Backend {
             methods,
             inner: Box::new(NativeVclBackendShim),
-            ctype: CString::new("native").unwrap(),
+            ctype: CString::new("native").expect("\"native\" is a valid C string"),
             phantom: PhantomData,
             backend_ref,
             native_configuration: Some((endpoint, backend_config)),
@@ -615,13 +616,24 @@ unsafe extern "C" fn vfp_pull<T: VclResponse>(
         return VfpStatus::Ok;
     }
 
-    let reader = vfe.priv1.cast::<T>().as_mut().unwrap();
+    let reader = vfe
+        .priv1
+        .cast::<T>()
+        .as_mut()
+        .expect("vfp_entry priv1 must not be null during pull");
     match reader.read(buf) {
         Err(e) => {
             // TODO: we should grow a VSL object
             // SAFETY: we assume ffi::VSLbt() will not store the pointer to the string's content
             let msg = ffi::txt::from_str(e.as_str().as_ref());
-            ffi::VSLbt(ctx.req.as_ref().unwrap().vsl, ffi::VslTag::Error, msg);
+            ffi::VSLbt(
+                ctx.req
+                    .as_ref()
+                    .expect("req must be set when VFP is active")
+                    .vsl,
+                ffi::VslTag::Error,
+                msg,
+            );
             VfpStatus::Error
         }
         Ok(0) => {
@@ -688,19 +700,19 @@ impl VCL_BACKEND {
         CStr::from_ptr(
             self.0
                 .as_ref()
-                .unwrap()
+                .expect("VCL_BACKEND pointer must not be null")
                 .vdir
                 .as_ref()
-                .unwrap()
+                .expect("director vdir must not be null")
                 .methods
                 .as_ref()
-                .unwrap()
+                .expect("director methods must not be null")
                 .type_
                 .as_ref()
-                .unwrap(),
+                .expect("director type_ pointer must not be null"),
         )
         .to_str()
-        .unwrap()
+        .expect("director type string must be valid UTF-8")
     }
 }
 
@@ -718,7 +730,10 @@ unsafe extern "C" fn wrap_gethdrs<S: VclBackend<T>, T: VclResponse>(
     match backend.get_response(&mut ctx) {
         Ok(res) => {
             // default to HTTP/1.1 200 if the backend didn't provide anything
-            let beresp = ctx.http_beresp.as_mut().unwrap();
+            let beresp = ctx
+                .http_beresp
+                .as_mut()
+                .expect("http_beresp must be set during backend gethdrs");
             if beresp.status().is_none() {
                 beresp.set_status(200);
             }
@@ -728,7 +743,11 @@ unsafe extern "C" fn wrap_gethdrs<S: VclBackend<T>, T: VclResponse>(
                     return 1;
                 }
             }
-            let bo = ctx.raw.bo.as_mut().unwrap();
+            let bo = ctx
+                .raw
+                .bo
+                .as_mut()
+                .expect("busyobj must not be null during backend gethdrs");
             let Some(htc) = ffi::WS_Alloc(bo.ws.as_mut_ptr(), size_of::<ffi::http_conn>() as u32)
                 .cast::<ffi::http_conn>()
                 .as_mut()
@@ -813,7 +832,11 @@ unsafe extern "C" fn wrap_healthy<S: VclBackend<T>, T: VclResponse>(
     let mut ctx = Ctx::from_ptr(ctxp);
     let (healthy, when) = backend.probe(&mut ctx);
     if !changed.is_null() {
-        *changed = when.try_into().unwrap(); // FIXME: on error?
+        // SystemTime->VCL_TIME can fail for times before UNIX_EPOCH. Avoid panicking
+        // across the FFI boundary; leave `*changed` untouched on conversion failure.
+        if let Ok(t) = when.try_into() {
+            *changed = t;
+        }
     }
     healthy.into()
 }
@@ -823,12 +846,22 @@ unsafe extern "C" fn wrap_getip<T: VclResponse>(
     _be: VCL_BACKEND,
 ) -> VCL_IP {
     let ctxp = validate_vrt_ctx(ctxp);
-    let bo = ctxp.bo.as_ref().unwrap();
+    let bo = ctxp
+        .bo
+        .as_ref()
+        .expect("busyobj must not be null during getip");
     assert_eq!(bo.magic, ffi::BUSYOBJ_MAGIC);
-    let htc = bo.htc.as_ref().unwrap();
+    let htc = bo
+        .htc
+        .as_ref()
+        .expect("http_conn must not be null during getip");
     // FIXME: document why htc does not use a different magic number
     assert_eq!(htc.magic, ffi::BUSYOBJ_MAGIC);
-    let transfer = htc.priv_.cast::<T>().as_ref().unwrap();
+    let transfer = htc
+        .priv_
+        .cast::<T>()
+        .as_ref()
+        .expect("http_conn priv_ must not be null during getip");
 
     let mut ctx = Ctx::from_ptr(ctxp);
 
@@ -851,8 +884,13 @@ unsafe extern "C" fn wrap_finish<S: VclBackend<T>, T: VclResponse>(
     let prev_backend: &S = get_backend(validate_director(be));
 
     // FIXME: shouldn't the ctx magic number be checked? If so, use validate_vrt_ctx()
-    let ctx = ctxp.as_ref().unwrap();
-    let bo = ctx.bo.as_mut().unwrap();
+    let ctx = ctxp
+        .as_ref()
+        .expect("vrt_ctx pointer must not be null during backend finish");
+    let bo = ctx
+        .bo
+        .as_mut()
+        .expect("busyobj must not be null during backend finish");
 
     // drop the VclResponse
     if let Some(htc) = ptr::replace(&raw mut bo.htc, null_mut()).as_mut() {
@@ -866,4 +904,55 @@ unsafe extern "C" fn wrap_finish<S: VclBackend<T>, T: VclResponse>(
 
     // FIXME?: should _prev be set to NULL?
     prev_backend.finish(&mut Ctx::from_ptr(ctx));
+}
+
+#[cfg(all(test, varnishsys_90_sslflags))]
+mod tests {
+    use std::net::SocketAddr;
+
+    use super::*;
+    use crate::ffi::BSSL_F_ENABLE;
+
+    fn builder() -> NativeBackendBuilder<'static> {
+        let addr: SocketAddr = "127.0.0.1:8080".parse().unwrap();
+        NativeBackendBuilder::new_ip(c"test", addr)
+    }
+
+    #[test]
+    fn fresh_builder_has_tls_disabled() {
+        assert_eq!(builder().sslflags & BSSL_F_ENABLE, 0);
+    }
+
+    #[test]
+    fn tls_sets_enable_flag_when_verify_all() {
+        let b = builder().tls(true, true);
+        assert_ne!(
+            b.sslflags & BSSL_F_ENABLE,
+            0,
+            "tls(true, true) must set BSSL_F_ENABLE, got sslflags={:#x}",
+            b.sslflags,
+        );
+    }
+
+    #[test]
+    fn tls_sets_enable_flag_when_verify_none() {
+        let b = builder().tls(false, false);
+        assert_ne!(
+            b.sslflags & BSSL_F_ENABLE,
+            0,
+            "tls(false, false) must set BSSL_F_ENABLE, got sslflags={:#x}",
+            b.sslflags,
+        );
+    }
+
+    #[test]
+    fn tls_sets_enable_flag_when_verify_peer_only() {
+        let b = builder().tls(false, true);
+        assert_ne!(
+            b.sslflags & BSSL_F_ENABLE,
+            0,
+            "tls(false, true) must set BSSL_F_ENABLE, got sslflags={:#x}",
+            b.sslflags,
+        );
+    }
 }

@@ -60,7 +60,9 @@ mod types {
             __ctx: *mut vrt_ctx,
             __args: *const arg_vmod_types_opt_array_u8,
         ) {
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             super::opt_array_u8(
                 if __args.valid__v != 0 { __args._v.into() } else { None },
             )
@@ -80,7 +82,9 @@ mod types {
             __ctx: *mut vrt_ctx,
             __args: *const arg_vmod_types_opt_bool,
         ) {
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             super::opt_bool(if __args.valid__v != 0 { __args._v.into() } else { None })
         }
         unsafe extern "C" fn vmod_c_to_bool(__ctx: *mut vrt_ctx) -> VCL_BOOL {
@@ -117,7 +121,9 @@ mod types {
             __ctx: *mut vrt_ctx,
             __args: *const arg_vmod_types_opt_cstr,
         ) {
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             super::opt_cstr(if __args.valid__v != 0 { __args._v.into() } else { None })
         }
         unsafe extern "C" fn vmod_c_opt_cstr_req(__ctx: *mut vrt_ctx, _v: VCL_STRING) {
@@ -141,7 +147,9 @@ mod types {
             __ctx: *mut vrt_ctx,
             __args: *const arg_vmod_types_opt_cstr_dflt,
         ) {
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             super::opt_cstr_dflt(
                 if __args.valid__v != 0 { __args._v.into() } else { None },
             )
@@ -197,7 +205,9 @@ mod types {
             __ctx: *mut vrt_ctx,
             __args: *const arg_vmod_types_opt_duration,
         ) {
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             super::opt_duration(
                 if __args.valid__v != 0 { __args._v.into() } else { None },
             )
@@ -241,7 +251,9 @@ mod types {
             __ctx: *mut vrt_ctx,
             __args: *const arg_vmod_types_opt_f64,
         ) {
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             super::opt_f64(if __args.valid__v != 0 { __args._v.into() } else { None })
         }
         unsafe extern "C" fn vmod_c_to_f64(__ctx: *mut vrt_ctx) -> VCL_REAL {
@@ -281,7 +293,9 @@ mod types {
             __ctx: *mut vrt_ctx,
             __args: *const arg_vmod_types_opt_i64,
         ) {
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             super::opt_i64(if __args.valid__v != 0 { __args._v.into() } else { None })
         }
         unsafe extern "C" fn vmod_c_to_i64(__ctx: *mut vrt_ctx) -> VCL_INT {
@@ -326,7 +340,9 @@ mod types {
             __args: *const arg_vmod_types_opt_str,
         ) {
             let mut __ctx = Ctx::from_ptr(__ctx);
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
                 Ok(
                     super::opt_str(
@@ -369,7 +385,9 @@ mod types {
             __args: *const arg_vmod_types_opt_str_dflt,
         ) {
             let mut __ctx = Ctx::from_ptr(__ctx);
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
                 Ok(
                     super::opt_str_dflt(
@@ -459,7 +477,9 @@ mod types {
             __ctx: *mut vrt_ctx,
             __args: *const arg_vmod_types_type_probe,
         ) {
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             super::type_probe(if __args.valid__v != 0 { __args._v.into() } else { None })
         }
         unsafe extern "C" fn vmod_c_type_probe_req(__ctx: *mut vrt_ctx, _v: VCL_PROBE) {
@@ -496,7 +516,9 @@ mod types {
             __ctx: *mut vrt_ctx,
             __args: *const arg_vmod_types_type_cow_probe,
         ) {
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             super::type_cow_probe(
                 if __args.valid__v != 0 { __args._v.into() } else { None },
             )
@@ -538,7 +560,9 @@ mod types {
             __ctx: *mut vrt_ctx,
             __args: *const arg_vmod_types_type_ip,
         ) {
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             super::type_ip(if __args.valid__v != 0 { __args._v.into() } else { None })
         }
         unsafe extern "C" fn vmod_c_type_ip_req(__ctx: *mut vrt_ctx, _v: VCL_IP) {
@@ -594,7 +618,9 @@ mod types {
             __args: *const arg_vmod_types_opt_i64_opt_i64,
         ) -> VCL_STRING {
             let mut __ctx = Ctx::from_ptr(__ctx);
-            let __args = __args.as_ref().unwrap();
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
             let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
                 Ok(
                     super::opt_i64_opt_i64(

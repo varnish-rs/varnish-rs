@@ -49,9 +49,19 @@ impl HttpHeaders<'_> {
         /* XXX: aliasing warning, it's the same pointer as the one in Ctx */
         let mut ws = Workspace::from_ptr(self.raw.ws);
         unsafe {
-            let hd = self.raw.hd.offset(idx as isize).as_mut().unwrap();
+            let hd = self
+                .raw
+                .hd
+                .offset(idx as isize)
+                .as_mut()
+                .expect("HTTP header descriptor pointer must not be null");
             *hd = ws.copy_bytes_with_null(value.into())?;
-            let hdf = self.raw.hdf.offset(idx as isize).as_mut().unwrap();
+            let hdf = self
+                .raw
+                .hdf
+                .offset(idx as isize)
+                .as_mut()
+                .expect("HTTP header flags pointer must not be null");
             *hdf = 0;
         }
         Ok(())
@@ -90,7 +100,7 @@ impl HttpHeaders<'_> {
 
         let mut idx_empty = 0;
         for (idx, hd) in hdrs.iter().enumerate() {
-            let (n, _) = hd.parse_header().unwrap();
+            let (n, _) = hd.parse_header().expect("HTTP header must be parseable");
             if name.eq_ignore_ascii_case(n) {
                 unsafe {
                     ffi::VSLbt(
@@ -132,7 +142,7 @@ impl HttpHeaders<'_> {
                     .hd
                     .offset(idx as isize)
                     .as_ref()
-                    .unwrap()
+                    .expect("HTTP header pointer must not be null")
                     .to_slice()
                     .map(StrOrBytes::from)
             }
@@ -252,7 +262,14 @@ impl<'a> Iterator for HttpHeadersIter<'a> {
             if self.cursor >= nhd as isize {
                 return None;
             }
-            let hd = unsafe { self.http.raw.hd.offset(self.cursor).as_ref().unwrap() };
+            let hd = unsafe {
+                self.http
+                    .raw
+                    .hd
+                    .offset(self.cursor)
+                    .as_ref()
+                    .expect("HTTP header pointer must not be null")
+            };
             self.cursor += 1;
             if let Some(hdr) = hd.parse_header() {
                 return Some(hdr);

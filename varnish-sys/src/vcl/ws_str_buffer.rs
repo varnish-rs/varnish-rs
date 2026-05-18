@@ -161,7 +161,10 @@ impl<Item, Suffix, Output> WsBuffer<'_, Item, Suffix, Output> {
 
     pub fn extend_from_slice(&mut self, slice: &[Item]) -> VclResult<()> {
         if self.unused.len() < slice.len() {
-            return Err(WsOutOfMemory(NonZeroUsize::new(slice.len()).unwrap()));
+            return Err(WsOutOfMemory(
+                NonZeroUsize::new(slice.len())
+                    .expect("slice.len() is non-zero since it exceeds unused.len()"),
+            ));
         }
         unsafe {
             let end = self.unused.as_mut_ptr();
@@ -279,28 +282,36 @@ mod tests {
         let mut ws = test_ws.workspace();
 
         // first buffer call gets all available space
-        let mut buf = ws.vcl_string_builder().unwrap();
+        let mut buf = ws
+            .vcl_string_builder()
+            .expect("workspace must have enough space");
         assert_eq!(buf.remaining(), 159);
-        buf.write_all(b"0123456789").unwrap();
+        buf.write_all(b"0123456789").expect("write must succeed");
         assert_eq!(buf.remaining(), 149);
         // saving 10 bytes + nul
         assert_eq!(get_cstr(&buf.finish()), c"0123456789");
 
-        let mut buf = ws.vcl_string_builder().unwrap();
+        let mut buf = ws
+            .vcl_string_builder()
+            .expect("workspace must have enough space");
         assert_eq!(buf.remaining(), 160 - round_up_to_usize(10 + 1) - 1);
-        write!(buf, "this data is ignored").unwrap();
+        write!(buf, "this data is ignored").expect("write must succeed");
         // the ReservedBuf goes out of scope without a call to .finish()
         // so now data is fully allocated
         drop(buf);
 
-        let mut buf = ws.vcl_string_builder().unwrap();
+        let mut buf = ws
+            .vcl_string_builder()
+            .expect("workspace must have enough space");
         assert_eq!(buf.remaining(), 160 - round_up_to_usize(10 + 1) - 1);
         let fill = vec![b'x'; buf.remaining() - 1];
-        buf.write_all(&fill).unwrap();
+        buf.write_all(&fill).expect("write must succeed");
         assert_eq!(buf.remaining(), 1);
         assert_eq!(
             get_cstr(&buf.finish()),
-            CString::new(fill).unwrap().as_c_str()
+            CString::new(fill)
+                .expect("fill bytes must not contain null bytes")
+                .as_c_str()
         );
 
         assert!(matches!(ws.vcl_string_builder(), Err(WsOutOfMemory(_))));
@@ -308,14 +319,18 @@ mod tests {
         // Will to the end of the buffer
         let mut test_ws = TestWS::new(160);
         let mut ws = test_ws.workspace();
-        let mut buf = ws.vcl_string_builder().unwrap();
+        let mut buf = ws
+            .vcl_string_builder()
+            .expect("workspace must have enough space");
         assert_eq!(buf.remaining(), 159);
         let fill = vec![b'x'; buf.remaining()];
-        buf.write_all(&fill).unwrap();
+        buf.write_all(&fill).expect("write must succeed");
         assert_eq!(buf.remaining(), 0);
         assert_eq!(
             get_cstr(&buf.finish()),
-            CString::new(fill).unwrap().as_c_str()
+            CString::new(fill)
+                .expect("fill bytes must not contain null bytes")
+                .as_c_str()
         );
 
         assert!(matches!(ws.vcl_string_builder(), Err(WsOutOfMemory(_))));
@@ -331,17 +346,21 @@ mod tests {
         let mut ws = test_ws.workspace();
 
         // first buffer call gets all available space
-        let mut buf = ws.vcl_blob_builder().unwrap();
+        let mut buf = ws
+            .vcl_blob_builder()
+            .expect("workspace must have enough space");
         assert_eq!(buf.remaining(), 160 - 24);
-        buf.write_all(b"0123456789").unwrap();
+        buf.write_all(b"0123456789").expect("write must succeed");
         let used = round_up_to_usize(24 + 10);
         let data = buf_to_vec(buf);
         assert_eq!(data, b"0123456789");
 
         // second reservation without (header + )
-        let mut buf = ws.vcl_blob_builder().unwrap();
+        let mut buf = ws
+            .vcl_blob_builder()
+            .expect("workspace must have enough space");
         assert_eq!(buf.remaining(), 160 - used - 24);
-        write!(buf, "this data is ignored").unwrap();
+        write!(buf, "this data is ignored").expect("write must succeed");
         drop(buf);
 
         // validate no data corruption
@@ -349,9 +368,11 @@ mod tests {
 
         // the ReservedBuf goes out of scope without a call to .finish()
         // so now data is fully allocated
-        let mut buf = ws.vcl_blob_builder().unwrap();
+        let mut buf = ws
+            .vcl_blob_builder()
+            .expect("workspace must have enough space");
         assert_eq!(buf.remaining(), 160 - used - 24);
-        write!(buf, "this data is ignored").unwrap();
+        write!(buf, "this data is ignored").expect("write must succeed");
     }
 
     #[repr(C)]
@@ -365,26 +386,33 @@ mod tests {
         let mut ws = test_ws.workspace();
 
         // first buffer call gets all available space
-        let mut buf = ws.slice_builder::<TestStruct>().unwrap();
+        let mut buf = ws
+            .slice_builder::<TestStruct>()
+            .expect("workspace must have enough space");
         assert_eq!(buf.remaining(), 160 / 4);
-        buf.push(TestStruct(1, 2)).unwrap();
+        buf.push(TestStruct(1, 2)).expect("push must succeed");
         let used = round_up_to_usize(4);
         let data = buf.finish();
         assert_eq!(data, [TestStruct(1, 2)]);
 
         // second reservation without (header + )
-        let mut buf = ws.slice_builder().unwrap();
+        let mut buf = ws
+            .slice_builder()
+            .expect("workspace must have enough space");
         assert_eq!(buf.remaining(), 160 - used);
-        write!(buf, "this data is ignored").unwrap();
+        write!(buf, "this data is ignored").expect("write must succeed");
         drop(buf);
 
         // validate no data corruption
         assert_eq!(data, [TestStruct(1, 2)]);
 
         // buf went out of scope without a call to .finish(), discarding it
-        let mut buf = ws.slice_builder().unwrap();
+        let mut buf = ws
+            .slice_builder()
+            .expect("workspace must have enough space");
         assert_eq!(buf.remaining(), 160 - used);
-        buf.extend_from_slice(b"0123456789").unwrap();
+        buf.extend_from_slice(b"0123456789")
+            .expect("extend_from_slice must succeed");
         assert_eq!(buf.finish(), b"0123456789");
     }
 }

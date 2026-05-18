@@ -13,7 +13,7 @@ impl Buffer<'_> {
     /// Create a `Vsb` from a C pointer
     #[expect(clippy::not_unsafe_ptr_arg_deref)]
     pub fn from_ptr(raw: *mut ffi::vsb) -> Self {
-        let raw = unsafe { raw.as_mut().unwrap() };
+        let raw = unsafe { raw.as_mut().expect("VSB pointer must not be null") };
         assert_eq!(raw.magic, ffi::VSB_MAGIC);
         Self { raw }
     }

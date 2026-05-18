@@ -61,7 +61,7 @@ impl<'a> MetricsReaderBuilder<'a> {
     /// It's usually superfluous to call this function, unless `varnishd` itself was called with
     /// the `-n` argument (in which case, both arguments should match)
     pub fn work_dir(self, dir: &Path) -> Result<Self, NulError> {
-        let c_dir = CString::new(dir.to_str().unwrap())?;
+        let c_dir = CString::new(dir.to_str().expect("work_dir path must be valid UTF-8"))?;
         let ret = unsafe { ffi::VSM_Arg(self.vsm, 'n' as c_char, c_dir.as_ptr()) };
         assert_eq!(ret, 1);
         Ok(self)
@@ -78,7 +78,7 @@ impl<'a> MetricsReaderBuilder<'a> {
             None => "off".to_string(),
             Some(t) => t.as_secs_f64().to_string(),
         })
-        .unwrap(); // Can never fail since we control the content of the string
+        .expect("string constructed from f64 cannot contain null bytes");
 
         // # Safety
         // we just created this string, no point to double-check it for nul bytes
@@ -155,7 +155,7 @@ fn vsm_error(p: *const ffi::vsm) -> VclError {
         VclError::new(
             CStr::from_ptr(ffi::VSM_Error(p))
                 .to_str()
-                .unwrap()
+                .expect("VSM error message must be valid UTF-8")
                 .to_string(),
         )
     }
@@ -198,11 +198,10 @@ pub enum Semantics {
 
 impl From<c_int> for Semantics {
     fn from(value: c_int) -> Self {
-        let c = char::from_u32(value as u32).unwrap();
-        match c {
-            'c' => Semantics::Counter,
-            'g' => Semantics::Gauge,
-            'b' => Semantics::Bitmap,
+        match char::from_u32(value as u32) {
+            Some('c') => Semantics::Counter,
+            Some('g') => Semantics::Gauge,
+            Some('b') => Semantics::Bitmap,
             _ => Semantics::Unknown,
         }
     }
@@ -237,11 +236,11 @@ pub enum MetricFormat {
 
 impl From<c_int> for MetricFormat {
     fn from(value: c_int) -> Self {
-        match char::from_u32(value as u32).unwrap() {
-            'i' => MetricFormat::Integer,
-            'B' => MetricFormat::Bytes,
-            'b' => MetricFormat::Bitmap,
-            'd' => MetricFormat::Duration,
+        match char::from_u32(value as u32) {
+            Some('i') => MetricFormat::Integer,
+            Some('B') => MetricFormat::Bytes,
+            Some('b') => MetricFormat::Bitmap,
+            Some('d') => MetricFormat::Duration,
             _ => MetricFormat::Unknown,
         }
     }
@@ -261,15 +260,24 @@ impl From<MetricFormat> for char {
 
 unsafe extern "C" fn add_point(ptr: *mut c_void, point: *const ffi::VSC_point) -> *mut c_void {
     // FIXME: handle errors without panic
-    let internal = ptr.cast::<MetricsReaderImpl>().as_mut().unwrap();
+    let internal = ptr
+        .cast::<MetricsReaderImpl>()
+        .as_mut()
+        .expect("VSC add_point callback priv pointer must not be null");
     let k = point as usize;
-    let point = point.as_ref().unwrap();
+    let point = point.as_ref().expect("VSC point pointer must not be null");
 
     let stat = Metric {
         value: point.ptr,
-        name: CStr::from_ptr(point.name).to_str().unwrap(),
-        short_desc: CStr::from_ptr(point.sdesc).to_str().unwrap(),
-        long_desc: CStr::from_ptr(point.ldesc).to_str().unwrap(),
+        name: CStr::from_ptr(point.name)
+            .to_str()
+            .expect("VSC point name must be valid UTF-8"),
+        short_desc: CStr::from_ptr(point.sdesc)
+            .to_str()
+            .expect("VSC point short description must be valid UTF-8"),
+        long_desc: CStr::from_ptr(point.ldesc)
+            .to_str()
+            .expect("VSC point long description must be valid UTF-8"),
         semantics: point.semantics.into(),
         format: point.format.into(),
     };
@@ -280,7 +288,10 @@ unsafe extern "C" fn add_point(ptr: *mut c_void, point: *const ffi::VSC_point) -
 }
 
 unsafe extern "C" fn del_point(ptr: *mut c_void, point: *const ffi::VSC_point) {
-    let internal = ptr.cast::<MetricsReaderImpl>().as_mut().unwrap();
+    let internal = ptr
+        .cast::<MetricsReaderImpl>()
+        .as_mut()
+        .expect("VSC del_point callback priv pointer must not be null");
     let k = point as usize;
     assert!(internal.points.contains_key(&k));
     internal.deleted.push(k);

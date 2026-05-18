@@ -138,7 +138,8 @@ pub fn derive_vsc_metric(input: &DeriveInput) -> ProcResult<TokenStream> {
         .max()
         .unwrap_or_default();
     let hashes = "#".repeat(hashes);
-    let metadata = Literal::from_str(&format!("cr{hashes}\"{metadata}\"{hashes}")).unwrap();
+    let metadata = Literal::from_str(&format!("cr{hashes}\"{metadata}\"{hashes}"))
+        .expect("generated raw string literal must be valid");
     Ok(quote! {
         unsafe impl varnish::VscMetric for #name {
             fn get_metadata() -> &'static std::ffi::CStr {
@@ -171,7 +172,11 @@ pub fn validate_fields(fields: &FieldList) -> ProcResult<()> {
                     .is_some_and(|seg| seg.ident == "AtomicU64");
 
                 if !is_atomic_u64 {
-                    let field_name = field.ident.as_ref().map(ToString::to_string).unwrap();
+                    let field_name = field
+                        .ident
+                        .as_ref()
+                        .map(ToString::to_string)
+                        .expect("struct field must have a name");
                     errors.push(syn::Error::new(
                         Spanned::span(field),
                         format!("Field {field_name} must be of type AtomicU64"),
@@ -194,7 +199,11 @@ fn generate_metrics(fields: &FieldList) -> ProcResult<BTreeMap<String, VscMetric
     let mut result = BTreeMap::new();
 
     for field in fields {
-        let name = field.ident.as_ref().unwrap().to_string();
+        let name = field
+            .ident
+            .as_ref()
+            .expect("struct field must have a name")
+            .to_string();
 
         let has_counter = has_attr(&field.attrs, "counter");
         let has_gauge = has_attr(&field.attrs, "gauge");
@@ -279,7 +288,7 @@ fn parse_metric_attributes(field: &Field, metric_type: &str) -> ProcResult<(Leve
         T::from_str(&value).map_err(|e| {
             meta.error(format!(
                 "Invalid {id} value for field {}: {e}",
-                field.ident.as_ref().unwrap()
+                field.ident.as_ref().expect("struct field must have a name")
             ))
         })
     }
@@ -300,7 +309,7 @@ fn parse_metric_attributes(field: &Field, metric_type: &str) -> ProcResult<(Leve
                     level = parse(ident, &meta, field)?;
                 } else if ident == "format" {
                     if metric_type == "bitmap" {
-                        let field_name = field.ident.as_ref().unwrap();
+                        let field_name = field.ident.as_ref().expect("struct field must have a name");
                         return Err(meta.error(format!(
                             "Field {field_name}: #[bitmap] does not support format attribute (always uses 'bitmap' format)"
                         )));
