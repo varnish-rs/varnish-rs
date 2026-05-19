@@ -60,7 +60,8 @@ use crate::ffi::{
 };
 
 use crate::vcl::{
-    from_vcl_probe, into_vcl_probe, BackendRef, CowProbe, Probe, subroutine::Subroutine, VclError, Workspace,
+    from_vcl_probe, into_vcl_probe, subroutine::Subroutine, BackendRef, CowProbe, Probe, VclError,
+    Workspace,
 };
 
 /// Convert a Rust type into a VCL one

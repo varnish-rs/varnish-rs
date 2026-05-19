@@ -14,12 +14,12 @@ mod subcall {
     use std::ffi::CStr;
 
     use varnish::ffi::{VRT_call, VCL_SUB};
-    use varnish::vcl::{Ctx, subroutine::Subroutine, VclError};
+    use varnish::vcl::{subroutine::Subroutine, Ctx, VclError};
 
     /// Call a VCL subroutine using the raw [`VCL_SUB`] pointer directly.
     ///
     /// Demonstrates bypassing the `Subroutine` wrapper and calling `VRT_call`
-    /// through the C FFI. Prefer using `Ctx::call_sub` in real code, as it handles error checking and is safer to use. 
+    /// through the C FFI. Prefer using `Ctx::call_sub` in real code, as it handles error checking and is safer to use.
     pub fn call_unsafe(ctx: &mut Ctx, sub: VCL_SUB) {
         // SAFETY: VCC guarantees sub is a valid non-null pointer when it reaches this call.
         unsafe { VRT_call(ctx.raw, sub) };
@@ -66,7 +66,7 @@ mod subcall {
         }
         crate::VARS.with(|v| {
             if let Some(m) = v.borrow_mut().as_mut() {
-                 m.remove(&key);
+                m.remove(&key);
             }
         });
 

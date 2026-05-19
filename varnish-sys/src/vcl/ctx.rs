@@ -4,7 +4,7 @@ use std::ffi::{c_int, c_uint, c_void, CStr};
 
 use crate::ffi;
 use crate::ffi::{vrt_ctx, VRT_call, VRT_check_call, VRT_fail, VRT_handled, VRT_CTX_MAGIC};
-use crate::vcl::{HttpHeaders, LogTag, subroutine::Subroutine, TestWS, VclError, Workspace};
+use crate::vcl::{subroutine::Subroutine, HttpHeaders, LogTag, TestWS, VclError, Workspace};
 
 /// VCL context
 ///
