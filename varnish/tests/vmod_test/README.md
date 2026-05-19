@@ -78,5 +78,3 @@ import rustest from "path/to/librustest.so";
 ### Function `STRING rustest.local_socket()`
 
 ### Function `STRING rustest.local_endpoint()`
-
-### Function `VOID rustest.ws_tests()`
