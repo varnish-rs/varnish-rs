@@ -29,6 +29,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: true,
+            restrict: [],
         },
     ],
     objects: [],

@@ -59,6 +59,9 @@ impl ObjProcessor {
         ];
         for func in &self.funcs {
             json.push(func.json.clone());
+            if let Some(restrict) = &func.restrict_json {
+                json.push(restrict.clone());
+            }
         }
 
         json.into()

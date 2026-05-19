@@ -14,5 +14,6 @@
 #include "vapi/vsm.h"
 #include "vapi/vsc.h"
 
+#include "vcl.h"
 
 struct vfp_entry *VFP_Push(struct vfp_ctx *, const struct vfp *);

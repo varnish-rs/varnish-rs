@@ -30,6 +30,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
     ],
     objects: [],
