@@ -16,7 +16,7 @@ error: #[shared_per_vcl] param is allowed only once in a function args list
 5 |     pub fn dup_shared_vcl(#[shared_per_vcl] a: Option<&i64>, #[shared_per_vcl] b: Option<&i64>) {}
   |                                                                                ^
 
-error: This parameter must be declared as `Option<&...>`
+error: #[shared_per_task] must be `&mut Option<Box<...>>`, `Option<&...>`, or `&RefCell<Option<...>>`
  --> tests/fail/error_fn_args_dups.rs:7:31
   |
 7 |         #[shared_per_task] a: Option<Box<i64>>,

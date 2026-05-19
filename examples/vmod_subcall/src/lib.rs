@@ -1,15 +1,9 @@
 varnish::run_vtc_tests!("tests/*.vtc");
 
-use std::cell::RefCell;
-use std::collections::HashMap;
-
-thread_local! {
-    static VARS: RefCell<Option<HashMap<String, String>>> = const { RefCell::new(None) };
-}
-
 /// Demonstrate calling VCL subroutines from a VMOD, with per-task context storage.
 #[varnish::vmod(docs = "README.md")]
 mod subcall {
+    use std::cell::RefCell;
     use std::collections::HashMap;
     use std::ffi::CStr;
 
@@ -37,18 +31,15 @@ mod subcall {
         array: &CStr,
         var_name: &CStr,
         sub: Subroutine,
+        #[shared_per_task] vars: &RefCell<Option<HashMap<String, String>>>,
     ) -> Result<(), VclError> {
-        let mut res = Ok(false);
         let key = var_name.to_string_lossy().into_owned();
 
-        crate::VARS.with(|v| {
-            if v.borrow().as_ref().is_some_and(|m| m.contains_key(&key)) {
-                return Err(VclError::new(format!(
-                    "variable {key:?} is already set by an enclosing call_for_each"
-                )));
-            }
-            Ok(())
-        })?;
+        if vars.borrow().as_ref().is_some_and(|m| m.contains_key(&key)) {
+            return Err(VclError::new(format!(
+                "variable {key:?} is already set by an enclosing call_for_each"
+            )));
+        }
 
         let words: Vec<String> = array
             .to_string_lossy()
@@ -56,36 +47,34 @@ mod subcall {
             .map(String::from)
             .collect();
         for word in words {
-            crate::VARS.with(|v| {
-                v.borrow_mut()
-                    .get_or_insert_with(HashMap::new)
-                    .insert(key.clone(), word.clone())
-            });
-            res = ctx.call_sub(sub);
-            if res.is_err() {
+            // Drop the borrow_mut before calling the sub so nested calls (var, call_for_each)
+            // can borrow vars during sub execution.
+            vars.borrow_mut()
+                .get_or_insert_with(HashMap::new)
+                .insert(key.clone(), word);
+            if ctx.call_sub(sub)? {
                 break;
             }
         }
-        crate::VARS.with(|v| {
-            if let Some(m) = v.borrow_mut().as_mut() {
-                m.remove(&key);
-            }
-        });
+        if let Some(m) = vars.borrow_mut().as_mut() {
+            m.remove(&key);
+        }
 
-        res.map(|_| ())
+        Ok(())
     }
 
     /// Return the current value of `var_name` as set by an enclosing `call_for_each`.
     ///
     /// Returns an error if `var_name` is not set.
-    pub fn var(_ctx: &mut Ctx, var_name: &CStr) -> Result<String, VclError> {
+    pub fn var(
+        _ctx: &mut Ctx,
+        var_name: &CStr,
+        #[shared_per_task] vars: &RefCell<Option<HashMap<String, String>>>,
+    ) -> Result<String, VclError> {
         let name = var_name.to_string_lossy();
-        crate::VARS
-            .with(|v| {
-                v.borrow()
-                    .as_ref()
-                    .and_then(|m| m.get(name.as_ref()).cloned())
-            })
+        vars.borrow()
+            .as_ref()
+            .and_then(|m| m.get(name.as_ref()).cloned())
             .ok_or_else(|| VclError::new(format!("variable {name:?} is not set")))
     }
 }

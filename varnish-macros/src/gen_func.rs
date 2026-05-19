@@ -138,7 +138,7 @@ impl FuncProcessor {
         }
 
         for arg in &info.args {
-            self.do_fn_param(info, arg);
+            self.do_fn_param(info, arg, shared_types);
         }
         self.do_fn_return(info);
 
@@ -209,7 +209,7 @@ impl FuncProcessor {
     }
 
     #[expect(clippy::too_many_lines)]
-    fn do_fn_param(&mut self, func_info: &FuncInfo, arg_info: &ParamTypeInfo) {
+    fn do_fn_param(&mut self, func_info: &FuncInfo, arg_info: &ParamTypeInfo, shared_types: &SharedTypes) {
         let arg_name_ident = arg_info.ident.to_ident();
         let arg_value = Self::get_arg_value(func_info, &arg_name_ident);
 
@@ -272,6 +272,33 @@ impl FuncProcessor {
                         (* #arg_value).put(obj, &PRIV_TASK_METHODS);
                     }
                 });
+
+                let json =
+                    Self::arg_to_json(arg_info.ident.clone(), false, "PRIV_TASK", Value::Null);
+                self.args_json.push(json);
+                self.add_cproto_arg(func_info, "struct vmod_priv *", &arg_info.ident);
+            }
+            ParamType::SharedPerTaskRefCell => {
+                self.add_wrapper_arg(func_info, quote! { #arg_name_ident: *mut vmod_priv });
+                let temp_var = format_ident!("__refcell_per_task");
+                // shared_per_task_ty stores "RefCell<Option<T>>" for this variant
+                let refcell_ty = syn::parse_str::<Type>(
+                    shared_types.shared_per_task_ty.as_deref().unwrap_or("()"),
+                )
+                .expect("Unable to re-parse shared_per_task type");
+                self.func_pre_call.push(quote! {
+                    // Auto-initialize on first call; stays in storage for reentrant sub calls
+                    if (* #arg_value).get_ref::<#refcell_ty>().is_none() {
+                        (* #arg_value).put(
+                            ::std::boxed::Box::new(<#refcell_ty as ::std::default::Default>::default()),
+                            &PRIV_TASK_METHODS,
+                        );
+                    }
+                    let #temp_var = (* #arg_value)
+                        .get_ref::<#refcell_ty>()
+                        .expect("vmod_priv RefCell was just initialized");
+                });
+                self.func_call_vars.push(quote! { #temp_var });
 
                 let json =
                     Self::arg_to_json(arg_info.ident.clone(), false, "PRIV_TASK", Value::Null);

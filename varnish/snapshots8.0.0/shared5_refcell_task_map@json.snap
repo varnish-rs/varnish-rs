@@ -1,0 +1,47 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VMOD_JSON_SPEC
+[
+  [
+    "$VMOD",
+    "2.0",
+    "refcell_task_map",
+    "Vmod_vmod_refcell_task_map_Func",
+    "0569aec9eb08256538a946f24eee3ae75bec760d8c005f3b332fea3488f5e870",
+    "Varnish (version) (hash)",
+    "0",
+    "0"
+  ],
+  [
+    "$CPROTO",
+    "
+typedef VCL_VOID td_vmod_refcell_task_map_with_map(
+    VRT_CTX,
+    struct vmod_priv *
+);
+
+struct Vmod_vmod_refcell_task_map_Func {
+  td_vmod_refcell_task_map_with_map *f_with_map;
+};
+
+static struct Vmod_vmod_refcell_task_map_Func Vmod_vmod_refcell_task_map_Func;"
+  ],
+  [
+    "$FUNC",
+    "with_map",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_refcell_task_map_Func.f_with_map",
+      "",
+      [
+        "PRIV_TASK",
+        "tsk",
+        "tsk"
+      ]
+    ]
+  ]
+]
+

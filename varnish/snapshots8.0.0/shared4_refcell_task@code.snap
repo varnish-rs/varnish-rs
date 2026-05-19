@@ -1,0 +1,137 @@
+---
+source: varnish-macros/src/tests.rs
+---
+mod refcell_task {
+    #[allow(non_snake_case, unused_imports, unused_qualifications, unused_variables)]
+    #[allow(clippy::needless_question_mark, clippy::new_without_default)]
+    #[automatically_derived]
+    mod varnish_generated {
+        use std::ffi::{c_char, c_int, c_uint, c_void, CStr};
+        use std::ptr::null;
+        use varnish::ffi::{
+            VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE,
+            VCL_REAL, VCL_STRING, VCL_SUB, VCL_TIME, VCL_VOID, VMOD_ABI_Version,
+            VclEvent, vmod_data, vmod_priv, vrt_ctx, VMOD_PRIV_METHODS_MAGIC,
+            vmod_priv_methods,
+        };
+        use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
+        use super::*;
+        static PRIV_TASK_METHODS: vmod_priv_methods = vmod_priv_methods {
+            magic: VMOD_PRIV_METHODS_MAGIC,
+            type_: c"RefCell < Option < PerTaskCell > >".as_ptr(),
+            fini: Some(vmod_priv::on_fini::<RefCell<Option<PerTaskCell>>>),
+        };
+        unsafe extern "C" fn vmod_c_read(__ctx: *mut vrt_ctx, tsk: *mut vmod_priv) {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            if (*tsk).get_ref::<RefCell<Option<PerTaskCell>>>().is_none() {
+                (*tsk)
+                    .put(
+                        ::std::boxed::Box::new(
+                            <RefCell<
+                                Option<PerTaskCell>,
+                            > as ::std::default::Default>::default(),
+                        ),
+                        &PRIV_TASK_METHODS,
+                    );
+            }
+            let __refcell_per_task = (*tsk)
+                .get_ref::<RefCell<Option<PerTaskCell>>>()
+                .expect("vmod_priv RefCell was just initialized");
+            super::read(&__ctx, __refcell_per_task)
+        }
+        unsafe extern "C" fn vmod_c_write(__ctx: *mut vrt_ctx, tsk: *mut vmod_priv) {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            if (*tsk).get_ref::<RefCell<Option<PerTaskCell>>>().is_none() {
+                (*tsk)
+                    .put(
+                        ::std::boxed::Box::new(
+                            <RefCell<
+                                Option<PerTaskCell>,
+                            > as ::std::default::Default>::default(),
+                        ),
+                        &PRIV_TASK_METHODS,
+                    );
+            }
+            let __refcell_per_task = (*tsk)
+                .get_ref::<RefCell<Option<PerTaskCell>>>()
+                .expect("vmod_priv RefCell was just initialized");
+            super::write(&mut __ctx, __refcell_per_task)
+        }
+        #[repr(C)]
+        struct arg_vmod_refcell_task_read_with_opt {
+            tsk: *mut vmod_priv,
+            valid_op: c_char,
+            op: VCL_INT,
+        }
+        unsafe extern "C" fn vmod_c_read_with_opt(
+            __ctx: *mut vrt_ctx,
+            __args: *const arg_vmod_refcell_task_read_with_opt,
+        ) {
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
+            if (*__args.tsk).get_ref::<RefCell<Option<PerTaskCell>>>().is_none() {
+                (*__args.tsk)
+                    .put(
+                        ::std::boxed::Box::new(
+                            <RefCell<
+                                Option<PerTaskCell>,
+                            > as ::std::default::Default>::default(),
+                        ),
+                        &PRIV_TASK_METHODS,
+                    );
+            }
+            let __refcell_per_task = (*__args.tsk)
+                .get_ref::<RefCell<Option<PerTaskCell>>>()
+                .expect("vmod_priv RefCell was just initialized");
+            super::read_with_opt(
+                __refcell_per_task,
+                if __args.valid_op != 0 { __args.op.into() } else { None },
+            )
+        }
+        #[repr(C)]
+        pub struct VmodExports {
+            vmod_c_read: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, tsk: *mut vmod_priv),
+            >,
+            vmod_c_write: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, tsk: *mut vmod_priv),
+            >,
+            vmod_c_read_with_opt: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __args: *const arg_vmod_refcell_task_read_with_opt,
+                ),
+            >,
+        }
+        pub static VMOD_EXPORTS: VmodExports = VmodExports {
+            vmod_c_read: Some(vmod_c_read),
+            vmod_c_write: Some(vmod_c_write),
+            vmod_c_read_with_opt: Some(vmod_c_read_with_opt),
+        };
+        #[allow(non_upper_case_globals)]
+        #[no_mangle]
+        pub static Vmod_refcell_task_Data: vmod_data = vmod_data {
+            vrt_major: 0,
+            vrt_minor: 0,
+            file_id: c"675f4fdaf8ee28273cf3ef5a2293d0f5cd9a169cf8dd8c3ea64449770aa03b88"
+                .as_ptr(),
+            name: c"refcell_task".as_ptr(),
+            func_name: c"Vmod_vmod_refcell_task_Func".as_ptr(),
+            func_len: ::std::mem::size_of::<VmodExports>() as c_int,
+            func: &VMOD_EXPORTS as *const _ as *const c_void,
+            abi: VMOD_ABI_Version.as_ptr(),
+            json: JSON.as_ptr(),
+            proto: null(),
+            vcs: c"".as_ptr(),
+            version: c"".as_ptr(),
+        };
+        const JSON: &CStr = c"(moved to @json.snap files)";
+    }
+    use std::cell::RefCell;
+    use super::PerTaskCell;
+    use varnish::vcl::Ctx;
+    pub fn read(_ctx: &Ctx, tsk: &RefCell<Option<PerTaskCell>>) {}
+    pub fn write(_ctx: &mut Ctx, tsk: &RefCell<Option<PerTaskCell>>) {}
+    pub fn read_with_opt(tsk: &RefCell<Option<PerTaskCell>>, op: Option<i64>) {}
+}
