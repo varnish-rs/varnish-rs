@@ -1,0 +1,41 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VMOD_JSON_SPEC
+[
+  [
+    "$VMOD",
+    "2.0",
+    "returns",
+    "Vmod_vmod_returns_Func",
+    "44cf123fff19e66986eef00f1c9e5573140e597520436a5753751ce2185cce95",
+    "Varnish (version) (hash)",
+    "0",
+    "0"
+  ],
+  [
+    "$CPROTO",
+    "
+typedef VCL_SUB td_vmod_returns_return_subroutine(
+    VRT_CTX
+);
+
+struct Vmod_vmod_returns_Func {
+  td_vmod_returns_return_subroutine *f_return_subroutine;
+};
+
+static struct Vmod_vmod_returns_Func Vmod_vmod_returns_Func;"
+  ],
+  [
+    "$FUNC",
+    "return_subroutine",
+    [
+      [
+        "SUB"
+      ],
+      "Vmod_vmod_returns_Func.f_return_subroutine",
+      ""
+    ]
+  ]
+]
+

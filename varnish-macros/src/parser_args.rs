@@ -379,6 +379,12 @@ impl ParamTy {
 
 impl OutputTy {
     pub fn parse(ty: &Type, func_type: FuncType) -> ProcResult<Self> {
+        if let Some(inner) = as_option_type(ty) {
+            if matches!(ParamTy::try_parse(inner), Some(ParamTy::Sub)) {
+                Err(error(ty, "Subroutine cannot be wrapped in Option"))?;
+            }
+        }
+
         let Some(ret_ty) = Self::try_parse(ty) else {
             Err(error(&ty, "This content type is not supported"))?
         };

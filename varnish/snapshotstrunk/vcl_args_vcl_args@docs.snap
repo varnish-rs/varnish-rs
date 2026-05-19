@@ -23,5 +23,3 @@ import vcl_args from "path/to/libvcl_args.so";
 ### Function `VOID vcl_args.arg_vcl_backend(BACKEND _backend)`
 
 ### Function `VOID vcl_args.arg_vcl_sub(SUB _sub)`
-
-### Function `VOID vcl_args.arg_subroutine(SUB _sub)`

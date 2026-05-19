@@ -1,0 +1,26 @@
+varnishtest "subcall: call_unsafe"
+
+varnish v1 -vcl {
+    import subcall from "${vmod}";
+
+    backend default none;
+
+    sub vcl_recv {
+        return (synth(200));
+    }
+
+    sub vcl_synth {
+        subcall.call_unsafe(mark_called);
+    }
+
+    sub mark_called {
+        set resp.http.called = "yes";
+    }
+
+} -start
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.http.called == "yes"
+} -run

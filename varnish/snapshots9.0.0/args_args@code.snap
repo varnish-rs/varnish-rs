@@ -1,7 +1,7 @@
 ---
 source: varnish-macros/src/tests.rs
 ---
-mod vcl_args {
+mod args {
     #[allow(non_snake_case, unused_imports, unused_qualifications, unused_variables)]
     #[allow(clippy::needless_question_mark, clippy::new_without_default)]
     #[automatically_derived]
@@ -16,37 +16,27 @@ mod vcl_args {
         };
         use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
         use super::*;
-        unsafe extern "C" fn vmod_c_arg_vcl_backend(
-            __ctx: *mut vrt_ctx,
-            _backend: VCL_BACKEND,
-        ) {
-            super::arg_vcl_backend(_backend.into())
-        }
-        unsafe extern "C" fn vmod_c_arg_vcl_sub(__ctx: *mut vrt_ctx, _sub: VCL_SUB) {
-            super::arg_vcl_sub(_sub.into())
+        unsafe extern "C" fn vmod_c_arg_subroutine(__ctx: *mut vrt_ctx, _sub: VCL_SUB) {
+            super::arg_subroutine(_sub.into())
         }
         #[repr(C)]
         pub struct VmodExports {
-            vmod_c_arg_vcl_backend: Option<
-                unsafe extern "C" fn(__ctx: *mut vrt_ctx, _backend: VCL_BACKEND),
-            >,
-            vmod_c_arg_vcl_sub: Option<
+            vmod_c_arg_subroutine: Option<
                 unsafe extern "C" fn(__ctx: *mut vrt_ctx, _sub: VCL_SUB),
             >,
         }
         pub static VMOD_EXPORTS: VmodExports = VmodExports {
-            vmod_c_arg_vcl_backend: Some(vmod_c_arg_vcl_backend),
-            vmod_c_arg_vcl_sub: Some(vmod_c_arg_vcl_sub),
+            vmod_c_arg_subroutine: Some(vmod_c_arg_subroutine),
         };
         #[allow(non_upper_case_globals)]
         #[no_mangle]
-        pub static Vmod_vcl_args_Data: vmod_data = vmod_data {
+        pub static Vmod_args_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"f2c3ec7d3e3f1e53c39cec0a7c02537cce3b91a84763aea7192d89bdc6400b7c"
+            file_id: c"8e9a39c49e67e7ad75871a9b802ec22485fa670c882e54cd380eaa363922ad75"
                 .as_ptr(),
-            name: c"vcl_args".as_ptr(),
-            func_name: c"Vmod_vmod_vcl_args_Func".as_ptr(),
+            name: c"args".as_ptr(),
+            func_name: c"Vmod_vmod_args_Func".as_ptr(),
             func_len: ::std::mem::size_of::<VmodExports>() as c_int,
             func: &VMOD_EXPORTS as *const _ as *const c_void,
             abi: VMOD_ABI_Version.as_ptr(),
@@ -57,7 +47,6 @@ mod vcl_args {
         };
         const JSON: &CStr = c"(moved to @json.snap files)";
     }
-    use varnish::ffi::{VCL_BACKEND, VCL_SUB};
-    pub fn arg_vcl_backend(_backend: VCL_BACKEND) {}
-    pub fn arg_vcl_sub(_sub: VCL_SUB) {}
+    use varnish::vcl::Subroutine;
+    pub fn arg_subroutine(_sub: Subroutine) {}
 }

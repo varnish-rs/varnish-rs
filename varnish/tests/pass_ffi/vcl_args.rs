@@ -7,14 +7,10 @@ fn main() {}
 #[vmod]
 mod vcl_args {
     use varnish::ffi::{VCL_BACKEND, VCL_SUB};
-    use varnish::vcl::Subroutine;
 
     pub fn arg_vcl_backend(_backend: VCL_BACKEND) {
     }
 
     pub fn arg_vcl_sub(_sub: VCL_SUB) {
-    }
-
-    pub fn arg_subroutine(_sub: Subroutine) {
     }
 }

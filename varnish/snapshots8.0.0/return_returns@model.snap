@@ -1,0 +1,29 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VmodInfo {
+    params: VmodParams {
+        docs: None,
+    },
+    ident: "returns",
+    docs: "",
+    funcs: [
+        FuncInfo {
+            func_type: Function,
+            ident: "return_subroutine",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                Sub,
+            ),
+            out_result: false,
+            restrict: [],
+        },
+    ],
+    objects: [],
+    shared_types: SharedTypes {
+        shared_per_task_ty: None,
+        shared_per_vcl_ty: None,
+    },
+}

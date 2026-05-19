@@ -1,4 +1,4 @@
-varnishtest "subcall: call_for_each, var, and call_unsafe"
+varnishtest "subcall: call_for_each and var"
 
 varnish v1 -vcl {
     import subcall from "${vmod}";

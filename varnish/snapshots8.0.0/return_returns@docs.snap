@@ -9,17 +9,15 @@ source: varnish-macros/src/tests.rs
    It will be automatically updated on each build.
 
 -->
-# Varnish Module (VMOD) `vcl_args`
+# Varnish Module (VMOD) `returns`
 
 ```vcl
 // Place import statement at the top of your VCL file
 // This loads vmod from a standard location
-import vcl_args;
+import returns;
 
 // Or load vmod from a specific file
-import vcl_args from "path/to/libvcl_args.so";
+import returns from "path/to/libreturns.so";
 ```
 
-### Function `VOID vcl_args.arg_vcl_backend(BACKEND _backend)`
-
-### Function `VOID vcl_args.arg_vcl_sub(SUB _sub)`
+### Function `SUB returns.return_subroutine()`

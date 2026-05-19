@@ -126,9 +126,14 @@ impl<'a> Ctx<'a> {
     }
 
     /// Call a VCL subroutine.
-    pub fn call_sub(&mut self, sub: Subroutine) -> bool {
+    ///
+    /// Returns `Ok(true)` if the request was handled after the call, `Ok(false)` otherwise.
+    /// Returns `Err` if the subroutine cannot be called in the current context (e.g. wrong VCL
+    /// state or incompatible subroutine type).
+    pub fn call_sub(&mut self, sub: Subroutine) -> Result<bool, VclError> {
+        self.check_call_sub(sub)?;
         unsafe { VRT_call(self.raw, sub.vcl_ptr()) }
-        self.is_handled()
+        Ok(self.is_handled())
     }
 
     /// Check whether a VCL subroutine can be called in the current context.

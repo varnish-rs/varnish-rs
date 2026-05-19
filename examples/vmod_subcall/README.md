@@ -23,29 +23,21 @@ import subcall from "path/to/libsubcall.so";
 
 Call a VCL subroutine using the raw [`VCL_SUB`] pointer directly.
 
-Demonstrates bypassing the [`Subroutine`] wrapper and calling `VRT_call`
-through the C FFI. Prefer [`call_for_each`] or [`Ctx::call_sub`] for new code.
+Demonstrates bypassing the `Subroutine` wrapper and calling `VRT_call`
+through the C FFI. Prefer using `Ctx::call_sub` in real code, as it handles error checking and is safer to use.
 
 ### Function `VOID subcall.call_for_each(STRING array, STRING var_name, SUB sub)`
 
 Split `array` on whitespace and call `sub` once per word.
 
 Each word is stored as `var_name` in the per-task variable map for the
-duration of that iteration, accessible via [`var`].
+duration of that iteration, accessible via `var`.
 
 Returns an error if `var_name` is already set — this prevents accidental
 shadowing when nesting two `call_for_each` calls with the same name.
 
-### Function `VOID subcall.set_var(STRING var_name, STRING value)`
-
-Set `var_name` to `value` in the per-task variable map.
-
-Overwrites any existing value. To read the value back, use [`var`].
-The per-task [`TaskVars`] sentinel ensures the map is cleared when the
-Varnish task ends.
-
 ### Function `STRING subcall.var(STRING var_name)`
 
-Return the current value of `var_name` as set by an enclosing [`call_for_each`].
+Return the current value of `var_name` as set by an enclosing `call_for_each`.
 
 Returns an error if `var_name` is not set.

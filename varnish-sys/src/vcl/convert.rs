@@ -30,6 +30,7 @@
 //! | `Option<CowProbe>` | <-> | `VCL_PROBE` |
 //! | `Option<Probe>` | <-> | `VCL_PROBE` |
 //! | `Option<std::net::SocketAddr>` | -> | `VCL_IP` |
+//! | `Subroutine` | <-> | `VCL_SUB` |
 //!
 //! For all the other types, which are pointers, you will need to use the native types.
 //!
@@ -440,11 +441,11 @@ impl From<VCL_BACKEND> for Option<BackendRef> {
 default_null_ptr!(VCL_SUB);
 impl From<VCL_SUB> for Subroutine {
     fn from(value: VCL_SUB) -> Self {
-        debug_assert!(!value.0.is_null(), "VCL_SUB must not be null");
+        assert!(!value.0.is_null(), "VCL_SUB must not be null");
         Subroutine(value)
     }
 }
-from_vcl_to_opt_rust!(VCL_SUB, Subroutine);
+
 impl IntoVCL<VCL_SUB> for Subroutine {
     fn into_vcl(self, _: &mut Workspace) -> Result<VCL_SUB, VclError> {
         Ok(self.vcl_ptr())
