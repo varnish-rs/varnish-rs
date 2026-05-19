@@ -137,6 +137,9 @@ impl Generator {
 
         for func in &self.functions {
             json.push(func.json.clone());
+            if let Some(restrict) = &func.restrict_json {
+                json.push(restrict.clone());
+            }
         }
 
         for obj in &self.objects {

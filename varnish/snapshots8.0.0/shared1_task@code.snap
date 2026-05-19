@@ -308,7 +308,7 @@ mod task {
         pub static Vmod_task_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"1b4f8f74db7c125dbbd311dd74942e3c5223e09b63ff3999a03f526b24d67eb9"
+            file_id: c"63ee8da26ffca68742b31c435229eab8bb52533783a5290ec134929fddff03e0"
                 .as_ptr(),
             name: c"task".as_ptr(),
             func_name: c"Vmod_vmod_task_Func".as_ptr(),

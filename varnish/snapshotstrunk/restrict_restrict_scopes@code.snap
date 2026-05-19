@@ -1,0 +1,228 @@
+---
+source: varnish-macros/src/tests.rs
+---
+mod restrict_scopes {
+    #[allow(non_snake_case, unused_imports, unused_qualifications, unused_variables)]
+    #[allow(clippy::needless_question_mark, clippy::new_without_default)]
+    #[automatically_derived]
+    mod varnish_generated {
+        use std::ffi::{c_char, c_int, c_uint, c_void, CStr};
+        use std::ptr::null;
+        use varnish::ffi::{
+            VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE,
+            VCL_REAL, VCL_STRING, VCL_TIME, VCL_VOID, VMOD_ABI_Version, VclEvent,
+            vmod_data, vmod_priv, vrt_ctx, VMOD_PRIV_METHODS_MAGIC, vmod_priv_methods,
+        };
+        use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
+        use super::*;
+        unsafe extern "C" fn vmod_c_client_only(__ctx: *mut vrt_ctx) -> VCL_INT {
+            if !__ctx.is_null()
+                && (*__ctx).method
+                    & (::varnish::vcl::subroutine::bitmask::CLIENT) as c_uint == 0
+            {
+                Ctx::from_ptr(__ctx).fail("'client_only' is only allowed in: client");
+                return Default::default();
+            }
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(super::client_only().into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        unsafe extern "C" fn vmod_c_backend_only(__ctx: *mut vrt_ctx) -> VCL_INT {
+            if !__ctx.is_null()
+                && (*__ctx).method
+                    & (::varnish::vcl::subroutine::bitmask::BACKEND) as c_uint == 0
+            {
+                Ctx::from_ptr(__ctx).fail("'backend_only' is only allowed in: backend");
+                return Default::default();
+            }
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(super::backend_only().into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        unsafe extern "C" fn vmod_c_housekeeping_only(__ctx: *mut vrt_ctx) -> VCL_INT {
+            if !__ctx.is_null()
+                && (*__ctx).method
+                    & (::varnish::vcl::subroutine::bitmask::HOUSEKEEPING) as c_uint == 0
+            {
+                Ctx::from_ptr(__ctx)
+                    .fail("'housekeeping_only' is only allowed in: housekeeping");
+                return Default::default();
+            }
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(super::housekeeping_only().into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        unsafe extern "C" fn vmod_c_client_or_backend(__ctx: *mut vrt_ctx) -> VCL_INT {
+            if !__ctx.is_null()
+                && (*__ctx).method
+                    & (::varnish::vcl::subroutine::bitmask::CLIENT
+                        | ::varnish::vcl::subroutine::bitmask::BACKEND) as c_uint == 0
+            {
+                Ctx::from_ptr(__ctx)
+                    .fail("'client_or_backend' is only allowed in: client, backend");
+                return Default::default();
+            }
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(super::client_or_backend().into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        unsafe extern "C" fn vmod_c_recv_only(__ctx: *mut vrt_ctx) -> VCL_INT {
+            if !__ctx.is_null()
+                && (*__ctx).method
+                    & (::varnish::vcl::subroutine::bitmask::RECV) as c_uint == 0
+            {
+                Ctx::from_ptr(__ctx).fail("'recv_only' is only allowed in: vcl_recv");
+                return Default::default();
+            }
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(super::recv_only().into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        unsafe extern "C" fn vmod_c_recv_or_hash(__ctx: *mut vrt_ctx) -> VCL_INT {
+            if !__ctx.is_null()
+                && (*__ctx).method
+                    & (::varnish::vcl::subroutine::bitmask::RECV
+                        | ::varnish::vcl::subroutine::bitmask::HASH) as c_uint == 0
+            {
+                Ctx::from_ptr(__ctx)
+                    .fail("'recv_or_hash' is only allowed in: vcl_recv, vcl_hash");
+                return Default::default();
+            }
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(super::recv_or_hash().into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        unsafe extern "C" fn vmod_c_backend_subs(__ctx: *mut vrt_ctx) -> VCL_INT {
+            if !__ctx.is_null()
+                && (*__ctx).method
+                    & (::varnish::vcl::subroutine::bitmask::BACKEND_FETCH
+                        | ::varnish::vcl::subroutine::bitmask::BACKEND_RESPONSE
+                        | ::varnish::vcl::subroutine::bitmask::BACKEND_ERROR) as c_uint
+                    == 0
+            {
+                Ctx::from_ptr(__ctx)
+                    .fail(
+                        "'backend_subs' is only allowed in: vcl_backend_fetch, vcl_backend_response, vcl_backend_error",
+                    );
+                return Default::default();
+            }
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(super::backend_subs().into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        #[repr(C)]
+        pub struct VmodExports {
+            vmod_c_client_only: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx) -> VCL_INT,
+            >,
+            vmod_c_backend_only: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx) -> VCL_INT,
+            >,
+            vmod_c_housekeeping_only: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx) -> VCL_INT,
+            >,
+            vmod_c_client_or_backend: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx) -> VCL_INT,
+            >,
+            vmod_c_recv_only: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx) -> VCL_INT,
+            >,
+            vmod_c_recv_or_hash: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx) -> VCL_INT,
+            >,
+            vmod_c_backend_subs: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx) -> VCL_INT,
+            >,
+        }
+        pub static VMOD_EXPORTS: VmodExports = VmodExports {
+            vmod_c_client_only: Some(vmod_c_client_only),
+            vmod_c_backend_only: Some(vmod_c_backend_only),
+            vmod_c_housekeeping_only: Some(vmod_c_housekeeping_only),
+            vmod_c_client_or_backend: Some(vmod_c_client_or_backend),
+            vmod_c_recv_only: Some(vmod_c_recv_only),
+            vmod_c_recv_or_hash: Some(vmod_c_recv_or_hash),
+            vmod_c_backend_subs: Some(vmod_c_backend_subs),
+        };
+        #[allow(non_upper_case_globals)]
+        #[no_mangle]
+        pub static Vmod_restrict_scopes_Data: vmod_data = vmod_data {
+            vrt_major: 0,
+            vrt_minor: 0,
+            file_id: c"ba241422bc82e759032505d2c6f3757cbb270186746a7149ca06719d69f60d5e"
+                .as_ptr(),
+            name: c"restrict_scopes".as_ptr(),
+            func_name: c"Vmod_vmod_restrict_scopes_Func".as_ptr(),
+            func_len: ::std::mem::size_of::<VmodExports>() as c_int,
+            func: &VMOD_EXPORTS as *const _ as *const c_void,
+            abi: VMOD_ABI_Version.as_ptr(),
+            json: JSON.as_ptr(),
+            proto: null(),
+            vcs: c"".as_ptr(),
+            version: c"".as_ptr(),
+        };
+        const JSON: &CStr = c"(moved to @json.snap files)";
+    }
+    pub fn client_only() -> i64 {
+        1
+    }
+    pub fn backend_only() -> i64 {
+        2
+    }
+    pub fn housekeeping_only() -> i64 {
+        3
+    }
+    pub fn client_or_backend() -> i64 {
+        4
+    }
+    pub fn recv_only() -> i64 {
+        5
+    }
+    pub fn recv_or_hash() -> i64 {
+        6
+    }
+    pub fn backend_subs() -> i64 {
+        7
+    }
+}

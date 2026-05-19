@@ -5,7 +5,9 @@
 use darling::ast::NestedMeta;
 use darling::FromMeta;
 use proc_macro2::TokenStream;
-use syn::{Attribute, ImplItem, Item, ItemImpl, ItemMod, ReturnType, Signature, Visibility};
+use syn::punctuated::Punctuated;
+use syn::token::Comma;
+use syn::{Attribute, Ident, ImplItem, Item, ItemImpl, ItemMod, ReturnType, Signature, Visibility};
 
 use crate::errors::Errors;
 use crate::model::{
@@ -14,6 +16,8 @@ use crate::model::{
 };
 use crate::parser_args::FuncStatus;
 use crate::{parser_utils, ProcResult};
+
+use varnish_sys::vcl::subroutine::VALID_RESTRICT_SCOPES;
 
 pub fn tokens_to_model(args: TokenStream, item_mod: &mut ItemMod) -> ProcResult<VmodInfo> {
     let args = NestedMeta::parse_meta_list(args)?;
@@ -207,6 +211,7 @@ impl ObjInfo {
                 args: Vec::new(),
                 output_ty: OutputTy::Default,
                 out_result: false,
+                restrict: Vec::new(),
             },
             funcs,
         })
@@ -233,12 +238,17 @@ impl FuncInfo {
             errors.add(signature, "async functions are not supported");
         }
 
+        let restrict = parse_restricted_attr(attrs, &mut errors);
+
         let func_type = if let Some(attr) = parser_utils::remove_attr(attrs, "event") {
             if is_object {
                 errors.add(
                     &attr.meta,
                     "Event functions are not supported for object methods",
                 );
+            }
+            if !restrict.is_empty() {
+                errors.add(signature, "#[restrict] is not allowed on event functions");
             }
             FuncType::Event
         } else if is_object {
@@ -296,6 +306,40 @@ impl FuncInfo {
             output_ty,
             out_result,
             args,
+            restrict,
         })
     }
+}
+
+fn parse_restricted_attr(attrs: &mut Vec<Attribute>, errors: &mut Errors) -> Vec<String> {
+    let Some(attr) = parser_utils::remove_attr(attrs, "restrict") else {
+        return Vec::new();
+    };
+    let scopes = match attr.parse_args_with(Punctuated::<Ident, Comma>::parse_terminated) {
+        Ok(v) => v,
+        Err(e) => {
+            errors.add(&attr, &format!("#[restrict] parse error: {e}"));
+            return Vec::new();
+        }
+    };
+    if scopes.is_empty() {
+        errors.add(&attr, "#[restrict] requires at least one scope argument");
+        return Vec::new();
+    }
+    let mut result = Vec::new();
+    for scope in scopes {
+        let name = scope.to_string();
+        if VALID_RESTRICT_SCOPES.contains(&name.as_str()) {
+            result.push(name);
+        } else {
+            errors.add(
+                &scope,
+                &format!(
+                    "Invalid scope '{name}'. Valid scopes: {}",
+                    VALID_RESTRICT_SCOPES.join(", ")
+                ),
+            );
+        }
+    }
+    result
 }

@@ -22,6 +22,7 @@ semver.workspace = true
 
 [dependencies]
 memchr.workspace = true
+paste.workspace = true
 serde.workspace = true
 thiserror.workspace = true
 

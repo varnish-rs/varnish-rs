@@ -30,6 +30,7 @@ VmodInfo {
             ],
             output_ty: Default,
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -41,6 +42,7 @@ VmodInfo {
                 "VCL_ACL",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -52,6 +54,7 @@ VmodInfo {
                 "VCL_ACL",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -63,6 +66,7 @@ VmodInfo {
                 "VCL_BACKEND",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -74,6 +78,7 @@ VmodInfo {
                 "VCL_BACKEND",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -85,6 +90,7 @@ VmodInfo {
                 "VCL_BLOB",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -96,6 +102,7 @@ VmodInfo {
                 "VCL_BLOB",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -107,6 +114,7 @@ VmodInfo {
                 "VCL_BODY",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -118,6 +126,7 @@ VmodInfo {
                 "VCL_BODY",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -129,6 +138,7 @@ VmodInfo {
                 "VCL_BOOL",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -140,6 +150,7 @@ VmodInfo {
                 "VCL_BOOL",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -151,6 +162,7 @@ VmodInfo {
                 "VCL_BYTES",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -162,6 +174,7 @@ VmodInfo {
                 "VCL_BYTES",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -173,6 +186,7 @@ VmodInfo {
                 "VCL_DURATION",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -184,6 +198,7 @@ VmodInfo {
                 "VCL_DURATION",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -195,6 +210,7 @@ VmodInfo {
                 "VCL_ENUM",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -206,6 +222,7 @@ VmodInfo {
                 "VCL_ENUM",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -217,6 +234,7 @@ VmodInfo {
                 "VCL_HEADER",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -228,6 +246,7 @@ VmodInfo {
                 "VCL_HEADER",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -239,6 +258,7 @@ VmodInfo {
                 "VCL_HTTP",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -250,6 +270,7 @@ VmodInfo {
                 "VCL_HTTP",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -261,6 +282,7 @@ VmodInfo {
                 "VCL_INSTANCE",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -272,6 +294,7 @@ VmodInfo {
                 "VCL_INT",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -283,6 +306,7 @@ VmodInfo {
                 "VCL_INT",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -294,6 +318,7 @@ VmodInfo {
                 "VCL_IP",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -305,6 +330,7 @@ VmodInfo {
                 "VCL_IP",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -316,6 +342,7 @@ VmodInfo {
                 "VCL_PROBE",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -327,6 +354,7 @@ VmodInfo {
                 "VCL_PROBE",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -338,6 +366,7 @@ VmodInfo {
                 "VCL_REAL",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -349,6 +378,7 @@ VmodInfo {
                 "VCL_REAL",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -360,6 +390,7 @@ VmodInfo {
                 "VCL_REGEX",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -371,6 +402,7 @@ VmodInfo {
                 "VCL_REGEX",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -382,6 +414,7 @@ VmodInfo {
                 "VCL_STEVEDORE",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -393,6 +426,7 @@ VmodInfo {
                 "VCL_STEVEDORE",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -404,6 +438,7 @@ VmodInfo {
                 "VCL_STRANDS",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -415,6 +450,7 @@ VmodInfo {
                 "VCL_STRANDS",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -426,6 +462,7 @@ VmodInfo {
                 "VCL_STRING",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -437,6 +474,7 @@ VmodInfo {
                 "VCL_STRING",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -448,6 +486,7 @@ VmodInfo {
                 "VCL_SUB",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -459,6 +498,7 @@ VmodInfo {
                 "VCL_SUB",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -470,6 +510,7 @@ VmodInfo {
                 "VCL_TIME",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -481,6 +522,7 @@ VmodInfo {
                 "VCL_TIME",
             ),
             out_result: true,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -492,6 +534,7 @@ VmodInfo {
                 "VCL_VCL",
             ),
             out_result: false,
+            restrict: [],
         },
         FuncInfo {
             func_type: Function,
@@ -503,6 +546,7 @@ VmodInfo {
                 "VCL_VCL",
             ),
             out_result: true,
+            restrict: [],
         },
     ],
     objects: [],

@@ -63,6 +63,8 @@ pub struct FuncProcessor {
     pub wrapper_function_body: TokenStream,
     /// JSON blob for the function
     pub json: Value,
+    /// `["$RESTRICT", [...]]` element placed after `json` in the parent array; `None` if unrestricted
+    pub restrict_json: Option<Value>,
 }
 
 impl FuncProcessor {
@@ -148,6 +150,11 @@ impl FuncProcessor {
         self.wrapper_function_body = self.gen_callback_fn(info);
         (self.cproto_typedef_init, self.cproto_typedef_decl) = self.gen_cproto(info);
         self.json = self.json_func(info);
+        self.restrict_json = if info.restrict.is_empty() {
+            None
+        } else {
+            Some(json! { ["$RESTRICT", info.restrict] })
+        };
     }
 
     /// per-function part of $CPROTO - returns typedef init (part of common struct) and declaration code
@@ -447,6 +454,7 @@ impl FuncProcessor {
     fn gen_callback_fn(&self, info: &FuncInfo) -> TokenStream {
         let opt_param_struct = self.gen_opt_param_struct(info);
         let signature = self.get_wrapper_fn_sig(true);
+        let restrict_check = self.gen_restrict_check(info);
         let func_pre_call = &self.func_pre_call;
         let func_always_after_call = &self.func_always_after_call;
         let mut needs_ctx = self.func_needs_ctx;
@@ -548,9 +556,46 @@ impl FuncProcessor {
         quote! {
             #opt_param_struct
             #signature {
+                #restrict_check
                 #create_ctx
                 #(#func_pre_call)*
                 #result
+            }
+        }
+    }
+
+    fn gen_restrict_check(&self, info: &FuncInfo) -> TokenStream {
+        if info.restrict.is_empty() || matches!(info.func_type, Destructor | Event) {
+            return quote! {};
+        }
+        let mask_terms: Vec<TokenStream> = info
+            .restrict
+            .iter()
+            .map(|s| {
+                let const_name = format_ident!(
+                    "{}",
+                    varnish_sys::vcl::subroutine::bitmask_const_name(s)
+                        .expect("invalid scope — should have been caught by parse_restrict_attr")
+                );
+                quote! { ::varnish::vcl::subroutine::bitmask::#const_name }
+            })
+            .collect();
+        let mask_expr = mask_terms
+            .into_iter()
+            .reduce(|a, b| quote! { #a | #b })
+            .unwrap();
+        let fn_name = &info.ident;
+        let scope_list = info.restrict.join(", ");
+        let err_msg = format!("'{fn_name}' is only allowed in: {scope_list}");
+        let return_stmt = if self.output_hdr == "VCL_VOID" {
+            quote! { return; }
+        } else {
+            quote! { return Default::default(); }
+        };
+        quote! {
+            if !__ctx.is_null() && (*__ctx).method & (#mask_expr) as c_uint == 0 {
+                Ctx::from_ptr(__ctx).fail(#err_msg);
+                #return_stmt
             }
         }
     }
