@@ -20,7 +20,9 @@ VmodInfo {
                     ty: SharedPerTaskMut,
                 },
             ],
-            output_ty: Bytes,
+            output_ty: ParamType(
+                Str,
+            ),
             out_result: false,
             restrict: [],
         },

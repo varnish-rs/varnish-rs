@@ -3,7 +3,7 @@ use varnish::vmod;
 fn main() {}
 
 pub struct PerTask<'a> {
-    pub data: &'a [u8],
+    pub data: &'a str,
 }
 
 #[vmod]
@@ -12,7 +12,7 @@ mod tuple {
 
     pub fn ref_to_slice_lifetime<'a>(
         #[shared_per_task] tsk_vals: &mut Option<Box<PerTask<'a>>>,
-    ) -> Option<&'a [u8]> {
+    ) -> Option<&'a str> {
         tsk_vals.as_ref().as_deref().map(|v| v.data)
     }
 }

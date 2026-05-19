@@ -59,7 +59,7 @@ mod tuple {
         pub static Vmod_tuple_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"53f10035db0ef3198d72ea65e638a0365e0c1d156483befcf454bddebd510156"
+            file_id: c"6d7f361a5da231e8fd5e9d6f78d5e1cded0fc5710583adc9f89b21dbfb3f330c"
                 .as_ptr(),
             name: c"tuple".as_ptr(),
             func_name: c"Vmod_vmod_tuple_Func".as_ptr(),
@@ -76,7 +76,7 @@ mod tuple {
     use super::PerTask;
     pub fn ref_to_slice_lifetime<'a>(
         tsk_vals: &mut Option<Box<PerTask<'a>>>,
-    ) -> Option<&'a [u8]> {
+    ) -> Option<&'a str> {
         tsk_vals.as_ref().as_deref().map(|v| v.data)
     }
 }
