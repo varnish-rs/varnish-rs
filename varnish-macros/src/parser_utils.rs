@@ -183,9 +183,9 @@ fn store_shared(
 ) -> ProcResult<()> {
     let Some(ty) = ty else {
         let msg = if is_mut {
-            "This params must be declared as `&mut Option<Box<...>>`"
+            "This parameter must be declared as `&mut Option<Box<...>>`"
         } else {
-            "This params must be declared as `Option<&...>`"
+            "This parameter must be declared as `Option<&...>`"
         };
         Err(error(arg_ty, msg))?
     };

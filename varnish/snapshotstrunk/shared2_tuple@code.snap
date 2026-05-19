@@ -80,7 +80,7 @@ mod tuple {
         pub static Vmod_tuple_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"41c8f93b128c17e6327da85165e29dc663acf100bf5bfb80ffce76925121d6fe"
+            file_id: c"4b8574f41519351f7b6fcfe6464a5405ecf74efc082e2564039ea42c53516588"
                 .as_ptr(),
             name: c"tuple".as_ptr(),
             func_name: c"Vmod_vmod_tuple_Func".as_ptr(),

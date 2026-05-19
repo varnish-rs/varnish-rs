@@ -28,6 +28,10 @@ import task from "path/to/libtask.so";
 
 ### Function `VOID task.per_tsk_opt([INT op])`
 
+### Function `VOID task.per_tsk_ref()`
+
+### Function `VOID task.per_tsk_ref_opt([INT op])`
+
 ### Constructor `task.PerVcl()`
 
 #### Method `VOID <object>.both()`

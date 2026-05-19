@@ -58,4 +58,8 @@ mod task {
     pub fn per_tsk_val(#[shared_per_task] tsk: &mut Option<Box<PerTask>>) {}
 
     pub fn per_tsk_opt(#[shared_per_task] tsk: &mut Option<Box<PerTask>>, op: Option<i64>) {}
+
+    pub fn per_tsk_ref(#[shared_per_task] tsk: Option<&PerTask>) {}
+
+    pub fn per_tsk_ref_opt(#[shared_per_task] tsk: Option<&PerTask>, op: Option<i64>) {}
 }
