@@ -247,6 +247,9 @@ impl FuncInfo {
                     "Event functions are not supported for object methods",
                 );
             }
+            if !restrict.is_empty() {
+                errors.add(signature, "#[restrict] is not allowed on event functions");
+            }
             FuncType::Event
         } else if is_object {
             if signature.ident == "new" {

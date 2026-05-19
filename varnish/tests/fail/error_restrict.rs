@@ -14,4 +14,13 @@ mod restrict_empty {
     }
 }
 
+#[varnish::vmod]
+mod restrict_on_event {
+    use varnish::vcl::Event;
+
+    #[restrict(vcl_recv)]
+    #[event]
+    pub fn on_event(event: Event) {}
+}
+
 fn main() {}

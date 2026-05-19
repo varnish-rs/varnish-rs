@@ -9,3 +9,9 @@ error: #[restrict] requires at least one scope argument
    |
 11 |     #[restrict()]
    |     ^
+
+error: #[restrict] is not allowed on event functions
+  --> tests/fail/error_restrict.rs:23:9
+   |
+23 |     pub fn on_event(event: Event) {}
+   |         ^^
