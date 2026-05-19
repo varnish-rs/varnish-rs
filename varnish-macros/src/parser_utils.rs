@@ -165,7 +165,7 @@ pub fn parse_shared_ref(store: &mut Option<String>, arg_ty: &Type) -> ProcResult
     store_shared(store, arg_ty, val, false)
 }
 
-/// Save/validate shared RefCell into the store. Must be declared as `&RefCell<Option<T>>`.
+/// Save/validate shared `RefCell` into the store. Must be declared as `&RefCell<Option<T>>`.
 /// Stores the `RefCell<Option<T>>` type (not just `T`) to distinguish from Mut/Ref forms.
 pub fn parse_shared_ref_cell(store: &mut Option<String>, arg_ty: &Type) -> ProcResult<()> {
     // Strip `&` → must be `RefCell<Option<T>>`
