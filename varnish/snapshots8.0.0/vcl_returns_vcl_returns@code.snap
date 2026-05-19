@@ -484,7 +484,7 @@ mod vcl_returns {
         pub static Vmod_vcl_returns_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"544153103ad8859f23d54c3f506207cfb79f3944ae2ebe922c70c6d46a23613b"
+            file_id: c"991b900a77b2a94ac7a85189c1fcba9e9c8659e668796e12abc085cfc61492c4"
                 .as_ptr(),
             name: c"vcl_returns".as_ptr(),
             func_name: c"Vmod_vmod_vcl_returns_Func".as_ptr(),

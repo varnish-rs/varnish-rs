@@ -6,6 +6,10 @@
 /// See also <https://varnish-cache.org/docs/trunk/reference/vmod.html>
 #[varnish::vmod(docs = "README.md")]
 mod example {
+    use std::io::Write as _;
+
+    use varnish::ffi::VCL_STRING;
+    use varnish::vcl::{VclError, Workspace};
     /// This will tell you if a number is even, isn't that odd?
     ///
     /// A simple function that returns true if the number is even, false otherwise.
@@ -36,6 +40,19 @@ mod example {
             // pattern matching FTW!
             Some(n) => format!("I was given {n} as argument"),
         }
+    }
+
+    /// Prefix a user-given string and do the concatenation directly in the
+    /// workspace.
+    /// Returns a VCL error if the string is empty or not UTF8, the latter
+    /// being handled automatically before reaching this function.
+    pub unsafe fn hello(ws: &mut Workspace, s: &str) -> Result<VCL_STRING, VclError> {
+        if s.is_empty() {
+            return Err("hello: empty string".into());
+        }
+        let mut buf = ws.vcl_string_builder()?;
+        write!(buf, "Hello, {s}").map_err(|e| VclError::new(e.to_string()))?;
+        Ok(buf.finish())
     }
 }
 

@@ -1,0 +1,119 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VmodInfo {
+    params: VmodParams {
+        docs: None,
+    },
+    ident: "restrict_scopes",
+    docs: "",
+    funcs: [
+        FuncInfo {
+            func_type: Function,
+            ident: "client_only",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                I64,
+            ),
+            out_result: false,
+            restrict: [
+                "client",
+            ],
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "backend_only",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                I64,
+            ),
+            out_result: false,
+            restrict: [
+                "backend",
+            ],
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "housekeeping_only",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                I64,
+            ),
+            out_result: false,
+            restrict: [
+                "housekeeping",
+            ],
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "client_or_backend",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                I64,
+            ),
+            out_result: false,
+            restrict: [
+                "client",
+                "backend",
+            ],
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "recv_only",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                I64,
+            ),
+            out_result: false,
+            restrict: [
+                "vcl_recv",
+            ],
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "recv_or_hash",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                I64,
+            ),
+            out_result: false,
+            restrict: [
+                "vcl_recv",
+                "vcl_hash",
+            ],
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "backend_subs",
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                I64,
+            ),
+            out_result: false,
+            restrict: [
+                "vcl_backend_fetch",
+                "vcl_backend_response",
+                "vcl_backend_error",
+            ],
+        },
+    ],
+    objects: [],
+    shared_types: SharedTypes {
+        shared_per_task_ty: None,
+        shared_per_vcl_ty: None,
+    },
+}

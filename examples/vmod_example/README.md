@@ -46,3 +46,10 @@ set resp.http.Obvious-Number = example.captain_obvious(42);
 
 * `[INT opt]`:
 Optional number to provide as argument
+
+### Function `STRING example.hello(STRING s)`
+
+Prefix a user-given string and do the concatenation directly in the
+workspace.
+Returns a VCL error if the string is empty or not UTF8, the latter
+being handled automatically before reaching this function.

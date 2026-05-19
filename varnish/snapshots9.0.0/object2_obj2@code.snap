@@ -173,7 +173,7 @@ mod obj2 {
         pub static Vmod_obj2_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"0cd5a7608f16067dbb42bb21d157e185290d63e1a33e73c3715eee45ee3fc2b6"
+            file_id: c"939e8599b5634825ab4fc12b28859169601c3150e2646b6374601d10fffc91a6"
                 .as_ptr(),
             name: c"obj2".as_ptr(),
             func_name: c"Vmod_vmod_obj2_Func".as_ptr(),

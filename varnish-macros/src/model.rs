@@ -74,6 +74,7 @@ pub struct FuncInfo {
     pub args: Vec<ParamTypeInfo>,
     pub output_ty: OutputTy,
     pub out_result: bool,
+    pub restrict: Vec<String>,
 }
 
 impl FuncInfo {

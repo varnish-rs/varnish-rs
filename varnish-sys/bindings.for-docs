@@ -1075,6 +1075,48 @@ pub const VSM_WRK_CHANGED: u32 = 1024;
 pub const VSM_WRK_RESTARTED: u32 = 2048;
 pub const VSM_MGT_MASK: u32 = 255;
 pub const VSM_WRK_MASK: u32 = 65280;
+pub const VCL_MET_RECV: u32 = 2;
+pub const VCL_MET_PIPE: u32 = 4;
+pub const VCL_MET_PASS: u32 = 8;
+pub const VCL_MET_HASH: u32 = 16;
+pub const VCL_MET_PURGE: u32 = 32;
+pub const VCL_MET_MISS: u32 = 64;
+pub const VCL_MET_HIT: u32 = 128;
+pub const VCL_MET_DELIVER: u32 = 256;
+pub const VCL_MET_SYNTH: u32 = 512;
+pub const VCL_MET_BACKEND_FETCH: u32 = 1024;
+pub const VCL_MET_BACKEND_REFRESH: u32 = 2048;
+pub const VCL_MET_BACKEND_RESPONSE: u32 = 4096;
+pub const VCL_MET_BACKEND_ERROR: u32 = 8192;
+pub const VCL_MET_INIT: u32 = 16384;
+pub const VCL_MET_FINI: u32 = 32768;
+pub const VCL_MET_MAX: u32 = 16;
+pub const VCL_MET_MASK: u32 = 65535;
+pub const VCL_MET_TASK_B: u32 = 15360;
+pub const VCL_MET_TASK_C: u32 = 1022;
+pub const VCL_MET_TASK_H: u32 = 49152;
+pub const VCL_MET_TASK_ALL: u32 = 65534;
+pub const VCL_RET_ABANDON: u32 = 1;
+pub const VCL_RET_BERESP: u32 = 2;
+pub const VCL_RET_DELIVER: u32 = 3;
+pub const VCL_RET_ERROR: u32 = 4;
+pub const VCL_RET_FAIL: u32 = 5;
+pub const VCL_RET_FETCH: u32 = 6;
+pub const VCL_RET_HASH: u32 = 7;
+pub const VCL_RET_LOOKUP: u32 = 8;
+pub const VCL_RET_MERGE: u32 = 9;
+pub const VCL_RET_OBJ_STALE: u32 = 10;
+pub const VCL_RET_OK: u32 = 11;
+pub const VCL_RET_PASS: u32 = 12;
+pub const VCL_RET_PIPE: u32 = 13;
+pub const VCL_RET_PURGE: u32 = 14;
+pub const VCL_RET_RESTART: u32 = 15;
+pub const VCL_RET_RETRY: u32 = 16;
+pub const VCL_RET_SYNTH: u32 = 17;
+pub const VCL_RET_VCL: u32 = 18;
+pub const VCL_RET_MAX: u32 = 19;
+pub const VRT_TYPE_MAGIC: u32 = 2839788594;
+pub const VCL_CONF_MAGIC: u32 = 1946600713;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct iovec {
@@ -4814,11 +4856,6 @@ pub struct suckaddr {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct vcl {
-    _unused: [u8; 0],
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct VCL_conf {
     _unused: [u8; 0],
 }
 #[repr(C)]
@@ -13267,6 +13304,201 @@ unsafe extern "C" {
     pub fn VSC_IsRaw(arg1: *const vsc) -> ::std::ffi::c_uint;
 }
 #[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct vrt_type {
+    pub magic: ::std::ffi::c_uint,
+    pub lname: *const ::std::ffi::c_char,
+    pub uname: *const ::std::ffi::c_char,
+    pub ctype: *const ::std::ffi::c_char,
+    pub szof: usize,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of vrt_type"][::std::mem::size_of::<vrt_type>() - 40usize];
+    ["Alignment of vrt_type"][::std::mem::align_of::<vrt_type>() - 8usize];
+    ["Offset of field: vrt_type::magic"][::std::mem::offset_of!(vrt_type, magic) - 0usize];
+    ["Offset of field: vrt_type::lname"][::std::mem::offset_of!(vrt_type, lname) - 8usize];
+    ["Offset of field: vrt_type::uname"][::std::mem::offset_of!(vrt_type, uname) - 16usize];
+    ["Offset of field: vrt_type::ctype"][::std::mem::offset_of!(vrt_type, ctype) - 24usize];
+    ["Offset of field: vrt_type::szof"][::std::mem::offset_of!(vrt_type, szof) - 32usize];
+};
+impl Default for vrt_type {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_ACL: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_BACKEND: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_BLOB: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_BODY: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_BOOL: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_BYTES: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_DURATION: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_ENUM: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_HEADER: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_HTTP: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_INSTANCE: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_INT: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_IP: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_PROBE: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_REAL: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_REGEX: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_STEVEDORE: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_STRANDS: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_STRING: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_STRINGS: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_SUB: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_TIME: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_VCL: [vrt_type; 1usize];
+}
+unsafe extern "C" {
+    pub static VCL_TYPE_VOID: [vrt_type; 1usize];
+}
+pub type vcl_event_f = ::std::option::Option<
+    unsafe extern "C" fn(ctx: *const vrt_ctx, arg1: VclEvent) -> ::std::ffi::c_int,
+>;
+pub type vcl_init_f =
+    ::std::option::Option<unsafe extern "C" fn(ctx: *const vrt_ctx) -> ::std::ffi::c_int>;
+pub type vcl_fini_f = ::std::option::Option<unsafe extern "C" fn(ctx: *const vrt_ctx)>;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct VCL_conf {
+    pub magic: ::std::ffi::c_uint,
+    pub syntax: ::std::ffi::c_uint,
+    pub default_director: *mut VCL_BACKEND,
+    pub default_probe: VCL_PROBE,
+    pub nref: ::std::ffi::c_uint,
+    pub ref_: *const vpi_ref,
+    pub nsrc: ::std::ffi::c_uint,
+    pub nsub: ::std::ffi::c_uint,
+    pub srcname: *mut *const ::std::ffi::c_char,
+    pub srcbody: *mut *const ::std::ffi::c_char,
+    pub nvmod: ::std::ffi::c_int,
+    pub instance_info: *const vpi_ii,
+    pub event_vcl: vcl_event_f,
+    pub recv_func: vcl_func_f,
+    pub pipe_func: vcl_func_f,
+    pub pass_func: vcl_func_f,
+    pub hash_func: vcl_func_f,
+    pub purge_func: vcl_func_f,
+    pub miss_func: vcl_func_f,
+    pub hit_func: vcl_func_f,
+    pub deliver_func: vcl_func_f,
+    pub synth_func: vcl_func_f,
+    pub backend_fetch_func: vcl_func_f,
+    pub backend_refresh_func: vcl_func_f,
+    pub backend_response_func: vcl_func_f,
+    pub backend_error_func: vcl_func_f,
+    pub init_func: vcl_func_f,
+    pub fini_func: vcl_func_f,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of VCL_conf"][::std::mem::size_of::<VCL_conf>() - 208usize];
+    ["Alignment of VCL_conf"][::std::mem::align_of::<VCL_conf>() - 8usize];
+    ["Offset of field: VCL_conf::magic"][::std::mem::offset_of!(VCL_conf, magic) - 0usize];
+    ["Offset of field: VCL_conf::syntax"][::std::mem::offset_of!(VCL_conf, syntax) - 4usize];
+    ["Offset of field: VCL_conf::default_director"]
+        [::std::mem::offset_of!(VCL_conf, default_director) - 8usize];
+    ["Offset of field: VCL_conf::default_probe"]
+        [::std::mem::offset_of!(VCL_conf, default_probe) - 16usize];
+    ["Offset of field: VCL_conf::nref"][::std::mem::offset_of!(VCL_conf, nref) - 24usize];
+    ["Offset of field: VCL_conf::ref_"][::std::mem::offset_of!(VCL_conf, ref_) - 32usize];
+    ["Offset of field: VCL_conf::nsrc"][::std::mem::offset_of!(VCL_conf, nsrc) - 40usize];
+    ["Offset of field: VCL_conf::nsub"][::std::mem::offset_of!(VCL_conf, nsub) - 44usize];
+    ["Offset of field: VCL_conf::srcname"][::std::mem::offset_of!(VCL_conf, srcname) - 48usize];
+    ["Offset of field: VCL_conf::srcbody"][::std::mem::offset_of!(VCL_conf, srcbody) - 56usize];
+    ["Offset of field: VCL_conf::nvmod"][::std::mem::offset_of!(VCL_conf, nvmod) - 64usize];
+    ["Offset of field: VCL_conf::instance_info"]
+        [::std::mem::offset_of!(VCL_conf, instance_info) - 72usize];
+    ["Offset of field: VCL_conf::event_vcl"][::std::mem::offset_of!(VCL_conf, event_vcl) - 80usize];
+    ["Offset of field: VCL_conf::recv_func"][::std::mem::offset_of!(VCL_conf, recv_func) - 88usize];
+    ["Offset of field: VCL_conf::pipe_func"][::std::mem::offset_of!(VCL_conf, pipe_func) - 96usize];
+    ["Offset of field: VCL_conf::pass_func"]
+        [::std::mem::offset_of!(VCL_conf, pass_func) - 104usize];
+    ["Offset of field: VCL_conf::hash_func"]
+        [::std::mem::offset_of!(VCL_conf, hash_func) - 112usize];
+    ["Offset of field: VCL_conf::purge_func"]
+        [::std::mem::offset_of!(VCL_conf, purge_func) - 120usize];
+    ["Offset of field: VCL_conf::miss_func"]
+        [::std::mem::offset_of!(VCL_conf, miss_func) - 128usize];
+    ["Offset of field: VCL_conf::hit_func"][::std::mem::offset_of!(VCL_conf, hit_func) - 136usize];
+    ["Offset of field: VCL_conf::deliver_func"]
+        [::std::mem::offset_of!(VCL_conf, deliver_func) - 144usize];
+    ["Offset of field: VCL_conf::synth_func"]
+        [::std::mem::offset_of!(VCL_conf, synth_func) - 152usize];
+    ["Offset of field: VCL_conf::backend_fetch_func"]
+        [::std::mem::offset_of!(VCL_conf, backend_fetch_func) - 160usize];
+    ["Offset of field: VCL_conf::backend_refresh_func"]
+        [::std::mem::offset_of!(VCL_conf, backend_refresh_func) - 168usize];
+    ["Offset of field: VCL_conf::backend_response_func"]
+        [::std::mem::offset_of!(VCL_conf, backend_response_func) - 176usize];
+    ["Offset of field: VCL_conf::backend_error_func"]
+        [::std::mem::offset_of!(VCL_conf, backend_error_func) - 184usize];
+    ["Offset of field: VCL_conf::init_func"]
+        [::std::mem::offset_of!(VCL_conf, init_func) - 192usize];
+    ["Offset of field: VCL_conf::fini_func"]
+        [::std::mem::offset_of!(VCL_conf, fini_func) - 200usize];
+};
+impl Default for VCL_conf {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct __locale_data {
     pub _address: u8,
@@ -13315,5 +13547,15 @@ pub struct VSC_vbe {
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct vdi_ahealth {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct vpi_ref {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct vpi_ii {
     pub _address: u8,
 }
