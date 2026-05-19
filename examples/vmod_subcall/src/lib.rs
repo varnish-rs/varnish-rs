@@ -33,6 +33,7 @@ mod subcall {
         sub: Subroutine,
         #[shared_per_task] vars: &RefCell<Option<HashMap<String, String>>>,
     ) -> Result<(), VclError> {
+        let mut res = Ok(true);
         let key = var_name.to_string_lossy().into_owned();
 
         if vars.borrow().as_ref().is_some_and(|m| m.contains_key(&key)) {
@@ -52,7 +53,8 @@ mod subcall {
             vars.borrow_mut()
                 .get_or_insert_with(HashMap::new)
                 .insert(key.clone(), word);
-            if ctx.call_sub(sub)? {
+            res = ctx.call_sub(sub);
+            if res.is_err() {
                 break;
             }
         }
@@ -60,7 +62,7 @@ mod subcall {
             m.remove(&key);
         }
 
-        Ok(())
+        res.map(|_| ())
     }
 
     /// Return the current value of `var_name` as set by an enclosing `call_for_each`.
