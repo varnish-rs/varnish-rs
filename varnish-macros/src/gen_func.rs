@@ -209,7 +209,12 @@ impl FuncProcessor {
     }
 
     #[expect(clippy::too_many_lines)]
-    fn do_fn_param(&mut self, func_info: &FuncInfo, arg_info: &ParamTypeInfo, shared_types: &SharedTypes) {
+    fn do_fn_param(
+        &mut self,
+        func_info: &FuncInfo,
+        arg_info: &ParamTypeInfo,
+        shared_types: &SharedTypes,
+    ) {
         let arg_name_ident = arg_info.ident.to_ident();
         let arg_value = Self::get_arg_value(func_info, &arg_name_ident);
 

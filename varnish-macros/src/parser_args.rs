@@ -140,14 +140,22 @@ impl ParamType {
             unique! { has_shared_per_task, "#[shared_per_task] param is allowed only once in a function args list" }
             if as_ref_mut_ty(arg_ty).is_some() {
                 // Must be exactly `&mut Option<Box<T>>`
-                if as_ref_mut_ty(arg_ty).and_then(as_option_type).and_then(as_box_type).is_none() {
+                if as_ref_mut_ty(arg_ty)
+                    .and_then(as_option_type)
+                    .and_then(as_box_type)
+                    .is_none()
+                {
                     Err(error(arg_ty, SHARED_PER_TASK_TYPE_ERR))?;
                 }
                 parse_shared_mut(&mut shared_types.shared_per_task_ty, arg_ty)?;
                 Self::SharedPerTaskMut
             } else if as_ref_ty(arg_ty).and_then(as_ref_cell_type).is_some() {
                 // Must be exactly `&RefCell<Option<T>>`
-                if as_ref_ty(arg_ty).and_then(as_ref_cell_type).and_then(as_option_type).is_none() {
+                if as_ref_ty(arg_ty)
+                    .and_then(as_ref_cell_type)
+                    .and_then(as_option_type)
+                    .is_none()
+                {
                     Err(error(arg_ty, SHARED_PER_TASK_TYPE_ERR))?;
                 }
                 parse_shared_ref_cell(&mut shared_types.shared_per_task_ty, arg_ty)?;
