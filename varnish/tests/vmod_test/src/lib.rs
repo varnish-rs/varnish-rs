@@ -16,9 +16,7 @@ mod rustest {
     use std::time::Duration;
 
     use varnish::ffi::{VCL_BLOB, VCL_STRING};
-    use varnish::vcl::{
-        CowProbe, Ctx, Event, FetchFilters, Probe, Request, VclError, Workspace,
-    };
+    use varnish::vcl::{CowProbe, Ctx, Event, FetchFilters, Probe, Request, VclError, Workspace};
 
     use super::VFPTest;
 
