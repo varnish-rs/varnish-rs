@@ -132,7 +132,7 @@ impl<'a> Ctx<'a> {
     /// state or incompatible subroutine type).
     pub fn call_sub(&mut self, sub: Subroutine) -> Result<bool, VclError> {
         self.check_call_sub(sub)?;
-        unsafe { VRT_call(self.raw, sub.vcl_ptr()) }
+        unsafe { VRT_call(self.raw, sub.vcl_ptr()) };
         Ok(self.is_handled())
     }
 

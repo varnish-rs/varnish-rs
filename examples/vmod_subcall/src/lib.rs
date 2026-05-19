@@ -38,6 +38,7 @@ mod subcall {
         var_name: &CStr,
         sub: Subroutine,
     ) -> Result<(), VclError> {
+        let mut res = Ok(false);
         let key = var_name.to_string_lossy().into_owned();
 
         crate::VARS.with(|v| {
@@ -60,7 +61,8 @@ mod subcall {
                     .get_or_insert_with(HashMap::new)
                     .insert(key.clone(), word.clone())
             });
-            if ctx.call_sub(sub)? {
+            res = ctx.call_sub(sub);
+            if res.is_err() {
                 break;
             }
         }
@@ -70,7 +72,7 @@ mod subcall {
             }
         });
 
-        Ok(())
+        res.map(|_| ())
     }
 
     /// Return the current value of `var_name` as set by an enclosing `call_for_each`.
