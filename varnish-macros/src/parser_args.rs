@@ -132,10 +132,15 @@ impl ParamType {
 
         let arg_ty = pat_ty.ty.as_ref();
         Ok(if is_per_task.is_some() {
-            parse_shared_mut(&mut shared_types.shared_per_task_ty, arg_ty)?;
             not_in! { Event, "Event functions must not have any #[shared_per_task] arguments." }
             unique! { has_shared_per_task, "#[shared_per_task] param is allowed only once in a function args list" }
-            Self::SharedPerTask
+            if as_ref_mut_ty(arg_ty).is_some() {
+                parse_shared_mut(&mut shared_types.shared_per_task_ty, arg_ty)?;
+                Self::SharedPerTaskMut
+            } else {
+                parse_shared_ref(&mut shared_types.shared_per_task_ty, arg_ty)?;
+                Self::SharedPerTaskRef
+            }
         } else if is_per_vcl.is_some() {
             if matches!(status.func_type, Constructor | Event) {
                 parse_shared_mut(&mut shared_types.shared_per_vcl_ty, arg_ty)?;

@@ -85,7 +85,7 @@ VmodInfo {
                 ParamTypeInfo {
                     ident: "tsk",
                     docs: "",
-                    ty: SharedPerTask,
+                    ty: SharedPerTaskMut,
                 },
             ],
             output_ty: Default,
@@ -100,7 +100,48 @@ VmodInfo {
                 ParamTypeInfo {
                     ident: "tsk",
                     docs: "",
-                    ty: SharedPerTask,
+                    ty: SharedPerTaskMut,
+                },
+                ParamTypeInfo {
+                    ident: "op",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: Null,
+                            ty_info: I64,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "per_tsk_ref",
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "tsk",
+                    docs: "",
+                    ty: SharedPerTaskRef,
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "per_tsk_ref_opt",
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "tsk",
+                    docs: "",
+                    ty: SharedPerTaskRef,
                 },
                 ParamTypeInfo {
                     ident: "op",
@@ -161,7 +202,7 @@ VmodInfo {
                         ParamTypeInfo {
                             ident: "tsk",
                             docs: "this comment is ignored too",
-                            ty: SharedPerTask,
+                            ty: SharedPerTaskMut,
                         },
                         ParamTypeInfo {
                             ident: "vcl",
@@ -186,7 +227,7 @@ VmodInfo {
                         ParamTypeInfo {
                             ident: "tsk",
                             docs: "",
-                            ty: SharedPerTask,
+                            ty: SharedPerTaskMut,
                         },
                         ParamTypeInfo {
                             ident: "vcl",
@@ -222,7 +263,7 @@ VmodInfo {
                         ParamTypeInfo {
                             ident: "tsk",
                             docs: "",
-                            ty: SharedPerTask,
+                            ty: SharedPerTaskMut,
                         },
                         ParamTypeInfo {
                             ident: "vcl",

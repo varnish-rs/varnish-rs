@@ -8,7 +8,7 @@ VMOD_JSON_SPEC
     "2.0",
     "task",
     "Vmod_vmod_task_Func",
-    "d3254ccf9860c2c9a8db4e739800906db26805bc168f4b8f497e3685770707e1",
+    "1b4f8f74db7c125dbbd311dd74942e3c5223e09b63ff3999a03f526b24d67eb9",
     "Varnish (version) (hash)",
     "0",
     "0"
@@ -48,6 +48,22 @@ struct arg_vmod_task_per_tsk_opt {
 typedef VCL_VOID td_vmod_task_per_tsk_opt(
     VRT_CTX,
     struct arg_vmod_task_per_tsk_opt *
+);
+
+typedef VCL_VOID td_vmod_task_per_tsk_ref(
+    VRT_CTX,
+    struct vmod_priv *
+);
+
+struct arg_vmod_task_per_tsk_ref_opt {
+  struct vmod_priv * tsk;
+  char valid_op;
+  VCL_INT op;
+};
+
+typedef VCL_VOID td_vmod_task_per_tsk_ref_opt(
+    VRT_CTX,
+    struct arg_vmod_task_per_tsk_ref_opt *
 );
 
 typedef VCL_VOID td_vmod_task_PerVcl__init(
@@ -95,6 +111,8 @@ struct Vmod_vmod_task_Func {
   td_vmod_task_per_vcl_opt *f_per_vcl_opt;
   td_vmod_task_per_tsk_val *f_per_tsk_val;
   td_vmod_task_per_tsk_opt *f_per_tsk_opt;
+  td_vmod_task_per_tsk_ref *f_per_tsk_ref;
+  td_vmod_task_per_tsk_ref_opt *f_per_tsk_ref_opt;
   td_vmod_task_PerVcl__init *f_PerVcl__init;
   td_vmod_task_PerVcl__fini *f_PerVcl__fini;
   td_vmod_task_PerVcl_both *f_PerVcl_both;
@@ -173,6 +191,46 @@ static struct Vmod_vmod_task_Func Vmod_vmod_task_Func;"
       ],
       "Vmod_vmod_task_Func.f_per_tsk_opt",
       "struct arg_vmod_task_per_tsk_opt",
+      [
+        "PRIV_TASK",
+        "tsk",
+        "tsk"
+      ],
+      [
+        "INT",
+        "op",
+        "op",
+        null,
+        null,
+        true
+      ]
+    ]
+  ],
+  [
+    "$FUNC",
+    "per_tsk_ref",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_task_Func.f_per_tsk_ref",
+      "",
+      [
+        "PRIV_TASK",
+        "tsk",
+        "tsk"
+      ]
+    ]
+  ],
+  [
+    "$FUNC",
+    "per_tsk_ref_opt",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_task_Func.f_per_tsk_ref_opt",
+      "struct arg_vmod_task_per_tsk_ref_opt",
       [
         "PRIV_TASK",
         "tsk",

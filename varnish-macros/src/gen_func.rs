@@ -241,7 +241,19 @@ impl FuncProcessor {
                 };
                 self.func_call_vars.push(quote! { #input_expr });
             }
-            ParamType::SharedPerTask => {
+            ParamType::SharedPerTaskRef => {
+                self.add_wrapper_arg(func_info, quote! { #arg_name_ident: *const vmod_priv });
+                self.func_call_vars.push(quote! {
+                    #arg_value
+                        .as_ref()
+                        .and_then(|v| v.get_ref())
+                });
+                let json =
+                    Self::arg_to_json(arg_info.ident.clone(), false, "PRIV_TASK", Value::Null);
+                self.args_json.push(json);
+                self.add_cproto_arg(func_info, "struct vmod_priv *", &arg_info.ident);
+            }
+            ParamType::SharedPerTaskMut => {
                 self.add_wrapper_arg(func_info, quote! { #arg_name_ident: *mut vmod_priv });
                 let temp_var = format_ident!("__obj_per_task");
                 self.func_pre_call
