@@ -4,7 +4,7 @@ fn main() {}
 
 #[vmod]
 mod args {
-    use varnish::vcl::Subroutine;
+    use varnish::vcl::subroutine::Subroutine;
 
     pub fn arg_subroutine(_sub: Subroutine) {}
 }

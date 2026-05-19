@@ -14,7 +14,7 @@ mod subcall {
     use std::ffi::CStr;
 
     use varnish::ffi::{VRT_call, VCL_SUB};
-    use varnish::vcl::{Ctx, Subroutine, VclError};
+    use varnish::vcl::{Ctx, subroutine::Subroutine, VclError};
 
     /// Call a VCL subroutine using the raw [`VCL_SUB`] pointer directly.
     ///

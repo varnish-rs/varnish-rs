@@ -4,7 +4,7 @@ fn main() {}
 
 #[vmod]
 mod returns {
-    use varnish::vcl::Subroutine;
+    use varnish::vcl::subroutine::Subroutine;
 
     pub fn return_subroutine() -> Subroutine {
         unimplemented!()
