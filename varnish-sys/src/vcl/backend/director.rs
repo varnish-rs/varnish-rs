@@ -1,11 +1,13 @@
 use std::ffi::{c_char, c_void, CString};
 use std::ptr;
 use std::ptr::null;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use crate::ffi::{VclEvent, VCL_BACKEND, VCL_BOOL, VCL_TIME};
 use crate::vcl::{Buffer, Ctx, VclResult};
 use crate::{ffi, validate_director};
 
+use super::backend_main::BackendShim;
 use super::{BackendRef, ProbeResult};
 
 /// Trait for wrapping a C `struct director`
@@ -77,7 +79,7 @@ pub trait VclDirector {
 pub struct Director<D: VclDirector> {
     #[expect(dead_code)]
     methods: Box<ffi::vdi_methods>,
-    inner: Box<D>,
+    inner: Box<BackendShim<D>>,
     #[expect(dead_code)]
     ctype: CString,
     backend_ref: BackendRef,
@@ -89,7 +91,10 @@ impl<D: VclDirector> Director<D> {
     /// This registers the director with Varnish and sets up the appropriate callbacks.
     /// The director will be automatically unregistered when dropped.
     pub fn new(ctx: &mut Ctx, director_type: &str, vcl_name: &str, inner: D) -> VclResult<Self> {
-        let mut inner = Box::new(inner);
+        let mut inner = Box::new(BackendShim {
+            inner,
+            deregistered: AtomicBool::new(false),
+        });
         let ctype = CString::new(director_type).map_err(|e| e.to_string())?;
         let cname = CString::new(vcl_name).map_err(|e| e.to_string())?;
         let methods = Box::new(ffi::vdi_methods {
@@ -108,11 +113,13 @@ impl<D: VclDirector> Director<D> {
             list: Some(wrap_director_list::<D>),
         });
 
+        // priv_ points to BackendShim<D>; #[repr(C)] with inner first means
+        // casting it back to *const D in the other wrap_* callbacks remains valid.
         let bep = unsafe {
             ffi::VRT_AddDirector(
                 ctx.raw,
                 &raw const *methods,
-                ptr::from_mut::<D>(&mut *inner).cast::<c_void>(),
+                ptr::from_mut::<BackendShim<D>>(&mut *inner).cast::<c_void>(),
                 c"%.*s".as_ptr(),
                 cname.as_bytes().len(),
                 cname.as_ptr().cast::<c_char>(),
@@ -140,12 +147,12 @@ impl<D: VclDirector> Director<D> {
 
     /// Access the bep director implementation
     pub fn get_inner(&self) -> &D {
-        &self.inner
+        &self.inner.inner
     }
 
     /// Access the bep director implementation mutably
     pub fn get_inner_mut(&mut self) -> &mut D {
-        &mut self.inner
+        &mut self.inner.inner
     }
 
     /// Resolve this director to a backend using `VRT_DirectorResolve`
@@ -164,9 +171,15 @@ impl<D: VclDirector> Director<D> {
 
 impl<D: VclDirector> Drop for Director<D> {
     fn drop(&mut self) {
+        // wrap_director_event already calls VRT_DelDirector when VCL_EVENT_DISCARD
+        // fires on the normal teardown path (per-VCL VMOD object dropped after
+        // vcl_KillBackends). Only fall through here if that didn't happen — e.g. the
+        // Director was dropped while the VCL is still warm.
         unsafe {
-            let mut bep = self.backend_ref.vcl_ptr();
-            ffi::VRT_DelDirector(&raw mut bep);
+            if !self.inner.deregistered.swap(true, Ordering::AcqRel) {
+                let mut bep = self.backend_ref.vcl_ptr();
+                ffi::VRT_DelDirector(&raw mut bep);
+            }
         }
     }
 }
@@ -231,6 +244,17 @@ unsafe extern "C" fn wrap_director_list<D: VclDirector>(
 
 unsafe extern "C" fn wrap_director_event<D: VclDirector>(director: VCL_BACKEND, ev: VclEvent) {
     let dir = validate_director(director);
-    let dir_impl: &D = &*dir.priv_.cast::<D>();
-    dir_impl.event(ev);
+    let shim: &BackendShim<D> = &*dir.priv_.cast::<BackendShim<D>>();
+    shim.inner.event(ev);
+
+    // See wrap_event in backend_main.rs for the rationale: vinyld's
+    // `vcl_KillBackends` asserts that VCL_EVENT_DISCARD synchronously removes the
+    // director from `vdire->directors`, which only happens if we call
+    // VRT_DelDirector here.
+    if matches!(ev, VclEvent::Discard)
+        && !shim.deregistered.swap(true, Ordering::AcqRel)
+    {
+        let mut bep = director;
+        ffi::VRT_DelDirector(&raw mut bep);
+    }
 }

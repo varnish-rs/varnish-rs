@@ -1,3 +1,5 @@
+use std::mem::ManuallyDrop;
+
 use varnish::vcl::{Backend, Ctx, VclBackend, VclError, VclResponse};
 
 varnish::run_vtc_tests!("tests/*.vtc");
@@ -7,13 +9,25 @@ struct parrot {
     backend: Backend<ParrotBackend, ResponseBody>,
 }
 
+/// A `parrot` variant whose [`Backend`] is wrapped in `ManuallyDrop` so the
+/// per-VCL fini cannot drop it. This deliberately reproduces the production
+/// pattern (e.g. ghost storing backends inside `Arc`s that outlive the fini
+/// callback) that triggers the `vcl_KillBackends()` assertion when the
+/// director's `VCL_EVENT_DISCARD` handler is not wired to `VRT_DelDirector`.
+#[allow(non_camel_case_types)]
+struct leaky_parrot {
+    backend: ManuallyDrop<Backend<ParrotBackend, ResponseBody>>,
+}
+
 /// a simple STRING dictionary in your VCL
 #[varnish::vmod(docs = "README.md")]
 mod be {
     use varnish::ffi::VCL_BACKEND;
     use varnish::vcl::{Backend, Ctx, VclError};
 
-    use super::{parrot, ParrotBackend};
+    use std::mem::ManuallyDrop;
+
+    use super::{leaky_parrot, parrot, ParrotBackend};
 
     /// parrot is our VCL object, which just holds a rust Backend,
     /// it only needs two functions:
@@ -42,6 +56,37 @@ mod be {
             )?;
 
             Ok(parrot { backend })
+        }
+
+        pub unsafe fn backend(&self) -> VCL_BACKEND {
+            self.backend.as_ref().vcl_ptr()
+        }
+    }
+
+    /// `leaky_parrot` wraps its [`Backend`] in `ManuallyDrop` so the per-VCL
+    /// fini does NOT drop the Backend. The director must therefore be
+    /// deregistered via the `VCL_EVENT_DISCARD` event handler, not via `Drop`.
+    ///
+    /// This is the test harness for the vcl_KillBackends assertion fix.
+    impl leaky_parrot {
+        pub fn new(
+            ctx: &mut Ctx,
+            #[vcl_name] name: &str,
+            to_repeat: &str,
+        ) -> Result<Self, VclError> {
+            let backend = Backend::new(
+                ctx,
+                "leaky_parrot",
+                name,
+                ParrotBackend {
+                    data: Vec::from(to_repeat),
+                },
+                false,
+            )?;
+
+            Ok(leaky_parrot {
+                backend: ManuallyDrop::new(backend),
+            })
         }
 
         pub unsafe fn backend(&self) -> VCL_BACKEND {

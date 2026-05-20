@@ -1,0 +1,62 @@
+varnishtest "Backend deregisters on VCL discard when Drop doesn't run"
+
+# Regression test for the panic
+#   "Assert error in vcl_KillBackends(), cache/cache_vcl.c line 704:"
+#   "Condition(VTAILQ_EMPTY(&vdire->directors)) not true."
+#
+# Custom backends added via `Backend::new` / `Director::new` get registered with
+# `VRT_AddDirector` but were only deregistered from Backend::drop / Director::drop.
+# When the per-VCL VMOD object that owns the Backend is destroyed inside VCL_EVENT_DISCARD
+# (the normal teardown path), Drop runs in time and everything works. But when the
+# Backend lives behind an `Arc` (or any reference that outlives the per-VCL fini)
+# — the way ghost stores backends in a shared `BackendPool` — Backend::drop never
+# runs in time, the director stays on `vdire->directors`, and `vcl_KillBackends`'s
+# trailing `assert(VTAILQ_EMPTY(&vdire->directors))` panics the child.
+#
+# To reproduce that deterministically without dragging in extra dependencies,
+# `leaky_parrot` parks its Backend in a process-wide `OnceLock<Mutex<Vec<…>>>`,
+# so the per-VCL fini cannot drop it. The only way the director gets removed
+# from the list is the `wrap_event` callback acting on VCL_EVENT_DISCARD.
+
+server s1 {} -start
+
+varnish v1 -vcl+backend {
+    import be from "${vmod}";
+
+    sub vcl_init {
+        new leaky = be.leaky_parrot("doesn't matter");
+    }
+
+    sub vcl_recv {
+        set req.backend_hint = leaky.backend();
+        return (pass);
+    }
+} -start
+
+# Sanity check that the backend wires up.
+client c1 {
+    txreq
+    rxresp
+    expect resp.body == "doesn't matter"
+} -run
+
+# Swap to a different VCL and discard the first. The discard triggers
+# vcl_KillBackends → VCL_EVENT_DISCARD on the leaky_parrot director, which
+# must call VRT_DelDirector synchronously or the assertion at
+# cache_vcl.c:704 fires.
+varnish v1 -cliok {vcl.inline plain "vcl 4.1; backend default none;"}
+varnish v1 -cliok "vcl.use plain"
+varnish v1 -cliok "vcl.discard vcl1"
+
+# Force VCL_Poll on the next CLI command, which actually runs vcl_KillBackends.
+varnish v1 -cliok "backend.list"
+
+# Confirm the worker is still alive: if discard had panicked, the child would
+# be down and the next request would not get a clean 503.
+client c2 {
+    txreq
+    rxresp
+    expect resp.status == 503
+} -run
+
+varnish v1 -expect MAIN.client_req >= 2

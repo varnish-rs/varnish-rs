@@ -27,3 +27,13 @@ it only needs two functions:
 - `backend()`, so that we can produce a C pointer for varnish to use
 
 #### Method `BACKEND <object>.backend()`
+
+### Constructor `be.leaky_parrot(STRING to_repeat)`
+
+`leaky_parrot` wraps its [`Backend`] in `ManuallyDrop` so the per-VCL
+fini does NOT drop the Backend. The director must therefore be
+deregistered via the `VCL_EVENT_DISCARD` event handler, not via `Drop`.
+
+This is the test harness for the vcl_KillBackends assertion fix.
+
+#### Method `BACKEND <object>.backend()`

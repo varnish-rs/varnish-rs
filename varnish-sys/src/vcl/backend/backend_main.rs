@@ -5,6 +5,7 @@ use std::net::{SocketAddr, TcpStream};
 use std::os::unix::io::FromRawFd;
 use std::ptr;
 use std::ptr::{null, null_mut};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::SystemTime;
 
 use crate::ffi::{VclEvent, VfpStatus, VCL_BACKEND, VCL_BOOL, VCL_IP, VCL_TIME};
@@ -45,6 +46,25 @@ pub struct NativeVclResponseShim;
 
 impl VclResponse for NativeVclResponseShim {}
 
+/// Storage for the user's [`VclBackend`] implementation, paired with a flag
+/// tracking whether the director has been deregistered from VCL.
+///
+/// Lives behind a `Box` so its address is stable for the C side: a raw pointer
+/// to a `BackendShim<S>` is what we hand to `VRT_AddDirector` as the director's
+/// `priv_`. Because the struct is `#[repr(C)]` with `inner` as the first field,
+/// the same pointer can be read back as `*const S` (this is what
+/// [`get_backend`] relies on).
+///
+/// The `deregistered` flag is set when `VCL_EVENT_DISCARD` synchronously calls
+/// `VRT_DelDirector` from [`wrap_event`]; [`Backend::drop`] checks it to avoid
+/// a double-`VRT_DelDirector`.
+#[repr(C)]
+#[derive(Debug)]
+pub(super) struct BackendShim<S> {
+    pub(super) inner: S,
+    pub(super) deregistered: AtomicBool,
+}
+
 /// Fat wrapper around [`VCL_BACKEND`].
 ///
 /// It will handle almost all the necessary boilerplate needed to create a custom backend. Most importantly,
@@ -59,7 +79,7 @@ impl VclResponse for NativeVclResponseShim {}
 pub struct Backend<S: VclBackend<T>, T: VclResponse> {
     #[expect(dead_code)]
     methods: Box<ffi::vdi_methods>,
-    inner: Box<S>,
+    inner: Box<BackendShim<S>>,
     #[expect(dead_code)]
     ctype: CString,
     phantom: PhantomData<T>,
@@ -72,7 +92,7 @@ impl<S: VclBackend<T>, T: VclResponse> Backend<S, T> {
     /// Access the inner type wrapped by [Backend]. Note that it isn't `mut` as other threads are
     /// likely to have access to it too.
     pub fn get_inner(&self) -> &S {
-        &self.inner
+        &self.inner.inner
     }
 
     /// Create a new builder, wrapping the `inner` structure (that implements [`VclBackend`]),
@@ -85,7 +105,10 @@ impl<S: VclBackend<T>, T: VclResponse> Backend<S, T> {
         be: S,
         has_probe: bool,
     ) -> VclResult<Self> {
-        let mut inner = Box::new(be);
+        let mut inner = Box::new(BackendShim {
+            inner: be,
+            deregistered: AtomicBool::new(false),
+        });
         let ctype: CString = CString::new(backend_type).map_err(|e| e.to_string())?;
         let cname: CString = CString::new(backend_id).map_err(|e| e.to_string())?;
         let methods = Box::new(ffi::vdi_methods {
@@ -104,11 +127,15 @@ impl<S: VclBackend<T>, T: VclResponse> Backend<S, T> {
             release: None,
         });
 
+        // The C side stores a raw pointer to the BackendShim as the director's priv_.
+        // Because BackendShim is #[repr(C)] with `inner: S` first, the same pointer
+        // can be read back as either &BackendShim<S> (by wrap_event) or &S (by
+        // get_backend / the other wrap_* callbacks).
         let bep = unsafe {
             ffi::VRT_AddDirector(
                 ctx.raw,
                 &raw const *methods,
-                ptr::from_mut::<S>(&mut *inner).cast::<c_void>(),
+                ptr::from_mut::<BackendShim<S>>(&mut *inner).cast::<c_void>(),
                 c"%.*s".as_ptr(),
                 cname.as_bytes().len(),
                 cname.as_ptr().cast::<c_char>(),
@@ -252,11 +279,16 @@ impl VclResponse for () {
 
 impl<S: VclBackend<T>, T: VclResponse> Drop for Backend<S, T> {
     fn drop(&mut self) {
+        // For VclBackend-backed directors, wrap_event already calls VRT_DelDirector when
+        // VCL_EVENT_DISCARD fires (the normal teardown path: the per-VCL VMOD object that
+        // owns us is dropped *after* vcl_KillBackends has run). Only fall through to
+        // VRT_DelDirector here if that didn't happen — e.g. the Backend was dropped before
+        // the VCL was discarded.
         unsafe {
             let mut bep = self.backend_ref.vcl_ptr();
             if self.native_configuration.is_some() {
                 ffi::VRT_delete_backend(null(), &raw mut bep);
-            } else {
+            } else if !self.inner.deregistered.swap(true, Ordering::AcqRel) {
                 ffi::VRT_DelDirector(&raw mut bep);
             }
         };
@@ -590,7 +622,10 @@ impl<'a> NativeBackendBuilder<'a> {
 
         Ok(Backend {
             methods,
-            inner: Box::new(NativeVclBackendShim),
+            inner: Box::new(BackendShim {
+                inner: NativeVclBackendShim,
+                deregistered: AtomicBool::new(false),
+            }),
             ctype: CString::new("native").expect("\"native\" is a valid C string"),
             phantom: PhantomData,
             backend_ref,
@@ -648,8 +683,26 @@ unsafe extern "C" fn vfp_pull<T: VclResponse>(
 }
 
 unsafe extern "C" fn wrap_event<S: VclBackend<T>, T: VclResponse>(be: VCL_BACKEND, ev: VclEvent) {
-    let backend: &S = get_backend(validate_director(be));
-    backend.event(ev);
+    let dir = validate_director(be);
+    let shim = dir
+        .priv_
+        .cast::<BackendShim<S>>()
+        .as_ref()
+        .expect("backend priv_ pointer is null");
+    shim.inner.event(ev);
+
+    // Varnish (and especially vinyld) requires that on VCL_EVENT_DISCARD the director
+    // is removed from `vdire->directors` synchronously inside the event callback. The
+    // canonical built-in backend handler (`vbe_dir_event`) does this via `VRT_DelDirector`;
+    // we must do the same, otherwise `vcl_KillBackends`'s
+    // `assert(VTAILQ_EMPTY(&vdire->directors))` at cache_vcl.c:704 trips and the child
+    // panics. Drop will see the `deregistered` flag and skip its own `VRT_DelDirector`.
+    if matches!(ev, VclEvent::Discard)
+        && !shim.deregistered.swap(true, Ordering::AcqRel)
+    {
+        let mut bep = be;
+        ffi::VRT_DelDirector(&raw mut bep);
+    }
 }
 
 unsafe extern "C" fn wrap_list<S: VclBackend<T>, T: VclResponse>(
