@@ -21,6 +21,12 @@ static RE_VARNISH_VER: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"Varnish (\d+\.|trunk )[-+. 0-9a-z]+").expect("Varnish version regex must be valid")
 });
 
+static RE_GLOB_POS: LazyLock<Regex> = LazyLock::new(|| {
+    // Glob pattern error positions are absolute (include CARGO_MANIFEST_DIR length), so they
+    // differ between machines. Normalize to "near position N:" for stable snapshots.
+    Regex::new(r"near position \d+:").expect("glob position regex must be valid")
+});
+
 static RE_STR_BLOB: LazyLock<Regex> = LazyLock::new(|| {
     // Use regex to remove "const JSON: &CStr = c\"...\";"  and  "const cproto: &CStr = c\"...\";"
     Regex::new(r#"const ([a-zA-Z0-9_]+): &CStr = c"([^\n]+)";\n"#)
@@ -60,6 +66,7 @@ fn run_vtc_tests_macro_expansion() {
         for (name, input) in cases {
             let tokens = vtc_tests::generate(input.clone());
             let rendered = render_tokens(&tokens.to_string()).replace(manifest_dir, "{MANIFEST_DIR}");
+            let rendered = RE_GLOB_POS.replace_all(&rendered, "near position N:").into_owned();
             assert_snapshot!(*name, rendered);
         }
     });
