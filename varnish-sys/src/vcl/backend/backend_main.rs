@@ -697,9 +697,7 @@ unsafe extern "C" fn wrap_event<S: VclBackend<T>, T: VclResponse>(be: VCL_BACKEN
     // we must do the same, otherwise `vcl_KillBackends`'s
     // `assert(VTAILQ_EMPTY(&vdire->directors))` at cache_vcl.c:704 trips and the child
     // panics. Drop will see the `deregistered` flag and skip its own `VRT_DelDirector`.
-    if matches!(ev, VclEvent::Discard)
-        && !shim.deregistered.swap(true, Ordering::AcqRel)
-    {
+    if matches!(ev, VclEvent::Discard) && !shim.deregistered.swap(true, Ordering::AcqRel) {
         let mut bep = be;
         ffi::VRT_DelDirector(&raw mut bep);
     }

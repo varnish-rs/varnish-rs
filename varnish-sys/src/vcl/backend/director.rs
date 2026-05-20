@@ -251,9 +251,7 @@ unsafe extern "C" fn wrap_director_event<D: VclDirector>(director: VCL_BACKEND, 
     // `vcl_KillBackends` asserts that VCL_EVENT_DISCARD synchronously removes the
     // director from `vdire->directors`, which only happens if we call
     // VRT_DelDirector here.
-    if matches!(ev, VclEvent::Discard)
-        && !shim.deregistered.swap(true, Ordering::AcqRel)
-    {
+    if matches!(ev, VclEvent::Discard) && !shim.deregistered.swap(true, Ordering::AcqRel) {
         let mut bep = director;
         ffi::VRT_DelDirector(&raw mut bep);
     }
