@@ -1,0 +1,16 @@
+---
+source: varnish-macros/src/vtc_tests.rs
+expression: result
+---
+"hello_world" => "hello_world"
+"has-dashes" => "has_dashes"
+"a-b-c" => "a_b_c"
+"foo.bar" => "foo_bar"
+"foo bar" => "foo_bar"
+"01_numeric" => "_01_numeric"
+"123" => "_123"
+"9test" => "_9test"
+"" => ""
+"---" => "___"
+"ABC" => "ABC"
+"abc123" => "abc123"

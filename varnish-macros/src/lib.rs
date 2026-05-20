@@ -21,6 +21,7 @@ mod names;
 mod parser;
 mod parser_args;
 mod parser_utils;
+mod vtc_tests;
 
 pub(crate) type ProcResult<T> = Result<T, Errors>;
 
@@ -78,4 +79,20 @@ pub fn vsc_metric(input: pm::TokenStream) -> pm::TokenStream {
     derive_vsc_metric(&input)
         .unwrap_or_else(Errors::into_compile_error)
         .into()
+}
+
+/// Generate one `#[test]` function per VTC file matching the glob pattern.
+///
+/// Globs are resolved at compile time, relative to `CARGO_MANIFEST_DIR`. Each
+/// matched file produces a test named `vtc_<sanitized_stem>`. An optional
+/// second argument (`true`) enables verbose `varnishtest` output.
+///
+/// Use it from your VMOD crate's `lib.rs`:
+///
+/// ```ignore
+/// varnish::run_vtc_tests!("tests/*.vtc");
+/// ```
+#[proc_macro]
+pub fn run_vtc_tests(input: pm::TokenStream) -> pm::TokenStream {
+    vtc_tests::generate(input.into()).into()
 }
