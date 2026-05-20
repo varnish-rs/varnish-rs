@@ -1,0 +1,6 @@
+---
+source: varnish-macros/src/tests.rs
+---
+::core::compile_error!(
+    "failed to parse glob pattern \"{MANIFEST_DIR}/tests/[unclosed_bracket\": Pattern syntax error near position 26: invalid range pattern",
+)

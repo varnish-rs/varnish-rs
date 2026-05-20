@@ -182,3 +182,72 @@ fn sanitize_ident(name: &str) -> String {
     }
     out
 }
+
+#[cfg(test)]
+mod tests {
+    use super::sanitize_ident;
+
+    #[test]
+    fn alphanumeric_unchanged() {
+        assert_eq!(sanitize_ident("hello_world"), "hello_world");
+        assert_eq!(sanitize_ident("abc123"), "abc123");
+        assert_eq!(sanitize_ident("ABC"), "ABC");
+    }
+
+    #[test]
+    fn dashes_become_underscores() {
+        assert_eq!(sanitize_ident("has-dashes"), "has_dashes");
+        assert_eq!(sanitize_ident("a-b-c"), "a_b_c");
+    }
+
+    #[test]
+    fn dots_become_underscores() {
+        assert_eq!(sanitize_ident("foo.bar"), "foo_bar");
+    }
+
+    #[test]
+    fn spaces_become_underscores() {
+        assert_eq!(sanitize_ident("foo bar"), "foo_bar");
+    }
+
+    #[test]
+    fn numeric_prefix_gets_leading_underscore() {
+        assert_eq!(sanitize_ident("01_numeric"), "_01_numeric");
+        assert_eq!(sanitize_ident("123"), "_123");
+        assert_eq!(sanitize_ident("9test"), "_9test");
+    }
+
+    #[test]
+    fn empty_string_unchanged() {
+        assert_eq!(sanitize_ident(""), "");
+    }
+
+    #[test]
+    fn all_special_chars() {
+        assert_eq!(sanitize_ident("---"), "___");
+    }
+
+    #[test]
+    fn sanitize_ident_cases() {
+        let cases = [
+            "hello_world",
+            "has-dashes",
+            "a-b-c",
+            "foo.bar",
+            "foo bar",
+            "01_numeric",
+            "123",
+            "9test",
+            "",
+            "---",
+            "ABC",
+            "abc123",
+        ];
+        let result = cases
+            .iter()
+            .map(|s| format!("{s:?} => {:?}", sanitize_ident(s)))
+            .collect::<Vec<_>>()
+            .join("\n");
+        insta::assert_snapshot!(result);
+    }
+}
