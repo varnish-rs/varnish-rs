@@ -259,7 +259,6 @@ pub enum OutputTy {
     SelfType,
     ParamType(ParamTy),
     String,
-    Bytes,
     VclType(String), // Raw VCL type, stored as original "VCL_..." string
 }
 
@@ -269,7 +268,7 @@ impl OutputTy {
             // Self is returned by obj constructors which are void in VCC
             Self::Default | Self::SelfType => "VOID".into(),
             Self::ParamType(ty) => ty.to_vcc_type().into(),
-            Self::Bytes | Self::String => "STRING".into(),
+            Self::String => "STRING".into(),
             Self::VclType(ty) => ty[4..].to_string(), // remove "VCL_" prefix
         }
     }
@@ -279,7 +278,7 @@ impl OutputTy {
         //            statement in the `varnish-macros/src/generator.rs` file.
         match self {
             Self::ParamType(ty) => ty.to_c_type().into(),
-            Self::Bytes | Self::String => "VCL_STRING".into(),
+            Self::String => "VCL_STRING".into(),
             Self::SelfType | Self::Default => "VCL_VOID".into(),
             Self::VclType(ty) => ty.into(),
         }

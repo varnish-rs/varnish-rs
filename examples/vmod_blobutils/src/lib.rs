@@ -11,6 +11,7 @@ varnish::run_vtc_tests!("tests/*.vtc");
 #[vmod]
 mod blobutils {
     use sha2::{Digest, Sha256};
+    use varnish::ffi::VCL_BLOB;
 
     /// Returns the length of a BLOB
     ///
@@ -56,13 +57,20 @@ mod blobutils {
         let mut hasher = Sha256::new();
         hasher.update(data);
         let hash = hasher.finalize();
-        let mut checksum = String::with_capacity(hash.len() * 2);
+        let mut out = String::with_capacity(hash.len() * 2);
         for byte in hash {
-            write!(&mut checksum, "{byte:02x}").expect("writing to String should not fail");
+            write!(&mut out, "{byte:02x}").expect("writing to String should not fail");
         }
-        checksum
+        out
     }
 
-    //    pub fn access_pointer(b: VCL_BLOB) {
-    //    }
+    /// Computes the SHA256 checksum of a blob passed as a raw VCL_BLOB pointer
+    ///
+    /// Example VCL:
+    /// ```vcl
+    /// set req.http.checksum = blobutils.checksum_from_pointer(blob);
+    /// ```
+    pub fn checksum_from_pointer(data: VCL_BLOB) -> String {
+        checksum(<&[u8]>::from(data))
+    }
 }

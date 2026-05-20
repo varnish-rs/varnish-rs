@@ -348,6 +348,8 @@ impl ParamTy {
                 return Some(Self::SocketAddr);
             } else if ident == "VCL_BACKEND" {
                 return Some(Self::VclType("VCL_BACKEND"));
+            } else if ident == "VCL_BLOB" {
+                return Some(Self::VclType("VCL_BLOB"));
             }
         }
 
@@ -406,7 +408,9 @@ impl OutputTy {
             }
         }
         if let Some(ty) = ParamTy::try_parse(ty) {
-            return Some(Self::ParamType(ty));
+            if !matches!(ty, ParamTy::Blob) {
+                return Some(Self::ParamType(ty));
+            }
         }
         if let Some(ident) = as_simple_ty(ty) {
             if ident == "String" {
@@ -422,15 +426,11 @@ impl OutputTy {
                     return Some(Self::String);
                 }
             }
-            if let Some(ty) = as_ref_ty(ty).and_then(as_slice_ty).and_then(as_simple_ty) {
-                if ty == "u8" {
-                    // `&[u8]`
-                    return Some(Self::Bytes);
-                }
-            }
             // Try to parse as Option<ParamTy> (e.g., Option<BackendRef>)
             if let Some(param_ty) = ParamTy::try_parse(ty) {
-                return Some(Self::ParamType(param_ty));
+                if !matches!(param_ty, ParamTy::Blob) {
+                    return Some(Self::ParamType(param_ty));
+                }
             }
         }
         if let Tuple(v) = ty {
