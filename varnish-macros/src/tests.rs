@@ -54,10 +54,7 @@ fn run_vtc_tests_macro_expansion() {
         ),
         ("parse_error", quote! { 42 }),
         ("invalid_glob", quote! { "tests/[unclosed_bracket" }),
-        (
-            "collision",
-            quote! { "tests/vtc_fixtures_collision/*.vtc" },
-        ),
+        ("collision", quote! { "tests/vtc_fixtures_collision/*.vtc" }),
     ];
     with_settings!({ omit_expression => true, prepend_module_to_snapshot => false }, {
         for (name, input) in cases {
