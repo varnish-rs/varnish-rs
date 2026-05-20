@@ -1,0 +1,1 @@
+varnishtest "Fixture for proc-macro snapshot only; not executed."

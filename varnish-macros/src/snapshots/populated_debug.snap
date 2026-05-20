@@ -1,0 +1,81 @@
+---
+source: varnish-macros/src/tests.rs
+---
+#[cfg(test)]
+#[allow(dead_code)]
+const _VTC_REBUILD_ANCHOR_0: &[u8] = include_bytes!(
+    "{MANIFEST_DIR}/tests/vtc_fixtures/01_numeric_prefix.vtc",
+);
+#[cfg(test)]
+#[allow(dead_code)]
+const _VTC_REBUILD_ANCHOR_1: &[u8] = include_bytes!(
+    "{MANIFEST_DIR}/tests/vtc_fixtures/basic.vtc",
+);
+#[cfg(test)]
+#[allow(dead_code)]
+const _VTC_REBUILD_ANCHOR_2: &[u8] = include_bytes!(
+    "{MANIFEST_DIR}/tests/vtc_fixtures/has-dashes.vtc",
+);
+#[cfg(test)]
+#[test]
+fn vtc__01_numeric_prefix() {
+    let dylib_path_var = if cfg!(target_os = "macos") {
+        "DYLD_FALLBACK_LIBRARY_PATH"
+    } else {
+        "LD_LIBRARY_PATH"
+    };
+    let dylib_path = ::std::env::var(dylib_path_var).unwrap_or_default();
+    if let Err(err) = ::varnish::varnishtest::run_one_test(
+        &dylib_path,
+        env!("CARGO_PKG_NAME"),
+        ::std::path::Path::new(
+            "{MANIFEST_DIR}/tests/vtc_fixtures/01_numeric_prefix.vtc",
+        ),
+        option_env!("VARNISHTEST_DURATION").unwrap_or("10s"),
+        true,
+    ) {
+        panic!("{err}");
+    }
+}
+#[cfg(test)]
+#[test]
+fn vtc_basic() {
+    let dylib_path_var = if cfg!(target_os = "macos") {
+        "DYLD_FALLBACK_LIBRARY_PATH"
+    } else {
+        "LD_LIBRARY_PATH"
+    };
+    let dylib_path = ::std::env::var(dylib_path_var).unwrap_or_default();
+    if let Err(err) = ::varnish::varnishtest::run_one_test(
+        &dylib_path,
+        env!("CARGO_PKG_NAME"),
+        ::std::path::Path::new(
+            "{MANIFEST_DIR}/tests/vtc_fixtures/basic.vtc",
+        ),
+        option_env!("VARNISHTEST_DURATION").unwrap_or("10s"),
+        true,
+    ) {
+        panic!("{err}");
+    }
+}
+#[cfg(test)]
+#[test]
+fn vtc_has_dashes() {
+    let dylib_path_var = if cfg!(target_os = "macos") {
+        "DYLD_FALLBACK_LIBRARY_PATH"
+    } else {
+        "LD_LIBRARY_PATH"
+    };
+    let dylib_path = ::std::env::var(dylib_path_var).unwrap_or_default();
+    if let Err(err) = ::varnish::varnishtest::run_one_test(
+        &dylib_path,
+        env!("CARGO_PKG_NAME"),
+        ::std::path::Path::new(
+            "{MANIFEST_DIR}/tests/vtc_fixtures/has-dashes.vtc",
+        ),
+        option_env!("VARNISHTEST_DURATION").unwrap_or("10s"),
+        true,
+    ) {
+        panic!("{err}");
+    }
+}
