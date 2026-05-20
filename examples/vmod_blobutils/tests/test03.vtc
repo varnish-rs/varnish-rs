@@ -1,0 +1,32 @@
+varnishtest "Test checksum_from_pointer()"
+
+server s1 {
+    rxreq
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import blobutils from "${vmod}";
+    import blob;
+
+    sub vcl_init {
+        new b = blob.blob(IDENTITY, "Hello, World!");
+        new empty_b = blob.blob(IDENTITY, "");
+    }
+
+    sub vcl_recv {
+        return (synth(200));
+    }
+
+    sub vcl_synth {
+        set resp.http.checksum = blobutils.checksum_from_pointer(b.get());
+        set resp.http.checksum-empty = blobutils.checksum_from_pointer(empty_b.get());
+    }
+} -start
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.http.checksum == "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
+    expect resp.http.checksum-empty == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+} -run

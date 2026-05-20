@@ -1,0 +1,5 @@
+error: This content type is not supported
+  --> tests/fail/errror_byte_array_option.rs:15:10
+   |
+15 |     ) -> Option<&'a [u8]> {
+   |          ^^^^^^
