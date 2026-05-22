@@ -14,7 +14,7 @@ pub struct RoundRobin {
 #[varnish::vmod(docs = "README.md")]
 mod round_robin {
     use super::{
-        RoundRobin, BackendRef, Ctx, Director, Mutex, RoundRobinDirector, RoundRobinState, VclError,
+        BackendRef, Ctx, Director, Mutex, RoundRobin, RoundRobinDirector, RoundRobinState, VclError,
     };
 
     impl RoundRobin {

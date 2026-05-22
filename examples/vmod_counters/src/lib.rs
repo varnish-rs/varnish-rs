@@ -2,7 +2,6 @@ use std::sync::atomic::AtomicU64;
 
 use varnish::{Vsc, VscMetric};
 
-
 varnish::run_vtc_tests!("tests/*.vtc");
 
 #[derive(VscMetric)]
