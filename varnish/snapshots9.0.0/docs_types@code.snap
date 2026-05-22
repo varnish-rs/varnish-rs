@@ -41,15 +41,15 @@ mod types {
             super::arg_only(_v.into())
         }
         #[repr(C)]
-        struct arg_vmod_types_DocStruct__init {
+        struct arg_vmod_types_DocStruct_new {
             valid_cap: c_char,
             cap: VCL_INT,
         }
-        unsafe extern "C" fn vmod_c_DocStruct__init(
+        unsafe extern "C" fn vmod_c_DocStruct_new(
             __ctx: *mut vrt_ctx,
             __objp: *mut *mut DocStruct,
             __vcl_name: *const c_char,
-            __args: *const arg_vmod_types_DocStruct__init,
+            __args: *const arg_vmod_types_DocStruct_new,
         ) {
             let __args = __args
                 .as_ref()
@@ -90,12 +90,12 @@ mod types {
             vmod_c_arg_only: Option<
                 unsafe extern "C" fn(__ctx: *mut vrt_ctx, _v: VCL_INT),
             >,
-            vmod_c_DocStruct__init: Option<
+            vmod_c_DocStruct_new: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
                     __objp: *mut *mut DocStruct,
                     __vcl_name: *const c_char,
-                    __args: *const arg_vmod_types_DocStruct__init,
+                    __args: *const arg_vmod_types_DocStruct_new,
                 ),
             >,
             vmod_c_DocStruct__fini: Option<
@@ -114,7 +114,7 @@ mod types {
             vmod_c_no_docs: Some(vmod_c_no_docs),
             vmod_c_doctest: Some(vmod_c_doctest),
             vmod_c_arg_only: Some(vmod_c_arg_only),
-            vmod_c_DocStruct__init: Some(vmod_c_DocStruct__init),
+            vmod_c_DocStruct_new: Some(vmod_c_DocStruct_new),
             vmod_c_DocStruct__fini: Some(vmod_c_DocStruct__fini),
             vmod_c_DocStruct_function: Some(vmod_c_DocStruct_function),
         };
@@ -123,7 +123,7 @@ mod types {
         pub static Vmod_types_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"4c128090e5e311293258e60f2f5d363e4daf996bc8f8f96ff9ba51e3229cc59d"
+            file_id: c"73af3e239c26709b3704928b316f2e69f39231fe8bdbf154a61cc612cf882dac"
                 .as_ptr(),
             name: c"types".as_ptr(),
             func_name: c"Vmod_vmod_types_Func".as_ptr(),

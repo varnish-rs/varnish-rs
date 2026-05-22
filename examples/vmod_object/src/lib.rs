@@ -2,9 +2,8 @@ use dashmap::DashMap;
 
 varnish::run_vtc_tests!("tests/*.vtc");
 
-/// kv only contains one element: a String->String hashmap that can be used in parallel
-#[allow(non_camel_case_types)]
-pub struct kv {
+/// Kv only contains one element: a String->String hashmap that can be used in parallel
+pub struct Kv {
     storage: DashMap<String, String>,
 }
 
@@ -13,12 +12,12 @@ pub struct kv {
 mod object {
     use dashmap::DashMap;
 
-    use super::kv;
+    use super::Kv;
 
     // implementation needs the same methods as defined in the vcc, plus "new()"
     // corresponding to the constructor, which requires the context (_ctx) , and the
     // name of the object in VLC (_vcl_name)
-    impl kv {
+    impl Kv {
         /// Create a new key-value store, with an optional capacity.
         /// If `cap` is 0 or less, it will be ignored.
         pub fn new(cap: Option<i64>) -> Self {
@@ -31,6 +30,11 @@ mod object {
             };
 
             Self { storage }
+        }
+
+        /// Create a new key-value store with a fixed capacity of 10.
+        pub fn new_fixed() -> Self {
+            Self::new(Some(10))
         }
 
         /// Retrieve the value associated `key`, or an empty string if `key` didn't exist.

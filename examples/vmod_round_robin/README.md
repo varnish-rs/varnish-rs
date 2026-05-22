@@ -19,7 +19,7 @@ import round_robin;
 import round_robin from "path/to/libround_robin.so";
 ```
 
-### Constructor `round_robin.rr()`
+### Constructor `round_robin.new()`
 
 Create a new round-robin director
 

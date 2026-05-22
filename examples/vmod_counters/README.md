@@ -17,7 +17,7 @@ import stats;
 import stats from "path/to/libstats.so";
 ```
 
-### Constructor `stats.test()`
+### Constructor `stats.new()`
 
 #### Method `VOID <object>.increment_foo()`
 

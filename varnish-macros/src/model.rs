@@ -19,9 +19,10 @@ pub struct VmodInfo {
 impl VmodInfo {
     fn iter_all_funcs(&self) -> impl Iterator<Item = &FuncInfo> {
         self.funcs.iter().chain(self.objects.iter().flat_map(|o| {
-            o.funcs
+            o.constructors
                 .iter()
-                .chain(once(&o.constructor).chain(once(&o.destructor)))
+                .chain(o.funcs.iter())
+                .chain(once(&o.destructor))
         }))
     }
 
@@ -59,7 +60,7 @@ pub struct VmodParams {
 pub struct ObjInfo {
     pub ident: String,
     pub docs: String,
-    pub constructor: FuncInfo,
+    pub constructors: Vec<FuncInfo>,
     pub destructor: FuncInfo,
     pub funcs: Vec<FuncInfo>,
 }
@@ -69,6 +70,8 @@ pub struct ObjInfo {
 pub struct FuncInfo {
     pub func_type: FuncType,
     pub ident: String,
+    /// Overrides the VCL-visible name; `None` means use `ident`
+    pub vcl_name: Option<String>,
     pub docs: String,
     pub has_optional_args: bool,
     pub args: Vec<ParamTypeInfo>,
@@ -80,6 +83,10 @@ pub struct FuncInfo {
 impl FuncInfo {
     pub fn count_args<F: Fn(&&ParamTypeInfo) -> bool>(&self, filter: F) -> usize {
         self.args.iter().filter(filter).count()
+    }
+
+    pub fn vcl_ident(&self) -> &str {
+        self.vcl_name.as_deref().unwrap_or(&self.ident)
     }
 }
 

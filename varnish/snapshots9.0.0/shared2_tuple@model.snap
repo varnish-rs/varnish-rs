@@ -11,6 +11,7 @@ VmodInfo {
         FuncInfo {
             func_type: Event,
             ident: "on_event",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [
@@ -27,6 +28,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "per_tsk_val",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [

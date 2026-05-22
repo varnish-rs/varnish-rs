@@ -12,36 +12,40 @@ VmodInfo {
         ObjInfo {
             ident: "Obj1",
             docs: "",
-            constructor: FuncInfo {
-                func_type: Constructor,
-                ident: "new",
-                docs: "",
-                has_optional_args: true,
-                args: [
-                    ParamTypeInfo {
-                        ident: "vcl",
-                        docs: "",
-                        ty: SharedPerVclMut,
-                    },
-                    ParamTypeInfo {
-                        ident: "val",
-                        docs: "",
-                        ty: Value(
-                            ParamInfo {
-                                kind: Optional,
-                                default: Null,
-                                ty_info: I64,
-                            },
-                        ),
-                    },
-                ],
-                output_ty: SelfType,
-                out_result: false,
-                restrict: [],
-            },
+            constructors: [
+                FuncInfo {
+                    func_type: Constructor,
+                    ident: "new",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: true,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "vcl",
+                            docs: "",
+                            ty: SharedPerVclMut,
+                        },
+                        ParamTypeInfo {
+                            ident: "val",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Optional,
+                                    default: Null,
+                                    ty_info: I64,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: SelfType,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
             destructor: FuncInfo {
                 func_type: Destructor,
                 ident: "_fini",
+                vcl_name: None,
                 docs: "",
                 has_optional_args: false,
                 args: [],
@@ -54,36 +58,40 @@ VmodInfo {
         ObjInfo {
             ident: "Obj2",
             docs: "",
-            constructor: FuncInfo {
-                func_type: Constructor,
-                ident: "new",
-                docs: "",
-                has_optional_args: false,
-                args: [
-                    ParamTypeInfo {
-                        ident: "vcl",
-                        docs: "",
-                        ty: SharedPerVclMut,
-                    },
-                    ParamTypeInfo {
-                        ident: "val",
-                        docs: "",
-                        ty: Value(
-                            ParamInfo {
-                                kind: Regular,
-                                default: Null,
-                                ty_info: I64,
-                            },
-                        ),
-                    },
-                ],
-                output_ty: SelfType,
-                out_result: false,
-                restrict: [],
-            },
+            constructors: [
+                FuncInfo {
+                    func_type: Constructor,
+                    ident: "new",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "vcl",
+                            docs: "",
+                            ty: SharedPerVclMut,
+                        },
+                        ParamTypeInfo {
+                            ident: "val",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Regular,
+                                    default: Null,
+                                    ty_info: I64,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: SelfType,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
             destructor: FuncInfo {
                 func_type: Destructor,
                 ident: "_fini",
+                vcl_name: None,
                 docs: "",
                 has_optional_args: false,
                 args: [],
@@ -96,43 +104,47 @@ VmodInfo {
         ObjInfo {
             ident: "Obj3",
             docs: "",
-            constructor: FuncInfo {
-                func_type: Constructor,
-                ident: "new",
-                docs: "",
-                has_optional_args: true,
-                args: [
-                    ParamTypeInfo {
-                        ident: "ctx",
-                        docs: "",
-                        ty: Context {
-                            is_mut: true,
-                        },
-                    },
-                    ParamTypeInfo {
-                        ident: "vcl",
-                        docs: "",
-                        ty: SharedPerVclMut,
-                    },
-                    ParamTypeInfo {
-                        ident: "val",
-                        docs: "",
-                        ty: Value(
-                            ParamInfo {
-                                kind: Optional,
-                                default: Null,
-                                ty_info: I64,
+            constructors: [
+                FuncInfo {
+                    func_type: Constructor,
+                    ident: "new",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: true,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "ctx",
+                            docs: "",
+                            ty: Context {
+                                is_mut: true,
                             },
-                        ),
-                    },
-                ],
-                output_ty: SelfType,
-                out_result: false,
-                restrict: [],
-            },
+                        },
+                        ParamTypeInfo {
+                            ident: "vcl",
+                            docs: "",
+                            ty: SharedPerVclMut,
+                        },
+                        ParamTypeInfo {
+                            ident: "val",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Optional,
+                                    default: Null,
+                                    ty_info: I64,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: SelfType,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
             destructor: FuncInfo {
                 func_type: Destructor,
                 ident: "_fini",
+                vcl_name: None,
                 docs: "",
                 has_optional_args: false,
                 args: [],
@@ -145,43 +157,47 @@ VmodInfo {
         ObjInfo {
             ident: "Obj4",
             docs: "",
-            constructor: FuncInfo {
-                func_type: Constructor,
-                ident: "new",
-                docs: "",
-                has_optional_args: false,
-                args: [
-                    ParamTypeInfo {
-                        ident: "ctx",
-                        docs: "",
-                        ty: Context {
-                            is_mut: true,
-                        },
-                    },
-                    ParamTypeInfo {
-                        ident: "vcl",
-                        docs: "",
-                        ty: SharedPerVclMut,
-                    },
-                    ParamTypeInfo {
-                        ident: "val",
-                        docs: "",
-                        ty: Value(
-                            ParamInfo {
-                                kind: Regular,
-                                default: Null,
-                                ty_info: I64,
+            constructors: [
+                FuncInfo {
+                    func_type: Constructor,
+                    ident: "new",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "ctx",
+                            docs: "",
+                            ty: Context {
+                                is_mut: true,
                             },
-                        ),
-                    },
-                ],
-                output_ty: SelfType,
-                out_result: false,
-                restrict: [],
-            },
+                        },
+                        ParamTypeInfo {
+                            ident: "vcl",
+                            docs: "",
+                            ty: SharedPerVclMut,
+                        },
+                        ParamTypeInfo {
+                            ident: "val",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Regular,
+                                    default: Null,
+                                    ty_info: I64,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: SelfType,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
             destructor: FuncInfo {
                 func_type: Destructor,
                 ident: "_fini",
+                vcl_name: None,
                 docs: "",
                 has_optional_args: false,
                 args: [],

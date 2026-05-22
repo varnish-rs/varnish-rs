@@ -20,10 +20,10 @@ import obj2;
 import obj2 from "path/to/libobj2.so";
 ```
 
-### Constructor `obj2.Obj1([INT val])`
+### Constructor `obj2.new([INT val])`
 
-### Constructor `obj2.Obj2(INT val)`
+### Constructor `obj2.new(INT val)`
 
-### Constructor `obj2.Obj3([INT val])`
+### Constructor `obj2.new([INT val])`
 
-### Constructor `obj2.Obj4(INT val)`
+### Constructor `obj2.new(INT val)`

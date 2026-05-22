@@ -19,7 +19,7 @@ import be;
 import be from "path/to/libbe.so";
 ```
 
-### Constructor `be.parrot(STRING to_repeat)`
+### Constructor `be.new(STRING to_repeat)`
 
 parrot is our VCL object, which just holds a rust Backend,
 it only needs two functions:

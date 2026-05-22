@@ -389,7 +389,7 @@ impl OutputTy {
         } else if !matches!(func_type, Constructor) && matches!(ret_ty, Self::SelfType) {
             Err(error(
                 ty,
-                "`Self` return type is only allowed in object constructors named `new`",
+                "`Self` return type is only allowed in object constructors",
             ))?;
         }
 

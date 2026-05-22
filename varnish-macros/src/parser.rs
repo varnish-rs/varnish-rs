@@ -7,7 +7,9 @@ use darling::FromMeta;
 use proc_macro2::TokenStream;
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
-use syn::{Attribute, Ident, ImplItem, Item, ItemImpl, ItemMod, ReturnType, Signature, Visibility};
+use syn::{
+    Attribute, Ident, ImplItem, Item, ItemImpl, ItemMod, ReturnType, Signature, Type, Visibility,
+};
 
 use crate::errors::Errors;
 use crate::model::{
@@ -130,6 +132,25 @@ impl VmodInfo {
                 "More than one event handler found. Only one event handler is allowed",
             );
         }
+
+        // Functions and constructors share a flat VCL namespace; methods are per-object so excluded.
+        let mut seen_vcl_names = std::collections::HashMap::<String, String>::new();
+        for func in &self.funcs {
+            let name = func.vcl_ident().to_string();
+            let desc = format!("function `{}`", func.ident);
+            if let Some(prev) = seen_vcl_names.insert(name.clone(), desc.clone()) {
+                errors.add(item, &format!("VCL name `{name}` collision: {prev} and {desc} have the same VCL name"));
+            }
+        }
+        for obj in &self.objects {
+            for constructor in &obj.constructors {
+                let name = constructor.vcl_ident().to_string();
+                let desc = format!("`{}` constructor `{}`", obj.ident, constructor.ident);
+                if let Some(prev) = seen_vcl_names.insert(name.clone(), desc.clone()) {
+                    errors.add(item, &format!("VCL name `{name}` collision: {prev} and {desc} have the same VCL name"));
+                }
+            }
+        }
         let per_vcl_mut = self.count_args(|v| matches!(v.ty, ParamType::SharedPerVclMut));
         let per_vcl_ref = self.count_args(|v| matches!(v.ty, ParamType::SharedPerVclRef));
         if per_vcl_ref > 0 && per_vcl_mut == 0 {
@@ -170,8 +191,12 @@ impl ObjInfo {
             );
         }
 
+        if let Some(attr) = parser_utils::remove_attr(&mut item_impl.attrs, "vcl_rename") {
+            errors.add(&attr, "#[vcl_rename] is not allowed on impl blocks");
+        }
+
         let mut funcs = Vec::new();
-        let mut constructor = None;
+        let mut constructors = Vec::new();
         for item in &mut item_impl.items {
             if let ImplItem::Fn(fn_item) = item {
                 let Some(func) = errors.on_err(FuncInfo::parse(
@@ -183,18 +208,18 @@ impl ObjInfo {
                 )) else {
                     continue;
                 };
-                if func.ident == "new" {
-                    constructor = Some(func);
+                if matches!(func.func_type, FuncType::Constructor) {
+                    constructors.push(func);
                 } else {
                     funcs.push(func);
                 }
             }
         }
 
-        if constructor.is_none() {
+        if constructors.is_empty() {
             errors.add(
                 &item_impl.self_ty,
-                "Object must have a constructor called `new`",
+                "Object must have a constructor (a public method returning `Self` or `Result<Self, _>`)",
             );
         }
 
@@ -202,10 +227,11 @@ impl ObjInfo {
         Ok(Self {
             ident: ident.expect("ident err already reported"),
             docs: parser_utils::parse_doc_str(&item_impl.attrs),
-            constructor: constructor.expect("ctor err already reported"),
+            constructors,
             destructor: FuncInfo {
                 func_type: FuncType::Destructor,
                 ident: "_fini".to_string(),
+                vcl_name: None,
                 docs: String::new(),
                 has_optional_args: false,
                 args: Vec::new(),
@@ -216,6 +242,15 @@ impl ObjInfo {
             funcs,
         })
     }
+}
+
+fn sig_returns_self(sig: &Signature) -> bool {
+    let ty: &Type = match &sig.output {
+        ReturnType::Type(_, ty) => ty.as_ref(),
+        ReturnType::Default => return false,
+    };
+    let inner = parser_utils::as_result_type(ty).unwrap_or(ty);
+    parser_utils::as_simple_ty(inner).is_some_and(|id| id == "Self")
 }
 
 impl FuncInfo {
@@ -239,6 +274,7 @@ impl FuncInfo {
         }
 
         let restrict = parse_restricted_attr(attrs, &mut errors);
+        let vcl_rename = parse_vcl_rename_attr(attrs, &mut errors);
 
         let func_type = if let Some(attr) = parser_utils::remove_attr(attrs, "event") {
             if is_object {
@@ -250,9 +286,15 @@ impl FuncInfo {
             if !restrict.is_empty() {
                 errors.add(signature, "#[restrict] is not allowed on event functions");
             }
+            if vcl_rename.is_some() {
+                errors.add(signature, "#[vcl_rename] is not allowed on event functions");
+            }
             FuncType::Event
         } else if is_object {
-            if signature.ident == "new" {
+            if sig_returns_self(signature) {
+                if !restrict.is_empty() {
+                    errors.add(signature, "#[restrict] is not allowed on constructors");
+                }
                 FuncType::Constructor
             } else {
                 FuncType::Method
@@ -301,6 +343,7 @@ impl FuncInfo {
         Ok(Self {
             func_type,
             ident: signature.ident.to_string(),
+            vcl_name: vcl_rename,
             docs: parser_utils::parse_doc_str(attrs),
             has_optional_args,
             output_ty,
@@ -342,4 +385,17 @@ fn parse_restricted_attr(attrs: &mut Vec<Attribute>, errors: &mut Errors) -> Vec
         }
     }
     result
+}
+
+fn parse_vcl_rename_attr(attrs: &mut Vec<Attribute>, errors: &mut Errors) -> Option<String> {
+    let attr = parser_utils::remove_attr(attrs, "vcl_rename")?;
+    if let Ok(ident) = attr.parse_args::<Ident>() {
+        Some(ident.to_string())
+    } else {
+        errors.add(
+            &attr,
+            "#[vcl_rename] expects a single identifier argument, e.g. #[vcl_rename(my_name)]",
+        );
+        None
+    }
 }

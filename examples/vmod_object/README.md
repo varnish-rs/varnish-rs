@@ -19,10 +19,14 @@ import object;
 import object from "path/to/libobject.so";
 ```
 
-### Constructor `object.kv([INT cap])`
+### Constructor `object.new([INT cap])`
 
 Create a new key-value store, with an optional capacity.
 If `cap` is 0 or less, it will be ignored.
+
+### Constructor `object.new_fixed()`
+
+Create a new key-value store with a fixed capacity of 10.
 
 #### Method `STRING <object>.get(STRING key)`
 

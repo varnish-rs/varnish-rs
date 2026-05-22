@@ -1,0 +1,111 @@
+---
+source: varnish-macros/src/tests.rs
+---
+mod non_new_constructor {
+    #[allow(non_snake_case, unused_imports, unused_qualifications, unused_variables)]
+    #[allow(clippy::needless_question_mark, clippy::new_without_default)]
+    #[automatically_derived]
+    mod varnish_generated {
+        use std::ffi::{c_char, c_int, c_uint, c_void, CStr};
+        use std::ptr::null;
+        use varnish::ffi::{
+            VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE,
+            VCL_REAL, VCL_STRING, VCL_TIME, VCL_VOID, VMOD_ABI_Version, VclEvent,
+            vmod_data, vmod_priv, vrt_ctx, VMOD_PRIV_METHODS_MAGIC, vmod_priv_methods,
+        };
+        use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
+        use super::*;
+        #[repr(C)]
+        struct arg_vmod_non_new_constructor_kv_create {
+            valid_cap: c_char,
+            cap: VCL_INT,
+        }
+        unsafe extern "C" fn vmod_c_kv_create(
+            __ctx: *mut vrt_ctx,
+            __objp: *mut *mut kv,
+            __vcl_name: *const c_char,
+            __args: *const arg_vmod_non_new_constructor_kv_create,
+        ) {
+            let __args = __args
+                .as_ref()
+                .expect("optional args pointer must not be null");
+            let __result = Box::new(
+                super::kv::create(
+                    if __args.valid_cap != 0 { __args.cap.into() } else { None },
+                ),
+            );
+            *__objp = Box::into_raw(__result);
+        }
+        unsafe extern "C" fn vmod_c_kv__fini(__objp: *mut *mut kv) {
+            drop(Box::from_raw(*__objp));
+            *__objp = ::std::ptr::null_mut();
+        }
+        unsafe extern "C" fn vmod_c_kv_get(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::kv,
+            key: VCL_STRING,
+        ) -> VCL_STRING {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(__obj.get(key.try_into()?).into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        #[repr(C)]
+        pub struct VmodExports {
+            vmod_c_kv_create: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __objp: *mut *mut kv,
+                    __vcl_name: *const c_char,
+                    __args: *const arg_vmod_non_new_constructor_kv_create,
+                ),
+            >,
+            vmod_c_kv__fini: Option<unsafe extern "C" fn(__objp: *mut *mut kv)>,
+            vmod_c_kv_get: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::kv,
+                    key: VCL_STRING,
+                ) -> VCL_STRING,
+            >,
+        }
+        pub static VMOD_EXPORTS: VmodExports = VmodExports {
+            vmod_c_kv_create: Some(vmod_c_kv_create),
+            vmod_c_kv__fini: Some(vmod_c_kv__fini),
+            vmod_c_kv_get: Some(vmod_c_kv_get),
+        };
+        #[allow(non_upper_case_globals)]
+        #[no_mangle]
+        pub static Vmod_non_new_constructor_Data: vmod_data = vmod_data {
+            vrt_major: 0,
+            vrt_minor: 0,
+            file_id: c"289d6d0d8d8143bec47372189d68191ceb5fb2df2e7af10a587c6db7e6ba1d32"
+                .as_ptr(),
+            name: c"non_new_constructor".as_ptr(),
+            func_name: c"Vmod_vmod_non_new_constructor_Func".as_ptr(),
+            func_len: ::std::mem::size_of::<VmodExports>() as c_int,
+            func: &VMOD_EXPORTS as *const _ as *const c_void,
+            abi: VMOD_ABI_Version.as_ptr(),
+            json: JSON.as_ptr(),
+            proto: null(),
+            vcs: c"".as_ptr(),
+            version: c"".as_ptr(),
+        };
+        const JSON: &CStr = c"(moved to @json.snap files)";
+    }
+    use super::*;
+    impl kv {
+        pub fn create(cap: Option<i64>) -> Self {
+            Self
+        }
+        pub fn get(&self, key: &str) -> String {
+            String::default()
+        }
+    }
+}

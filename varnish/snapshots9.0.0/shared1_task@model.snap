@@ -11,6 +11,7 @@ VmodInfo {
         FuncInfo {
             func_type: Event,
             ident: "on_event",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [
@@ -39,6 +40,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "per_vcl_val",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [
@@ -55,6 +57,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "per_vcl_opt",
+            vcl_name: None,
             docs: "",
             has_optional_args: true,
             args: [
@@ -82,6 +85,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "per_tsk_val",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [
@@ -98,6 +102,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "per_tsk_opt",
+            vcl_name: None,
             docs: "",
             has_optional_args: true,
             args: [
@@ -125,6 +130,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "per_tsk_ref",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [
@@ -141,6 +147,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "per_tsk_ref_opt",
+            vcl_name: None,
             docs: "",
             has_optional_args: true,
             args: [
@@ -170,25 +177,29 @@ VmodInfo {
         ObjInfo {
             ident: "PerVcl",
             docs: "",
-            constructor: FuncInfo {
-                func_type: Constructor,
-                ident: "new",
-                docs: "",
-                has_optional_args: false,
-                args: [
-                    ParamTypeInfo {
-                        ident: "vcl",
-                        docs: "",
-                        ty: SharedPerVclMut,
-                    },
-                ],
-                output_ty: SelfType,
-                out_result: false,
-                restrict: [],
-            },
+            constructors: [
+                FuncInfo {
+                    func_type: Constructor,
+                    ident: "new",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "vcl",
+                            docs: "",
+                            ty: SharedPerVclMut,
+                        },
+                    ],
+                    output_ty: SelfType,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
             destructor: FuncInfo {
                 func_type: Destructor,
                 ident: "_fini",
+                vcl_name: None,
                 docs: "",
                 has_optional_args: false,
                 args: [],
@@ -200,6 +211,7 @@ VmodInfo {
                 FuncInfo {
                     func_type: Method,
                     ident: "both",
+                    vcl_name: None,
                     docs: "",
                     has_optional_args: false,
                     args: [
@@ -226,6 +238,7 @@ VmodInfo {
                 FuncInfo {
                     func_type: Method,
                     ident: "both_pos",
+                    vcl_name: None,
                     docs: "",
                     has_optional_args: false,
                     args: [
@@ -263,6 +276,7 @@ VmodInfo {
                 FuncInfo {
                     func_type: Method,
                     ident: "both_opt",
+                    vcl_name: None,
                     docs: "",
                     has_optional_args: true,
                     args: [

@@ -58,7 +58,7 @@ This comment is multi-lined to ensure multiple `#[doc]` are parsed correctly.
 * `INT _v`:
 doc comment for `arg_only`
 
-### Constructor `types.DocStruct([INT cap])`
+### Constructor `types.new([INT cap])`
 
 doctest for `DocStruct` implementation
 

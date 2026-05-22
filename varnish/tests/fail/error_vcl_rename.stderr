@@ -1,0 +1,5 @@
+error: #[vcl_rename] is not allowed on impl blocks
+ --> tests/fail/error_vcl_rename.rs:7:5
+  |
+7 |     #[vcl_rename(foo)]
+  |     ^

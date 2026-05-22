@@ -11,29 +11,16 @@ use crate::errors::error;
 use crate::model::{FuncInfo, ObjInfo};
 use crate::ProcResult;
 
-/// iterator to go over all functions in a [`ObjInfo`], including constructor and destructor
-pub struct ObjFuncIter<'a> {
-    obj: &'a ObjInfo,
-    idx: usize,
-}
-
-impl<'a> Iterator for ObjFuncIter<'a> {
-    type Item = &'a FuncInfo;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let idx = self.idx;
-        self.idx += 1;
-        match idx {
-            0 => Some(&self.obj.constructor),
-            1 => Some(&self.obj.destructor),
-            idx => self.obj.funcs.get(idx - 2),
-        }
-    }
-}
-
 impl ObjInfo {
-    pub fn iter(&self) -> ObjFuncIter<'_> {
-        ObjFuncIter { obj: self, idx: 0 }
+    /// Order is load-bearing: constructors first, destructor second, methods last.
+    /// `gen_objects.rs` slices the resulting `Vec<FuncProcessor>` by index to split
+    /// constructors from the rest, so this order must not change.
+    /// Multiple constructors all return the same `Self` type, so one destructor covers all of them.
+    pub fn iter(&self) -> impl Iterator<Item = &FuncInfo> {
+        self.constructors
+            .iter()
+            .chain(std::iter::once(&self.destructor))
+            .chain(self.funcs.iter())
     }
 }
 

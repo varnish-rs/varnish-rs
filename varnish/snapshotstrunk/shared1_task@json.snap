@@ -8,7 +8,7 @@ VMOD_JSON_SPEC
     "2.0",
     "task",
     "Vmod_vmod_task_Func",
-    "63ee8da26ffca68742b31c435229eab8bb52533783a5290ec134929fddff03e0",
+    "37a8ebd0593f868a3139b558da1a83e8e32e777aea7fd3bbb32b73006a5d267f",
     "Varnish (version) (hash)",
     "0",
     "0"
@@ -66,7 +66,7 @@ typedef VCL_VOID td_vmod_task_per_tsk_ref_opt(
     struct arg_vmod_task_per_tsk_ref_opt *
 );
 
-typedef VCL_VOID td_vmod_task_PerVcl__init(
+typedef VCL_VOID td_vmod_task_PerVcl_new(
     VRT_CTX,
     struct vmod_task_PerVcl **,
     const char *,
@@ -113,7 +113,7 @@ struct Vmod_vmod_task_Func {
   td_vmod_task_per_tsk_opt *f_per_tsk_opt;
   td_vmod_task_per_tsk_ref *f_per_tsk_ref;
   td_vmod_task_per_tsk_ref_opt *f_per_tsk_ref_opt;
-  td_vmod_task_PerVcl__init *f_PerVcl__init;
+  td_vmod_task_PerVcl_new *f_PerVcl_new;
   td_vmod_task_PerVcl__fini *f_PerVcl__fini;
   td_vmod_task_PerVcl_both *f_PerVcl_both;
   td_vmod_task_PerVcl_both_pos *f_PerVcl_both_pos;
@@ -248,7 +248,7 @@ static struct Vmod_vmod_task_Func Vmod_vmod_task_Func;"
   ],
   [
     "$OBJ",
-    "PerVcl",
+    "new",
     {
       "NULL_OK": false
     },
@@ -259,7 +259,7 @@ static struct Vmod_vmod_task_Func Vmod_vmod_task_Func;"
         [
           "VOID"
         ],
-        "Vmod_vmod_task_Func.f_PerVcl__init",
+        "Vmod_vmod_task_Func.f_PerVcl_new",
         "",
         [
           "PRIV_VCL",

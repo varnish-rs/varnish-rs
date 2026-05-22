@@ -59,7 +59,6 @@ impl Names {
     pub fn fn_name(&self) -> &str {
         let (ty, name) = self.function.as_ref().expect("function is not set");
         match *ty {
-            FuncType::Constructor => "_init",
             FuncType::Destructor => "_fini",
             _ => name.as_str(),
         }

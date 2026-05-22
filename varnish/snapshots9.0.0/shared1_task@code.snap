@@ -128,7 +128,7 @@ mod task {
                 if __args.valid_op != 0 { __args.op.into() } else { None },
             )
         }
-        unsafe extern "C" fn vmod_c_PerVcl__init(
+        unsafe extern "C" fn vmod_c_PerVcl_new(
             __ctx: *mut vrt_ctx,
             __objp: *mut *mut PerVcl,
             __vcl_name: *const c_char,
@@ -255,7 +255,7 @@ mod task {
                     __args: *const arg_vmod_task_per_tsk_ref_opt,
                 ),
             >,
-            vmod_c_PerVcl__init: Option<
+            vmod_c_PerVcl_new: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
                     __objp: *mut *mut PerVcl,
@@ -297,7 +297,7 @@ mod task {
             vmod_c_per_tsk_opt: Some(vmod_c_per_tsk_opt),
             vmod_c_per_tsk_ref: Some(vmod_c_per_tsk_ref),
             vmod_c_per_tsk_ref_opt: Some(vmod_c_per_tsk_ref_opt),
-            vmod_c_PerVcl__init: Some(vmod_c_PerVcl__init),
+            vmod_c_PerVcl_new: Some(vmod_c_PerVcl_new),
             vmod_c_PerVcl__fini: Some(vmod_c_PerVcl__fini),
             vmod_c_PerVcl_both: Some(vmod_c_PerVcl_both),
             vmod_c_PerVcl_both_pos: Some(vmod_c_PerVcl_both_pos),
@@ -308,7 +308,7 @@ mod task {
         pub static Vmod_task_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"63ee8da26ffca68742b31c435229eab8bb52533783a5290ec134929fddff03e0"
+            file_id: c"37a8ebd0593f868a3139b558da1a83e8e32e777aea7fd3bbb32b73006a5d267f"
                 .as_ptr(),
             name: c"task".as_ptr(),
             func_name: c"Vmod_vmod_task_Func".as_ptr(),

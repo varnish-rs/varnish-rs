@@ -6,7 +6,7 @@ varnish v1 -vcl+backend {
         import object from "${vmod}";
 
         sub vcl_init {
-                new kv = object.kv();
+                new kv = object.new();
         }
 
         sub vcl_recv {

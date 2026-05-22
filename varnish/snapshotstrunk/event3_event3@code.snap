@@ -53,7 +53,7 @@ mod event3 {
                     .and_then(|v| v.get_user_data()),
             )
         }
-        unsafe extern "C" fn vmod_c_Obj1__init(
+        unsafe extern "C" fn vmod_c_Obj1_new(
             __ctx: *mut vrt_ctx,
             __objp: *mut *mut Obj1,
             __vcl_name: *const c_char,
@@ -82,7 +82,7 @@ mod event3 {
                         .and_then(|v| v.get_user_data()),
                 )
         }
-        unsafe extern "C" fn vmod_c_Obj2__init(
+        unsafe extern "C" fn vmod_c_Obj2_new(
             __ctx: *mut vrt_ctx,
             __objp: *mut *mut Obj2,
             __vcl_name: *const c_char,
@@ -121,7 +121,7 @@ mod event3 {
             vmod_c_access: Option<
                 unsafe extern "C" fn(__ctx: *mut vrt_ctx, vcl: *const vmod_priv),
             >,
-            vmod_c_Obj1__init: Option<
+            vmod_c_Obj1_new: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
                     __objp: *mut *mut Obj1,
@@ -137,7 +137,7 @@ mod event3 {
                     vcl: *const vmod_priv,
                 ),
             >,
-            vmod_c_Obj2__init: Option<
+            vmod_c_Obj2_new: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
                     __objp: *mut *mut Obj2,
@@ -153,10 +153,10 @@ mod event3 {
         pub static VMOD_EXPORTS: VmodExports = VmodExports {
             vmod_c_on_event: Some(vmod_c_on_event),
             vmod_c_access: Some(vmod_c_access),
-            vmod_c_Obj1__init: Some(vmod_c_Obj1__init),
+            vmod_c_Obj1_new: Some(vmod_c_Obj1_new),
             vmod_c_Obj1__fini: Some(vmod_c_Obj1__fini),
             vmod_c_Obj1_obj_access: Some(vmod_c_Obj1_obj_access),
-            vmod_c_Obj2__init: Some(vmod_c_Obj2__init),
+            vmod_c_Obj2_new: Some(vmod_c_Obj2_new),
             vmod_c_Obj2__fini: Some(vmod_c_Obj2__fini),
             vmod_c_Obj2_obj_access: Some(vmod_c_Obj2_obj_access),
         };
@@ -165,7 +165,7 @@ mod event3 {
         pub static Vmod_event3_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"7b4be3f80bd034fc48000e7e7e74cdab732a45145ec32098955dbcf57a3e748c"
+            file_id: c"b0d3002d76c94a5fdc4400aad9cfa4404a85e128fb5dea2c179283f7d18ea54e"
                 .as_ptr(),
             name: c"event3".as_ptr(),
             func_name: c"Vmod_vmod_event3_Func".as_ptr(),

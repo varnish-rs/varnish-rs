@@ -12,31 +12,35 @@ VmodInfo {
         ObjInfo {
             ident: "kv1",
             docs: "",
-            constructor: FuncInfo {
-                func_type: Constructor,
-                ident: "new",
-                docs: "",
-                has_optional_args: true,
-                args: [
-                    ParamTypeInfo {
-                        ident: "cap",
-                        docs: "",
-                        ty: Value(
-                            ParamInfo {
-                                kind: Optional,
-                                default: Null,
-                                ty_info: I64,
-                            },
-                        ),
-                    },
-                ],
-                output_ty: SelfType,
-                out_result: false,
-                restrict: [],
-            },
+            constructors: [
+                FuncInfo {
+                    func_type: Constructor,
+                    ident: "new",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: true,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "cap",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Optional,
+                                    default: Null,
+                                    ty_info: I64,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: SelfType,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
             destructor: FuncInfo {
                 func_type: Destructor,
                 ident: "_fini",
+                vcl_name: None,
                 docs: "",
                 has_optional_args: false,
                 args: [],
@@ -48,6 +52,7 @@ VmodInfo {
                 FuncInfo {
                     func_type: Method,
                     ident: "set",
+                    vcl_name: None,
                     docs: "",
                     has_optional_args: false,
                     args: [
@@ -86,6 +91,7 @@ VmodInfo {
                 FuncInfo {
                     func_type: Method,
                     ident: "get",
+                    vcl_name: None,
                     docs: "",
                     has_optional_args: false,
                     args: [
@@ -115,42 +121,46 @@ VmodInfo {
         ObjInfo {
             ident: "kv2",
             docs: "",
-            constructor: FuncInfo {
-                func_type: Constructor,
-                ident: "new",
-                docs: "",
-                has_optional_args: true,
-                args: [
-                    ParamTypeInfo {
-                        ident: "cap",
-                        docs: "",
-                        ty: Value(
-                            ParamInfo {
-                                kind: Optional,
-                                default: Null,
-                                ty_info: I64,
-                            },
-                        ),
-                    },
-                    ParamTypeInfo {
-                        ident: "name",
-                        docs: "",
-                        ty: VclName(
-                            ParamInfo {
-                                kind: Regular,
-                                default: Null,
-                                ty_info: Str,
-                            },
-                        ),
-                    },
-                ],
-                output_ty: SelfType,
-                out_result: false,
-                restrict: [],
-            },
+            constructors: [
+                FuncInfo {
+                    func_type: Constructor,
+                    ident: "new",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: true,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "cap",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Optional,
+                                    default: Null,
+                                    ty_info: I64,
+                                },
+                            ),
+                        },
+                        ParamTypeInfo {
+                            ident: "name",
+                            docs: "",
+                            ty: VclName(
+                                ParamInfo {
+                                    kind: Regular,
+                                    default: Null,
+                                    ty_info: Str,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: SelfType,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
             destructor: FuncInfo {
                 func_type: Destructor,
                 ident: "_fini",
+                vcl_name: None,
                 docs: "",
                 has_optional_args: false,
                 args: [],
@@ -162,6 +172,7 @@ VmodInfo {
                 FuncInfo {
                     func_type: Method,
                     ident: "set",
+                    vcl_name: None,
                     docs: "",
                     has_optional_args: true,
                     args: [
@@ -202,49 +213,53 @@ VmodInfo {
         ObjInfo {
             ident: "kv3",
             docs: "",
-            constructor: FuncInfo {
-                func_type: Constructor,
-                ident: "new",
-                docs: "",
-                has_optional_args: true,
-                args: [
-                    ParamTypeInfo {
-                        ident: "ctx",
-                        docs: "",
-                        ty: Context {
-                            is_mut: true,
+            constructors: [
+                FuncInfo {
+                    func_type: Constructor,
+                    ident: "new",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: true,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "ctx",
+                            docs: "",
+                            ty: Context {
+                                is_mut: true,
+                            },
                         },
-                    },
-                    ParamTypeInfo {
-                        ident: "cap",
-                        docs: "",
-                        ty: Value(
-                            ParamInfo {
-                                kind: Optional,
-                                default: Null,
-                                ty_info: I64,
-                            },
-                        ),
-                    },
-                    ParamTypeInfo {
-                        ident: "name",
-                        docs: "",
-                        ty: VclName(
-                            ParamInfo {
-                                kind: Regular,
-                                default: Null,
-                                ty_info: Str,
-                            },
-                        ),
-                    },
-                ],
-                output_ty: SelfType,
-                out_result: false,
-                restrict: [],
-            },
+                        ParamTypeInfo {
+                            ident: "cap",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Optional,
+                                    default: Null,
+                                    ty_info: I64,
+                                },
+                            ),
+                        },
+                        ParamTypeInfo {
+                            ident: "name",
+                            docs: "",
+                            ty: VclName(
+                                ParamInfo {
+                                    kind: Regular,
+                                    default: Null,
+                                    ty_info: Str,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: SelfType,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
             destructor: FuncInfo {
                 func_type: Destructor,
                 ident: "_fini",
+                vcl_name: None,
                 docs: "",
                 has_optional_args: false,
                 args: [],
@@ -256,6 +271,7 @@ VmodInfo {
                 FuncInfo {
                     func_type: Method,
                     ident: "set",
+                    vcl_name: None,
                     docs: "",
                     has_optional_args: true,
                     args: [

@@ -22,10 +22,10 @@ import event3 from "path/to/libevent3.so";
 
 ### Function `VOID event3.access()`
 
-### Constructor `event3.Obj1()`
+### Constructor `event3.new()`
 
 #### Method `VOID <object>.obj_access()`
 
-### Constructor `event3.Obj2()`
+### Constructor `event3.new()`
 
 #### Method `VOID <object>.obj_access()`

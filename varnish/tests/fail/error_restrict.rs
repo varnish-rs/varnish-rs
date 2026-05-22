@@ -23,4 +23,18 @@ mod restrict_on_event {
     pub fn on_event(event: Event) {}
 }
 
+pub struct Obj;
+
+#[varnish::vmod]
+mod restrict_on_constructor {
+    use super::Obj;
+
+    impl Obj {
+        #[restrict(vcl_recv)]
+        pub fn new() -> Self {
+            Self
+        }
+    }
+}
+
 fn main() {}
