@@ -22,16 +22,20 @@ pub struct ObjProcessor {
 
 impl ObjProcessor {
     pub fn from_info(names: Names, info: &ObjInfo, types: &SharedTypes) -> Self {
-        let funcs: Vec<FuncProcessor> = info
+        let constructor_fps: Vec<FuncProcessor> = info
+            .constructors
             .iter()
             .map(|f| {
                 FuncProcessor::from_info(names.to_func(f.func_type, f.ident.as_str()), f, types)
             })
             .collect();
 
-        let num_constructors = info.constructors.len();
-        let constructor_fps = &funcs[..num_constructors];
-        let non_constructor_fps = &funcs[num_constructors..];
+        let non_constructor_fps: Vec<FuncProcessor> = std::iter::once(&info.destructor)
+            .chain(info.funcs.iter())
+            .map(|f| {
+                FuncProcessor::from_info(names.to_func(f.func_type, f.ident.as_str()), f, types)
+            })
+            .collect();
 
         let json_objs = info
             .constructors
@@ -48,7 +52,7 @@ impl ObjProcessor {
                 if let Some(r) = &constructor_fp.restrict_json {
                     obj_json.push(r.clone());
                 }
-                for fp in non_constructor_fps {
+                for fp in &non_constructor_fps {
                     obj_json.push(fp.json.clone());
                     if let Some(r) = &fp.restrict_json {
                         obj_json.push(r.clone());
@@ -56,6 +60,11 @@ impl ObjProcessor {
                 }
                 obj_json.into()
             })
+            .collect();
+
+        let funcs: Vec<FuncProcessor> = constructor_fps
+            .into_iter()
+            .chain(non_constructor_fps)
             .collect();
 
         let mut obj = Self {

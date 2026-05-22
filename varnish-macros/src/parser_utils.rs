@@ -8,21 +8,7 @@ use syn::Type::{Path, Reference};
 use syn::{Attribute, ExprLit, GenericArgument, MetaNameValue, PathSegment, Type, TypePath};
 
 use crate::errors::error;
-use crate::model::{FuncInfo, ObjInfo};
 use crate::ProcResult;
-
-impl ObjInfo {
-    /// Order is load-bearing: constructors first, destructor second, methods last.
-    /// `gen_objects.rs` slices the resulting `Vec<FuncProcessor>` by index to split
-    /// constructors from the rest, so this order must not change.
-    /// Multiple constructors all return the same `Self` type, so one destructor covers all of them.
-    pub fn iter(&self) -> impl Iterator<Item = &FuncInfo> {
-        self.constructors
-            .iter()
-            .chain(std::iter::once(&self.destructor))
-            .chain(self.funcs.iter())
-    }
-}
 
 /// Remove an attribute from a list of attributes, returning the attribute if found.
 pub fn remove_attr(attrs: &mut Vec<Attribute>, name: &str) -> Option<Attribute> {

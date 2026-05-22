@@ -24,8 +24,10 @@ import vcl_rename from "path/to/libvcl_rename.so";
 
 ### Function `INT vcl_rename.bar()`
 
+## Object `kv`
+
 ### Constructor `vcl_rename.make([INT cap])`
 
-#### Method `STRING <object>.get(STRING key)`
+### Method `STRING <object>.get(STRING key)`
 
-#### Method `VOID <object>.store(STRING key, STRING value)`
+### Method `VOID <object>.store(STRING key, STRING value)`

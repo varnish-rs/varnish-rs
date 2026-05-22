@@ -20,6 +20,8 @@ import multi_constructor;
 import multi_constructor from "path/to/libmulti_constructor.so";
 ```
 
+## Object `kv`
+
 ### Constructor `multi_constructor.new([INT cap])`
 
 Create a new key-value store with optional capacity.
@@ -28,6 +30,6 @@ Create a new key-value store with optional capacity.
 
 Create a new key-value store with a fixed capacity of 10.
 
-#### Method `VOID <object>.set(STRING key, STRING value)`
+### Method `VOID <object>.set(STRING key, STRING value)`
 
-#### Method `STRING <object>.get(STRING key)`
+### Method `STRING <object>.get(STRING key)`

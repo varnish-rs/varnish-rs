@@ -32,10 +32,12 @@ import task from "path/to/libtask.so";
 
 ### Function `VOID task.per_tsk_ref_opt([INT op])`
 
+## Object `PerVcl`
+
 ### Constructor `task.new()`
 
-#### Method `VOID <object>.both()`
+### Method `VOID <object>.both()`
 
-#### Method `VOID <object>.both_pos(INT val)`
+### Method `VOID <object>.both_pos(INT val)`
 
-#### Method `VOID <object>.both_opt([INT opt])`
+### Method `VOID <object>.both_opt([INT opt])`

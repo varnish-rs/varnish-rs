@@ -79,6 +79,8 @@ import {ident} from "path/to/lib{ident}.so";
     }
 
     for obj in &info.objects {
+        ln!(docs, "\n## Object `{}`", obj.ident);
+        write_docs(&mut docs, &obj.docs, "##");
         for constructor in &obj.constructors {
             let vcl_name = constructor.vcl_ident();
             ln!(
@@ -91,12 +93,11 @@ import {ident} from "path/to/lib{ident}.so";
                     vcl_name
                 )
             );
-            write_docs(&mut docs, &obj.docs, "###");
-            write_function(&mut docs, &obj.ident, "####", vcl_name, constructor);
+            write_function(&mut docs, &obj.ident, "###", vcl_name, constructor);
         }
 
         for method in &obj.funcs {
-            write_function(&mut docs, &obj.ident, "####", "Method", method);
+            write_function(&mut docs, &obj.ident, "###", "Method", method);
         }
     }
 
