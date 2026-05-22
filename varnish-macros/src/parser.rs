@@ -139,7 +139,12 @@ impl VmodInfo {
             let name = func.vcl_ident().to_string();
             let desc = format!("function `{}`", func.ident);
             if let Some(prev) = seen_vcl_names.insert(name.clone(), desc.clone()) {
-                errors.add(item, &format!("VCL name `{name}` collision: {prev} and {desc} have the same VCL name"));
+                errors.add(
+                    item,
+                    &format!(
+                        "VCL name `{name}` collision: {prev} and {desc} have the same VCL name"
+                    ),
+                );
             }
         }
         for obj in &self.objects {
@@ -147,7 +152,12 @@ impl VmodInfo {
                 let name = constructor.vcl_ident().to_string();
                 let desc = format!("`{}` constructor `{}`", obj.ident, constructor.ident);
                 if let Some(prev) = seen_vcl_names.insert(name.clone(), desc.clone()) {
-                    errors.add(item, &format!("VCL name `{name}` collision: {prev} and {desc} have the same VCL name"));
+                    errors.add(
+                        item,
+                        &format!(
+                            "VCL name `{name}` collision: {prev} and {desc} have the same VCL name"
+                        ),
+                    );
                 }
             }
         }
