@@ -8,7 +8,7 @@ VMOD_JSON_SPEC
     "2.0",
     "obj2",
     "Vmod_vmod_obj2_Func",
-    "a8b357bc24bd720605138b460bb5f178119431f4e6429928f93d4f1d26c86c5b",
+    "c90ca6b4ec2f9db8e6a3d620e0e530af19a24ef8a10aa41d62e9e1cb05b73027",
     "Varnish (version) (hash)",
     "0",
     "0"
@@ -24,24 +24,24 @@ struct vmod_obj2_Obj3;
 
 struct vmod_obj2_Obj4;
 
-struct arg_vmod_obj2_Obj1_new {
+struct arg_vmod_obj2_Obj1_obj1 {
   struct vmod_priv * __vp;
   char valid_val;
   VCL_INT val;
 };
 
-typedef VCL_VOID td_vmod_obj2_Obj1_new(
+typedef VCL_VOID td_vmod_obj2_Obj1_obj1(
     VRT_CTX,
     struct vmod_obj2_Obj1 **,
     const char *,
-    struct arg_vmod_obj2_Obj1_new *
+    struct arg_vmod_obj2_Obj1_obj1 *
 );
 
 typedef VCL_VOID td_vmod_obj2_Obj1__fini(
     struct vmod_obj2_Obj1 **
 );
 
-typedef VCL_VOID td_vmod_obj2_Obj2_new(
+typedef VCL_VOID td_vmod_obj2_Obj2_obj2(
     VRT_CTX,
     struct vmod_obj2_Obj2 **,
     const char *,
@@ -53,24 +53,24 @@ typedef VCL_VOID td_vmod_obj2_Obj2__fini(
     struct vmod_obj2_Obj2 **
 );
 
-struct arg_vmod_obj2_Obj3_new {
+struct arg_vmod_obj2_Obj3_obj3 {
   struct vmod_priv * __vp;
   char valid_val;
   VCL_INT val;
 };
 
-typedef VCL_VOID td_vmod_obj2_Obj3_new(
+typedef VCL_VOID td_vmod_obj2_Obj3_obj3(
     VRT_CTX,
     struct vmod_obj2_Obj3 **,
     const char *,
-    struct arg_vmod_obj2_Obj3_new *
+    struct arg_vmod_obj2_Obj3_obj3 *
 );
 
 typedef VCL_VOID td_vmod_obj2_Obj3__fini(
     struct vmod_obj2_Obj3 **
 );
 
-typedef VCL_VOID td_vmod_obj2_Obj4_new(
+typedef VCL_VOID td_vmod_obj2_Obj4_obj4(
     VRT_CTX,
     struct vmod_obj2_Obj4 **,
     const char *,
@@ -83,13 +83,13 @@ typedef VCL_VOID td_vmod_obj2_Obj4__fini(
 );
 
 struct Vmod_vmod_obj2_Func {
-  td_vmod_obj2_Obj1_new *f_Obj1_new;
+  td_vmod_obj2_Obj1_obj1 *f_Obj1_obj1;
   td_vmod_obj2_Obj1__fini *f_Obj1__fini;
-  td_vmod_obj2_Obj2_new *f_Obj2_new;
+  td_vmod_obj2_Obj2_obj2 *f_Obj2_obj2;
   td_vmod_obj2_Obj2__fini *f_Obj2__fini;
-  td_vmod_obj2_Obj3_new *f_Obj3_new;
+  td_vmod_obj2_Obj3_obj3 *f_Obj3_obj3;
   td_vmod_obj2_Obj3__fini *f_Obj3__fini;
-  td_vmod_obj2_Obj4_new *f_Obj4_new;
+  td_vmod_obj2_Obj4_obj4 *f_Obj4_obj4;
   td_vmod_obj2_Obj4__fini *f_Obj4__fini;
 };
 
@@ -97,7 +97,7 @@ static struct Vmod_vmod_obj2_Func Vmod_vmod_obj2_Func;"
   ],
   [
     "$OBJ",
-    "new",
+    "obj1",
     {
       "NULL_OK": false
     },
@@ -108,8 +108,8 @@ static struct Vmod_vmod_obj2_Func Vmod_vmod_obj2_Func;"
         [
           "VOID"
         ],
-        "Vmod_vmod_obj2_Func.f_Obj1_new",
-        "struct arg_vmod_obj2_Obj1_new",
+        "Vmod_vmod_obj2_Func.f_Obj1_obj1",
+        "struct arg_vmod_obj2_Obj1_obj1",
         [
           "PRIV_VCL",
           "__vp",
@@ -138,7 +138,7 @@ static struct Vmod_vmod_obj2_Func Vmod_vmod_obj2_Func;"
   ],
   [
     "$OBJ",
-    "new",
+    "obj2",
     {
       "NULL_OK": false
     },
@@ -149,7 +149,7 @@ static struct Vmod_vmod_obj2_Func Vmod_vmod_obj2_Func;"
         [
           "VOID"
         ],
-        "Vmod_vmod_obj2_Func.f_Obj2_new",
+        "Vmod_vmod_obj2_Func.f_Obj2_obj2",
         "",
         [
           "PRIV_VCL",
@@ -176,7 +176,7 @@ static struct Vmod_vmod_obj2_Func Vmod_vmod_obj2_Func;"
   ],
   [
     "$OBJ",
-    "new",
+    "obj3",
     {
       "NULL_OK": false
     },
@@ -187,8 +187,8 @@ static struct Vmod_vmod_obj2_Func Vmod_vmod_obj2_Func;"
         [
           "VOID"
         ],
-        "Vmod_vmod_obj2_Func.f_Obj3_new",
-        "struct arg_vmod_obj2_Obj3_new",
+        "Vmod_vmod_obj2_Func.f_Obj3_obj3",
+        "struct arg_vmod_obj2_Obj3_obj3",
         [
           "PRIV_VCL",
           "__vp",
@@ -217,7 +217,7 @@ static struct Vmod_vmod_obj2_Func Vmod_vmod_obj2_Func;"
   ],
   [
     "$OBJ",
-    "new",
+    "obj4",
     {
       "NULL_OK": false
     },
@@ -228,7 +228,7 @@ static struct Vmod_vmod_obj2_Func Vmod_vmod_obj2_Func;"
         [
           "VOID"
         ],
-        "Vmod_vmod_obj2_Func.f_Obj4_new",
+        "Vmod_vmod_obj2_Func.f_Obj4_obj4",
         "",
         [
           "PRIV_VCL",

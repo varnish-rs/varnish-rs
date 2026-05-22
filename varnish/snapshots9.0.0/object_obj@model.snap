@@ -15,7 +15,7 @@ VmodInfo {
             constructors: [
                 FuncInfo {
                     func_type: Constructor,
-                    ident: "new",
+                    ident: "kv1",
                     vcl_name: None,
                     docs: "",
                     has_optional_args: true,
@@ -124,7 +124,7 @@ VmodInfo {
             constructors: [
                 FuncInfo {
                     func_type: Constructor,
-                    ident: "new",
+                    ident: "kv2",
                     vcl_name: None,
                     docs: "",
                     has_optional_args: true,
@@ -216,7 +216,7 @@ VmodInfo {
             constructors: [
                 FuncInfo {
                     func_type: Constructor,
-                    ident: "new",
+                    ident: "kv3",
                     vcl_name: None,
                     docs: "",
                     has_optional_args: true,

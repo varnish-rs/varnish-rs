@@ -15,7 +15,7 @@ VmodInfo {
             constructors: [
                 FuncInfo {
                     func_type: Constructor,
-                    ident: "new",
+                    ident: "obj1",
                     vcl_name: None,
                     docs: "",
                     has_optional_args: true,
@@ -61,7 +61,7 @@ VmodInfo {
             constructors: [
                 FuncInfo {
                     func_type: Constructor,
-                    ident: "new",
+                    ident: "obj2",
                     vcl_name: None,
                     docs: "",
                     has_optional_args: false,
@@ -107,7 +107,7 @@ VmodInfo {
             constructors: [
                 FuncInfo {
                     func_type: Constructor,
-                    ident: "new",
+                    ident: "obj3",
                     vcl_name: None,
                     docs: "",
                     has_optional_args: true,
@@ -160,7 +160,7 @@ VmodInfo {
             constructors: [
                 FuncInfo {
                     func_type: Constructor,
-                    ident: "new",
+                    ident: "obj4",
                     vcl_name: None,
                     docs: "",
                     has_optional_args: false,

@@ -8,7 +8,7 @@ VMOD_JSON_SPEC
     "2.0",
     "event3",
     "Vmod_vmod_event3_Func",
-    "b0d3002d76c94a5fdc4400aad9cfa4404a85e128fb5dea2c179283f7d18ea54e",
+    "2e04e8a41fb633a6b2c76b6b78155396928a8dc4c57935089e8168db69187824",
     "Varnish (version) (hash)",
     "0",
     "0"
@@ -25,7 +25,7 @@ typedef VCL_VOID td_vmod_event3_access(
     struct vmod_priv *
 );
 
-typedef VCL_VOID td_vmod_event3_Obj1_new(
+typedef VCL_VOID td_vmod_event3_Obj1_obj1(
     VRT_CTX,
     struct vmod_event3_Obj1 **,
     const char *,
@@ -42,7 +42,7 @@ typedef VCL_VOID td_vmod_event3_Obj1_obj_access(
     struct vmod_priv *
 );
 
-typedef VCL_VOID td_vmod_event3_Obj2_new(
+typedef VCL_VOID td_vmod_event3_Obj2_obj2(
     VRT_CTX,
     struct vmod_event3_Obj2 **,
     const char *,
@@ -61,10 +61,10 @@ typedef VCL_VOID td_vmod_event3_Obj2_obj_access(
 struct Vmod_vmod_event3_Func {
   vmod_event_f *f_on_event;
   td_vmod_event3_access *f_access;
-  td_vmod_event3_Obj1_new *f_Obj1_new;
+  td_vmod_event3_Obj1_obj1 *f_Obj1_obj1;
   td_vmod_event3_Obj1__fini *f_Obj1__fini;
   td_vmod_event3_Obj1_obj_access *f_Obj1_obj_access;
-  td_vmod_event3_Obj2_new *f_Obj2_new;
+  td_vmod_event3_Obj2_obj2 *f_Obj2_obj2;
   td_vmod_event3_Obj2__fini *f_Obj2__fini;
   td_vmod_event3_Obj2_obj_access *f_Obj2_obj_access;
 };
@@ -93,7 +93,7 @@ static struct Vmod_vmod_event3_Func Vmod_vmod_event3_Func;"
   ],
   [
     "$OBJ",
-    "new",
+    "obj1",
     {
       "NULL_OK": false
     },
@@ -104,7 +104,7 @@ static struct Vmod_vmod_event3_Func Vmod_vmod_event3_Func;"
         [
           "VOID"
         ],
-        "Vmod_vmod_event3_Func.f_Obj1_new",
+        "Vmod_vmod_event3_Func.f_Obj1_obj1",
         "",
         [
           "PRIV_VCL",
@@ -142,7 +142,7 @@ static struct Vmod_vmod_event3_Func Vmod_vmod_event3_Func;"
   ],
   [
     "$OBJ",
-    "new",
+    "obj2",
     {
       "NULL_OK": false
     },
@@ -153,7 +153,7 @@ static struct Vmod_vmod_event3_Func Vmod_vmod_event3_Func;"
         [
           "VOID"
         ],
-        "Vmod_vmod_event3_Func.f_Obj2_new",
+        "Vmod_vmod_event3_Func.f_Obj2_obj2",
         "",
         [
           "PRIV_VCL",

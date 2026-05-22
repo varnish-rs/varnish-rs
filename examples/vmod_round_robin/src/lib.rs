@@ -6,8 +6,7 @@ use varnish_sys::report_details_json;
 varnish::run_vtc_tests!("tests/*.vtc");
 
 /// A simple round-robin director that distributes requests across multiple backends
-#[allow(non_camel_case_types)]
-pub struct rr {
+pub struct RoundRobin {
     director: Director<RoundRobinDirector>,
 }
 
@@ -15,13 +14,13 @@ pub struct rr {
 #[varnish::vmod(docs = "README.md")]
 mod round_robin {
     use super::{
-        rr, BackendRef, Ctx, Director, Mutex, RoundRobinDirector, RoundRobinState, VclError,
+        RoundRobin, BackendRef, Ctx, Director, Mutex, RoundRobinDirector, RoundRobinState, VclError,
     };
 
-    impl rr {
+    impl RoundRobin {
         /// Create a new round-robin director
         pub fn new(ctx: &mut Ctx, #[vcl_name] name: &str) -> Result<Self, VclError> {
-            Ok(rr {
+            Ok(RoundRobin {
                 director: Director::new(
                     ctx,
                     "roundrobin",

@@ -15,7 +15,7 @@ mod obj {
     use varnish::vcl::Ctx;
 
     impl kv1 {
-        pub fn new(cap: Option<i64>) -> Self {
+        pub fn kv1(cap: Option<i64>) -> Self {
             Self
         }
         pub fn set(&self, key: &str, value: &str) {}
@@ -25,14 +25,14 @@ mod obj {
     }
 
     impl kv2 {
-        pub fn new(cap: Option<i64>, #[vcl_name] name: &str) -> Self {
+        pub fn kv2(cap: Option<i64>, #[vcl_name] name: &str) -> Self {
             Self
         }
         pub fn set(&self, key: &str, value: Option<&str>) {}
     }
 
     impl kv3 {
-        pub fn new(ctx: &mut Ctx, cap: Option<i64>, #[vcl_name] name: &str) -> Self {
+        pub fn kv3(ctx: &mut Ctx, cap: Option<i64>, #[vcl_name] name: &str) -> Self {
             Self
         }
         pub fn set(&self, ctx: &mut Ctx, key: &str, value: Option<&str>) {}

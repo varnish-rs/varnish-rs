@@ -18,7 +18,7 @@ import std;
     import round_robin from "${vmod}";
 
     sub vcl_init {
-        new rr = round_robin.rr();
+        new rr = round_robin.new();
         rr.add_backend(s1);
         rr.add_backend(s2);
     }

@@ -20,16 +20,16 @@ import obj;
 import obj from "path/to/libobj.so";
 ```
 
-### Constructor `obj.new([INT cap])`
+### Constructor `obj.kv1([INT cap])`
 
 #### Method `VOID <object>.set(STRING key, STRING value)`
 
 #### Method `STRING <object>.get(STRING key)`
 
-### Constructor `obj.new([INT cap])`
+### Constructor `obj.kv2([INT cap])`
 
 #### Method `VOID <object>.set(STRING key, [STRING value])`
 
-### Constructor `obj.new([INT cap])`
+### Constructor `obj.kv3([INT cap])`
 
 #### Method `VOID <object>.set(STRING key, [STRING value])`
