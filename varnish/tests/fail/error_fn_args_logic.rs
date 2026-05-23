@@ -2,6 +2,7 @@
 mod err_fn_args_logic {
     pub fn string(s: String) {}
     pub fn task_arg_non_mut(#[shared_per_task] a: Option<i64>) {}
+    pub fn task_refcell_mut(#[shared_per_task] a: &mut RefCell<Option<i64>>) {}
     pub fn vcl_arg_non_ref(#[shared_per_vcl] a: Option<i64>) {}
     pub fn on_non_event(a: Event) {}
     #[event]

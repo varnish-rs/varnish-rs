@@ -1,0 +1,75 @@
+---
+source: varnish-macros/src/tests.rs
+---
+mod refcell_task_map {
+    #[allow(non_snake_case, unused_imports, unused_qualifications, unused_variables)]
+    #[allow(clippy::needless_question_mark, clippy::new_without_default)]
+    #[automatically_derived]
+    mod varnish_generated {
+        use std::ffi::{c_char, c_int, c_uint, c_void, CStr};
+        use std::ptr::null;
+        use varnish::ffi::{
+            VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE,
+            VCL_REAL, VCL_STRING, VCL_TIME, VCL_VOID, VMOD_ABI_Version, VclEvent,
+            vmod_data, vmod_priv, vrt_ctx, VMOD_PRIV_METHODS_MAGIC, vmod_priv_methods,
+        };
+        use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
+        use super::*;
+        static PRIV_TASK_METHODS: vmod_priv_methods = vmod_priv_methods {
+            magic: VMOD_PRIV_METHODS_MAGIC,
+            type_: c"RefCell < Option < HashMap < String , String > > >".as_ptr(),
+            fini: Some(vmod_priv::on_fini::<RefCell<Option<HashMap<String, String>>>>),
+        };
+        unsafe extern "C" fn vmod_c_with_map(__ctx: *mut vrt_ctx, tsk: *mut vmod_priv) {
+            if (*tsk).get_ref::<RefCell<Option<HashMap<String, String>>>>().is_none() {
+                (*tsk)
+                    .put(
+                        ::std::boxed::Box::new(
+                            <RefCell<
+                                Option<HashMap<String, String>>,
+                            > as ::std::default::Default>::default(),
+                        ),
+                        &PRIV_TASK_METHODS,
+                    );
+            }
+            let __refcell_per_task = (*tsk)
+                .get_ref::<RefCell<Option<HashMap<String, String>>>>()
+                .expect("vmod_priv RefCell was just initialized");
+            super::with_map(__refcell_per_task)
+        }
+        #[repr(C)]
+        pub struct VmodExports {
+            vmod_c_with_map: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, tsk: *mut vmod_priv),
+            >,
+        }
+        pub static VMOD_EXPORTS: VmodExports = VmodExports {
+            vmod_c_with_map: Some(vmod_c_with_map),
+        };
+        #[allow(non_upper_case_globals)]
+        #[no_mangle]
+        pub static Vmod_refcell_task_map_Data: vmod_data = vmod_data {
+            vrt_major: 0,
+            vrt_minor: 0,
+            file_id: c"0569aec9eb08256538a946f24eee3ae75bec760d8c005f3b332fea3488f5e870"
+                .as_ptr(),
+            name: c"refcell_task_map".as_ptr(),
+            func_name: c"Vmod_vmod_refcell_task_map_Func".as_ptr(),
+            func_len: ::std::mem::size_of::<VmodExports>() as c_int,
+            func: &VMOD_EXPORTS as *const _ as *const c_void,
+            abi: VMOD_ABI_Version.as_ptr(),
+            json: JSON.as_ptr(),
+            proto: null(),
+            vcs: c"".as_ptr(),
+            version: c"".as_ptr(),
+        };
+        const JSON: &CStr = c"(moved to @json.snap files)";
+    }
+    use std::cell::RefCell;
+    use std::collections::HashMap;
+    pub fn with_map(tsk: &RefCell<Option<HashMap<String, String>>>) {
+        let mut borrow = tsk.borrow_mut();
+        let map = borrow.get_or_insert_with(HashMap::new);
+        map.insert("key".to_string(), "val".to_string());
+    }
+}

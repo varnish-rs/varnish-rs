@@ -1,0 +1,105 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VMOD_JSON_SPEC
+[
+  [
+    "$VMOD",
+    "2.0",
+    "refcell_task",
+    "Vmod_vmod_refcell_task_Func",
+    "675f4fdaf8ee28273cf3ef5a2293d0f5cd9a169cf8dd8c3ea64449770aa03b88",
+    "Varnish (version) (hash)",
+    "0",
+    "0"
+  ],
+  [
+    "$CPROTO",
+    "
+typedef VCL_VOID td_vmod_refcell_task_read(
+    VRT_CTX,
+    struct vmod_priv *
+);
+
+typedef VCL_VOID td_vmod_refcell_task_write(
+    VRT_CTX,
+    struct vmod_priv *
+);
+
+struct arg_vmod_refcell_task_read_with_opt {
+  struct vmod_priv * tsk;
+  char valid_op;
+  VCL_INT op;
+};
+
+typedef VCL_VOID td_vmod_refcell_task_read_with_opt(
+    VRT_CTX,
+    struct arg_vmod_refcell_task_read_with_opt *
+);
+
+struct Vmod_vmod_refcell_task_Func {
+  td_vmod_refcell_task_read *f_read;
+  td_vmod_refcell_task_write *f_write;
+  td_vmod_refcell_task_read_with_opt *f_read_with_opt;
+};
+
+static struct Vmod_vmod_refcell_task_Func Vmod_vmod_refcell_task_Func;"
+  ],
+  [
+    "$FUNC",
+    "read",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_refcell_task_Func.f_read",
+      "",
+      [
+        "PRIV_TASK",
+        "tsk",
+        "tsk"
+      ]
+    ]
+  ],
+  [
+    "$FUNC",
+    "write",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_refcell_task_Func.f_write",
+      "",
+      [
+        "PRIV_TASK",
+        "tsk",
+        "tsk"
+      ]
+    ]
+  ],
+  [
+    "$FUNC",
+    "read_with_opt",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_refcell_task_Func.f_read_with_opt",
+      "struct arg_vmod_refcell_task_read_with_opt",
+      [
+        "PRIV_TASK",
+        "tsk",
+        "tsk"
+      ],
+      [
+        "INT",
+        "op",
+        "op",
+        null,
+        null,
+        true
+      ]
+    ]
+  ]
+]
+

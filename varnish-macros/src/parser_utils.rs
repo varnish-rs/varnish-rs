@@ -84,6 +84,11 @@ pub fn as_box_type(ty: &Type) -> Option<&Type> {
     as_one_gen_type(ty, "Box")
 }
 
+/// Try to get the inner type of the `RefCell<T>`, or return None if it's not a `RefCell<T>`.
+pub fn as_ref_cell_type(ty: &Type) -> Option<&Type> {
+    as_one_gen_type(ty, "RefCell")
+}
+
 /// Try to get the inner type of `__name__<T>` type with one argument, or return None if it's not a generic type with one argument.
 fn as_one_gen_type<'a>(ty: &'a Type, name: &'static str) -> Option<&'a Type> {
     if let Some(GenericArgument::Type(inner_ty)) = as_one_gen_arg(ty, name) {
@@ -158,6 +163,22 @@ pub fn parse_shared_mut(store: &mut Option<String>, arg_ty: &Type) -> ProcResult
 pub fn parse_shared_ref(store: &mut Option<String>, arg_ty: &Type) -> ProcResult<()> {
     let val = as_option_type(arg_ty).and_then(as_ref_ty);
     store_shared(store, arg_ty, val, false)
+}
+
+/// Save/validate shared `RefCell` into the store. Must be declared as `&RefCell<Option<T>>`.
+/// Stores the `RefCell<Option<T>>` type (not just `T`) to distinguish from Mut/Ref forms.
+pub fn parse_shared_ref_cell(store: &mut Option<String>, arg_ty: &Type) -> ProcResult<()> {
+    // Strip `&` → must be `RefCell<Option<T>>`
+    let refcell_ty =
+        as_ref_ty(arg_ty).filter(|t| as_ref_cell_type(t).and_then(as_option_type).is_some());
+    if refcell_ty.is_none() {
+        Err(error(
+            arg_ty,
+            "This parameter must be declared as `&RefCell<Option<...>>`",
+        ))?;
+    }
+    // Store the `RefCell<Option<T>>` type string (inner of `&`)
+    store_shared(store, arg_ty, refcell_ty, false)
 }
 
 use syn::visit_mut::VisitMut;

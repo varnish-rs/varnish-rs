@@ -131,6 +131,10 @@ pub enum ParamType {
     SharedPerTaskMut,
     /// A readonly argument `Option<&T>` representing any Rust name and type shared across tasks (i.e. `PRIV_TASK`)
     SharedPerTaskRef,
+    /// A reentrant argument `&RefCell<Option<T>>` for shared per-task state.
+    /// Unlike `SharedPerTaskMut`, the value stays in per-task storage during sub calls,
+    /// so nested VCL subroutine calls can also access it. Auto-initialized on first use.
+    SharedPerTaskRefCell,
     /// A readonly argument `Option<&T>` representing any Rust name and type shared across VCL load (i.e. `PRIV_VCL`)
     SharedPerVclRef,
     /// A mutable argument `&mut Option<Box<T>>` representing any Rust name and type shared across VCL load (i.e. `PRIV_VCL`)

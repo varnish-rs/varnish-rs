@@ -9,9 +9,13 @@ use crate::model::{
     FuncType, OutputTy, ParamInfo, ParamKind, ParamTy, ParamType, ParamTypeInfo, SharedTypes,
 };
 use crate::parser_utils::{
-    as_one_gen_arg, as_option_type, as_ref_mut_ty, as_ref_ty, as_simple_ty, as_slice_ty,
-    parse_and_rm_doc, parse_shared_mut, parse_shared_ref, remove_attr,
+    as_box_type, as_one_gen_arg, as_option_type, as_ref_cell_type, as_ref_mut_ty, as_ref_ty,
+    as_simple_ty, as_slice_ty, parse_and_rm_doc, parse_shared_mut, parse_shared_ref,
+    parse_shared_ref_cell, remove_attr,
 };
+
+const SHARED_PER_TASK_TYPE_ERR: &str =
+    "#[shared_per_task] must be `&mut Option<Box<...>>`, `Option<&...>`, or `&RefCell<Option<...>>`";
 use crate::ProcResult;
 
 /// Parser state for a function parser. This is not part of the model, but helps with error detection.
@@ -135,9 +139,32 @@ impl ParamType {
             not_in! { Event, "Event functions must not have any #[shared_per_task] arguments." }
             unique! { has_shared_per_task, "#[shared_per_task] param is allowed only once in a function args list" }
             if as_ref_mut_ty(arg_ty).is_some() {
+                // Must be exactly `&mut Option<Box<T>>`
+                if as_ref_mut_ty(arg_ty)
+                    .and_then(as_option_type)
+                    .and_then(as_box_type)
+                    .is_none()
+                {
+                    Err(error(arg_ty, SHARED_PER_TASK_TYPE_ERR))?;
+                }
                 parse_shared_mut(&mut shared_types.shared_per_task_ty, arg_ty)?;
                 Self::SharedPerTaskMut
+            } else if as_ref_ty(arg_ty).and_then(as_ref_cell_type).is_some() {
+                // Must be exactly `&RefCell<Option<T>>`
+                if as_ref_ty(arg_ty)
+                    .and_then(as_ref_cell_type)
+                    .and_then(as_option_type)
+                    .is_none()
+                {
+                    Err(error(arg_ty, SHARED_PER_TASK_TYPE_ERR))?;
+                }
+                parse_shared_ref_cell(&mut shared_types.shared_per_task_ty, arg_ty)?;
+                Self::SharedPerTaskRefCell
             } else {
+                // Must be exactly `Option<&T>`
+                if as_option_type(arg_ty).and_then(as_ref_ty).is_none() {
+                    Err(error(arg_ty, SHARED_PER_TASK_TYPE_ERR))?;
+                }
                 parse_shared_ref(&mut shared_types.shared_per_task_ty, arg_ty)?;
                 Self::SharedPerTaskRef
             }

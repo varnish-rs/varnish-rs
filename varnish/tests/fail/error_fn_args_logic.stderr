@@ -4,50 +4,56 @@ error: unsupported argument type
 3 |     pub fn string(s: String) {}
   |                   ^
 
-error: This parameter must be declared as `Option<&...>`
+error: #[shared_per_task] must be `&mut Option<Box<...>>`, `Option<&...>`, or `&RefCell<Option<...>>`
  --> tests/fail/error_fn_args_logic.rs:4:51
   |
 4 |     pub fn task_arg_non_mut(#[shared_per_task] a: Option<i64>) {}
   |                                                   ^^^^^^
 
-error: This parameter must be declared as `Option<&...>`
- --> tests/fail/error_fn_args_logic.rs:5:49
+error: #[shared_per_task] must be `&mut Option<Box<...>>`, `Option<&...>`, or `&RefCell<Option<...>>`
+ --> tests/fail/error_fn_args_logic.rs:5:51
   |
-5 |     pub fn vcl_arg_non_ref(#[shared_per_vcl] a: Option<i64>) {}
+5 |     pub fn task_refcell_mut(#[shared_per_task] a: &mut RefCell<Option<i64>>) {}
+  |                                                   ^
+
+error: This parameter must be declared as `Option<&...>`
+ --> tests/fail/error_fn_args_logic.rs:6:49
+  |
+6 |     pub fn vcl_arg_non_ref(#[shared_per_vcl] a: Option<i64>) {}
   |                                                 ^^^^^^
 
 error: Event parameters are only allowed in event handlers. Try adding `#[event]` to this function.
- --> tests/fail/error_fn_args_logic.rs:6:25
+ --> tests/fail/error_fn_args_logic.rs:7:25
   |
-6 |     pub fn on_non_event(a: Event) {}
+7 |     pub fn on_non_event(a: Event) {}
   |                         ^
 
 error: Event functions can only have `Ctx`, `#[event] Event`, and `#[shared_per_vcl] &mut Option<Box<T>>` arguments.
- --> tests/fail/error_fn_args_logic.rs:8:25
+ --> tests/fail/error_fn_args_logic.rs:9:25
   |
-8 |     pub fn on_event_arg(a: i64) {}
+9 |     pub fn on_event_arg(a: i64) {}
   |                         ^
 
 error: Event functions must not have any #[shared_per_task] arguments.
-  --> tests/fail/error_fn_args_logic.rs:10:49
+  --> tests/fail/error_fn_args_logic.rs:11:49
    |
-10 |     pub fn on_event_arg_task(#[shared_per_task] a: Option<Box<i64>>) {}
+11 |     pub fn on_event_arg_task(#[shared_per_task] a: Option<Box<i64>>) {}
    |                                                 ^
 
 error: This parameter must be declared as `&mut Option<Box<...>>`
-  --> tests/fail/error_fn_args_logic.rs:12:50
+  --> tests/fail/error_fn_args_logic.rs:13:50
    |
-12 |     pub fn on_event_arg_vcl(#[shared_per_vcl] a: Option<&i64>) {}
+13 |     pub fn on_event_arg_vcl(#[shared_per_vcl] a: Option<&i64>) {}
    |                                                  ^^^^^^
 
 error: This type of argument must be declared as optional with `Option<...>`
-  --> tests/fail/error_fn_args_logic.rs:13:32
+  --> tests/fail/error_fn_args_logic.rs:14:32
    |
-13 |     pub fn socket_addr_non_opt(_v: SocketAddr) {}
+14 |     pub fn socket_addr_non_opt(_v: SocketAddr) {}
    |                                ^^
 
 error: #[vcl_name] params are only allowed in object constructors
-  --> tests/fail/error_fn_args_logic.rs:15:33
+  --> tests/fail/error_fn_args_logic.rs:16:33
    |
-15 |     pub fn vcl_name(#[vcl_name] a: &str) {}
+16 |     pub fn vcl_name(#[vcl_name] a: &str) {}
    |                                 ^
