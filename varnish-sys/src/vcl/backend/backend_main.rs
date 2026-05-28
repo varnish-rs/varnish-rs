@@ -517,7 +517,7 @@ impl<'a> NativeBackendBuilder<'a> {
     /// The caller must ensure that `vcl` is valid for the duration of this call.
     ///
     /// Internally a minimal [`vrt_ctx`] is stack-allocated with only `vcl` set and passed to
-    /// [`VRT_new_backend`]. This is safe because `VRT_new_backend` only reads ctx during its
+    /// `VRT_new_backend`. This is safe because `VRT_new_backend` only reads ctx during its
     /// synchronous execution and does not retain the pointer afterward.
     ///
     /// We use [`ffi::vcl`] here as `VCL_VCL` isn't [Send], and the function is unsafe anyway.
