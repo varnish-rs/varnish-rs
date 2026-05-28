@@ -8,7 +8,8 @@ use std::ptr::{null, null_mut};
 use std::time::SystemTime;
 
 use crate::ffi::{
-    vrt_ctx, VclEvent, VfpStatus, VCL_BACKEND, VCL_BOOL, VCL_IP, VCL_TIME, VCL_VCL, VRT_CTX_MAGIC,
+    vrt_ctx, vsa_suckaddr_len, VclEvent, VfpStatus, VCL_BACKEND, VCL_BOOL, VCL_IP, VCL_TIME,
+    VCL_VCL, VRT_CTX_MAGIC,
 };
 #[cfg(varnishsys_90_sslflags)]
 use crate::ffi::{BSSL_F_ENABLE, BSSL_F_NOVERIFY, BSSL_F_VERIFY_HOST};
@@ -121,7 +122,7 @@ impl<S: VclBackend<T>, T: VclResponse> Backend<S, T> {
         }
 
         let backend_ref = unsafe {
-            BackendRef::new_withouth_refcount(bep).expect("Backend pointer should never be null")
+            BackendRef::new_without_refcount(bep).expect("Backend pointer should never be null")
         };
 
         Ok(Backend {
@@ -508,16 +509,18 @@ impl<'a> NativeBackendBuilder<'a> {
         self
     }
 
-    /// Build the native backend with a VCL. This can be use in cases where there's no [Ctx], linke
+    /// Build the native backend with a VCL. This can be used in cases where there's no [Ctx], like
     /// in a background thread.
     ///
     /// # Safety
     ///
-    /// The caller must ensure that vcl is valid during the whole execution of the function.
-    /// Internally the function creates a dummy [Ctx] with `vcl` as this is the only value that
-    /// matters to [`VRT_new_backend`] used underneath.
+    /// The caller must ensure that `vcl` is valid for the duration of this call.
     ///
-    /// We use [`ffi::vcl`] here are `VCL_VCL` isn't [Send], and the function is unsafe anyway.
+    /// Internally a minimal [`vrt_ctx`] is stack-allocated with only `vcl` set and passed to
+    /// [`VRT_new_backend`]. This is safe because `VRT_new_backend` only reads ctx during its
+    /// synchronous execution and does not retain the pointer afterward.
+    ///
+    /// We use [`ffi::vcl`] here as `VCL_VCL` isn't [Send], and the function is unsafe anyway.
     pub unsafe fn build_with_vcl(
         self,
         vcl: *mut ffi::vcl,
@@ -527,14 +530,20 @@ impl<'a> NativeBackendBuilder<'a> {
             vcl: VCL_VCL(vcl),
             ..Default::default()
         };
-        let mut ctx = Ctx::from_ptr(&raw const raw_ctx);
-        self.build(&mut ctx)
+        self.build_with_raw_ctx(&raw const raw_ctx)
     }
 
     /// Build the native backend
     pub fn build(
         self,
         ctx: &mut Ctx,
+    ) -> VclResult<Backend<NativeVclBackendShim, NativeVclResponseShim>> {
+        unsafe { self.build_with_raw_ctx(ctx.raw) }
+    }
+
+    unsafe fn build_with_raw_ctx(
+        self,
+        raw: *const vrt_ctx,
     ) -> VclResult<Backend<NativeVclBackendShim, NativeVclResponseShim>> {
         // Validate required fields
         let endpoint_type = self
@@ -557,17 +566,14 @@ impl<'a> NativeBackendBuilder<'a> {
             sslflags: self.sslflags,
         });
 
-        // Set endpoint based on type
-        // in case of an IP, we need a buffer that'll live until we've pass endpoint to VRT_new_backend
-        let mut sa_buf: [c_void; std::mem::size_of::<ffi::suckaddr>()] = [];
+        // in case of an IP, we need a buffer that'll live until we've passed endpoint to VRT_new_backend
+        let mut sa_buf = vec![0u8; vsa_suckaddr_len];
         match endpoint_type {
             BackendEndpoint::Uds(path) => {
                 endpoint.uds_path = path.as_ptr();
             }
             BackendEndpoint::Ip(addr) => {
-                unsafe {
-                    crate::vcl::convert::write_ip_to_buf(addr, &mut sa_buf);
-                }
+                crate::vcl::convert::write_ip_to_buf(addr, &mut sa_buf);
                 match addr {
                     SocketAddr::V4(_) => endpoint.ipv4 = VCL_IP(sa_buf.as_ptr().cast()),
                     SocketAddr::V6(_) => endpoint.ipv6 = VCL_IP(sa_buf.as_ptr().cast()),
@@ -598,10 +604,11 @@ impl<'a> NativeBackendBuilder<'a> {
             probe: ffi::VCL_PROBE(null()),
         });
 
-        // Create the backend via VRT_new_backend (NULL via backend)
-        let bep = unsafe {
-            ffi::VRT_new_backend(ctx.raw, &raw const *backend_config, VCL_BACKEND(null()))
-        };
+        let bep = ffi::VRT_new_backend(
+            raw.cast_mut(),
+            &raw const *backend_config,
+            VCL_BACKEND(null()),
+        );
 
         if bep.0.is_null() {
             return Err(format!(
@@ -613,9 +620,8 @@ impl<'a> NativeBackendBuilder<'a> {
 
         let methods = Box::new(ffi::vdi_methods::default());
 
-        let backend_ref = unsafe {
-            BackendRef::new_withouth_refcount(bep).expect("Backend pointer should never be null")
-        };
+        let backend_ref =
+            BackendRef::new_without_refcount(bep).expect("Backend pointer should never be null");
 
         Ok(Backend {
             methods,
