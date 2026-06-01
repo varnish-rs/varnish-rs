@@ -1,0 +1,22 @@
+varnishtest "repeater"
+
+server s1 {} -start
+
+varnish v1 -vcl+backend {
+    import simple_backend from "${vmod}";
+
+    sub vcl_init {
+        new repeater = simple_backend.new("I'll repeat this on and on");
+    }
+
+    sub vcl_recv {
+        set req.backend_hint = repeater.backend();
+        return (pass);
+    }
+} -start
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.body == "I'll repeat this on and on"
+} -run

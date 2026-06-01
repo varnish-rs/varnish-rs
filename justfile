@@ -61,12 +61,12 @@ bless-all:
 
 # Build the project with just the default and all features
 build:
-    cargo build {{packages}} {{features}} $({{just_executable()}} get-package-exclude-args)
-    cargo build {{packages}} {{features}} {{targets}} $({{just_executable()}} get-package-exclude-args)
+    cargo build {{packages}} {{features}}
+    cargo build {{packages}} {{features}} {{targets}}
 
 # Quick compile without building a binary
 check:
-    cargo check {{packages}} {{features}} {{targets}} $({{just_executable()}} get-package-exclude-args)
+    cargo check {{packages}} {{features}} {{targets}}
 
 # Generate code coverage report to upload to codecov.io
 ci-coverage: env-info && \
@@ -105,7 +105,7 @@ clean-all: clean
 
 # Run cargo clippy to lint the code
 clippy *args:
-    cargo clippy {{packages}} {{features}} {{targets}} $({{just_executable()}} get-package-exclude-args) {{args}}
+    cargo clippy {{packages}} {{features}} {{targets}} {{args}}
 
 # Generate code coverage report. Will install `cargo llvm-cov` if missing.
 coverage *args='--no-clean --open':  (cargo-install 'cargo-llvm-cov')
@@ -121,7 +121,7 @@ coverage *args='--no-clean --open':  (cargo-install 'cargo-llvm-cov')
     open ./target/debug/coverage/index.html
     #
     # TODO: use llvm-cov instead:
-    # cargo llvm-cov {{packages}} {{features}} {{targets}} --include-build-script $({{just_executable()}} get-package-exclude-args) {{args}}
+    # cargo llvm-cov {{packages}} {{features}} {{targets}} --include-build-script {{args}}
 
 docker-run version=default_varnish_ver *args='':  (docker-build-ver version) (docker-run-ver version args)
 
@@ -213,7 +213,7 @@ semver *args:  (cargo-install 'cargo-semver-checks')
 
 # Run all unit and integration tests
 test *args: build
-    cargo test {{packages}} {{features}} {{targets}} $({{just_executable()}} get-package-exclude-args) {{args}}
+    cargo test {{packages}} {{features}} {{targets}} {{args}}
     cargo test --doc {{packages}} {{features}}
 
 # Test documentation generation
@@ -303,19 +303,6 @@ docker-run-ver version *args:
         -v "$PWD/docker/.cache/{{version}}:/home/user/.cache" \
         -v "$PWD/docker/.cache/{{version}}/.bash_history:/home/user/.bash_history" \
         varnish-img-{{version}} {{args}}
-
-# Get the `--exclude <SPEC>` parameter for the cargo build/test/... command, depending on the installed version of Varnish
-[private]
-get-package-exclude-args:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    if {{just_executable()}} get-varnish-version 8.0 > /dev/null 2> /dev/null ; then
-        echo ""
-    else
-        EXCLUDE="--exclude vmod_be --exclude vmod_vfp --exclude vmod_vdp --exclude vmod_test --exclude vmod_native_backend --exclude vmod_round_robin"
-        >&2 echo "INFO: Due to older Varnish, running with: $EXCLUDE"
-        echo "$EXCLUDE"
-    fi
 
 # Install Varnish. For a release version, installs from packages.varnish-software.com.
 # For `trunk`, clones https://github.com/varnish/varnish.git, builds, and installs to VARNISH_INSTALL_DIR (default: /tmp/varnish-trunk).
