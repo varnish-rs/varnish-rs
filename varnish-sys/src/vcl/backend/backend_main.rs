@@ -7,7 +7,10 @@ use std::ptr;
 use std::ptr::{null, null_mut};
 use std::time::SystemTime;
 
-use crate::ffi::{VclEvent, VfpStatus, VCL_BACKEND, VCL_BOOL, VCL_IP, VCL_TIME};
+use crate::ffi::{
+    vrt_ctx, vsa_suckaddr_len, VclEvent, VfpStatus, VCL_BACKEND, VCL_BOOL, VCL_IP, VCL_TIME,
+    VCL_VCL, VRT_CTX_MAGIC,
+};
 #[cfg(varnishsys_90_sslflags)]
 use crate::ffi::{BSSL_F_ENABLE, BSSL_F_NOVERIFY, BSSL_F_VERIFY_HOST};
 use crate::utils::get_backend;
@@ -119,7 +122,7 @@ impl<S: VclBackend<T>, T: VclResponse> Backend<S, T> {
         }
 
         let backend_ref = unsafe {
-            BackendRef::new_withouth_refcount(bep).expect("Backend pointer should never be null")
+            BackendRef::new_without_refcount(bep).expect("Backend pointer should never be null")
         };
 
         Ok(Backend {
@@ -506,10 +509,41 @@ impl<'a> NativeBackendBuilder<'a> {
         self
     }
 
+    /// Build the native backend with a VCL. This can be used in cases where there's no [Ctx], like
+    /// in a background thread.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `vcl` is valid for the duration of this call.
+    ///
+    /// Internally a minimal [`vrt_ctx`] is stack-allocated with only `vcl` set and passed to
+    /// `VRT_new_backend`. This is safe because `VRT_new_backend` only reads ctx during its
+    /// synchronous execution and does not retain the pointer afterward.
+    ///
+    /// We use [`ffi::vcl`] here as `VCL_VCL` isn't [Send], and the function is unsafe anyway.
+    pub unsafe fn build_with_vcl(
+        self,
+        vcl: *mut ffi::vcl,
+    ) -> VclResult<Backend<NativeVclBackendShim, NativeVclResponseShim>> {
+        let raw_ctx = vrt_ctx {
+            magic: VRT_CTX_MAGIC,
+            vcl: VCL_VCL(vcl),
+            ..Default::default()
+        };
+        self.build_with_raw_ctx(&raw const raw_ctx)
+    }
+
     /// Build the native backend
     pub fn build(
         self,
         ctx: &mut Ctx,
+    ) -> VclResult<Backend<NativeVclBackendShim, NativeVclResponseShim>> {
+        unsafe { self.build_with_raw_ctx(ctx.raw) }
+    }
+
+    unsafe fn build_with_raw_ctx(
+        self,
+        raw: *const vrt_ctx,
     ) -> VclResult<Backend<NativeVclBackendShim, NativeVclResponseShim>> {
         // Validate required fields
         let endpoint_type = self
@@ -532,16 +566,17 @@ impl<'a> NativeBackendBuilder<'a> {
             sslflags: self.sslflags,
         });
 
-        // Set endpoint based on type
+        // in case of an IP, we need a buffer that'll live until we've passed endpoint to VRT_new_backend
+        let mut sa_buf = vec![0u8; vsa_suckaddr_len];
         match endpoint_type {
             BackendEndpoint::Uds(path) => {
                 endpoint.uds_path = path.as_ptr();
             }
             BackendEndpoint::Ip(addr) => {
-                let sa = addr.into_vcl(&mut ctx.ws)?;
+                crate::vcl::convert::write_ip_to_buf(addr, &mut sa_buf);
                 match addr {
-                    SocketAddr::V4(_) => endpoint.ipv4 = sa,
-                    SocketAddr::V6(_) => endpoint.ipv6 = sa,
+                    SocketAddr::V4(_) => endpoint.ipv4 = VCL_IP(sa_buf.as_ptr().cast()),
+                    SocketAddr::V6(_) => endpoint.ipv6 = VCL_IP(sa_buf.as_ptr().cast()),
                 }
             }
         }
@@ -569,10 +604,11 @@ impl<'a> NativeBackendBuilder<'a> {
             probe: ffi::VCL_PROBE(null()),
         });
 
-        // Create the backend via VRT_new_backend (NULL via backend)
-        let bep = unsafe {
-            ffi::VRT_new_backend(ctx.raw, &raw const *backend_config, VCL_BACKEND(null()))
-        };
+        let bep = ffi::VRT_new_backend(
+            raw.cast_mut(),
+            &raw const *backend_config,
+            VCL_BACKEND(null()),
+        );
 
         if bep.0.is_null() {
             return Err(format!(
@@ -584,9 +620,8 @@ impl<'a> NativeBackendBuilder<'a> {
 
         let methods = Box::new(ffi::vdi_methods::default());
 
-        let backend_ref = unsafe {
-            BackendRef::new_withouth_refcount(bep).expect("Backend pointer should never be null")
-        };
+        let backend_ref =
+            BackendRef::new_without_refcount(bep).expect("Backend pointer should never be null");
 
         Ok(Backend {
             methods,
@@ -653,7 +688,7 @@ unsafe extern "C" fn wrap_event<S: VclBackend<T>, T: VclResponse>(be: VCL_BACKEN
 }
 
 unsafe extern "C" fn wrap_list<S: VclBackend<T>, T: VclResponse>(
-    ctxp: *const ffi::vrt_ctx,
+    ctxp: *const vrt_ctx,
     be: VCL_BACKEND,
     vsbp: *mut ffi::vsb,
     detailed: i32,
@@ -680,7 +715,7 @@ unsafe extern "C" fn wrap_panic<S: VclBackend<T>, T: VclResponse>(
 }
 
 unsafe extern "C" fn wrap_pipe<S: VclBackend<T>, T: VclResponse>(
-    ctxp: *const ffi::vrt_ctx,
+    ctxp: *const vrt_ctx,
     be: VCL_BACKEND,
 ) -> ffi::stream_close_t {
     let mut ctx = Ctx::from_ptr(ctxp);
@@ -718,7 +753,7 @@ impl VCL_BACKEND {
 
 #[allow(clippy::too_many_lines)] // fixme
 unsafe extern "C" fn wrap_gethdrs<S: VclBackend<T>, T: VclResponse>(
-    ctxp: *const ffi::vrt_ctx,
+    ctxp: *const vrt_ctx,
     bep: VCL_BACKEND,
 ) -> c_int {
     let mut ctx = Ctx::from_ptr(ctxp);
@@ -823,7 +858,7 @@ unsafe extern "C" fn wrap_gethdrs<S: VclBackend<T>, T: VclResponse>(
 }
 
 unsafe extern "C" fn wrap_healthy<S: VclBackend<T>, T: VclResponse>(
-    ctxp: *const ffi::vrt_ctx,
+    ctxp: *const vrt_ctx,
     be: VCL_BACKEND,
     changed: *mut VCL_TIME,
 ) -> VCL_BOOL {
@@ -841,10 +876,7 @@ unsafe extern "C" fn wrap_healthy<S: VclBackend<T>, T: VclResponse>(
     healthy.into()
 }
 
-unsafe extern "C" fn wrap_getip<T: VclResponse>(
-    ctxp: *const ffi::vrt_ctx,
-    _be: VCL_BACKEND,
-) -> VCL_IP {
+unsafe extern "C" fn wrap_getip<T: VclResponse>(ctxp: *const vrt_ctx, _be: VCL_BACKEND) -> VCL_IP {
     let ctxp = validate_vrt_ctx(ctxp);
     let bo = ctxp
         .bo
@@ -878,7 +910,7 @@ unsafe extern "C" fn wrap_getip<T: VclResponse>(
 }
 
 unsafe extern "C" fn wrap_finish<S: VclBackend<T>, T: VclResponse>(
-    ctxp: *const ffi::vrt_ctx,
+    ctxp: *const vrt_ctx,
     be: VCL_BACKEND,
 ) {
     let prev_backend: &S = get_backend(validate_director(be));

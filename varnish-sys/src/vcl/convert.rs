@@ -450,11 +450,9 @@ unsafe fn write_ip_to_ptr(ip: SocketAddr, p: *mut c_void) {
     }
 }
 
-pub(crate) unsafe fn write_ip_to_buf(ip: SocketAddr, buf: &mut [c_void]) {
-    unsafe {
-        assert_eq!(buf.len(), vsa_suckaddr_len);
-        write_ip_to_ptr(ip, buf.as_mut_ptr());
-    }
+pub(crate) unsafe fn write_ip_to_buf(ip: SocketAddr, buf: &mut [u8]) {
+    assert_eq!(buf.len(), vsa_suckaddr_len);
+    write_ip_to_ptr(ip, buf.as_mut_ptr().cast::<c_void>());
 }
 impl IntoVCL<VCL_IP> for SocketAddr {
     fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_IP, VclError> {
@@ -468,7 +466,7 @@ impl IntoVCL<VCL_IP> for SocketAddr {
                 Err(VclError::WsOutOfMemory(size))?;
             }
 
-            let buf = std::slice::from_raw_parts_mut(p, vsa_suckaddr_len);
+            let buf = std::slice::from_raw_parts_mut(p.cast::<u8>(), vsa_suckaddr_len);
             write_ip_to_buf(self, buf);
 
             Ok(VCL_IP(p.cast()))

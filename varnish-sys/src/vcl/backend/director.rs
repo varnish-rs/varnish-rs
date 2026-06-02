@@ -127,7 +127,7 @@ impl<D: VclDirector> Director<D> {
         }
 
         let backend_ref = unsafe {
-            BackendRef::new_withouth_refcount(bep).expect("Backend pointer should never be null")
+            BackendRef::new_without_refcount(bep).expect("Backend pointer should never be null")
         };
 
         Ok(Director {
