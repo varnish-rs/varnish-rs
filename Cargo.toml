@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 default-members = ["varnish", "varnish-macros", "varnish-sys"]
-members = ["varnish", "varnish-macros", "varnish-sys", "varnish/tests/vmod_test", "examples/vmod_*"]
+members = ["varnish", "varnish-macros", "varnish-sys", "varnish/tests/vmod_test", "examples/vmod_*", "examples/stat_tree"]
 
 [workspace.package]
 # These fields are used by multiple crates, so it's defined here.
@@ -23,6 +23,7 @@ varnish-sys = { path = "./varnish-sys", version = "0.6.0" }
 #
 # These dependencies are used by one or more crates, and easier to maintain in one place.
 bindgen_helpers = "0.6.1"
+clap = { version = "4", features = ["derive"] }
 cc = "1.2.17"
 darling = "0.23.0"
 glob = "0.3.1"
