@@ -3,7 +3,7 @@ use std::path::Path;
 use std::time::Duration;
 
 use clap::Parser;
-use varnish::{MetricFormat, MetricsReaderBuilder, Semantics};
+use varnish::{Metric, MetricFormat, MetricsReaderBuilder, Semantics};
 
 #[derive(Parser)]
 #[command(about = "Display Varnish statistics as a tree")]
@@ -13,8 +13,8 @@ struct Cli {
     name: Option<String>,
 
     /// Attach timeout in seconds
-    #[arg(short = 't')]
-    timeout: Option<f64>,
+    #[arg(short = 't', default_value = "5.0")]
+    timeout: f64,
 
     /// Field inclusion glob, passed to VSC (may be repeated, processed before -X)
     #[arg(short = 'I')]
@@ -28,7 +28,7 @@ struct Cli {
     #[arg(short = 'a')]
     all: bool,
 
-    /// Show short description next to each value
+    /// Show format and short description columns
     #[arg(short = 'v')]
     verbose: bool,
 }
@@ -37,7 +37,6 @@ struct Node {
     children: HashMap<String, Node>,
     value: Option<u64>,
     short_desc: String,
-    semantics: Semantics,
     format: MetricFormat,
 }
 
@@ -47,32 +46,31 @@ impl Node {
             children: HashMap::new(),
             value: None,
             short_desc: String::new(),
-            semantics: Semantics::Unknown,
             format: MetricFormat::Unknown,
         }
     }
 }
 
-fn insert(
-    root: &mut Node,
-    parts: &[&str],
-    value: u64,
-    short_desc: &str,
-    semantics: Semantics,
-    format: MetricFormat,
-) {
+fn metric_value(metric: &Metric<'_>) -> u64 {
+    if metric.semantics == Semantics::Gauge {
+        metric.get_clamped_value()
+    } else {
+        metric.get_raw_value()
+    }
+}
+
+fn insert(root: &mut Node, parts: &[&str], metric: &Metric<'_>) {
     if parts.is_empty() {
-        root.value = Some(value);
-        root.short_desc = short_desc.to_string();
-        root.semantics = semantics;
-        root.format = format;
+        root.value = Some(metric_value(metric));
+        root.short_desc = metric.short_desc.to_string();
+        root.format = metric.format;
         return;
     }
     let child = root
         .children
         .entry(parts[0].to_string())
         .or_insert_with(Node::new);
-    insert(child, &parts[1..], value, short_desc, semantics, format);
+    insert(child, &parts[1..], metric);
 }
 
 fn format_value(node: &Node) -> String {
@@ -158,10 +156,13 @@ fn print_children(node: &Node, prefix: &str, verbose: bool) {
 fn main() {
     let cli = Cli::parse();
 
-    let mut builder = MetricsReaderBuilder::new();
-    if let Some(t) = cli.timeout {
-        builder = builder.patience(Some(Duration::from_secs_f64(t)));
+    if !cli.timeout.is_finite() || cli.timeout < 0.0 {
+        eprintln!("invalid timeout: must be a non-negative finite number");
+        std::process::exit(1);
     }
+
+    let mut builder =
+        MetricsReaderBuilder::new().patience(Some(Duration::from_secs_f64(cli.timeout)));
 
     for pattern in &cli.include {
         builder = builder.include(pattern).unwrap_or_else(|e| {
@@ -192,18 +193,11 @@ fn main() {
 
     let mut root = Node::new();
     for metric in reader.stats().values() {
-        if !cli.all && metric.get_raw_value() == 0 {
+        if !cli.all && metric_value(metric) == 0 {
             continue;
         }
         let parts: Vec<&str> = metric.name.split('.').collect();
-        insert(
-            &mut root,
-            &parts,
-            metric.get_raw_value(),
-            metric.short_desc,
-            metric.semantics,
-            metric.format,
-        );
+        insert(&mut root, &parts, metric);
     }
 
     let top_keys = sorted_keys(&root.children);
