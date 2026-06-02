@@ -40,14 +40,20 @@ struct Node {
     format: MetricFormat,
 }
 
-impl Node {
-    fn new() -> Self {
+impl Default for Node {
+    fn default() -> Self {
         Node {
             children: HashMap::new(),
             value: None,
             short_desc: String::new(),
             format: MetricFormat::Unknown,
         }
+    }
+}
+
+impl Node {
+    fn new() -> Self {
+        Self::default()
     }
 }
 
@@ -78,7 +84,7 @@ fn format_value(node: &Node) -> String {
     if node.format == MetricFormat::Bitmap {
         format!("0x{value:016x}")
     } else {
-        format!("{value}")
+        value.to_string()
     }
 }
 
