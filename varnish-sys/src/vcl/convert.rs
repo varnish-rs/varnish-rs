@@ -46,7 +46,7 @@
 //! and will create a synthetic error object.
 
 use std::borrow::Cow;
-use std::ffi::{c_char, CStr};
+use std::ffi::CStr;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::ptr::{null, null_mut};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -283,26 +283,9 @@ impl From<VCL_REAL> for f64 {
 // VCL_STRING
 //
 default_null_ptr!(VCL_STRING);
-impl IntoVCL<VCL_STRING> for &[u8] {
-    fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_STRING, VclError> {
-        // Try to save some work if the buffer is already in the workspace.
-        // We assume that &[u8] has always been readonly, so workspace data is valid.
-        // However, we need to make sure that the buffer is null-terminated, either by its own last
-        // byte, or by the one after it
-        let with_extra_byte = unsafe { std::slice::from_raw_parts(self.as_ptr(), self.len() + 1) };
-        if (ws.contains(self) && self.ends_with(b"\0"))
-            || (ws.contains(with_extra_byte) && with_extra_byte.last() == Some(&b'\0'))
-        {
-            Ok(VCL_STRING(self.as_ptr().cast::<c_char>()))
-        } else {
-            Ok(VCL_STRING(ws.copy_bytes_with_null(self)?.b))
-        }
-    }
-}
-
 impl IntoVCL<VCL_STRING> for &str {
     fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_STRING, VclError> {
-        self.as_bytes().into_vcl(ws)
+        Ok(VCL_STRING(ws.copy_bytes_with_null(self.as_bytes())?.b))
     }
 }
 impl IntoVCL<VCL_STRING> for &CStr {
@@ -312,7 +295,7 @@ impl IntoVCL<VCL_STRING> for &CStr {
 }
 impl IntoVCL<VCL_STRING> for &Cow<'_, str> {
     fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_STRING, VclError> {
-        self.as_bytes().into_vcl(ws)
+        Ok(VCL_STRING(ws.copy_bytes_with_null(self.as_bytes())?.b))
     }
 }
 impl IntoVCL<VCL_STRING> for String {
@@ -320,11 +303,11 @@ impl IntoVCL<VCL_STRING> for String {
         self.as_str().into_vcl(ws)
     }
 }
-impl<T: IntoVCL<VCL_STRING> + AsRef<[u8]>> IntoVCL<VCL_STRING> for Option<T> {
+impl<T: IntoVCL<VCL_STRING>> IntoVCL<VCL_STRING> for Option<T> {
     fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_STRING, VclError> {
         match self {
             None => Ok(VCL_STRING(null())),
-            Some(t) => t.as_ref().into_vcl(ws),
+            Some(t) => t.into_vcl(ws),
         }
     }
 }
@@ -467,11 +450,9 @@ unsafe fn write_ip_to_ptr(ip: SocketAddr, p: *mut c_void) {
     }
 }
 
-pub(crate) unsafe fn write_ip_to_buf(ip: SocketAddr, buf: &mut [c_void]) {
-    unsafe {
-        assert_eq!(buf.len(), vsa_suckaddr_len);
-        write_ip_to_ptr(ip, buf.as_mut_ptr());
-    }
+pub(crate) unsafe fn write_ip_to_buf(ip: SocketAddr, buf: &mut [u8]) {
+    assert_eq!(buf.len(), vsa_suckaddr_len);
+    write_ip_to_ptr(ip, buf.as_mut_ptr().cast::<c_void>());
 }
 impl IntoVCL<VCL_IP> for SocketAddr {
     fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_IP, VclError> {
@@ -485,7 +466,7 @@ impl IntoVCL<VCL_IP> for SocketAddr {
                 Err(VclError::WsOutOfMemory(size))?;
             }
 
-            let buf = std::slice::from_raw_parts_mut(p, vsa_suckaddr_len);
+            let buf = std::slice::from_raw_parts_mut(p.cast::<u8>(), vsa_suckaddr_len);
             write_ip_to_buf(self, buf);
 
             Ok(VCL_IP(p.cast()))

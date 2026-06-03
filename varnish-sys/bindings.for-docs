@@ -1064,7 +1064,7 @@ pub const VFP_CTX_MAGIC: u32 = 1641665509;
 pub const VDP_ENTRY_MAGIC: u32 = 893302657;
 pub const VDP_CTX_MAGIC: u32 = 3998227959;
 pub const VMOD_ABI_Version: &::std::ffi::CStr =
-    c"Varnish 9.0.0 ce1b315b0c35477c666e4c8d8e1c9174df87eb61";
+    c"Varnish 9.0.3 0a625649cd40af4b6c10be5e58a2e89a5e275baa";
 pub const VSM_n_USAGE: &::std::ffi::CStr = c"[-n varnish_name]";
 pub const VSM_t_USAGE: &::std::ffi::CStr = c"[-t <seconds|off>]";
 pub const VSM_MGT_RUNNING: u32 = 2;

@@ -13,11 +13,18 @@ use crate::generator::render_model;
 use crate::metrics::derive_vsc_metric;
 use crate::parser::tokens_to_model;
 use crate::parser_utils::remove_attr;
+use crate::vtc_tests;
 
 static RE_VARNISH_VER: LazyLock<Regex> = LazyLock::new(|| {
     // Use regex to remove "Varnish 7.5.0 eef25264e5ca5f96a77129308edb83ccf84cb1b1" and similar.
     // Also removes any pre-builds and other versions because we assume a double-quote at the end.
     Regex::new(r"Varnish (\d+\.|trunk )[-+. 0-9a-z]+").expect("Varnish version regex must be valid")
+});
+
+static RE_GLOB_POS: LazyLock<Regex> = LazyLock::new(|| {
+    // Glob pattern error positions are absolute (include CARGO_MANIFEST_DIR length), so they
+    // differ between machines. Normalize to "near position N:" for stable snapshots.
+    Regex::new(r"near position \d+:").expect("glob position regex must be valid")
 });
 
 static RE_STR_BLOB: LazyLock<Regex> = LazyLock::new(|| {
@@ -36,6 +43,40 @@ fn parse_pass_tests() {
 #[test]
 fn parse_pass_ffi_tests() {
     run_parse_tests("../varnish/tests/pass_ffi/*.rs");
+}
+
+#[test]
+fn run_vtc_tests_macro_expansion() {
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let cases: &[(&str, TokenStream)] = &[
+        ("populated", quote! { "tests/vtc_fixtures/*.vtc" }),
+        (
+            "populated_debug",
+            quote! { "tests/vtc_fixtures/*.vtc", true },
+        ),
+        (
+            "no_matches",
+            quote! { "tests/vtc_fixtures/*.does_not_exist" },
+        ),
+        ("parse_error", quote! { 42 }),
+        ("invalid_glob", quote! { "tests/[unclosed_bracket" }),
+        ("collision", quote! { "tests/vtc_fixtures_collision/*.vtc" }),
+    ];
+    with_settings!({ omit_expression => true, prepend_module_to_snapshot => false }, {
+        for (name, input) in cases {
+            let tokens = vtc_tests::generate(input.clone());
+            let rendered = render_tokens(&tokens.to_string()).replace(manifest_dir, "{MANIFEST_DIR}");
+            let rendered = RE_GLOB_POS.replace_all(&rendered, "near position N:").into_owned();
+            assert_snapshot!(*name, rendered);
+        }
+    });
+}
+
+fn render_tokens(src: &str) -> String {
+    match syn::parse_file(src) {
+        Ok(file) => prettyplease::unparse(&file),
+        Err(_) => src.to_string(),
+    }
 }
 
 fn run_parse_tests(path: &str) {

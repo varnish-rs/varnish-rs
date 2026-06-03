@@ -1,0 +1,4 @@
+---
+source: varnish-macros/src/tests.rs
+---
+::core::compile_error!("expected string literal")

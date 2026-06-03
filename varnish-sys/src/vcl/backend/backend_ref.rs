@@ -58,7 +58,7 @@ impl BackendRef {
 
     // this doesn't grab a reference and is only used to
     // create the backend_ref fields of Backend, NativeBackend and Director
-    pub(super) unsafe fn new_withouth_refcount(bep: VCL_BACKEND) -> Option<Self> {
+    pub(super) unsafe fn new_without_refcount(bep: VCL_BACKEND) -> Option<Self> {
         if bep.0.is_null() {
             return None;
         }
