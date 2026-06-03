@@ -65,9 +65,9 @@ fn metric_value(metric: &Metric<'_>) -> u64 {
     }
 }
 
-fn insert(root: &mut Node, parts: &[&str], metric: &Metric<'_>) {
+fn insert(root: &mut Node, parts: &[&str], metric: &Metric<'_>, value: u64) {
     if parts.is_empty() {
-        root.value = Some(metric_value(metric));
+        root.value = Some(value);
         root.short_desc = metric.short_desc.to_string();
         root.format = metric.format;
         return;
@@ -75,8 +75,8 @@ fn insert(root: &mut Node, parts: &[&str], metric: &Metric<'_>) {
     let child = root
         .children
         .entry(parts[0].to_string())
-        .or_insert_with(Node::new);
-    insert(child, &parts[1..], metric);
+        .or_default();
+    insert(child, &parts[1..], metric, value);
 }
 
 fn format_value(node: &Node) -> String {
@@ -199,11 +199,12 @@ fn main() {
 
     let mut root = Node::new();
     for metric in reader.stats().values() {
-        if !cli.all && metric_value(metric) == 0 {
+        let value = metric_value(metric);
+        if !cli.all && value == 0 {
             continue;
         }
         let parts: Vec<&str> = metric.name.split('.').collect();
-        insert(&mut root, &parts, metric);
+        insert(&mut root, &parts, metric, value);
     }
 
     let top_keys = sorted_keys(&root.children);

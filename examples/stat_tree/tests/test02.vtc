@@ -1,0 +1,11 @@
+varnishtest "stat_tree: verbose output shows format and description"
+
+server s1 {} -start
+
+varnish v1 -vcl+backend {} -start
+
+shell -match \
+{MAIN
+├── cache_hit: 0  integer   Cache hits
+└── uptime:    .  duration  Child process uptime} \
+    {${stat_tree} -n ${v1_name} -I 'MAIN.cache_hit' -I 'MAIN.uptime' -a -v}
