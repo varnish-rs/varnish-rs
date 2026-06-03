@@ -72,10 +72,7 @@ fn insert(root: &mut Node, parts: &[&str], metric: &Metric<'_>, value: u64) {
         root.format = metric.format;
         return;
     }
-    let child = root
-        .children
-        .entry(parts[0].to_string())
-        .or_default();
+    let child = root.children.entry(parts[0].to_string()).or_default();
     insert(child, &parts[1..], metric, value);
 }
 
