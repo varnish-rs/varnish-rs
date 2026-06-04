@@ -1,0 +1,16 @@
+[package]
+name = "stat_tree"
+version = "0.0.0"
+publish = false
+edition.workspace = true
+
+[[bin]]
+name = "stat_tree"
+path = "src/main.rs"
+
+[dependencies]
+varnish = { workspace = true }
+clap = { workspace = true }
+
+[lints]
+workspace = true

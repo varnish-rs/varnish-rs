@@ -1,0 +1,11 @@
+varnishtest "stat_tree: tree structure with two counters"
+
+server s1 {} -start
+
+varnish v1 -vcl+backend {} -start
+
+shell -match \
+{MAIN
+├── cache_hit: 0
+└── uptime:    .} \
+    {${stat_tree} -n ${v1_name} -I 'MAIN.cache_hit' -I 'MAIN.uptime' -a}
