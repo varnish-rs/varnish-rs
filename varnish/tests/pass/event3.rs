@@ -28,14 +28,14 @@ mod event3 {
     pub fn access(#[shared_per_vcl] vcl: Option<&PerVcl>) {}
 
     impl Obj1 {
-        pub fn new(#[shared_per_vcl] vcl: &mut Option<Box<PerVcl>>) -> Self {
+        pub fn obj1(#[shared_per_vcl] vcl: &mut Option<Box<PerVcl>>) -> Self {
             Self
         }
         pub fn obj_access(&self, #[shared_per_vcl] vcl: Option<&PerVcl>) {}
     }
 
     impl Obj2 {
-        pub fn new(vdp: &mut DeliveryFilters) -> Self {
+        pub fn obj2(vdp: &mut DeliveryFilters) -> Self {
             Self
         }
         pub fn obj_access(&self) {}

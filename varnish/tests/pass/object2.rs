@@ -16,19 +16,19 @@ mod obj2 {
     use varnish::vcl::Ctx;
 
     impl Obj1 {
-        pub fn new(#[shared_per_vcl] vcl: &mut Option<Box<PerVcl>>, val: Option<i64>) -> Self {
+        pub fn obj1(#[shared_per_vcl] vcl: &mut Option<Box<PerVcl>>, val: Option<i64>) -> Self {
             Self
         }
     }
 
     impl Obj2 {
-        pub fn new(#[shared_per_vcl] vcl: &mut Option<Box<PerVcl>>, val: i64) -> Self {
+        pub fn obj2(#[shared_per_vcl] vcl: &mut Option<Box<PerVcl>>, val: i64) -> Self {
             Self
         }
     }
 
     impl Obj3 {
-        pub fn new(
+        pub fn obj3(
             ctx: &mut Ctx,
             #[shared_per_vcl] vcl: &mut Option<Box<PerVcl>>,
             val: Option<i64>,
@@ -38,7 +38,7 @@ mod obj2 {
     }
 
     impl Obj4 {
-        pub fn new(
+        pub fn obj4(
             ctx: &mut Ctx,
             #[shared_per_vcl] vcl: &mut Option<Box<PerVcl>>,
             val: i64,

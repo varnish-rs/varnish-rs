@@ -1,0 +1,36 @@
+varnishtest "kv via new_fixed"
+
+server s1 {} -start
+
+varnish v1 -vcl+backend {
+    import object from "${vmod}";
+
+    sub vcl_init {
+        new kv = object.new_fixed();
+    }
+
+    sub vcl_recv {
+        return (synth(200));
+    }
+
+    sub vcl_synth {
+        if (req.http.method == "SET") {
+            kv.set(req.http.key, req.http.value);
+        } else {
+            set resp.http.value = kv.get(req.http.key);
+        }
+    }
+} -start
+
+client c1 {
+    txreq -hdr "key: k1"
+    rxresp
+    expect resp.http.value == ""
+
+    txreq -hdr "method: SET" -hdr "key: k1" -hdr "value: v1"
+    rxresp
+
+    txreq -hdr "key: k1"
+    rxresp
+    expect resp.http.value == "v1"
+} -run

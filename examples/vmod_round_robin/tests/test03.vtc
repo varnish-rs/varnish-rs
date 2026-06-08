@@ -9,7 +9,7 @@ varnish v1 -vcl+backend {
     import std;
 
     sub vcl_init {
-        new rr = round_robin.rr();
+        new rr = round_robin.new();
         rr.add_backend(s1);
         rr.add_backend(s2);
         rr.add_backend(s3);

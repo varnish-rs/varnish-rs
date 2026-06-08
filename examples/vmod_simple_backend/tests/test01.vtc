@@ -1,16 +1,16 @@
-varnishtest "parrot"
+varnishtest "repeater"
 
 server s1 {} -start
 
 varnish v1 -vcl+backend {
-    import be from "${vmod}";
+    import simple_backend from "${vmod}";
 
     sub vcl_init {
-        new polly = be.parrot("I'll repeat this on and on");
+        new repeater = simple_backend.new("I'll repeat this on and on");
     }
 
     sub vcl_recv {
-        set req.backend_hint = polly.backend();
+        set req.backend_hint = repeater.backend();
         return (pass);
     }
 } -start

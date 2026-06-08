@@ -21,23 +21,23 @@ mod obj2 {
             fini: Some(vmod_priv::on_fini_per_vcl::<PerVcl>),
         };
         #[repr(C)]
-        struct arg_vmod_obj2_Obj1__init {
+        struct arg_vmod_obj2_Obj1_obj1 {
             __vp: *mut vmod_priv,
             valid_val: c_char,
             val: VCL_INT,
         }
-        unsafe extern "C" fn vmod_c_Obj1__init(
+        unsafe extern "C" fn vmod_c_Obj1_obj1(
             __ctx: *mut vrt_ctx,
             __objp: *mut *mut Obj1,
             __vcl_name: *const c_char,
-            __args: *const arg_vmod_obj2_Obj1__init,
+            __args: *const arg_vmod_obj2_Obj1_obj1,
         ) {
             let __args = __args
                 .as_ref()
                 .expect("optional args pointer must not be null");
             let mut __obj_per_vcl = (*__args.__vp).take_per_vcl::<PerVcl>();
             let __result = Box::new(
-                super::Obj1::new(
+                super::Obj1::obj1(
                     &mut __obj_per_vcl.user_data,
                     if __args.valid_val != 0 { __args.val.into() } else { None },
                 ),
@@ -49,7 +49,7 @@ mod obj2 {
             drop(Box::from_raw(*__objp));
             *__objp = ::std::ptr::null_mut();
         }
-        unsafe extern "C" fn vmod_c_Obj2__init(
+        unsafe extern "C" fn vmod_c_Obj2_obj2(
             __ctx: *mut vrt_ctx,
             __objp: *mut *mut Obj2,
             __vcl_name: *const c_char,
@@ -58,7 +58,7 @@ mod obj2 {
         ) {
             let mut __obj_per_vcl = (*__vp).take_per_vcl::<PerVcl>();
             let __result = Box::new(
-                super::Obj2::new(&mut __obj_per_vcl.user_data, val.into()),
+                super::Obj2::obj2(&mut __obj_per_vcl.user_data, val.into()),
             );
             *__objp = Box::into_raw(__result);
             (*__vp).put(__obj_per_vcl, &PRIV_VCL_METHODS);
@@ -68,16 +68,16 @@ mod obj2 {
             *__objp = ::std::ptr::null_mut();
         }
         #[repr(C)]
-        struct arg_vmod_obj2_Obj3__init {
+        struct arg_vmod_obj2_Obj3_obj3 {
             __vp: *mut vmod_priv,
             valid_val: c_char,
             val: VCL_INT,
         }
-        unsafe extern "C" fn vmod_c_Obj3__init(
+        unsafe extern "C" fn vmod_c_Obj3_obj3(
             __ctx: *mut vrt_ctx,
             __objp: *mut *mut Obj3,
             __vcl_name: *const c_char,
-            __args: *const arg_vmod_obj2_Obj3__init,
+            __args: *const arg_vmod_obj2_Obj3_obj3,
         ) {
             let mut __ctx = Ctx::from_ptr(__ctx);
             let __args = __args
@@ -85,7 +85,7 @@ mod obj2 {
                 .expect("optional args pointer must not be null");
             let mut __obj_per_vcl = (*__args.__vp).take_per_vcl::<PerVcl>();
             let __result = Box::new(
-                super::Obj3::new(
+                super::Obj3::obj3(
                     &mut __ctx,
                     &mut __obj_per_vcl.user_data,
                     if __args.valid_val != 0 { __args.val.into() } else { None },
@@ -98,7 +98,7 @@ mod obj2 {
             drop(Box::from_raw(*__objp));
             *__objp = ::std::ptr::null_mut();
         }
-        unsafe extern "C" fn vmod_c_Obj4__init(
+        unsafe extern "C" fn vmod_c_Obj4_obj4(
             __ctx: *mut vrt_ctx,
             __objp: *mut *mut Obj4,
             __vcl_name: *const c_char,
@@ -108,7 +108,7 @@ mod obj2 {
             let mut __ctx = Ctx::from_ptr(__ctx);
             let mut __obj_per_vcl = (*__vp).take_per_vcl::<PerVcl>();
             let __result = Box::new(
-                super::Obj4::new(&mut __ctx, &mut __obj_per_vcl.user_data, val.into()),
+                super::Obj4::obj4(&mut __ctx, &mut __obj_per_vcl.user_data, val.into()),
             );
             *__objp = Box::into_raw(__result);
             (*__vp).put(__obj_per_vcl, &PRIV_VCL_METHODS);
@@ -119,16 +119,16 @@ mod obj2 {
         }
         #[repr(C)]
         pub struct VmodExports {
-            vmod_c_Obj1__init: Option<
+            vmod_c_Obj1_obj1: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
                     __objp: *mut *mut Obj1,
                     __vcl_name: *const c_char,
-                    __args: *const arg_vmod_obj2_Obj1__init,
+                    __args: *const arg_vmod_obj2_Obj1_obj1,
                 ),
             >,
             vmod_c_Obj1__fini: Option<unsafe extern "C" fn(__objp: *mut *mut Obj1)>,
-            vmod_c_Obj2__init: Option<
+            vmod_c_Obj2_obj2: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
                     __objp: *mut *mut Obj2,
@@ -138,16 +138,16 @@ mod obj2 {
                 ),
             >,
             vmod_c_Obj2__fini: Option<unsafe extern "C" fn(__objp: *mut *mut Obj2)>,
-            vmod_c_Obj3__init: Option<
+            vmod_c_Obj3_obj3: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
                     __objp: *mut *mut Obj3,
                     __vcl_name: *const c_char,
-                    __args: *const arg_vmod_obj2_Obj3__init,
+                    __args: *const arg_vmod_obj2_Obj3_obj3,
                 ),
             >,
             vmod_c_Obj3__fini: Option<unsafe extern "C" fn(__objp: *mut *mut Obj3)>,
-            vmod_c_Obj4__init: Option<
+            vmod_c_Obj4_obj4: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
                     __objp: *mut *mut Obj4,
@@ -159,13 +159,13 @@ mod obj2 {
             vmod_c_Obj4__fini: Option<unsafe extern "C" fn(__objp: *mut *mut Obj4)>,
         }
         pub static VMOD_EXPORTS: VmodExports = VmodExports {
-            vmod_c_Obj1__init: Some(vmod_c_Obj1__init),
+            vmod_c_Obj1_obj1: Some(vmod_c_Obj1_obj1),
             vmod_c_Obj1__fini: Some(vmod_c_Obj1__fini),
-            vmod_c_Obj2__init: Some(vmod_c_Obj2__init),
+            vmod_c_Obj2_obj2: Some(vmod_c_Obj2_obj2),
             vmod_c_Obj2__fini: Some(vmod_c_Obj2__fini),
-            vmod_c_Obj3__init: Some(vmod_c_Obj3__init),
+            vmod_c_Obj3_obj3: Some(vmod_c_Obj3_obj3),
             vmod_c_Obj3__fini: Some(vmod_c_Obj3__fini),
-            vmod_c_Obj4__init: Some(vmod_c_Obj4__init),
+            vmod_c_Obj4_obj4: Some(vmod_c_Obj4_obj4),
             vmod_c_Obj4__fini: Some(vmod_c_Obj4__fini),
         };
         #[allow(non_upper_case_globals)]
@@ -173,7 +173,7 @@ mod obj2 {
         pub static Vmod_obj2_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"939e8599b5634825ab4fc12b28859169601c3150e2646b6374601d10fffc91a6"
+            file_id: c"c90ca6b4ec2f9db8e6a3d620e0e530af19a24ef8a10aa41d62e9e1cb05b73027"
                 .as_ptr(),
             name: c"obj2".as_ptr(),
             func_name: c"Vmod_vmod_obj2_Func".as_ptr(),
@@ -190,17 +190,17 @@ mod obj2 {
     use super::*;
     use varnish::vcl::Ctx;
     impl Obj1 {
-        pub fn new(vcl: &mut Option<Box<PerVcl>>, val: Option<i64>) -> Self {
+        pub fn obj1(vcl: &mut Option<Box<PerVcl>>, val: Option<i64>) -> Self {
             Self
         }
     }
     impl Obj2 {
-        pub fn new(vcl: &mut Option<Box<PerVcl>>, val: i64) -> Self {
+        pub fn obj2(vcl: &mut Option<Box<PerVcl>>, val: i64) -> Self {
             Self
         }
     }
     impl Obj3 {
-        pub fn new(
+        pub fn obj3(
             ctx: &mut Ctx,
             vcl: &mut Option<Box<PerVcl>>,
             val: Option<i64>,
@@ -209,7 +209,7 @@ mod obj2 {
         }
     }
     impl Obj4 {
-        pub fn new(ctx: &mut Ctx, vcl: &mut Option<Box<PerVcl>>, val: i64) -> Self {
+        pub fn obj4(ctx: &mut Ctx, vcl: &mut Option<Box<PerVcl>>, val: i64) -> Self {
             Self
         }
     }

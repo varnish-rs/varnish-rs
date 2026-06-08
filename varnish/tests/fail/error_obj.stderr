@@ -4,7 +4,7 @@ error: Expected a simple type for object. If the object is defined elsewhere, us
 12 |     impl super::Obj {}
    |          ^^^^^
 
-error: Object must have a constructor called `new`
+error: Object must have a constructor (a public method returning `Self` or `Result<Self, _>`)
   --> tests/fail/error_obj.rs:12:10
    |
 12 |     impl super::Obj {}
@@ -16,7 +16,7 @@ error: Generics are not supported for object impls
 13 |     impl<T> ObjGen<T> {}
    |          ^
 
-error: Object must have a constructor called `new`
+error: Object must have a constructor (a public method returning `Self` or `Result<Self, _>`)
   --> tests/fail/error_obj.rs:13:13
    |
 13 |     impl<T> ObjGen<T> {}
@@ -40,31 +40,37 @@ error: Event functions are not supported for object methods
 20 |         #[event]
    |           ^^^^^
 
-error: Object must have a constructor called `new`
+error: Object must have a constructor (a public method returning `Self` or `Result<Self, _>`)
   --> tests/fail/error_obj.rs:15:10
    |
 15 |     impl Obj {
    |          ^^^
 
-error: #[vcl_name] params must be declared as `&str` or `&CStr`
+error: #[vcl_name] params are only allowed in object constructors
   --> tests/fail/error_obj.rs:25:32
    |
 25 |         pub fn new(#[vcl_name] a: String) {}
    |                                ^
 
-error: Object must have a constructor called `new`
+error: Object must have a constructor (a public method returning `Self` or `Result<Self, _>`)
   --> tests/fail/error_obj.rs:24:10
    |
 24 |     impl ObjVclNameTy {
    |          ^^^^^^^^^^^^
 
-error: #[vcl_name] param is allowed only once in a function args list
+error: #[vcl_name] params are only allowed in object constructors
+  --> tests/fail/error_obj.rs:29:32
+   |
+29 |         pub fn new(#[vcl_name] a: &str, #[vcl_name] b: &str) {}
+   |                                ^
+
+error: #[vcl_name] params are only allowed in object constructors
   --> tests/fail/error_obj.rs:29:53
    |
 29 |         pub fn new(#[vcl_name] a: &str, #[vcl_name] b: &str) {}
    |                                                     ^
 
-error: Object must have a constructor called `new`
+error: Object must have a constructor (a public method returning `Self` or `Result<Self, _>`)
   --> tests/fail/error_obj.rs:28:10
    |
 28 |     impl ObjVclNameDup {

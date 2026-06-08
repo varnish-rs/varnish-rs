@@ -8,7 +8,7 @@ VMOD_JSON_SPEC
     "2.0",
     "types",
     "Vmod_vmod_types_Func",
-    "4c128090e5e311293258e60f2f5d363e4daf996bc8f8f96ff9ba51e3229cc59d",
+    "73af3e239c26709b3704928b316f2e69f39231fe8bdbf154a61cc612cf882dac",
     "Varnish (version) (hash)",
     "0",
     "0"
@@ -37,16 +37,16 @@ typedef VCL_VOID td_vmod_types_arg_only(
     VCL_INT
 );
 
-struct arg_vmod_types_DocStruct__init {
+struct arg_vmod_types_DocStruct_new {
   char valid_cap;
   VCL_INT cap;
 };
 
-typedef VCL_VOID td_vmod_types_DocStruct__init(
+typedef VCL_VOID td_vmod_types_DocStruct_new(
     VRT_CTX,
     struct vmod_types_DocStruct **,
     const char *,
-    struct arg_vmod_types_DocStruct__init *
+    struct arg_vmod_types_DocStruct_new *
 );
 
 typedef VCL_VOID td_vmod_types_DocStruct__fini(
@@ -64,7 +64,7 @@ struct Vmod_vmod_types_Func {
   td_vmod_types_no_docs *f_no_docs;
   td_vmod_types_doctest *f_doctest;
   td_vmod_types_arg_only *f_arg_only;
-  td_vmod_types_DocStruct__init *f_DocStruct__init;
+  td_vmod_types_DocStruct_new *f_DocStruct_new;
   td_vmod_types_DocStruct__fini *f_DocStruct__fini;
   td_vmod_types_DocStruct_function *f_DocStruct_function;
 };
@@ -132,7 +132,7 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
   ],
   [
     "$OBJ",
-    "DocStruct",
+    "new",
     {
       "NULL_OK": false
     },
@@ -143,8 +143,8 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
         [
           "VOID"
         ],
-        "Vmod_vmod_types_Func.f_DocStruct__init",
-        "struct arg_vmod_types_DocStruct__init",
+        "Vmod_vmod_types_Func.f_DocStruct_new",
+        "struct arg_vmod_types_DocStruct_new",
         [
           "INT",
           "cap",

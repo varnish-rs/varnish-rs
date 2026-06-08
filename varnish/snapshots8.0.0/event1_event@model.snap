@@ -11,6 +11,7 @@ VmodInfo {
         FuncInfo {
             func_type: Event,
             ident: "on_event",
+            vcl_name: None,
             docs: "Event function - the comment is ignored",
             has_optional_args: false,
             args: [

@@ -1,9 +1,9 @@
-struct ObjNoCtor;
+struct ObjNoConstructor;
 
 #[varnish::vmod]
 mod err {
-    use super::ObjNoCtor;
-    impl ObjNoCtor {
+    use super::ObjNoConstructor;
+    impl ObjNoConstructor {
         pub fn func() -> i64 {
             0
         }

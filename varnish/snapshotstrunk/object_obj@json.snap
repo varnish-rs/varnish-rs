@@ -8,7 +8,7 @@ VMOD_JSON_SPEC
     "2.0",
     "obj",
     "Vmod_vmod_obj_Func",
-    "de062d2fb26624c293085f22f305a24cf504ccbe71b2a6c317eca30b804ca8a9",
+    "95335543a305005bf00d0f2dcf61f2161606c9815eb6de4eed8d4302257e2c11",
     "Varnish (version) (hash)",
     "0",
     "0"
@@ -22,16 +22,16 @@ struct vmod_obj_kv2;
 
 struct vmod_obj_kv3;
 
-struct arg_vmod_obj_kv1__init {
+struct arg_vmod_obj_kv1_kv1 {
   char valid_cap;
   VCL_INT cap;
 };
 
-typedef VCL_VOID td_vmod_obj_kv1__init(
+typedef VCL_VOID td_vmod_obj_kv1_kv1(
     VRT_CTX,
     struct vmod_obj_kv1 **,
     const char *,
-    struct arg_vmod_obj_kv1__init *
+    struct arg_vmod_obj_kv1_kv1 *
 );
 
 typedef VCL_VOID td_vmod_obj_kv1__fini(
@@ -51,16 +51,16 @@ typedef VCL_STRING td_vmod_obj_kv1_get(
     VCL_STRING
 );
 
-struct arg_vmod_obj_kv2__init {
+struct arg_vmod_obj_kv2_kv2 {
   char valid_cap;
   VCL_INT cap;
 };
 
-typedef VCL_VOID td_vmod_obj_kv2__init(
+typedef VCL_VOID td_vmod_obj_kv2_kv2(
     VRT_CTX,
     struct vmod_obj_kv2 **,
     const char *,
-    struct arg_vmod_obj_kv2__init *
+    struct arg_vmod_obj_kv2_kv2 *
 );
 
 typedef VCL_VOID td_vmod_obj_kv2__fini(
@@ -79,16 +79,16 @@ typedef VCL_VOID td_vmod_obj_kv2_set(
     struct arg_vmod_obj_kv2_set *
 );
 
-struct arg_vmod_obj_kv3__init {
+struct arg_vmod_obj_kv3_kv3 {
   char valid_cap;
   VCL_INT cap;
 };
 
-typedef VCL_VOID td_vmod_obj_kv3__init(
+typedef VCL_VOID td_vmod_obj_kv3_kv3(
     VRT_CTX,
     struct vmod_obj_kv3 **,
     const char *,
-    struct arg_vmod_obj_kv3__init *
+    struct arg_vmod_obj_kv3_kv3 *
 );
 
 typedef VCL_VOID td_vmod_obj_kv3__fini(
@@ -108,14 +108,14 @@ typedef VCL_VOID td_vmod_obj_kv3_set(
 );
 
 struct Vmod_vmod_obj_Func {
-  td_vmod_obj_kv1__init *f_kv1__init;
+  td_vmod_obj_kv1_kv1 *f_kv1_kv1;
   td_vmod_obj_kv1__fini *f_kv1__fini;
   td_vmod_obj_kv1_set *f_kv1_set;
   td_vmod_obj_kv1_get *f_kv1_get;
-  td_vmod_obj_kv2__init *f_kv2__init;
+  td_vmod_obj_kv2_kv2 *f_kv2_kv2;
   td_vmod_obj_kv2__fini *f_kv2__fini;
   td_vmod_obj_kv2_set *f_kv2_set;
-  td_vmod_obj_kv3__init *f_kv3__init;
+  td_vmod_obj_kv3_kv3 *f_kv3_kv3;
   td_vmod_obj_kv3__fini *f_kv3__fini;
   td_vmod_obj_kv3_set *f_kv3_set;
 };
@@ -135,8 +135,8 @@ static struct Vmod_vmod_obj_Func Vmod_vmod_obj_Func;"
         [
           "VOID"
         ],
-        "Vmod_vmod_obj_Func.f_kv1__init",
-        "struct arg_vmod_obj_kv1__init",
+        "Vmod_vmod_obj_Func.f_kv1_kv1",
+        "struct arg_vmod_obj_kv1_kv1",
         [
           "INT",
           "cap",
@@ -208,8 +208,8 @@ static struct Vmod_vmod_obj_Func Vmod_vmod_obj_Func;"
         [
           "VOID"
         ],
-        "Vmod_vmod_obj_Func.f_kv2__init",
-        "struct arg_vmod_obj_kv2__init",
+        "Vmod_vmod_obj_Func.f_kv2_kv2",
+        "struct arg_vmod_obj_kv2_kv2",
         [
           "INT",
           "cap",
@@ -268,8 +268,8 @@ static struct Vmod_vmod_obj_Func Vmod_vmod_obj_Func;"
         [
           "VOID"
         ],
-        "Vmod_vmod_obj_Func.f_kv3__init",
-        "struct arg_vmod_obj_kv3__init",
+        "Vmod_vmod_obj_Func.f_kv3_kv3",
+        "struct arg_vmod_obj_kv3_kv3",
         [
           "INT",
           "cap",

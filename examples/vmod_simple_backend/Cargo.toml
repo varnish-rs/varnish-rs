@@ -1,5 +1,5 @@
 [package]
-name = "vmod_be"
+name = "vmod_simple_backend"
 version = "0.0.0"
 publish = false
 edition.workspace = true

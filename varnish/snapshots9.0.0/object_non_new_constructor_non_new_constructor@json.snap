@@ -1,0 +1,104 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VMOD_JSON_SPEC
+[
+  [
+    "$VMOD",
+    "2.0",
+    "non_new_constructor",
+    "Vmod_vmod_non_new_constructor_Func",
+    "289d6d0d8d8143bec47372189d68191ceb5fb2df2e7af10a587c6db7e6ba1d32",
+    "Varnish (version) (hash)",
+    "0",
+    "0"
+  ],
+  [
+    "$CPROTO",
+    "
+struct vmod_non_new_constructor_kv;
+
+struct arg_vmod_non_new_constructor_kv_create {
+  char valid_cap;
+  VCL_INT cap;
+};
+
+typedef VCL_VOID td_vmod_non_new_constructor_kv_create(
+    VRT_CTX,
+    struct vmod_non_new_constructor_kv **,
+    const char *,
+    struct arg_vmod_non_new_constructor_kv_create *
+);
+
+typedef VCL_VOID td_vmod_non_new_constructor_kv__fini(
+    struct vmod_non_new_constructor_kv **
+);
+
+typedef VCL_STRING td_vmod_non_new_constructor_kv_get(
+    VRT_CTX,
+    struct vmod_non_new_constructor_kv *,
+    VCL_STRING
+);
+
+struct Vmod_vmod_non_new_constructor_Func {
+  td_vmod_non_new_constructor_kv_create *f_kv_create;
+  td_vmod_non_new_constructor_kv__fini *f_kv__fini;
+  td_vmod_non_new_constructor_kv_get *f_kv_get;
+};
+
+static struct Vmod_vmod_non_new_constructor_Func Vmod_vmod_non_new_constructor_Func;"
+  ],
+  [
+    "$OBJ",
+    "create",
+    {
+      "NULL_OK": false
+    },
+    "struct vmod_non_new_constructor_kv",
+    [
+      "$INIT",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_non_new_constructor_Func.f_kv_create",
+        "struct arg_vmod_non_new_constructor_kv_create",
+        [
+          "INT",
+          "cap",
+          "cap",
+          null,
+          null,
+          true
+        ]
+      ]
+    ],
+    [
+      "$FINI",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_non_new_constructor_Func.f_kv__fini",
+        ""
+      ]
+    ],
+    [
+      "$METHOD",
+      "get",
+      [
+        [
+          "STRING"
+        ],
+        "Vmod_vmod_non_new_constructor_Func.f_kv_get",
+        "",
+        [
+          "STRING",
+          "key",
+          "key"
+        ]
+      ]
+    ]
+  ]
+]
+

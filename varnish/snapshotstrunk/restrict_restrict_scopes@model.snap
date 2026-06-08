@@ -11,6 +11,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "client_only",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -25,6 +26,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "backend_only",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -39,6 +41,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "housekeeping_only",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -53,6 +56,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "client_or_backend",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -68,6 +72,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "recv_only",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -82,6 +87,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "recv_or_hash",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -97,6 +103,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "backend_subs",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],

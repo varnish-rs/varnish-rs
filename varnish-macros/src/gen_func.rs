@@ -471,7 +471,11 @@ impl FuncProcessor {
 
         match info.func_type {
             Function | Method => {
-                json! { [ info.func_type.to_vcc_type(), self.names.fn_name().to_string(), decl ] }
+                let vcl_name = info
+                    .vcl_name
+                    .as_deref()
+                    .unwrap_or_else(|| self.names.fn_name());
+                json! { [ info.func_type.to_vcc_type(), vcl_name, decl ] }
             }
             Constructor | Destructor => {
                 json! { [ info.func_type.to_vcc_type(), decl ] }

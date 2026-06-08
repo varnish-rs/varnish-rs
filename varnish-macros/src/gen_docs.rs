@@ -79,21 +79,25 @@ import {ident} from "path/to/lib{ident}.so";
     }
 
     for obj in &info.objects {
-        ln!(
-            docs,
-            "\n### Constructor `{sig}`",
-            sig = fn_sig(
-                &info.ident,
-                &obj.constructor,
-                &get_user_args(&obj.constructor),
-                &obj.ident
-            )
-        );
-        write_docs(&mut docs, &obj.docs, "###");
-        write_function(&mut docs, &obj.ident, "####", &obj.ident, &obj.constructor);
+        ln!(docs, "\n## Object `{}`", obj.ident);
+        write_docs(&mut docs, &obj.docs, "##");
+        for constructor in &obj.constructors {
+            let vcl_name = constructor.vcl_ident();
+            ln!(
+                docs,
+                "\n### Constructor `{sig}`",
+                sig = fn_sig(
+                    &info.ident,
+                    constructor,
+                    &get_user_args(constructor),
+                    vcl_name
+                )
+            );
+            write_function(&mut docs, &obj.ident, "###", vcl_name, constructor);
+        }
 
         for method in &obj.funcs {
-            write_function(&mut docs, &obj.ident, "####", "Method", method);
+            write_function(&mut docs, &obj.ident, "###", "Method", method);
         }
     }
 
@@ -147,9 +151,9 @@ fn fn_sig(
     if matches!(func.func_type, FuncType::Constructor) {
         wrt!(res, "{}.{}(", top_obj, obj_or_typ);
     } else if matches!(func.func_type, FuncType::Method) {
-        wrt!(res, "<object>.{}(", func.ident);
+        wrt!(res, "<object>.{}(", func.vcl_ident());
     } else {
-        wrt!(res, "{}.{}(", top_obj, func.ident);
+        wrt!(res, "{}.{}(", top_obj, func.vcl_ident());
     }
     let mut first = true;
     for (arg, ty) in user_args {

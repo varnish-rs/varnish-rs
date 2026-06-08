@@ -7,7 +7,7 @@ varnish v1 -vcl+backend {
     import std;
 
     sub vcl_init {
-        new kv = object.kv();
+        new kv = object.new();
     }
 
     sub vcl_recv {

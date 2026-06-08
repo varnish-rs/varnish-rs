@@ -17,22 +17,24 @@ import stats;
 import stats from "path/to/libstats.so";
 ```
 
-### Constructor `stats.test()`
+## Object `Stats`
 
-#### Method `VOID <object>.increment_foo()`
+### Constructor `stats.new()`
 
-#### Method `INT <object>.get_foo()`
+### Method `VOID <object>.increment_foo()`
 
-#### Method `VOID <object>.update_temperature(INT value)`
+### Method `INT <object>.get_foo()`
 
-#### Method `INT <object>.get_temperature()`
+### Method `VOID <object>.update_temperature(INT value)`
 
-#### Method `INT <object>.get_memory()`
+### Method `INT <object>.get_temperature()`
 
-#### Method `VOID <object>.update_memory(INT value)`
+### Method `INT <object>.get_memory()`
 
-#### Method `VOID <object>.set_flag(INT bit)`
+### Method `VOID <object>.update_memory(INT value)`
 
-#### Method `VOID <object>.clear_flag(INT bit)`
+### Method `VOID <object>.set_flag(INT bit)`
 
-#### Method `INT <object>.get_flags()`
+### Method `VOID <object>.clear_flag(INT bit)`
+
+### Method `INT <object>.get_flags()`

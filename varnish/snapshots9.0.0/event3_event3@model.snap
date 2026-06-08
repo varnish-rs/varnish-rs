@@ -11,6 +11,7 @@ VmodInfo {
         FuncInfo {
             func_type: Event,
             ident: "on_event",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [
@@ -49,6 +50,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "access",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [
@@ -67,25 +69,29 @@ VmodInfo {
         ObjInfo {
             ident: "Obj1",
             docs: "",
-            constructor: FuncInfo {
-                func_type: Constructor,
-                ident: "new",
-                docs: "",
-                has_optional_args: false,
-                args: [
-                    ParamTypeInfo {
-                        ident: "vcl",
-                        docs: "",
-                        ty: SharedPerVclMut,
-                    },
-                ],
-                output_ty: SelfType,
-                out_result: false,
-                restrict: [],
-            },
+            constructors: [
+                FuncInfo {
+                    func_type: Constructor,
+                    ident: "obj1",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "vcl",
+                            docs: "",
+                            ty: SharedPerVclMut,
+                        },
+                    ],
+                    output_ty: SelfType,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
             destructor: FuncInfo {
                 func_type: Destructor,
                 ident: "_fini",
+                vcl_name: None,
                 docs: "",
                 has_optional_args: false,
                 args: [],
@@ -97,6 +103,7 @@ VmodInfo {
                 FuncInfo {
                     func_type: Method,
                     ident: "obj_access",
+                    vcl_name: None,
                     docs: "",
                     has_optional_args: false,
                     args: [
@@ -120,25 +127,29 @@ VmodInfo {
         ObjInfo {
             ident: "Obj2",
             docs: "",
-            constructor: FuncInfo {
-                func_type: Constructor,
-                ident: "new",
-                docs: "",
-                has_optional_args: false,
-                args: [
-                    ParamTypeInfo {
-                        ident: "vdp",
-                        docs: "",
-                        ty: DeliveryFilters,
-                    },
-                ],
-                output_ty: SelfType,
-                out_result: false,
-                restrict: [],
-            },
+            constructors: [
+                FuncInfo {
+                    func_type: Constructor,
+                    ident: "obj2",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "vdp",
+                            docs: "",
+                            ty: DeliveryFilters,
+                        },
+                    ],
+                    output_ty: SelfType,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
             destructor: FuncInfo {
                 func_type: Destructor,
                 ident: "_fini",
+                vcl_name: None,
                 docs: "",
                 has_optional_args: false,
                 args: [],
@@ -150,6 +161,7 @@ VmodInfo {
                 FuncInfo {
                     func_type: Method,
                     ident: "obj_access",
+                    vcl_name: None,
                     docs: "",
                     has_optional_args: false,
                     args: [

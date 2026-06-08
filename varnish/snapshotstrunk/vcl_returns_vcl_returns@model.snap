@@ -11,6 +11,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "arg_vcl_backend",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [
@@ -35,6 +36,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_acl",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -47,6 +49,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_acl",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -59,6 +62,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_backend",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -71,6 +75,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_backend",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -83,6 +88,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_blob",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -95,6 +101,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_blob",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -107,6 +114,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_body",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -119,6 +127,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_body",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -131,6 +140,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_bool",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -143,6 +153,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_bool",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -155,6 +166,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_bytes",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -167,6 +179,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_bytes",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -179,6 +192,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_duration",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -191,6 +205,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_duration",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -203,6 +218,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_enum",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -215,6 +231,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_enum",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -227,6 +244,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_header",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -239,6 +257,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_header",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -251,6 +270,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_http",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -263,6 +283,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_http",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -275,6 +296,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_instance",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -287,6 +309,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_int",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -299,6 +322,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_int",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -311,6 +335,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_ip",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -323,6 +348,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_ip",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -335,6 +361,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_probe",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -347,6 +374,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_probe",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -359,6 +387,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_real",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -371,6 +400,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_real",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -383,6 +413,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_regex",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -395,6 +426,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_regex",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -407,6 +439,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_stevedore",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -419,6 +452,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_stevedore",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -431,6 +465,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_strands",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -443,6 +478,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_strands",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -455,6 +491,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_string",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -467,6 +504,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_string",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -479,6 +517,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_sub",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -491,6 +530,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_sub",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -503,6 +543,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_time",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -515,6 +556,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_time",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -527,6 +569,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "val_vcl",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],
@@ -539,6 +582,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "res_vcl",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],

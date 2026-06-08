@@ -143,7 +143,9 @@ impl Generator {
         }
 
         for obj in &self.objects {
-            json.push(obj.json.clone());
+            for json_obj in &obj.json_objs {
+                json.push(json_obj.clone());
+            }
         }
 
         let mut json = serde_json::to_string_pretty(&json! {json})

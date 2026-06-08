@@ -19,18 +19,20 @@ import round_robin;
 import round_robin from "path/to/libround_robin.so";
 ```
 
-### Constructor `round_robin.rr()`
+## Object `RoundRobin`
+
+### Constructor `round_robin.new()`
 
 Create a new round-robin director
 
-#### Method `VOID <object>.add_backend([BACKEND backend])`
+### Method `VOID <object>.add_backend([BACKEND backend])`
 
 Add a backend to the director
 
-#### Method `INT <object>.count()`
+### Method `INT <object>.count()`
 
 Get the number of backends in the director
 
-#### Method `BACKEND <object>.backend()`
+### Method `BACKEND <object>.backend()`
 
 Get the director as a backend reference

@@ -1,5 +1,5 @@
-error: Object must have a constructor called `new`
+error: Object must have a constructor (a public method returning `Self` or `Result<Self, _>`)
  --> tests/fail/error_obj_no_ctor.rs:6:10
   |
-6 |     impl ObjNoCtor {
-  |          ^^^^^^^^^
+6 |     impl ObjNoConstructor {
+  |          ^^^^^^^^^^^^^^^^

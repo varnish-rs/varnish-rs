@@ -58,16 +58,18 @@ This comment is multi-lined to ensure multiple `#[doc]` are parsed correctly.
 * `INT _v`:
 doc comment for `arg_only`
 
-### Constructor `types.DocStruct([INT cap])`
+## Object `DocStruct`
 
 doctest for `DocStruct` implementation
+
+### Constructor `types.new([INT cap])`
 
 doctest for `new`
 
 * `[INT cap]`:
 doc comment for `cap`
 
-#### Method `VOID <object>.function(STRING key)`
+### Method `VOID <object>.function(STRING key)`
 
 doctest for the object function
 

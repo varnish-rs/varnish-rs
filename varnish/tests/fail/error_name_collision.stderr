@@ -1,0 +1,11 @@
+error: VCL name `new` collision: `Foo` constructor `new` and `Bar` constructor `new` have the same VCL name
+ --> tests/fail/error_name_collision.rs:5:1
+  |
+5 | mod constructor_constructor_collision {
+  | ^^^
+
+error: VCL name `new` collision: function `new` and `Foo` constructor `new` have the same VCL name
+  --> tests/fail/error_name_collision.rs:22:1
+   |
+22 | mod constructor_function_collision {
+   | ^^^

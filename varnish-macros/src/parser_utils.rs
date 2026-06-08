@@ -8,34 +8,7 @@ use syn::Type::{Path, Reference};
 use syn::{Attribute, ExprLit, GenericArgument, MetaNameValue, PathSegment, Type, TypePath};
 
 use crate::errors::error;
-use crate::model::{FuncInfo, ObjInfo};
 use crate::ProcResult;
-
-/// iterator to go over all functions in a [`ObjInfo`], including constructor and destructor
-pub struct ObjFuncIter<'a> {
-    obj: &'a ObjInfo,
-    idx: usize,
-}
-
-impl<'a> Iterator for ObjFuncIter<'a> {
-    type Item = &'a FuncInfo;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let idx = self.idx;
-        self.idx += 1;
-        match idx {
-            0 => Some(&self.obj.constructor),
-            1 => Some(&self.obj.destructor),
-            idx => self.obj.funcs.get(idx - 2),
-        }
-    }
-}
-
-impl ObjInfo {
-    pub fn iter(&self) -> ObjFuncIter<'_> {
-        ObjFuncIter { obj: self, idx: 0 }
-    }
-}
 
 /// Remove an attribute from a list of attributes, returning the attribute if found.
 pub fn remove_attr(attrs: &mut Vec<Attribute>, name: &str) -> Option<Attribute> {

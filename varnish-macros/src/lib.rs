@@ -39,7 +39,7 @@ mod tests;
 ///   - `#[shared_per_task]` attribute on a function argument will treat it as a `PRIV_TASK` object.
 ///   - `#[shared_per_vcl]` attribute on a function argument will treat it as a `PRIV_VCL` object.
 /// - `impl` blocks' public methods are exported as VMOD object methods. The object itself may reside outside the module.
-///   - `pub fn new(...)` is treated as the object constructor.
+///   - A public method returning `Self` or `Result<Self, _>` is treated as the object constructor.
 ///   - `#[vcl_name]` attribute on an object constructor's argument will set it to the VCL name.
 #[proc_macro_attribute]
 pub fn vmod(args: pm::TokenStream, input: pm::TokenStream) -> pm::TokenStream {

@@ -15,3 +15,15 @@ error: #[restrict] is not allowed on event functions
    |
 23 |     pub fn on_event(event: Event) {}
    |         ^^
+
+error: #[restrict] is not allowed on constructors
+  --> tests/fail/error_restrict.rs:34:13
+   |
+34 |         pub fn new() -> Self {
+   |             ^^
+
+error: Object must have a constructor (a public method returning `Self` or `Result<Self, _>`)
+  --> tests/fail/error_restrict.rs:32:10
+   |
+32 |     impl Obj {
+   |          ^^^

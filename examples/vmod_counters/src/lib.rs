@@ -2,6 +2,8 @@ use std::sync::atomic::AtomicU64;
 
 use varnish::{Vsc, VscMetric};
 
+varnish::run_vtc_tests!("tests/*.vtc");
+
 #[derive(VscMetric)]
 #[repr(C)] // required for correct memory layout
 pub struct VariousStats {
@@ -24,8 +26,7 @@ pub struct VariousStats {
     flags: AtomicU64,
 }
 
-#[allow(non_camel_case_types)]
-pub struct test {
+pub struct Stats {
     stats: Vsc<VariousStats>,
 }
 
@@ -33,9 +34,9 @@ pub struct test {
 mod stats {
     use varnish::Vsc;
 
-    use super::{test, VariousStats};
+    use super::{Stats, VariousStats};
 
-    impl test {
+    impl Stats {
         #[allow(clippy::new_without_default)]
         pub fn new() -> Self {
             let stats = Vsc::<VariousStats>::new("mystats", "default");
@@ -110,10 +111,4 @@ mod stats {
                 .expect("flags value must fit in i64")
         }
     }
-}
-
-#[cfg(test)]
-mod tests {
-    // run all VTC tests
-    varnish::run_vtc_tests!("tests/*.vtc");
 }

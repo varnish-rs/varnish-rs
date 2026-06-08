@@ -16,21 +16,21 @@ mod obj {
         use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
         use super::*;
         #[repr(C)]
-        struct arg_vmod_obj_kv1__init {
+        struct arg_vmod_obj_kv1_kv1 {
             valid_cap: c_char,
             cap: VCL_INT,
         }
-        unsafe extern "C" fn vmod_c_kv1__init(
+        unsafe extern "C" fn vmod_c_kv1_kv1(
             __ctx: *mut vrt_ctx,
             __objp: *mut *mut kv1,
             __vcl_name: *const c_char,
-            __args: *const arg_vmod_obj_kv1__init,
+            __args: *const arg_vmod_obj_kv1_kv1,
         ) {
             let __args = __args
                 .as_ref()
                 .expect("optional args pointer must not be null");
             let __result = Box::new(
-                super::kv1::new(
+                super::kv1::kv1(
                     if __args.valid_cap != 0 { __args.cap.into() } else { None },
                 ),
             );
@@ -73,15 +73,15 @@ mod obj {
                 })
         }
         #[repr(C)]
-        struct arg_vmod_obj_kv2__init {
+        struct arg_vmod_obj_kv2_kv2 {
             valid_cap: c_char,
             cap: VCL_INT,
         }
-        unsafe extern "C" fn vmod_c_kv2__init(
+        unsafe extern "C" fn vmod_c_kv2_kv2(
             __ctx: *mut vrt_ctx,
             __objp: *mut *mut kv2,
             __vcl_name: *const c_char,
-            __args: *const arg_vmod_obj_kv2__init,
+            __args: *const arg_vmod_obj_kv2_kv2,
         ) {
             let mut __ctx = Ctx::from_ptr(__ctx);
             let __args = __args
@@ -89,7 +89,7 @@ mod obj {
                 .expect("optional args pointer must not be null");
             let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
                 let __result = Box::new(
-                    super::kv2::new(
+                    super::kv2::kv2(
                         if __args.valid_cap != 0 { __args.cap.into() } else { None },
                         VCL_STRING(__vcl_name).try_into()?,
                     ),
@@ -141,15 +141,15 @@ mod obj {
                 })
         }
         #[repr(C)]
-        struct arg_vmod_obj_kv3__init {
+        struct arg_vmod_obj_kv3_kv3 {
             valid_cap: c_char,
             cap: VCL_INT,
         }
-        unsafe extern "C" fn vmod_c_kv3__init(
+        unsafe extern "C" fn vmod_c_kv3_kv3(
             __ctx: *mut vrt_ctx,
             __objp: *mut *mut kv3,
             __vcl_name: *const c_char,
-            __args: *const arg_vmod_obj_kv3__init,
+            __args: *const arg_vmod_obj_kv3_kv3,
         ) {
             let mut __ctx = Ctx::from_ptr(__ctx);
             let __args = __args
@@ -157,7 +157,7 @@ mod obj {
                 .expect("optional args pointer must not be null");
             let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
                 let __result = Box::new(
-                    super::kv3::new(
+                    super::kv3::kv3(
                         &mut __ctx,
                         if __args.valid_cap != 0 { __args.cap.into() } else { None },
                         VCL_STRING(__vcl_name).try_into()?,
@@ -212,12 +212,12 @@ mod obj {
         }
         #[repr(C)]
         pub struct VmodExports {
-            vmod_c_kv1__init: Option<
+            vmod_c_kv1_kv1: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
                     __objp: *mut *mut kv1,
                     __vcl_name: *const c_char,
-                    __args: *const arg_vmod_obj_kv1__init,
+                    __args: *const arg_vmod_obj_kv1_kv1,
                 ),
             >,
             vmod_c_kv1__fini: Option<unsafe extern "C" fn(__objp: *mut *mut kv1)>,
@@ -236,12 +236,12 @@ mod obj {
                     key: VCL_STRING,
                 ) -> VCL_STRING,
             >,
-            vmod_c_kv2__init: Option<
+            vmod_c_kv2_kv2: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
                     __objp: *mut *mut kv2,
                     __vcl_name: *const c_char,
-                    __args: *const arg_vmod_obj_kv2__init,
+                    __args: *const arg_vmod_obj_kv2_kv2,
                 ),
             >,
             vmod_c_kv2__fini: Option<unsafe extern "C" fn(__objp: *mut *mut kv2)>,
@@ -252,12 +252,12 @@ mod obj {
                     __args: *const arg_vmod_obj_kv2_set,
                 ),
             >,
-            vmod_c_kv3__init: Option<
+            vmod_c_kv3_kv3: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
                     __objp: *mut *mut kv3,
                     __vcl_name: *const c_char,
-                    __args: *const arg_vmod_obj_kv3__init,
+                    __args: *const arg_vmod_obj_kv3_kv3,
                 ),
             >,
             vmod_c_kv3__fini: Option<unsafe extern "C" fn(__objp: *mut *mut kv3)>,
@@ -270,14 +270,14 @@ mod obj {
             >,
         }
         pub static VMOD_EXPORTS: VmodExports = VmodExports {
-            vmod_c_kv1__init: Some(vmod_c_kv1__init),
+            vmod_c_kv1_kv1: Some(vmod_c_kv1_kv1),
             vmod_c_kv1__fini: Some(vmod_c_kv1__fini),
             vmod_c_kv1_set: Some(vmod_c_kv1_set),
             vmod_c_kv1_get: Some(vmod_c_kv1_get),
-            vmod_c_kv2__init: Some(vmod_c_kv2__init),
+            vmod_c_kv2_kv2: Some(vmod_c_kv2_kv2),
             vmod_c_kv2__fini: Some(vmod_c_kv2__fini),
             vmod_c_kv2_set: Some(vmod_c_kv2_set),
-            vmod_c_kv3__init: Some(vmod_c_kv3__init),
+            vmod_c_kv3_kv3: Some(vmod_c_kv3_kv3),
             vmod_c_kv3__fini: Some(vmod_c_kv3__fini),
             vmod_c_kv3_set: Some(vmod_c_kv3_set),
         };
@@ -286,7 +286,7 @@ mod obj {
         pub static Vmod_obj_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"de062d2fb26624c293085f22f305a24cf504ccbe71b2a6c317eca30b804ca8a9"
+            file_id: c"95335543a305005bf00d0f2dcf61f2161606c9815eb6de4eed8d4302257e2c11"
                 .as_ptr(),
             name: c"obj".as_ptr(),
             func_name: c"Vmod_vmod_obj_Func".as_ptr(),
@@ -303,7 +303,7 @@ mod obj {
     use super::*;
     use varnish::vcl::Ctx;
     impl kv1 {
-        pub fn new(cap: Option<i64>) -> Self {
+        pub fn kv1(cap: Option<i64>) -> Self {
             Self
         }
         pub fn set(&self, key: &str, value: &str) {}
@@ -312,13 +312,13 @@ mod obj {
         }
     }
     impl kv2 {
-        pub fn new(cap: Option<i64>, name: &str) -> Self {
+        pub fn kv2(cap: Option<i64>, name: &str) -> Self {
             Self
         }
         pub fn set(&self, key: &str, value: Option<&str>) {}
     }
     impl kv3 {
-        pub fn new(ctx: &mut Ctx, cap: Option<i64>, name: &str) -> Self {
+        pub fn kv3(ctx: &mut Ctx, cap: Option<i64>, name: &str) -> Self {
             Self
         }
         pub fn set(&self, ctx: &mut Ctx, key: &str, value: Option<&str>) {}

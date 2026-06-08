@@ -11,6 +11,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "arg_vcl_backend",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [

@@ -53,14 +53,14 @@ mod event3 {
                     .and_then(|v| v.get_user_data()),
             )
         }
-        unsafe extern "C" fn vmod_c_Obj1__init(
+        unsafe extern "C" fn vmod_c_Obj1_obj1(
             __ctx: *mut vrt_ctx,
             __objp: *mut *mut Obj1,
             __vcl_name: *const c_char,
             __vp: *mut vmod_priv,
         ) {
             let mut __obj_per_vcl = (*__vp).take_per_vcl::<PerVcl>();
-            let __result = Box::new(super::Obj1::new(&mut __obj_per_vcl.user_data));
+            let __result = Box::new(super::Obj1::obj1(&mut __obj_per_vcl.user_data));
             *__objp = Box::into_raw(__result);
             (*__vp).put(__obj_per_vcl, &PRIV_VCL_METHODS);
         }
@@ -82,7 +82,7 @@ mod event3 {
                         .and_then(|v| v.get_user_data()),
                 )
         }
-        unsafe extern "C" fn vmod_c_Obj2__init(
+        unsafe extern "C" fn vmod_c_Obj2_obj2(
             __ctx: *mut vrt_ctx,
             __objp: *mut *mut Obj2,
             __vcl_name: *const c_char,
@@ -91,7 +91,7 @@ mod event3 {
             let mut __ctx = Ctx::from_ptr(__ctx);
             let mut __obj_per_vcl = (*__vp).take_per_vcl::<PerVcl>();
             let __result = Box::new(
-                super::Obj2::new(
+                super::Obj2::obj2(
                     &mut __ctx.raw.delivery_filters(&mut __obj_per_vcl.delivery_filters),
                 ),
             );
@@ -121,7 +121,7 @@ mod event3 {
             vmod_c_access: Option<
                 unsafe extern "C" fn(__ctx: *mut vrt_ctx, vcl: *const vmod_priv),
             >,
-            vmod_c_Obj1__init: Option<
+            vmod_c_Obj1_obj1: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
                     __objp: *mut *mut Obj1,
@@ -137,7 +137,7 @@ mod event3 {
                     vcl: *const vmod_priv,
                 ),
             >,
-            vmod_c_Obj2__init: Option<
+            vmod_c_Obj2_obj2: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
                     __objp: *mut *mut Obj2,
@@ -153,10 +153,10 @@ mod event3 {
         pub static VMOD_EXPORTS: VmodExports = VmodExports {
             vmod_c_on_event: Some(vmod_c_on_event),
             vmod_c_access: Some(vmod_c_access),
-            vmod_c_Obj1__init: Some(vmod_c_Obj1__init),
+            vmod_c_Obj1_obj1: Some(vmod_c_Obj1_obj1),
             vmod_c_Obj1__fini: Some(vmod_c_Obj1__fini),
             vmod_c_Obj1_obj_access: Some(vmod_c_Obj1_obj_access),
-            vmod_c_Obj2__init: Some(vmod_c_Obj2__init),
+            vmod_c_Obj2_obj2: Some(vmod_c_Obj2_obj2),
             vmod_c_Obj2__fini: Some(vmod_c_Obj2__fini),
             vmod_c_Obj2_obj_access: Some(vmod_c_Obj2_obj_access),
         };
@@ -165,7 +165,7 @@ mod event3 {
         pub static Vmod_event3_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"7b4be3f80bd034fc48000e7e7e74cdab732a45145ec32098955dbcf57a3e748c"
+            file_id: c"2e04e8a41fb633a6b2c76b6b78155396928a8dc4c57935089e8168db69187824"
                 .as_ptr(),
             name: c"event3".as_ptr(),
             func_name: c"Vmod_vmod_event3_Func".as_ptr(),
@@ -192,13 +192,13 @@ mod event3 {
     }
     pub fn access(vcl: Option<&PerVcl>) {}
     impl Obj1 {
-        pub fn new(vcl: &mut Option<Box<PerVcl>>) -> Self {
+        pub fn obj1(vcl: &mut Option<Box<PerVcl>>) -> Self {
             Self
         }
         pub fn obj_access(&self, vcl: Option<&PerVcl>) {}
     }
     impl Obj2 {
-        pub fn new(vdp: &mut DeliveryFilters) -> Self {
+        pub fn obj2(vdp: &mut DeliveryFilters) -> Self {
             Self
         }
         pub fn obj_access(&self) {}

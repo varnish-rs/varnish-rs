@@ -6,24 +6,26 @@
    It will be automatically updated on each build.
 
 -->
-# Varnish Module (VMOD) `be`
+# Varnish Module (VMOD) `simple_backend`
 
 a simple STRING dictionary in your VCL
 
 ```vcl
 // Place import statement at the top of your VCL file
 // This loads vmod from a standard location
-import be;
+import simple_backend;
 
 // Or load vmod from a specific file
-import be from "path/to/libbe.so";
+import simple_backend from "path/to/libsimple_backend.so";
 ```
 
-### Constructor `be.parrot(STRING to_repeat)`
+## Object `Repeater`
 
-parrot is our VCL object, which just holds a rust Backend,
+Repeater is our VCL object, which just holds a rust Backend,
 it only needs two functions:
 - `new()`, so that the VCL can instantiate it
 - `backend()`, so that we can produce a C pointer for varnish to use
 
-#### Method `BACKEND <object>.backend()`
+### Constructor `simple_backend.new(STRING to_repeat)`
+
+### Method `BACKEND <object>.backend()`
