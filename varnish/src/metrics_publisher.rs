@@ -5,10 +5,24 @@ use std::ptr::null_mut;
 
 use varnish_sys::ffi::{vsc_seg, VRT_VSC_Alloc, VRT_VSC_Destroy};
 
+/// Trait implemented by structs derived with `#[derive(VscMetric)]`.
+///
+/// Do not implement this trait manually — use the derive macro instead, which generates the
+/// correct JSON metadata that Varnish requires. Fields must be of type `AtomicU64` and
+/// annotated with `#[counter]`, `#[gauge]`, or `#[bitmap]`.
 pub unsafe trait VscMetric {
     fn get_metadata() -> &'static CStr;
 }
 
+/// Owns a live Varnish statistics (VSC) segment for a `T: VscMetric` struct.
+///
+/// Create one with [`Vsc::new`] and keep it alive for as long as the metrics should be
+/// visible. `Deref`s to `T`, so you can access fields directly.
+///
+/// ```rust,ignore
+/// let vsc = Vsc::<MyMetrics>::new("mymod", "mymod");
+/// vsc.requests.fetch_add(1, Ordering::Relaxed);
+/// ```
 pub struct Vsc<T: VscMetric> {
     metric: *mut T,
     seg: *mut vsc_seg,
@@ -16,6 +30,13 @@ pub struct Vsc<T: VscMetric> {
 }
 
 impl<T: VscMetric> Vsc<T> {
+    /// Allocate a new VSC segment.
+    ///
+    /// - `module_name`: unique instance name shown in `varnishstat` (e.g. `"mymod"`)
+    /// - `module_prefix`: prefix for stat names in the output (e.g. `"mymod"`)
+    ///
+    /// Panics if either string contains an interior nul byte, or if Varnish fails to allocate
+    /// the segment.
     pub fn new(module_name: &str, module_prefix: &str) -> Self {
         let mut seg = null_mut();
         let name = CString::new(module_name).expect("module_name contained interior nul byte");

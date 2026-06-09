@@ -1,6 +1,11 @@
 varnish::run_vtc_tests!("tests/*.vtc");
 
-#[varnish::vmod]
+/// Demonstrates `#[restrict(...)]`, which limits which VCL subroutines can call a function.
+///
+/// A violation is caught at VCL compile time — the `vcl.load` command will fail with
+/// "Not available in subroutine". This is useful for functions that only make sense
+/// in a specific context (e.g., accessing `bereq` headers is only valid in backend subs).
+#[varnish::vmod(docs = "README.md")]
 mod restricted_callsites {
     /// Only callable from client-side VCL subs (`vcl_recv`, `vcl_pass`, `vcl_hash`, etc.)
     #[restrict(client)]
