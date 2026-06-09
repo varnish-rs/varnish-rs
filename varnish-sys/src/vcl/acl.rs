@@ -29,7 +29,17 @@ impl Acl {
 }
 
 impl From<ffi::VCL_ACL> for Acl {
-    fn from(p: ffi::VCL_ACL) -> Self {
-        Acl { raw: p }
+    fn from(value: ffi::VCL_ACL) -> Self {
+        Acl { raw: value }
+    }
+}
+
+impl From<ffi::VCL_ACL> for Option<Acl> {
+    fn from(value: ffi::VCL_ACL) -> Self {
+        if value.0.is_null() {
+            return None;
+        }
+
+        Some(Acl { raw: value })
     }
 }
