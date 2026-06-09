@@ -3,8 +3,8 @@
 use std::ffi::{c_int, c_uint, c_void, CStr};
 
 use crate::ffi;
-use crate::ffi::{vrt_ctx, VRT_fail, VRT_CTX_MAGIC};
-use crate::vcl::{HttpHeaders, LogTag, TestWS, VclError, Workspace};
+use crate::ffi::{vrt_ctx, VRT_call, VRT_check_call, VRT_fail, VRT_handled, VRT_CTX_MAGIC};
+use crate::vcl::{subroutine::Subroutine, HttpHeaders, LogTag, TestWS, VclError, Workspace};
 
 /// VCL context
 ///
@@ -123,6 +123,41 @@ impl<'a> Ctx<'a> {
         let raw = unsafe { ffi::VRT_r_local_endpoint(self.raw) };
         let cstr = <&CStr>::from(raw);
         Ok(cstr.to_str()?)
+    }
+
+    /// Call a VCL subroutine.
+    ///
+    /// Returns `Ok(true)` if the request was handled after the call, `Ok(false)` otherwise.
+    /// Returns `Err` if the subroutine cannot be called in the current context (e.g. wrong VCL
+    /// state or incompatible subroutine type).
+    /// If `Ok(true)` was returned, no other subroutine can be called, and doing so will result
+    /// in a VCL error.
+    pub fn call_sub(&mut self, sub: Subroutine) -> Result<bool, VclError> {
+        self.check_call_sub(sub)?;
+        unsafe { VRT_call(self.raw, sub.vcl_ptr()) };
+        Ok(self.is_handled())
+    }
+
+    /// Check whether a VCL subroutine can be called in the current context.
+    ///
+    /// Returns `Ok(())` if the call is valid, or `Err` with the reason otherwise.
+    pub fn check_call_sub(&self, sub: Subroutine) -> Result<(), VclError> {
+        let result = unsafe { VRT_check_call(self.raw, sub.vcl_ptr()) };
+        if result.0.is_null() {
+            Ok(())
+        } else {
+            let msg = unsafe { CStr::from_ptr(result.0) }
+                .to_string_lossy()
+                .into_owned();
+            Err(VclError::new(msg))
+        }
+    }
+
+    /// Returns `true` if the current request has already been handled.
+    /// If `true`, no other subroutine can be called, and doing so will result
+    /// in a VCL error.
+    pub fn is_handled(&self) -> bool {
+        unsafe { VRT_handled(self.raw) != 0 }
     }
 
     pub fn cached_req_body(&mut self) -> Result<Vec<&'a [u8]>, VclError> {

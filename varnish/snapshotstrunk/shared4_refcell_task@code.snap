@@ -10,8 +10,9 @@ mod refcell_task {
         use std::ptr::null;
         use varnish::ffi::{
             VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE,
-            VCL_REAL, VCL_STRING, VCL_TIME, VCL_VOID, VMOD_ABI_Version, VclEvent,
-            vmod_data, vmod_priv, vrt_ctx, VMOD_PRIV_METHODS_MAGIC, vmod_priv_methods,
+            VCL_REAL, VCL_STRING, VCL_SUB, VCL_TIME, VCL_VOID, VMOD_ABI_Version,
+            VclEvent, vmod_data, vmod_priv, vrt_ctx, VMOD_PRIV_METHODS_MAGIC,
+            vmod_priv_methods,
         };
         use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
         use super::*;
@@ -113,7 +114,7 @@ mod refcell_task {
         pub static Vmod_refcell_task_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"675f4fdaf8ee28273cf3ef5a2293d0f5cd9a169cf8dd8c3ea64449770aa03b88"
+            file_id: c"686523a0e99b4c99a05e49c3f870cfc5afd3c6b6579050704d6eb58472dde5ce"
                 .as_ptr(),
             name: c"refcell_task".as_ptr(),
             func_name: c"Vmod_vmod_refcell_task_Func".as_ptr(),

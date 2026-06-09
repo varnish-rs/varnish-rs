@@ -1,0 +1,40 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VmodInfo {
+    params: VmodParams {
+        docs: None,
+    },
+    ident: "args",
+    docs: "",
+    funcs: [
+        FuncInfo {
+            func_type: Function,
+            ident: "arg_subroutine",
+            vcl_name: None,
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_sub",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: Sub,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+            restrict: [],
+        },
+    ],
+    objects: [],
+    shared_types: SharedTypes {
+        shared_per_task_ty: None,
+        shared_per_vcl_ty: None,
+    },
+}

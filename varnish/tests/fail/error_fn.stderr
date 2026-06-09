@@ -29,3 +29,9 @@ error: functions and methods that return a VCL_* type must be tagged as `unsafe`
   |
 9 |     pub fn ret_vcl() -> Result<VCL_STRING, &'static str> {
   |         ^^
+
+error: Subroutine cannot be wrapped in Option
+  --> tests/fail/error_fn.rs:12:29
+   |
+12 |     pub fn ret_opt_sub() -> Option<Subroutine> {
+   |                             ^^^^^^
