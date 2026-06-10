@@ -60,7 +60,7 @@ use crate::ffi::{
 };
 
 use crate::vcl::{
-    from_vcl_probe, into_vcl_probe, subroutine::Subroutine, BackendRef, CowProbe, Probe, VclError,
+    from_vcl_probe, into_vcl_probe, acl, subroutine::Subroutine, BackendRef, CowProbe, Probe, VclError,
     Workspace,
 };
 
@@ -118,7 +118,21 @@ macro_rules! from_vcl_to_opt_rust {
 }
 
 // VCL_ACL
-default_null_ptr!(VCL_ACL);
+impl From<VCL_ACL> for Acl {
+    fn from(value: VCL_ACL) -> Acl {
+        Acl { raw: value }
+    }
+}
+
+impl From<VCL_ACL> for Option<Acl> {
+    fn from(value: VCL_ACL) -> Option<Acl> {
+        if value.0.is_null() {
+            return None;
+        }
+
+        Some(Acl { raw: value })
+    }
+}
 
 // VCL_BLOB
 default_null_ptr!(VCL_BLOB);
