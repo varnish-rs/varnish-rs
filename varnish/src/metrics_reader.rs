@@ -1,9 +1,26 @@
 //! Access Varnish statistics
 //!
-//! The VSC (Varnish Shared Counter) is a way for outside program to access Varnish statistics in a
+//! The VSC (Varnish Shared Counter) is a way for outside programs to access Varnish statistics in a
 //! non-blocking way. The main way to access those counters traditionally is with `varnishstat`,
 //! but the API is generic and allows you to track, filter and read any counter that `varnishd`
 //! (and vmods) are exposing.
+//!
+//! ```rust,no_run
+//! use varnish::MetricsReaderBuilder;
+//! fn main() {
+//!
+//!     let mut reader = MetricsReaderBuilder::new().build().unwrap_or_else(|e| {
+//!         eprintln!("Error: {e}");
+//!         std::process::exit(1);
+//!     });
+//!
+//!     reader.update();
+//!
+//!     for stat in reader.stats().values() {
+//!         println!("{}: {}", stat.name, stat.get_raw_value());
+//!     }
+//! }
+//! ```
 
 use std::collections::HashMap;
 use std::ffi::{c_char, c_int, c_void, CStr, CString, NulError};
@@ -15,7 +32,7 @@ use std::time::Duration;
 use varnish_sys::ffi;
 use varnish_sys::vcl::{VclError, VclResult};
 
-/// A statistics set allowing to access VSC metrics counters, created with a [`MetricsReaderBuilder`]
+/// A statistics reader allowing access to VSC metrics counters, created with a [`MetricsReaderBuilder`]
 #[derive(Debug)]
 pub struct MetricsReader<'a> {
     vsm: *mut ffi::vsm,

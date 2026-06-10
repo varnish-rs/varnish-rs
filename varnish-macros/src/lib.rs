@@ -169,6 +169,12 @@ mod tests;
 ///         }
 ///     }
 /// }
+/// ```
+///
+/// # `docs` attribute
+///
+/// Use `#[vmod(docs = "README.md")]` to generate a markdown documentation file at build time.
+/// The path is relative to the crate root. The file is overwritten on each build.
 #[proc_macro_attribute]
 pub fn vmod(args: pm::TokenStream, input: pm::TokenStream) -> pm::TokenStream {
     // parse the module code into a data model.

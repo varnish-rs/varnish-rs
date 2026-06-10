@@ -8,7 +8,7 @@
 -->
 # Varnish Module (VMOD) `simple_backend`
 
-a simple STRING dictionary in your VCL
+a simple backend that sends a fixed string
 
 ```vcl
 // Place import statement at the top of your VCL file
