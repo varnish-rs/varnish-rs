@@ -17,3 +17,13 @@
 #include "vcl.h"
 
 struct vfp_entry *VFP_Push(struct vfp_ctx *, const struct vfp *);
+
+/** from vcc_interface.h */
+typedef int acl_match_f(VRT_CTX, const VCL_IP);
+
+struct vrt_acl {
+    unsigned        magic;
+#define VRT_ACL_MAGIC   0x78329d96
+    acl_match_f     *match;
+    const char    *name;
+};

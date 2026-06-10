@@ -1,4 +1,4 @@
-use std::net::SocketAddr;
+use std::{ffi::CStr, net::SocketAddr};
 
 use crate::ffi;
 
@@ -22,24 +22,19 @@ impl Acl {
         }
     }
 
+    /// Return the VCL name of the underlying ACL.
+    pub fn name(&self) -> &CStr {
+        assert!(!self.raw.0.is_null());
+
+        unsafe {
+            let acl = *self.raw.0;
+            assert_eq!(acl.magic, ffi::VRT_ACL_MAGIC);
+            CStr::from_ptr(acl.name)
+        }
+    }
+
     /// Retun the `C` pointer to the underlying ACL.
     pub unsafe fn vcl_ptr(&self) -> ffi::VCL_ACL {
         self.raw
-    }
-}
-
-impl From<ffi::VCL_ACL> for Acl {
-    fn from(value: ffi::VCL_ACL) -> Self {
-        Acl { raw: value }
-    }
-}
-
-impl From<ffi::VCL_ACL> for Option<Acl> {
-    fn from(value: ffi::VCL_ACL) -> Self {
-        if value.0.is_null() {
-            return None;
-        }
-
-        Some(Acl { raw: value })
     }
 }
