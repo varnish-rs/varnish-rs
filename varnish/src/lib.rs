@@ -5,6 +5,329 @@
 //! For a guide to building a VMOD — project structure, `Cargo.toml`, VTC tests — see [`vcl`].
 
 // Re-publish some varnish_sys modules
+/// This module gathers the tools needed to build a vmod in `rust`.
+///
+/// In addition to the following primer and documentation, you can also look at the various [example vmods](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_example), each focusing on different aspects of the code.
+///
+/// # Building your first vmod
+///
+/// ## Create a new project
+///
+/// Start by creating a new library project:
+/// ``` shell
+/// cargo new --lib my_vmod
+/// cd my_vmod
+/// ```
+///
+/// The general structure of your code should look like this:
+///
+/// ```text
+/// .
+/// ├── Cargo.toml
+/// └── src
+///     └── lib.rs
+/// ```
+///
+/// ## Cargo.toml
+///
+/// Let's add `varnish` as a dependency in `Cargo.toml
+///
+/// ```toml
+/// [package]
+/// name = "my_vmod"
+/// version = "0.1.0"
+/// edition = "2024"
+///
+/// [dependencies]
+/// varnish = "0.6.0"       # add this line
+///
+/// [lib]
+/// crate-type = ["cdylib"] # and this line
+/// ```
+///
+/// ## src/lib.rs
+///
+/// Next, we need to actually write the code. For this example, we are going to create two function:
+/// - `my_vmod.sum()` which takes two numbers and sum them
+/// - `my_vmod.reverse()` which takes an optional string, and reverses it
+///
+/// ```rust,no_run
+/// #[varnish::vmod]
+/// mod my_vmod {
+///     pub fn sum(a: i64, b: i64) -> i64 {
+///         a + b
+///     }
+///
+///     pub fn reverse(s: Option<&str>) -> String {
+///         match s {
+///             Some(s) => s.chars().rev().collect(),
+///             None => "no string given".into(),
+///         }
+///     }
+/// }
+///
+/// #[test]
+/// fn test_reverse_foo() {
+///     assert_eq!(my_vmod::reverse(Some("foo")), "oof");
+/// }
+///
+/// #[test]
+/// fn test_reverse_none() {
+///     assert_eq!(my_vmod::reverse(None), "no string given");
+/// }
+///
+/// #[test]
+/// fn test_sum() {
+///     assert_eq!(my_vmod::sum(3, 8), 11);
+/// }
+/// ```
+///
+/// The most important bit here is the `#[varnish::vmod]`macro applied to the `my_vmod` module. It means that the functions inside it should be exported as vmod functions.
+///
+/// `varnish-rs` will automatically convert `rust` types to and from VCL ones. Wrapping a type into an [Option] makes it optional, meaning it can be ignored when call the vmod from VCL.
+///
+/// ## VTC tests
+///
+/// Our `rust` code already contains unit tests, but it's good to validate that the code is properly wired and test the vmod in a full-stack tests.
+///
+/// For this, we use [varsnishtest](https://www.varnish-software.com/developers/tutorials/testing-varnish-varnishtest/) which will start a full ephemeral Varnish server and load the VCL of our choice, before sending requests and validating the responses.
+///
+/// First, create a new `tests/test01.vtc` file:
+///
+/// ```vtc
+/// varnishtest "first my_vmod test"
+///
+/// server s1 {
+///     rxreq
+///     expect req.http.even == "true"
+///     txresp
+/// } -start
+///
+/// varnish v1 -vcl+backend {
+///     import hello_world from "${vmod}";
+///
+///     sub vcl_recv {
+///         set req.http.even = hello_world.is_even(8);
+///     }
+/// } -start
+///
+/// client c1 {
+///     txreq
+///     rxresp
+///     expect resp.status == 200
+/// ```
+///
+/// And add this line at the top for `src.lib.rs`:
+/// ``` rust,no_run
+/// varnish::run_vtc_tests!("tests/*.vtc");
+/// ```
+///
+/// You can then compile the vmod, and run all the tests:
+///
+/// ``` txt
+/// $ cargo build && cargo test
+///     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s
+///     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+///      Running unittests src/lib.rs (target/debug/deps/my_vmod-6f8d69114a407a56)
+///
+/// running 4 tests
+/// test test_reverse_none ... ok
+/// test test_reverse_foo ... ok
+/// test test_sum ... ok
+/// test vtc_test01 ... ok
+///
+/// test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.03s
+/// ```
+/// `#[vcl_name]`), see the [`varnish::vmod`](varnish_macros::vmod) attribute documentation.
+///
+/// # Installation
+///
+/// The vmod file will be located in your build directory (`./target/debug/libmy_vmod.so`) by default, and you can install in the system-wide vmod directory, which you can find with `pkg-config`:
+/// ```
+/// # pkg-config --variable=vmoddir varnishapi
+/// /usr/lib/varnish/vmods
+/// # sudo cp ./target/debug/libmy_vmod.so /usr/lib/varnish/vmods/
+/// ```
+///
+/// # Argument types
+///
+/// `varnish-rs` allows you to use native type as function arguments, and will convert them from VCL types before handling them to your code.
+///
+/// Here are the types you can use, and how they correspond to VCL types:
+///
+/// | Rust | VCL |
+/// | :--: | :-:
+/// | `f64`  | `VCL_REAL` |
+/// | `i64`  | `VCL_INT` |
+/// | `bool` | `VCL_BOOL` |
+/// | `std::time::Duration` | `VCL_DURATION` |
+/// | `std::time::SystemTime` | `VCL_TIME` |
+/// | `&str` | `VCL_STRING` |
+/// | `&[u8]` | `VCL_BLOB` |
+/// | `Option<CowProbe>` | `VCL_PROBE` |
+/// | `Option<Probe>` | `VCL_PROBE` |
+/// | `Option<std::net::SocketAddr>` | `VCL_IP` |
+/// | `Subroutine` | `VCL_SUB` |
+///
+/// All types can in addition be wrapped in an `Option` to make the argument optional.
+///
+/// **Note:** some type, like `VCL_PROBE` are nullable (they can be a `NULL` pointer in C), so `Option<Option<Probe>> is valid, meaning your function can receive three different values:
+/// - `None`: the VCL code didn't provide a `VCL_IP`
+/// - `Some(`None`): the VCL code provided a `NULL` `VCL_IP`
+/// - `Some(Some(ip))`: the VCL code provided a non-`NULL` `VCL_IP`
+///
+/// VCL types can also be ingested natively, at the cost of marking the function `unsafe`.
+///
+/// ## Context
+///
+/// For some operations such as logging, you may need access to the [`Ctx`] object (`vrt_ctx` in C). To do this, you can use the `ctx: &mut Ctx` which `varnish-rs` will recognize as special and handle you a `rust` proxy object.
+///
+/// ## Per-task shared data
+///
+/// Vmods routinely need to store data for the duration of a task. This can be accomplished with the `#[shared_per_task]` macro on an argument of type `&Option<Box<T>>` (the reference can be `mut`).
+///
+/// All calls to the vmod functions within a same VCL task will share the same reference, with the first call pointing to `None`.
+///
+/// You can check [vmod_timestamp](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_timestamp) for an example:
+///
+/// ``` rust,no_run
+/// /// Returns the duration since the same function was called for the last time (in the same task).
+/// /// If it's the first time it's been called, return 0.
+/// pub fn timestamp(#[shared_per_task] shared: &mut Option<Box<Instant>>) -> Duration {
+///     // we will need this either way
+///     let now = Instant::now();
+///
+///     match shared {
+///         None => {
+///             // This is the first time we're running this function in the task's context
+///             *shared = Some(Box::new(now));
+///             Duration::default()
+///         }
+///         Some(shared) => {
+///             // Update box content in-place to the new value, and get the old value
+///             let old_now = mem::replace(&mut **shared, now);
+///             // Since Instant implements Copy, we can continue using it and subtract the old value
+///             now.duration_since(old_now)
+///         }
+///     }
+/// }
+/// ```
+///
+/// For relatively obvious reasons, the `#[shared_per_task]` object type must be the same accross the vmod.
+///
+/// ## Per-VCL shared data
+///
+/// Similarly, some vmods need a global store, shared accros all task. This is achieved with the  `#[shared_per_vcl]` macro which requires an `Option<&T>` type (the reference **can't** be `mut`).
+///
+/// Example from [vmod_event](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_event):
+/// ```rust, no_run
+/// /// Return the number of VCL loads stored during when the event function ran.
+/// pub fn loaded(#[shared_per_vcl] shared: Option<&i64>) -> i64  {
+///     shared.copied().unwrap_or(0)
+/// }
+/// ```
+///
+/// If you wish to modify the value from a client or backend task, you'll need the type to be thread-safe.
+///
+/// ## Event function
+///
+/// Vmods have the ability to hook into the VCL lifetime and act when the VCL is loaded, discarded, etc. This is an opportunity to update `#[shared_per_vcl]` objects, for example, again from [vmod_event](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_event):
+///
+/// ```rust,no_run
+/// #[event]
+/// pub fn on_event(
+///     ctx: &mut Ctx,
+///     #[shared_per_vcl] shared: &mut Option<Box<i64>>,
+///     event: Event,
+/// ) -> Result<(), &'static str> {
+///     // log the event, showing that it implements Debug
+///     ctx.log(LogTag::Debug, format!("event: {event:?}"));
+///
+///     // we only care about load events, which is why we don't use `match`
+///     if matches!(event, Event::Load) {
+///         // increment the count in a thread-safe way
+///         let last_count = super::EVENT_LOADED_COUNT.fetch_add(1, Relaxed);
+///         if last_count == 1 {
+///             // Demo that we can fail on the second `load` event
+///             return Err("second load always fail");
+///         }
+///
+///         // store the count, so it is accessible in the `loaded()` VCL function
+///         let new_count = last_count + 1;
+///         match shared {
+///             None => {
+///                 // This is the first time we're running this function in the VCL context
+///                 *shared = Some(Box::new(new_count));
+///             }
+///             Some(shared) => {
+///                 // Update box content in-place to the new value
+///                 **shared = new_count;
+///             }
+///         }
+///     }
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Note the type of the `#[shared_per_vcl]` argument here: `&mut Option<Box<i64>>`, while it was `Option<&i64>` for "regular"  functions.
+///
+/// # Return types
+///
+/// Similarly, your vmod can return different type that will be translated back into VCL types before being handed back to the C code:
+///
+/// | Rust | VCL |
+/// | :--: | :-:
+/// | `()` | `VCL_VOID` |
+/// | `f64`  | `VCL_REAL` |
+/// | `i64`  | `VCL_INT` |
+/// | `bool` | `VCL_BOOL` |
+/// | `std::time::Duration` | `VCL_DURATION` |
+/// | `std::time::SystemTime` | `VCL_TIME` |
+/// | `&str` | `VCL_STRING` |
+/// | `String` | `VCL_STRING` |
+/// | `&[u8]` | `VCL_BLOB` |
+/// | `Option<CowProbe>` | `VCL_PROBE` |
+/// | `Option<Probe>` | `VCL_PROBE` |
+/// | `Option<std::net::SocketAddr>` | `VCL_IP` |
+/// | `Subroutine` | `VCL_SUB` |
+///
+/// You can also omit the return value entirely.
+///
+/// In addition, You can wrap the return value in a `Result<T, ::varnish::vcl::VclError>`, `Result<T, &'static>` or `Result<T, String>`. Doing so and returning an `Err` will create a VCL failure that will stop the processing of the current task which is useful for unrecoverable failures.
+///
+/// VCL types can also be returned as-is, at the cost of marking the function `unsafe`.
+///
+/// # Backends and directors
+///
+/// As a C construct, [`crate::ffi::VCL_BACKEND`] can be a bit confusing to create and manipulate, notably as it
+/// involves a bunch of structures with different lifetimes and quite a lot of casting. This
+/// module hopes to alleviate those issues by handling the most of them and by offering a more
+/// idiomatic interface centered around vmod objects.
+///
+/// Here's what's in the toolbox:
+/// - [`Backend`]: an "actual" backend that can be used by Varnish to create an HTTP response. It
+///   relies on two traits:
+///   - [`VclBackend`] reports health, and generates the response headers
+///   - [`VclResponse`] for the response body writer, structs implementing that trait are
+///     returned by [`VclBackend::get_response`]
+/// - [`NativeBackend`]: a specialization of [`Backend`], relying on the native Varnish
+///   implementation providing IP and UDS backends
+/// - [`NativeBackendBuilder`]: a builder to easily create a [`NativeBackend`]
+/// - [`Director`]: a routing object doesn't create responses, but insead pick a [`Backend`]
+///   or [`Director`] object based on the HTTP request, based on the [`VclDirector`].
+/// - [`BackendRef`]: a refcounted wrapper around [`Backend`] and [`Director`], this is the primary
+///   type used for arguments and returns of vmod functions.
+///
+///   **Important:** all these types wraps refcounted C structures that Varnish will try to free
+///   when a VCL goes cold, which means you can't hold onto them forever. It's not as scary as it
+///   sounds, and you can approach this two different ways.
+///
+///   Use a vmod object that will own them. The object will automatically be dropped at the end of
+///   the VCL lifetime, as will all its fields, and all the types above will automatically decrease
+///   their refcount to the underlying C structure when this happens.
+///
+///   Otherwise, your vmod can implement the event function and drop the structs on a cold event.
 pub use varnish_sys::vcl;
 
 // Re-export the report_details_json macro
