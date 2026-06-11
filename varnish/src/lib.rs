@@ -3,8 +3,8 @@
 //! [examples](https://github.com/varnish-rs/varnish-rs/tree/main/examples).
 //!
 //! For a guide to building a VMOD — project structure, `Cargo.toml`, VTC tests — see [`vcl`].
-//! To expose custom statistics counters from a VMOD, see [`metrics_publisher`].
-//! To read Varnish statistics from an external program, see [`metrics_reader`].
+//!
+//! To read Varnish statistics from an external program, see [`MetricsReader`].
 
 // Re-publish some varnish_sys modules
 /// This module gathers the tools needed to build a vmod in `rust`.
@@ -366,6 +366,64 @@
 /// ```
 ///
 /// Any function that returns `Self` will instantly become a constructor in the vmod. An `impl` can contain multiple constructors, and a `vmod` block can contain multiple `impl`.
+///
+/// # Metrics
+///
+/// Vmods can expose new counters to `varnishstat` (and other VSC readers) with [`Vsc`] and [`VscMetric`]. In your code, create a new struct, and tag it with `#[derive(VscMetric)]`:
+///
+/// ```rust,no_run
+/// use std::sync::atomic::AtomicU64;
+/// use varnish::VscMetric;
+/// #[derive(VscMetric)]
+/// #[repr(C)] // required for correct memory layout
+/// pub struct VariousStats {
+///     /// Some arbitrary counter
+///     #[counter]
+///     foo: AtomicU64,
+///
+///     /// Some arbitrary gauge
+///     #[gauge]
+///     temperature: AtomicU64,
+/// }
+/// ```
+///
+/// Three important points:
+/// - the structure must also be tagged `#[repr(C)]`
+/// - all fields inside it must be `AtomicU64`
+/// - the code comments will be converted to metadata and exposed to the VSC readers.
+///
+/// You can then create, expose and modify those metrics:
+///
+/// ``` rust, ignore
+/// let stats = Vsc::<VariousStats>::new("mystats", "default");
+/// stats.foo.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+/// ```
+///
+/// You'll be able to see the metrics with `varnishstat`:
+///
+/// ```txt
+/// $ varnishstat -j -f mystats.default.foo -f mystats.default.temperature
+/// {
+///   "version": 1,
+///   "timestamp": "2026-06-11T10:42:13",
+///   "counters": {
+///     "mystats.default.foo": {
+///       "description": "Some arbitrary counter",
+///       "flag": "c",
+///       "format": "i",
+///       "value": 4
+///     },
+///     "mystats.default.temperature": {
+///       "description": "Some arbitrary gauge",
+///       "flag": "g",
+///       "format": "i",
+///       "value": 22
+///     }
+///   }
+/// }
+/// ```
+///
+/// See [vmod_counter](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_counters) for the full example.
 ///
 /// # Backends and directors
 ///

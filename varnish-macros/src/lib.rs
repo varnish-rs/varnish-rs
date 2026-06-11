@@ -204,10 +204,15 @@ pub fn vmod(args: pm::TokenStream, input: pm::TokenStream) -> pm::TokenStream {
 }
 
 /// Handle the `#[derive(VscMetric)]` macro. This can only be applied to a struct.
-/// The struct must have only fields of type `AtomicU64`.
+///
+/// The struct must be `#[repr(C)]` so that field layout matches what Varnish expects and have only fields of type `AtomicU64`, annotated with one of these attributes:
 /// - `#[counter]` attribute on a field will export it as a counter.
 /// - `#[gauge]` attribute on a field will export it as a gauge.
 /// - `#[bitmap]` attribute on a field will export it as a bitmap.
+///
+/// Doc comments on fields are included in the generated metadata and exposed to VSC readers such
+/// as `varnishstat`.
+
 #[proc_macro_derive(VscMetric, attributes(counter, gauge, bitmap))]
 pub fn vsc_metric(input: pm::TokenStream) -> pm::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);

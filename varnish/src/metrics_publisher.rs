@@ -16,8 +16,7 @@ use varnish_sys::ffi::{vsc_seg, VRT_VSC_Alloc, VRT_VSC_Destroy};
 /// Trait implemented by structs derived with `#[derive(VscMetric)]`.
 ///
 /// Do not implement this trait manually — use the derive macro instead, which generates the
-/// correct JSON metadata that Varnish requires. Fields must be of type `AtomicU64` and
-/// annotated with `#[counter]`, `#[gauge]`, or `#[bitmap]`.
+/// correct JSON metadata that Varnish requires.
 pub unsafe trait VscMetric {
     fn get_metadata() -> &'static CStr;
 }
