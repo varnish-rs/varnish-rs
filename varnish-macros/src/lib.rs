@@ -41,6 +41,7 @@ mod tests;
 /// - `impl` blocks' public methods are exported as VMOD object methods. The object itself may reside outside the module.
 ///   - A public method returning `Self` or `Result<Self, _>` is treated as the object constructor.
 ///   - `#[vcl_name]` attribute on an object constructor's argument will set it to the VCL name.
+///
 /// The `#[vmod]` attribute can only be applied to a module. All `pub` functions in that module
 /// are exported as VMOD functions. `impl` blocks export their `pub` methods as VMOD object
 /// methods; `pub fn new(...)` is treated as the object constructor.

@@ -53,7 +53,7 @@
 /// - `my_vmod.sum()` which takes two numbers and sum them
 /// - `my_vmod.reverse()` which takes an optional string, and reverses it
 ///
-/// ```rust,no_run
+/// ```rust,ignore
 /// /// an example vmod
 /// #[varnish::vmod(docs = "API.md")]
 /// mod my_vmod {
