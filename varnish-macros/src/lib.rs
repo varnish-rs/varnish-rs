@@ -216,7 +216,6 @@ pub fn vmod(args: pm::TokenStream, input: pm::TokenStream) -> pm::TokenStream {
 ///
 /// Doc comments on fields are included in the generated metadata and exposed to VSC readers such
 /// as `varnishstat`.
-
 #[proc_macro_derive(VscMetric, attributes(counter, gauge, bitmap))]
 pub fn vsc_metric(input: pm::TokenStream) -> pm::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
