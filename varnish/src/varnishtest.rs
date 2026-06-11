@@ -103,6 +103,11 @@ pub fn run_one_test(
     run_varnish_test(&vmod_path, testfile, timeout, debug)
 }
 
+/// Run a single `.vtc` test file against the given VMOD shared library.
+///
+/// This is normally invoked indirectly via the [`varnish::run_vtc_tests!`][crate::run_vtc_tests]
+/// macro, which discovers test files by glob and handles the library path. Call this directly
+/// only if you need finer control over which tests run or how failures are reported.
 pub fn run_varnish_test(
     vmod_path: &Path,
     testfile: &Path,

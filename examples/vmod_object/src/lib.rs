@@ -3,6 +3,7 @@ use dashmap::DashMap;
 varnish::run_vtc_tests!("tests/*.vtc");
 
 /// Kv only contains one element: a String->String hashmap that can be used in parallel
+#[derive(Default)]
 pub struct Kv {
     storage: DashMap<String, String>,
 }
@@ -21,15 +22,12 @@ mod object {
         /// Create a new key-value store, with an optional capacity.
         /// If `cap` is 0 or less, it will be ignored.
         pub fn new(cap: Option<i64>) -> Self {
-            // depending on whether cap was actually passed, and on its value,
-            // call a different constructor
-            let storage = match cap {
-                None => DashMap::new(),
-                Some(n) if n <= 0 => DashMap::new(),
-                Some(n) => DashMap::with_capacity(n as usize),
-            };
-
-            Self { storage }
+            match cap {
+                Some(n) if n > 0 => Self {
+                    storage: DashMap::with_capacity(n as usize),
+                },
+                _ => Self::default(),
+            }
         }
 
         /// Create a new key-value store with a fixed capacity of 10.

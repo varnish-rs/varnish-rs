@@ -8,7 +8,7 @@ struct Repeater {
     backend: Backend<RepeaterBackend, RepeaterResponseBody>,
 }
 
-/// a simple STRING dictionary in your VCL
+/// a simple backend that sends a fixed string
 #[varnish::vmod(docs = "README.md")]
 mod simple_backend {
     use std::sync::Arc;
