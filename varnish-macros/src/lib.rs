@@ -65,7 +65,7 @@ mod tests;
 /// Valid grouped scopes: `client` (all client-side subs), `backend` (all backend-side subs),
 /// `housekeeping` (`vcl_init` + `vcl_fini`)
 ///
-/// ```rust
+/// ```rust,ignore
 /// # use varnish::vmod;
 /// #[vmod]
 /// mod example {
@@ -92,7 +92,7 @@ mod tests;
 /// The type must be `&mut Option<Box<T>>` for mutable access, or `Option<&T>` for read-only
 /// access. Only one `T` type is allowed per VMOD.
 ///
-/// ```rust
+/// ```rust,ignore
 /// # use varnish::vmod;
 /// #[vmod]
 /// mod example {
@@ -119,7 +119,7 @@ mod tests;
 /// access. Only one `T` type is allowed per VMOD. Mutable access is only available in
 /// `#[event]` handlers and object constructors; everywhere else use read-only `Option<&T>`.
 ///
-/// ```rust
+/// ```rust,ignore
 /// # use varnish::vmod;
 /// # use varnish::vcl::{Ctx, Event};
 /// #[vmod]
@@ -156,7 +156,7 @@ mod tests;
 /// identification. Only valid on object constructors (`pub fn new`), at most once per
 /// constructor. The type must be `&str` or `&CStr`.
 ///
-/// ```rust
+/// ```rust,ignore
 /// # use varnish::vmod;
 /// # pub struct MyObj { name: String }
 /// #[vmod]

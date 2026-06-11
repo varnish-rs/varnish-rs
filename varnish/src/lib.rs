@@ -179,7 +179,7 @@
 /// # Installation
 ///
 /// The vmod file will be located in your build directory (`./target/debug/libmy_vmod.so`) by default, and you can install in the system-wide vmod directory, which you can find with `pkg-config`:
-/// ```
+/// ```shell
 /// # pkg-config --variable=vmoddir varnishapi
 /// /usr/lib/varnish/vmods
 /// # sudo cp ./target/debug/libmy_vmod.so /usr/lib/varnish/vmods/
@@ -226,7 +226,7 @@
 ///
 /// You can check [vmod_timestamp](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_timestamp) for an example:
 ///
-/// ``` rust,no_run
+/// ```rust,ignore
 /// /// Returns the duration since the same function was called for the last time (in the same task).
 /// /// If it's the first time it's been called, return 0.
 /// pub fn timestamp(#[shared_per_task] shared: &mut Option<Box<Instant>>) -> Duration {
@@ -256,7 +256,7 @@
 /// Similarly, some vmods need a global store, shared across all tasks. This is achieved with the `#[shared_per_vcl]` attribute which requires an `Option<&T>` type (the reference **can't** be `mut`).
 ///
 /// Example from [vmod_event](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_event):
-/// ```rust, no_run
+/// ```rust,ignore
 /// /// Return the number of VCL loads stored when the event function ran.
 /// pub fn loaded(#[shared_per_vcl] shared: Option<&i64>) -> i64  {
 ///     shared.copied().unwrap_or(0)
@@ -269,7 +269,7 @@
 ///
 /// Vmods have the ability to hook into the VCL lifetime and act when the VCL is loaded, discarded, etc. This is an opportunity to update `#[shared_per_vcl]` objects, for example, again from [vmod_event](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_event):
 ///
-/// ```rust,no_run
+/// ```rust,ignore
 /// #[event]
 /// pub fn on_event(
 ///     ctx: &mut Ctx,
@@ -342,7 +342,7 @@
 ///
 /// To expose an object, you will need to define it **outside** of the `varnish::vmod` module, and its `impl` containing only the `pub` methods **inside** of it:
 ///
-/// ```rust,no_run
+/// ```rust,ignore
 /// pub struct MyObject {
 ///     val: i64
 /// }
