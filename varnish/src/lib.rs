@@ -3,6 +3,8 @@
 //! [examples](https://github.com/varnish-rs/varnish-rs/tree/main/examples).
 //!
 //! For a guide to building a VMOD — project structure, `Cargo.toml`, VTC tests — see [`vcl`].
+//! To expose custom statistics counters from a VMOD, see [`metrics_publisher`].
+//! To read Varnish statistics from an external program, see [`metrics_reader`].
 
 // Re-publish some varnish_sys modules
 /// This module gathers the tools needed to build a vmod in `rust`.

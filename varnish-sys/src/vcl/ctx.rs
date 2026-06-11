@@ -160,6 +160,11 @@ impl<'a> Ctx<'a> {
         unsafe { VRT_handled(self.raw) != 0 }
     }
 
+    /// Retrieve the cached request body as a list of byte slices.
+    ///
+    /// Returns slices pointing into the workspace; each slice is a contiguous chunk of the body.
+    /// Fails if the body has not been cached (i.e. `std.cache_req_body()` was not called in VCL
+    /// before this subroutine ran).
     pub fn cached_req_body(&mut self) -> Result<Vec<&'a [u8]>, VclError> {
         unsafe extern "C" fn chunk_collector(
             priv_: *mut c_void,
@@ -294,11 +299,15 @@ impl TestCtx {
         test_ctx
     }
 
+    /// Return a [`Ctx`] wrapping this test context, for use in unit tests.
     pub fn ctx(&mut self) -> Ctx<'_> {
         Ctx::from_ref(&mut self.vrt_ctx)
     }
 }
 
+/// Log a message outside of a request context using a VSL tag.
+///
+/// Useful in event handlers or other places where no [`Ctx`] is available.
 pub fn log(tag: LogTag, msg: impl AsRef<str>) {
     let msg = msg.as_ref();
     unsafe {

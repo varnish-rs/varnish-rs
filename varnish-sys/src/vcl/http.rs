@@ -96,6 +96,7 @@ impl HttpHeaders<'_> {
         self.set_header_raw(&format!("{name}: {value}"))
     }
 
+    /// Remove all headers matching `name` (case-insensitive). No-op if the header is absent.
     pub fn unset_header(&mut self, name: &str) {
         let hdrs = unsafe {
             &from_raw_parts_mut(self.raw.hd, self.raw.nhd as usize)[(HDR_FIRST as usize)..]
@@ -253,6 +254,7 @@ impl HttpHeaders<'_> {
             .map(|hdr| hdr.1)
     }
 
+    /// Iterate over `(name, value)` pairs for all headers, excluding the request/status line.
     pub fn iter(&self) -> HttpHeadersIter<'_> {
         HttpHeadersIter {
             http: self,
@@ -270,6 +272,7 @@ impl<'a> IntoIterator for &'a HttpHeaders<'a> {
     }
 }
 
+/// Iterator over HTTP header `(name, value)` pairs, returned by [`HttpHeaders::iter`].
 #[derive(Debug)]
 pub struct HttpHeadersIter<'a> {
     http: &'a HttpHeaders<'a>,
