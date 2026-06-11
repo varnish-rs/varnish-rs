@@ -51,8 +51,8 @@ mod tests;
 /// ## `#[event]`
 ///
 /// Marks a function as a VCL event handler. Called by Varnish on `Load`, `Warm`, `Cold`, and
-/// `Discard` events. The function must accept `(evt: Event, ctx: &mut Ctx)` as its first two
-/// arguments (plus any `#[shared_per_vcl]` arguments).
+/// `Discard` events. The function may accept an `Event` argument, a `&Ctx` or `&mut Ctx`
+/// argument, and any number of `#[shared_per_vcl]` arguments, in any order. All are optional.
 ///
 /// ## `#[restrict(scope, ...)]`
 ///
@@ -90,8 +90,12 @@ mod tests;
 /// request/task. The value is created on first use and dropped when the task ends — it does
 /// not outlive the request. This maps to `PRIV_TASK` in C VMODs.
 ///
-/// The type must be `&mut Option<Box<T>>` for mutable access, or `Option<&T>` for read-only
-/// access. Only one `T` type is allowed per VMOD.
+/// The type must be one of:
+/// - `Option<&T>` — read-only access
+/// - `&mut Option<Box<T>>` — mutable access, value initialized to `None` on first call
+/// - `&RefCell<Option<T>>` — interior-mutable access, useful for vmods calling subroutines.
+///
+/// Only one `T` type is allowed per VMOD.
 ///
 /// ```rust,ignore
 /// # use varnish::vmod;
