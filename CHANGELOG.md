@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0](https://github.com/varnish-rs/varnish-rs/compare/varnish-sys-v0.6.0...varnish-sys-v0.7.0) - 2026-06-11
+
+### Fixed
+
+- NativeBackendBuilder::tls() now returns self ([#284](https://github.com/varnish-rs/varnish-rs/pull/284))
+
+### Other
+
+- Doc update ([#299](https://github.com/varnish-rs/varnish-rs/pull/299))
+- introduce the SubRoutine to call VCL routines from vmods ([#298](https://github.com/varnish-rs/varnish-rs/pull/298))
+- Introduce NativeBackendBuilder::build_with_vcl() ([#264](https://github.com/varnish-rs/varnish-rs/pull/264))
+- remove impl IntoVCL<VCL_STRING> for &[u8] ([#291](https://github.com/varnish-rs/varnish-rs/pull/291))
+- [convert] Add internal write_ip_to_buf() ([#272](https://github.com/varnish-rs/varnish-rs/pull/272))
+- implement the $Restrict equivalent of the C world ([#278](https://github.com/varnish-rs/varnish-rs/pull/278))
+- Add hash_always_miss and hash_ignore_* functions/ ([#261](https://github.com/varnish-rs/varnish-rs/pull/261))
+- implement weaken_etag() ([#281](https://github.com/varnish-rs/varnish-rs/pull/281))
+- remove all unwrap() calls ([#282](https://github.com/varnish-rs/varnish-rs/pull/282))
+- Fix/267 tls enable flag ([#288](https://github.com/varnish-rs/varnish-rs/pull/288))
+- use #[allow(non_snake_case)]  ([#287](https://github.com/varnish-rs/varnish-rs/pull/287))
+- Add local_socket support to the VCL context ([#285](https://github.com/varnish-rs/varnish-rs/pull/285))
+- add test for blob_copy ([#279](https://github.com/varnish-rs/varnish-rs/pull/279))
+- [internal] cleanup version_after_v6 blocks ([#262](https://github.com/varnish-rs/varnish-rs/pull/262))
+
 ## [0.6.0](https://github.com/varnish-rs/varnish-rs/compare/varnish-sys-v0.5.5...varnish-sys-v0.6.0) - 2026-03-23
 
 ### Other
