@@ -396,6 +396,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "opt_acl",
+            vcl_name: None,
             docs: "",
             has_optional_args: true,
             args: [
@@ -418,6 +419,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "opt_req_acl",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [
@@ -440,6 +442,7 @@ VmodInfo {
         FuncInfo {
             func_type: Function,
             ident: "to_res_acl",
+            vcl_name: None,
             docs: "",
             has_optional_args: false,
             args: [],

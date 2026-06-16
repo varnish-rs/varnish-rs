@@ -9,10 +9,14 @@ VMOD_JSON_SPEC
     "types",
     "Vmod_vmod_types_Func",
 <<<<<<< HEAD
+<<<<<<< HEAD
     "c13df0540d7786fdca53f5d15d1111b8c80ab3d4de7401fb217f0fb2188d6a9c",
 =======
     "bf16dadd071d5848b6db9a3adf94d4b5e98d040f188bc7d5e9db15106b5f5029",
 >>>>>>> 4e0c943 (Update snapshots for new Acl type)
+=======
+    "6a07d4e6b45387996d6ddf4316f787c14c6ec62d8d17fc10c182b3dcf2cc172c",
+>>>>>>> ca08975 (Remove tests for Option<Option<Acl>>)
     "Varnish (version) (hash)",
     "0",
     "0"
