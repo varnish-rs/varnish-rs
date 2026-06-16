@@ -227,7 +227,6 @@ impl ParamTy {
             Self::Probe | Self::ProbeCow => "VCL_PROBE",
             Self::SocketAddr => "VCL_IP",
             Self::Str | Self::CStr => "VCL_STRING",
-            Self::Sub => "VCL_SUB",
             Self::VclType(ty) => ty,
         }
     }
@@ -235,8 +234,7 @@ impl ParamTy {
     /// User MUST use some types with `Option`
     pub fn must_be_optional(self) -> bool {
         match self {
-            Self::Acl
-            | Self::Bool
+            Self::Bool
             | Self::Blob
             | Self::CStr
             | Self::Duration
@@ -246,7 +244,11 @@ impl ParamTy {
             | Self::Str
             | Self::Sub
             | Self::VclType(_) => false,
-            Self::BackendRef | Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
+            Self::Acl
+            | Self::BackendRef
+            | Self::Probe
+            | Self::ProbeCow
+            | Self::SocketAddr => true,
         }
     }
 
