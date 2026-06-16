@@ -58,9 +58,10 @@ use crate::ffi::{
     VCL_HEADER, VCL_HTTP, VCL_INT, VCL_IP, VCL_PROBE, VCL_REAL, VCL_REGEX, VCL_STEVEDORE,
     VCL_STRANDS, VCL_STRING, VCL_SUB, VCL_TIME, VCL_VCL,
 };
+
 use crate::vcl::{
-    from_vcl_probe, into_vcl_probe, Acl, subroutine::Subroutine, BackendRef, CowProbe, Probe, VclError,
-    Workspace,
+    from_vcl_probe, into_vcl_probe, subroutine::Subroutine, Acl, BackendRef, CowProbe, Probe,
+    VclError, Workspace,
 };
 
 /// Convert a Rust type into a VCL one
