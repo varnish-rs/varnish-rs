@@ -61,7 +61,11 @@ mod types {
 
     // Acl
     pub fn opt_acl(_v: Option<Acl>) {}
-    pub fn type_acl_req(#[required] _v: Option<Acl>) {}
+    pub fn opt_opt_acl(_v: Option<Option<Acl>>) {}
+    pub fn opt_req_acl(#[required] _v: Option<Acl>) {}
+    pub fn to_res_acl() -> Result<Option<Acl>, &'static str> {
+        Err("")
+    }
 
     // Duration
     pub fn type_duration(_v: Duration) {}
