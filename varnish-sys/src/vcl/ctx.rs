@@ -96,7 +96,7 @@ impl<'a> Ctx<'a> {
     }
 
     /// Match an ACL against a provided address.
-    pub fn acl_match(&self, acl: Acl, addr: Option<SocketAddr>) -> bool {
+    pub fn acl_match(&self, acl: Acl, addr: SocketAddr) -> bool {
         acl.matches(self, addr)
     }
 
