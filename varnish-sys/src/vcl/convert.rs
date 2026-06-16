@@ -134,6 +134,21 @@ impl From<VCL_ACL> for Option<Acl> {
     }
 }
 
+impl IntoVCL<VCL_ACL> for Acl {
+    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_ACL, VclError> {
+        unsafe { Ok(self.vcl_ptr()) }
+    }
+}
+
+impl IntoVCL<VCL_ACL> for Option<Acl> {
+    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_ACL, VclError> {
+        match self {
+            Some(acl) => unsafe { Ok(acl.vcl_ptr()) },
+            None => Err(VclError::Str("acl is null")),
+        }
+    }
+}
+
 // VCL_BLOB
 default_null_ptr!(VCL_BLOB);
 impl From<VCL_BLOB> for &[u8] {
