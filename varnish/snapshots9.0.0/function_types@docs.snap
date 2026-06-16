@@ -62,6 +62,12 @@ import types from "path/to/libtypes.so";
 
 ### Function `STRING types.to_res_cstr_err()`
 
+### Function `VOID types.opt_acl([ACL _v])`
+
+### Function `VOID types.opt_req_acl(ACL _v)`
+
+### Function `ACL types.to_res_acl()`
+
 ### Function `VOID types.type_duration(DURATION _v)`
 
 ### Function `VOID types.opt_duration([DURATION _v])`

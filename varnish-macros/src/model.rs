@@ -227,6 +227,7 @@ impl ParamTy {
             Self::Probe | Self::ProbeCow => "VCL_PROBE",
             Self::SocketAddr => "VCL_IP",
             Self::Str | Self::CStr => "VCL_STRING",
+            Self::Sub => "VCL_SUB",
             Self::VclType(ty) => ty,
         }
     }

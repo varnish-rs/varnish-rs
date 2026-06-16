@@ -8,7 +8,11 @@ VMOD_JSON_SPEC
     "2.0",
     "types",
     "Vmod_vmod_types_Func",
+<<<<<<< HEAD
     "c13df0540d7786fdca53f5d15d1111b8c80ab3d4de7401fb217f0fb2188d6a9c",
+=======
+    "bf16dadd071d5848b6db9a3adf94d4b5e98d040f188bc7d5e9db15106b5f5029",
+>>>>>>> 4e0c943 (Update snapshots for new Acl type)
     "Varnish (version) (hash)",
     "0",
     "0"
@@ -129,6 +133,25 @@ typedef VCL_STRING td_vmod_types_to_res_cstr(
 );
 
 typedef VCL_STRING td_vmod_types_to_res_cstr_err(
+    VRT_CTX
+);
+
+struct arg_vmod_types_opt_acl {
+  char valid__v;
+  VCL_ACL _v;
+};
+
+typedef VCL_VOID td_vmod_types_opt_acl(
+    VRT_CTX,
+    struct arg_vmod_types_opt_acl *
+);
+
+typedef VCL_VOID td_vmod_types_opt_req_acl(
+    VRT_CTX,
+    VCL_ACL
+);
+
+typedef VCL_ACL td_vmod_types_to_res_acl(
     VRT_CTX
 );
 
@@ -389,6 +412,9 @@ struct Vmod_vmod_types_Func {
   td_vmod_types_to_cstr *f_to_cstr;
   td_vmod_types_to_res_cstr *f_to_res_cstr;
   td_vmod_types_to_res_cstr_err *f_to_res_cstr_err;
+  td_vmod_types_opt_acl *f_opt_acl;
+  td_vmod_types_opt_req_acl *f_opt_req_acl;
+  td_vmod_types_to_res_acl *f_to_res_acl;
   td_vmod_types_type_duration *f_type_duration;
   td_vmod_types_opt_duration *f_opt_duration;
   td_vmod_types_to_duration *f_to_duration;
@@ -739,6 +765,52 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
         "STRING"
       ],
       "Vmod_vmod_types_Func.f_to_res_cstr_err",
+      ""
+    ]
+  ],
+  [
+    "$FUNC",
+    "opt_acl",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_types_Func.f_opt_acl",
+      "struct arg_vmod_types_opt_acl",
+      [
+        "ACL",
+        "_v",
+        "_v",
+        null,
+        null,
+        true
+      ]
+    ]
+  ],
+  [
+    "$FUNC",
+    "opt_req_acl",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_types_Func.f_opt_req_acl",
+      "",
+      [
+        "ACL",
+        "_v",
+        "_v"
+      ]
+    ]
+  ],
+  [
+    "$FUNC",
+    "to_res_acl",
+    [
+      [
+        "ACL"
+      ],
+      "Vmod_vmod_types_Func.f_to_res_acl",
       ""
     ]
   ],
