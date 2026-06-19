@@ -1,0 +1,5 @@
+error: unsupported argument type
+ --> tests/fail/error_acl.rs:9:31
+  |
+9 |     pub fn return_opt_opt_acl(_v: Option<Option<Acl>>) {}
+  |                               ^^

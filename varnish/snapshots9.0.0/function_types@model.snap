@@ -395,7 +395,30 @@ VmodInfo {
         },
         FuncInfo {
             func_type: Function,
-            ident: "opt_acl",
+            ident: "type_acl",
+            vcl_name: None,
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: Acl,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+            restrict: [],
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "arg_acl",
             vcl_name: None,
             docs: "",
             has_optional_args: true,
@@ -418,24 +441,14 @@ VmodInfo {
         },
         FuncInfo {
             func_type: Function,
-            ident: "opt_req_acl",
+            ident: "return_acl",
             vcl_name: None,
             docs: "",
             has_optional_args: false,
-            args: [
-                ParamTypeInfo {
-                    ident: "_v",
-                    docs: "",
-                    ty: Value(
-                        ParamInfo {
-                            kind: Required,
-                            default: Null,
-                            ty_info: Acl,
-                        },
-                    ),
-                },
-            ],
-            output_ty: Default,
+            args: [],
+            output_ty: ParamType(
+                Acl,
+            ),
             out_result: false,
             restrict: [],
         },

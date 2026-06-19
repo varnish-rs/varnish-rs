@@ -1,4 +1,0 @@
----
-source: varnish-macros/src/tests.rs
----
-:: core :: compile_error ! { "unsupported argument type" }

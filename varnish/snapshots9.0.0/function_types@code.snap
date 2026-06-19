@@ -9,21 +9,10 @@ mod types {
         use std::ffi::{c_char, c_int, c_uint, c_void, CStr};
         use std::ptr::null;
         use varnish::ffi::{
-<<<<<<< HEAD
-            VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_PROBE,
-            VCL_REAL, VCL_STRING, VCL_SUB, VCL_TIME, VCL_VOID, VMOD_ABI_Version,
-=======
             VCL_ACL, VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP,
-<<<<<<< HEAD
-            VCL_PROBE, VCL_REAL, VCL_STRING, VCL_TIME, VCL_VOID, VMOD_ABI_Version,
->>>>>>> 4e0c943 (Update snapshots for new Acl type)
-            VclEvent, vmod_data, vmod_priv, vrt_ctx, VMOD_PRIV_METHODS_MAGIC,
-            vmod_priv_methods,
-=======
             VCL_PROBE, VCL_REAL, VCL_STRING, VCL_SUB, VCL_TIME, VCL_VOID,
             VMOD_ABI_Version, VclEvent, vmod_data, vmod_priv, vrt_ctx,
             VMOD_PRIV_METHODS_MAGIC, vmod_priv_methods,
->>>>>>> ca08975 (Remove tests for Option<Option<Acl>>)
         };
         use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
         use super::*;
@@ -202,22 +191,33 @@ mod types {
                     Default::default()
                 })
         }
+        unsafe extern "C" fn vmod_c_type_acl(__ctx: *mut vrt_ctx, _v: VCL_ACL) {
+            super::type_acl(_v.into())
+        }
         #[repr(C)]
-        struct arg_vmod_types_opt_acl {
+        struct arg_vmod_types_arg_acl {
             valid__v: c_char,
             _v: VCL_ACL,
         }
-        unsafe extern "C" fn vmod_c_opt_acl(
+        unsafe extern "C" fn vmod_c_arg_acl(
             __ctx: *mut vrt_ctx,
-            __args: *const arg_vmod_types_opt_acl,
+            __args: *const arg_vmod_types_arg_acl,
         ) {
             let __args = __args
                 .as_ref()
                 .expect("optional args pointer must not be null");
-            super::opt_acl(if __args.valid__v != 0 { __args._v.into() } else { None })
+            super::arg_acl(if __args.valid__v != 0 { __args._v.into() } else { None })
         }
-        unsafe extern "C" fn vmod_c_opt_req_acl(__ctx: *mut vrt_ctx, _v: VCL_ACL) {
-            super::opt_req_acl(_v.into())
+        unsafe extern "C" fn vmod_c_return_acl(__ctx: *mut vrt_ctx) -> VCL_ACL {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(super::return_acl().into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
         }
         unsafe extern "C" fn vmod_c_to_res_acl(__ctx: *mut vrt_ctx) -> VCL_ACL {
             let mut __ctx = Ctx::from_ptr(__ctx);
@@ -754,14 +754,17 @@ mod types {
             vmod_c_to_res_cstr_err: Option<
                 unsafe extern "C" fn(__ctx: *mut vrt_ctx) -> VCL_STRING,
             >,
-            vmod_c_opt_acl: Option<
+            vmod_c_type_acl: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, _v: VCL_ACL),
+            >,
+            vmod_c_arg_acl: Option<
                 unsafe extern "C" fn(
                     __ctx: *mut vrt_ctx,
-                    __args: *const arg_vmod_types_opt_acl,
+                    __args: *const arg_vmod_types_arg_acl,
                 ),
             >,
-            vmod_c_opt_req_acl: Option<
-                unsafe extern "C" fn(__ctx: *mut vrt_ctx, _v: VCL_ACL),
+            vmod_c_return_acl: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx) -> VCL_ACL,
             >,
             vmod_c_to_res_acl: Option<
                 unsafe extern "C" fn(__ctx: *mut vrt_ctx) -> VCL_ACL,
@@ -932,8 +935,9 @@ mod types {
             vmod_c_to_cstr: Some(vmod_c_to_cstr),
             vmod_c_to_res_cstr: Some(vmod_c_to_res_cstr),
             vmod_c_to_res_cstr_err: Some(vmod_c_to_res_cstr_err),
-            vmod_c_opt_acl: Some(vmod_c_opt_acl),
-            vmod_c_opt_req_acl: Some(vmod_c_opt_req_acl),
+            vmod_c_type_acl: Some(vmod_c_type_acl),
+            vmod_c_arg_acl: Some(vmod_c_arg_acl),
+            vmod_c_return_acl: Some(vmod_c_return_acl),
             vmod_c_to_res_acl: Some(vmod_c_to_res_acl),
             vmod_c_type_duration: Some(vmod_c_type_duration),
             vmod_c_opt_duration: Some(vmod_c_opt_duration),
@@ -983,15 +987,7 @@ mod types {
         pub static Vmod_types_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-<<<<<<< HEAD
-<<<<<<< HEAD
-            file_id: c"c13df0540d7786fdca53f5d15d1111b8c80ab3d4de7401fb217f0fb2188d6a9c"
-=======
-            file_id: c"bf16dadd071d5848b6db9a3adf94d4b5e98d040f188bc7d5e9db15106b5f5029"
->>>>>>> 4e0c943 (Update snapshots for new Acl type)
-=======
-            file_id: c"6a07d4e6b45387996d6ddf4316f787c14c6ec62d8d17fc10c182b3dcf2cc172c"
->>>>>>> ca08975 (Remove tests for Option<Option<Acl>>)
+            file_id: c"90968e517039f4c73943ba74b5f3c2e8bc329a6a486d4b3d16075f7403c4f6d7"
                 .as_ptr(),
             name: c"types".as_ptr(),
             func_name: c"Vmod_vmod_types_Func".as_ptr(),
@@ -1049,9 +1045,12 @@ mod types {
     pub fn to_res_cstr_err() -> Result<&'static CStr, &'static CStr> {
         Ok(c"")
     }
-    pub fn opt_acl(_v: Option<Acl>) {}
-    pub fn opt_req_acl(_v: Option<Acl>) {}
-    pub fn to_res_acl() -> Result<Option<Acl>, &'static str> {
+    pub fn type_acl(_v: Acl) {}
+    pub fn arg_acl(_v: Option<Acl>) {}
+    pub fn return_acl() -> Acl {
+        unimplemented!()
+    }
+    pub fn to_res_acl() -> Result<Acl, &'static str> {
         Err("")
     }
     pub fn type_duration(_v: Duration) {}

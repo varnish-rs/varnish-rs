@@ -5,7 +5,7 @@ use std::net::SocketAddr;
 
 use crate::ffi;
 use crate::ffi::{vrt_ctx, VRT_call, VRT_check_call, VRT_fail, VRT_handled, VRT_CTX_MAGIC};
-use crate::vcl::{Acl, subroutine::Subroutine, HttpHeaders, LogTag, TestWS, VclError, Workspace};
+use crate::vcl::{subroutine::Subroutine, Acl, HttpHeaders, LogTag, TestWS, VclError, Workspace};
 
 /// VCL context
 ///
@@ -96,8 +96,14 @@ impl<'a> Ctx<'a> {
     }
 
     /// Match an ACL against a provided address.
-    pub fn acl_match(&self, acl: Acl, addr: SocketAddr) -> bool {
-        acl.matches(self, addr)
+    pub fn acl_match(&self, acl: &Acl, addr: SocketAddr) -> bool {
+        assert!(!acl.raw.0.is_null());
+
+        unsafe {
+            let mut sa_buf = vec![0u8; ffi::vsa_suckaddr_len];
+            crate::vcl::convert::write_ip_to_buf(addr, &mut sa_buf);
+            ffi::VRT_acl_match(self.raw, acl.raw, ffi::VCL_IP(sa_buf.as_ptr().cast())) == 1
+        }
     }
 
     /// Return the name of the listener socket that received the current request.

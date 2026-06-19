@@ -118,33 +118,24 @@ macro_rules! from_vcl_to_opt_rust {
 }
 
 // VCL_ACL
+
+// this is deceiving: VCL_ACL must never be null, but we may need to return a NULL to the C layer if
+// the vmod returns Return<Acl, _>
+default_null_ptr!(VCL_ACL);
+
+from_vcl_to_opt_rust!(VCL_ACL, Acl);
 impl From<VCL_ACL> for Acl {
     fn from(value: VCL_ACL) -> Acl {
+        assert!(!value.0.is_null());
         Acl { raw: value }
-    }
-}
-
-impl From<VCL_ACL> for Option<Acl> {
-    fn from(value: VCL_ACL) -> Option<Acl> {
-        if value.0.is_null() {
-            return None;
-        }
-
-        Some(Acl { raw: value })
     }
 }
 
 impl IntoVCL<VCL_ACL> for Acl {
     fn into_vcl(self, _: &mut Workspace) -> Result<VCL_ACL, VclError> {
-        unsafe { Ok(self.vcl_ptr()) }
-    }
-}
-
-impl IntoVCL<VCL_ACL> for Option<Acl> {
-    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_ACL, VclError> {
-        match self {
-            Some(acl) => unsafe { Ok(acl.vcl_ptr()) },
-            None => Err(VclError::Str("acl is null")),
+        unsafe {
+            assert!(!self.vcl_ptr().0.is_null());
+            Ok(self.vcl_ptr())
         }
     }
 }

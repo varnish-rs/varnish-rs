@@ -10,7 +10,7 @@ There are two types of tests in this project:
 
 ## Debugging Macro-Generated Code
 
-The simplest way to observe generated code is to examine `varnish/sanshots/*@code.snap` files. They contain code generated from the `varnish/test/pass/*.rs` files. Additionally, the model file describes intermediate parse result of the test file, json files shows the data given to the Varnish vmod compiler, and docs contain the generated documentation.
+The simplest way to observe generated code is to examine `varnish/snapshots*/*@code.snap` files. They contain code generated from the `varnish/test/pass/*.rs` files. Additionally, the model file describes intermediate parse result of the test file, json files shows the data given to the Varnish vmod compiler, and docs contain the generated documentation.
 
 For a more in-depth look, use `cargo expand` command.  You will need to run `cargo install cargo-expand` to install it first. You can copy/paste the expanded code into the same file, removing some boilerplate before and after the expanded code, and then run `cargo check` to see the errors.  Note that some expansions cannot be compiled - e.g. anything expanded from `format!` or `panic!` - so you may need compare the generated code with the original, and keep all the original parts for anything unrelated to the generated code.
 

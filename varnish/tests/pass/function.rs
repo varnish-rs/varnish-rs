@@ -60,9 +60,12 @@ mod types {
     }
 
     // Acl
-    pub fn opt_acl(_v: Option<Acl>) {}
-    pub fn opt_req_acl(#[required] _v: Option<Acl>) {}
-    pub fn to_res_acl() -> Result<Option<Acl>, &'static str> {
+    pub fn type_acl(_v: Acl) {}
+    pub fn arg_acl(_v: Option<Acl>) {}
+    pub fn return_acl() -> Acl {
+        unimplemented!()
+    }
+    pub fn to_res_acl() -> Result<Acl, &'static str> {
         Err("")
     }
 

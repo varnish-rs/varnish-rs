@@ -62,9 +62,11 @@ import types from "path/to/libtypes.so";
 
 ### Function `STRING types.to_res_cstr_err()`
 
-### Function `VOID types.opt_acl([ACL _v])`
+### Function `VOID types.type_acl(ACL _v)`
 
-### Function `VOID types.opt_req_acl(ACL _v)`
+### Function `VOID types.arg_acl([ACL _v])`
+
+### Function `ACL types.return_acl()`
 
 ### Function `ACL types.to_res_acl()`
 

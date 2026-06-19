@@ -235,7 +235,8 @@ impl ParamTy {
     /// User MUST use some types with `Option`
     pub fn must_be_optional(self) -> bool {
         match self {
-            Self::Bool
+            Self::Acl
+            | Self::Bool
             | Self::Blob
             | Self::CStr
             | Self::Duration
@@ -245,11 +246,7 @@ impl ParamTy {
             | Self::Str
             | Self::Sub
             | Self::VclType(_) => false,
-            Self::Acl
-            | Self::BackendRef
-            | Self::Probe
-            | Self::ProbeCow
-            | Self::SocketAddr => true,
+            Self::BackendRef | Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
         }
     }
 

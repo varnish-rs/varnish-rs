@@ -375,6 +375,8 @@ impl ParamTy {
                 return Some(Self::Probe);
             } else if ident == "SocketAddr" {
                 return Some(Self::SocketAddr);
+            } else if ident == "VCL_ACL" {
+                return Some(Self::VclType("VCL_ACL"));
             } else if ident == "VCL_BACKEND" {
                 return Some(Self::VclType("VCL_BACKEND"));
             } else if ident == "VCL_BLOB" {

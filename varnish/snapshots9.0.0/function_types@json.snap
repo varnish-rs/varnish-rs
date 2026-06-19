@@ -8,15 +8,7 @@ VMOD_JSON_SPEC
     "2.0",
     "types",
     "Vmod_vmod_types_Func",
-<<<<<<< HEAD
-<<<<<<< HEAD
-    "c13df0540d7786fdca53f5d15d1111b8c80ab3d4de7401fb217f0fb2188d6a9c",
-=======
-    "bf16dadd071d5848b6db9a3adf94d4b5e98d040f188bc7d5e9db15106b5f5029",
->>>>>>> 4e0c943 (Update snapshots for new Acl type)
-=======
-    "6a07d4e6b45387996d6ddf4316f787c14c6ec62d8d17fc10c182b3dcf2cc172c",
->>>>>>> ca08975 (Remove tests for Option<Option<Acl>>)
+    "90968e517039f4c73943ba74b5f3c2e8bc329a6a486d4b3d16075f7403c4f6d7",
     "Varnish (version) (hash)",
     "0",
     "0"
@@ -140,19 +132,23 @@ typedef VCL_STRING td_vmod_types_to_res_cstr_err(
     VRT_CTX
 );
 
-struct arg_vmod_types_opt_acl {
+typedef VCL_VOID td_vmod_types_type_acl(
+    VRT_CTX,
+    VCL_ACL
+);
+
+struct arg_vmod_types_arg_acl {
   char valid__v;
   VCL_ACL _v;
 };
 
-typedef VCL_VOID td_vmod_types_opt_acl(
+typedef VCL_VOID td_vmod_types_arg_acl(
     VRT_CTX,
-    struct arg_vmod_types_opt_acl *
+    struct arg_vmod_types_arg_acl *
 );
 
-typedef VCL_VOID td_vmod_types_opt_req_acl(
-    VRT_CTX,
-    VCL_ACL
+typedef VCL_ACL td_vmod_types_return_acl(
+    VRT_CTX
 );
 
 typedef VCL_ACL td_vmod_types_to_res_acl(
@@ -416,8 +412,9 @@ struct Vmod_vmod_types_Func {
   td_vmod_types_to_cstr *f_to_cstr;
   td_vmod_types_to_res_cstr *f_to_res_cstr;
   td_vmod_types_to_res_cstr_err *f_to_res_cstr_err;
-  td_vmod_types_opt_acl *f_opt_acl;
-  td_vmod_types_opt_req_acl *f_opt_req_acl;
+  td_vmod_types_type_acl *f_type_acl;
+  td_vmod_types_arg_acl *f_arg_acl;
+  td_vmod_types_return_acl *f_return_acl;
   td_vmod_types_to_res_acl *f_to_res_acl;
   td_vmod_types_type_duration *f_type_duration;
   td_vmod_types_opt_duration *f_opt_duration;
@@ -774,13 +771,29 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
   ],
   [
     "$FUNC",
-    "opt_acl",
+    "type_acl",
     [
       [
         "VOID"
       ],
-      "Vmod_vmod_types_Func.f_opt_acl",
-      "struct arg_vmod_types_opt_acl",
+      "Vmod_vmod_types_Func.f_type_acl",
+      "",
+      [
+        "ACL",
+        "_v",
+        "_v"
+      ]
+    ]
+  ],
+  [
+    "$FUNC",
+    "arg_acl",
+    [
+      [
+        "VOID"
+      ],
+      "Vmod_vmod_types_Func.f_arg_acl",
+      "struct arg_vmod_types_arg_acl",
       [
         "ACL",
         "_v",
@@ -793,18 +806,13 @@ static struct Vmod_vmod_types_Func Vmod_vmod_types_Func;"
   ],
   [
     "$FUNC",
-    "opt_req_acl",
+    "return_acl",
     [
       [
-        "VOID"
+        "ACL"
       ],
-      "Vmod_vmod_types_Func.f_opt_req_acl",
-      "",
-      [
-        "ACL",
-        "_v",
-        "_v"
-      ]
+      "Vmod_vmod_types_Func.f_return_acl",
+      ""
     ]
   ],
   [
