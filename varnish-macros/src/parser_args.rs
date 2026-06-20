@@ -357,7 +357,9 @@ impl ParamTy {
     /// Tries parsing regular VCL types as `i64`, `bool`, `Duration`, `&str`, ...
     pub fn try_parse(ty: &Type) -> Option<Self> {
         if let Some(ident) = as_simple_ty(ty) {
-            if ident == "bool" {
+            if ident == "Acl" {
+                return Some(Self::Acl);
+            } else if ident == "bool" {
                 return Some(Self::Bool);
             } else if ident == "BackendRef" {
                 return Some(Self::BackendRef);
@@ -373,6 +375,8 @@ impl ParamTy {
                 return Some(Self::Probe);
             } else if ident == "SocketAddr" {
                 return Some(Self::SocketAddr);
+            } else if ident == "VCL_ACL" {
+                return Some(Self::VclType("VCL_ACL"));
             } else if ident == "VCL_BACKEND" {
                 return Some(Self::VclType("VCL_BACKEND"));
             } else if ident == "VCL_BLOB" {

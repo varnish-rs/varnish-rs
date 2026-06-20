@@ -176,6 +176,7 @@ pub struct ParamInfo {
 /// Represents the common function argument types. These could also be returned.
 #[derive(Debug, Clone, Copy)]
 pub enum ParamTy {
+    Acl,
     Bool,
     BackendRef,
     Blob,
@@ -195,6 +196,7 @@ pub enum ParamTy {
 impl ParamTy {
     pub fn to_vcc_type(self) -> &'static str {
         match self {
+            Self::Acl => "ACL",
             Self::Bool => "BOOL",
             Self::BackendRef => "BACKEND",
             Self::Blob => "BLOB",
@@ -214,6 +216,7 @@ impl ParamTy {
         // ATTENTION: Each VCL_* type here must also be listed in the `use varnish::...`
         //            statement in the `varnish-macros/src/generator.rs` file.
         match self {
+            Self::Acl => "VCL_ACL",
             Self::Bool => "VCL_BOOL",
             Self::BackendRef => "VCL_BACKEND",
             Self::Blob => "VCL_BLOB",
@@ -232,7 +235,8 @@ impl ParamTy {
     /// User MUST use some types with `Option`
     pub fn must_be_optional(self) -> bool {
         match self {
-            Self::Bool
+            Self::Acl
+            | Self::Bool
             | Self::Blob
             | Self::CStr
             | Self::Duration
@@ -250,7 +254,8 @@ impl ParamTy {
     /// e.g. if `&CStr` contains invalid UTF-8 characters and cannot be converted to `&str`.
     pub fn use_try_from(self) -> bool {
         match self {
-            Self::Bool
+            Self::Acl
+            | Self::Bool
             | Self::BackendRef
             | Self::Blob
             | Self::CStr

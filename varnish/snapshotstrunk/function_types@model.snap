@@ -395,6 +395,78 @@ VmodInfo {
         },
         FuncInfo {
             func_type: Function,
+            ident: "type_acl",
+            vcl_name: None,
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: Acl,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+            restrict: [],
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "arg_acl",
+            vcl_name: None,
+            docs: "",
+            has_optional_args: true,
+            args: [
+                ParamTypeInfo {
+                    ident: "_v",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Optional,
+                            default: Null,
+                            ty_info: Acl,
+                        },
+                    ),
+                },
+            ],
+            output_ty: Default,
+            out_result: false,
+            restrict: [],
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "return_acl",
+            vcl_name: None,
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                Acl,
+            ),
+            out_result: false,
+            restrict: [],
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "to_res_acl",
+            vcl_name: None,
+            docs: "",
+            has_optional_args: false,
+            args: [],
+            output_ty: ParamType(
+                Acl,
+            ),
+            out_result: true,
+            restrict: [],
+        },
+        FuncInfo {
+            func_type: Function,
             ident: "type_duration",
             vcl_name: None,
             docs: "",

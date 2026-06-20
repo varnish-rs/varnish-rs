@@ -11,7 +11,7 @@ mod types {
     use std::net::SocketAddr;
     use std::time::Duration;
     use varnish::ffi::VCL_STRING;
-    use varnish::vcl::{CowProbe, Probe, Workspace};
+    use varnish::vcl::{Acl, CowProbe, Probe, Workspace};
     use varnish_sys::vcl::VclError;
 
     // void
@@ -57,6 +57,16 @@ mod types {
     }
     pub fn to_res_cstr_err() -> Result<&'static CStr, &'static CStr> {
         Ok(c"")
+    }
+
+    // Acl
+    pub fn type_acl(_v: Acl) {}
+    pub fn arg_acl(_v: Option<Acl>) {}
+    pub fn return_acl() -> Acl {
+        unimplemented!()
+    }
+    pub fn to_res_acl() -> Result<Acl, &'static str> {
+        Err("")
     }
 
     // Duration

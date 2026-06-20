@@ -1,3 +1,4 @@
+mod acl;
 mod backend;
 mod convert;
 mod ctx;
@@ -11,6 +12,7 @@ mod vsb;
 mod ws;
 mod ws_str_buffer;
 
+pub use acl::*;
 pub use backend::*;
 pub use convert::*;
 pub use ctx::*;

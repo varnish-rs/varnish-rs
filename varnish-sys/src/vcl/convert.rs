@@ -60,8 +60,8 @@ use crate::ffi::{
 };
 
 use crate::vcl::{
-    from_vcl_probe, into_vcl_probe, subroutine::Subroutine, BackendRef, CowProbe, Probe, VclError,
-    Workspace,
+    from_vcl_probe, into_vcl_probe, subroutine::Subroutine, Acl, BackendRef, CowProbe, Probe,
+    VclError, Workspace,
 };
 
 /// Convert a Rust type into a VCL one
@@ -118,7 +118,27 @@ macro_rules! from_vcl_to_opt_rust {
 }
 
 // VCL_ACL
+
+// this is deceiving: VCL_ACL must never be null, but we may need to return a NULL to the C layer if
+// the vmod returns Return<Acl, _>
 default_null_ptr!(VCL_ACL);
+
+from_vcl_to_opt_rust!(VCL_ACL, Acl);
+impl From<VCL_ACL> for Acl {
+    fn from(value: VCL_ACL) -> Acl {
+        assert!(!value.0.is_null());
+        Acl { raw: value }
+    }
+}
+
+impl IntoVCL<VCL_ACL> for Acl {
+    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_ACL, VclError> {
+        unsafe {
+            assert!(!self.vcl_ptr().0.is_null());
+            Ok(self.vcl_ptr())
+        }
+    }
+}
 
 // VCL_BLOB
 default_null_ptr!(VCL_BLOB);
