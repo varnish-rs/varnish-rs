@@ -18,7 +18,7 @@ jobs:
     name: Test Varnish latest
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Stable Rust
         uses: dtolnay/rust-toolchain@stable
       - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -42,7 +42,7 @@ jobs:
           - ver: 9.0.0
           - ver: 8.0.0
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Stable Rust
         uses: dtolnay/rust-toolchain@stable
       - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -66,7 +66,7 @@ jobs:
     name: Test MSRV
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
         uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@v2
@@ -87,7 +87,7 @@ jobs:
   test-docs-rs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Stable Rust
         uses: dtolnay/rust-toolchain@stable
       - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -105,7 +105,7 @@ jobs:
     name: Test on macOS
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Stable Rust
         uses: dtolnay/rust-toolchain@stable
       - if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
@@ -146,7 +146,7 @@ jobs:
       group: release-plz-${{ github.ref }}
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - name: Install Stable Rust
         uses: dtolnay/rust-toolchain@stable
