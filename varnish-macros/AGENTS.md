@@ -44,7 +44,7 @@ TokenStream (attr args, ItemMod)
 
 ## Testing — two systems, see [varnish/tests/AGENTS.md](../varnish/tests/AGENTS.md) for the fixture side
 
-1. `src/tests.rs` (insta): reads real fixtures from `varnish/tests/pass/*.rs` and `varnish/tests/pass_ffi/*.rs` (cross-crate!), runs parser/generator directly, snapshots 4 outputs per fixture (`@model`, `@docs`, `@code`, JSON/CStr blobs) into `varnish/snapshots<VARNISHAPI_VERSION>/` — one dir per supported Varnish version.
+1. `src/tests.rs` (insta): reads real fixtures from `varnish/tests/pass/*.rs` and `varnish/tests/pass_ffi/*.rs` (cross-crate!), runs parser/generator directly, snapshots 4 outputs per fixture (`@model`, `@docs`, `@code`, `@json`) into `varnish/snapshots<VARNISHAPI_VERSION>/` — one dir per supported Varnish version.
 2. `varnish/tests/compile.rs` (trybuild, lives in `varnish` crate): `fail/*.rs` + `.stderr` compile-fail, `pass/*.rs`/`pass_ffi/*.rs` compile-pass (same fixtures reused above).
 
 **Update snapshots**: `just bless` (wraps `cargo insta test --accept --unreferenced=ignore -p varnish-macros -p varnish` + `TRYBUILD=overwrite`).

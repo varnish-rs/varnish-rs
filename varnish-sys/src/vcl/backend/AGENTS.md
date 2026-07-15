@@ -6,7 +6,7 @@ Lets a VMOD implement a custom Varnish backend (director) in Rust — health-che
 
 ## Files
 
-- `backend_main.rs` (990 lines, biggest file in crate) — `Backend<S,T>`, `VclBackend`/`VclResponse` traits (what a VMOD implements), `NativeBackendBuilder`, `StreamClose`. Has unit tests.
+- `backend_main.rs` (biggest file in crate) — `Backend<S,T>`, `VclBackend`/`VclResponse` traits (what a VMOD implements), `NativeBackendBuilder`, `StreamClose`. Has unit tests.
 - `backend_ref.rs` — backend reference/handle glue.
 - `director.rs` — VMOD director glue (routing requests to a backend impl).
 
