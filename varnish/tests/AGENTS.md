@@ -1,0 +1,19 @@
+# varnish/tests — macro-output fixtures + integration subcrate
+
+See also: [varnish/](../AGENTS.md) · [varnish-macros](../../varnish-macros/AGENTS.md) · [examples](../../examples/AGENTS.md)
+
+Two unrelated things live here: macro-output test fixtures, and a real integration-test subcrate.
+
+## Macro-output fixtures (trybuild + insta)
+
+- `compile.rs` — trybuild harness. `fail/*.rs` must fail to compile, paired with expected `fail/*.stderr`. `pass/*.rs` must compile. `pass_ffi/*.rs` must compile, gated on `ffi` feature.
+- Same `pass/*.rs` and `pass_ffi/*.rs` fixtures are **also** read by `varnish-macros/src/tests.rs` (insta) — parser/generator run directly, 4 outputs snapshotted per fixture (`@model`, `@docs`, `@code`, JSON/CStr) into `varnish/snapshots<version>/` (`snapshots8.0.0`, `snapshots9.0.0`, `snapshotstrunk` — one dir per supported Varnish major version, path picked via `env!("VARNISHAPI_VERSION_NUMBER")`).
+- **Update both**: `just bless` (regens insta snapshots + trybuild `.stderr` for the currently-installed Varnish version). `just bless-all` does all versions via Docker.
+- New pass-fixture in `tests/pass/*.rs` → auto-exercised by both harnesses. New fail-fixture → add `tests/fail/X.rs`, generate `X.stderr` via `just bless`.
+- Unreferenced snapshots across version dirs are OK (`--unreferenced=ignore`) — some fixtures may exist only for some versions.
+
+## `vmod_test/` subcrate
+
+Real workspace member, cdylib crate name `rustest`, `varnish = { features = ["ffi"] }`. Exercises nearly every framework feature: workspace reservation, hashing controls, probes, IP building, blobs, backends. Embeds `varnish::run_vtc_tests!("tests/*.vtc")` with 16 `.vtc` files.
+
+**This is the closest thing to a full `varnishd` integration test** — when adding a new framework feature, add coverage here (or in a matching `examples/vmod_*`), not just unit tests.
