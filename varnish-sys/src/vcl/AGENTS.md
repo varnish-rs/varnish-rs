@@ -7,17 +7,17 @@ Re-exported whole as `varnish::vcl`. Wraps raw Varnish C structs with checked, m
 ## Files
 
 - `acl.rs` — `Acl` wrapper.
-- `convert.rs` (510 lines) — Rust ⇄ `VCL_*` conversion traits. **Macro-generated code depends on these directly** — changing a trait here ripples into `varnish-macros` codegen.
-- `ctx.rs` (369 lines) — `Ctx`, `Req`, `TestCtx`, `PerVclState<T>`, `log()`. Main request-context wrapper around `vrt_ctx`. Has unit tests.
+- `convert.rs` (large) — Rust ⇄ `VCL_*` conversion traits. **Macro-generated code depends on these directly** — changing a trait here ripples into `varnish-macros` codegen.
+- `ctx.rs` — `Ctx`, `Req`, `TestCtx`, `PerVclState<T>`, `log()`. Main request-context wrapper around `vrt_ctx`. Has unit tests.
 - `error.rs` — VCL error type.
-- `http.rs` (305 lines) — `HttpHeaders`, header iteration. **Assumes UTF-8, panics otherwise** (issue #4, known not fixed).
+- `http.rs` — `HttpHeaders`, header iteration. **Assumes UTF-8, panics otherwise** (issue #4, known not fixed).
 - `probe.rs` — `Probe`/`CowProbe`/`Request`, backend health checks.
-- `processor.rs` (397 lines) — `DeliveryProcessor`/`FetchProcessor` traits, `FetchFilters`/`DeliveryFilters`, `new_vdp`/`new_vfp`. Backs `examples/vmod_vdp`, `vmod_vfp`.
+- `processor.rs` — `DeliveryProcessor`/`FetchProcessor` traits, `FetchFilters`/`DeliveryFilters`, `new_vdp`/`new_vfp`. Backs `examples/vmod_vdp`, `vmod_vfp`.
 - `str_or_bytes.rs` — `StrOrBytes<'a>` enum.
 - `subroutine.rs` — `Subroutine` wrapper, `VALID_RESTRICT_SCOPES`, `bitmask_const_name`. **Consumed directly by `varnish-macros`** (parser.rs, gen_func.rs) for `#[restrict(...)]` codegen.
 - `vsb.rs` — `Buffer`, wraps Varnish `vsb` string buffer.
-- `ws.rs` (343 lines) — `Workspace<'ctx>`, `TestWS`. Per-task arena allocator. Has unit tests.
-- `ws_str_buffer.rs` (418 lines) — `WsBuffer`/`WsStrBuffer`/`WsBlobBuffer` builders on top of workspace. Has unit tests.
+- `ws.rs` — `Workspace<'ctx>`, `TestWS`. Per-task arena allocator. Has unit tests.
+- `ws_str_buffer.rs` — `WsBuffer`/`WsStrBuffer`/`WsBlobBuffer` builders on top of workspace. Has unit tests.
 - `backend/` — director/backend subsystem, own guide: [backend/AGENTS.md](backend/AGENTS.md).
 
 ## Conventions

@@ -51,7 +51,7 @@ TokenStream (attr args, ItemMod)
 
 ## Gotchas
 
-- Any codegen change touches insta snapshots across **8 Varnish-version dirs** under `varnish/snapshots*` — expect large diffs.
+- Any codegen change touches insta snapshots under `varnish/snapshots*` — expect large diffs. 3 real dirs are checked in (`snapshots8.0.0`, `snapshots9.0.0`, `snapshotstrunk`); other version dirs are symlinks to one of these (see [varnish/tests/AGENTS.md](../varnish/tests/AGENTS.md)) so you don't need to bless each one separately per patch release.
 - Debug generated code with `cargo expand` (see root CONTRIBUTING.md for the exact recipe).
 - `run_vtc_tests!` needs `CARGO_MANIFEST_DIR` at compile time — errors outside cargo build.
 - Breaking macro API changes ripple into every downstream VMOD example — run `just semver` (cargo-semver-checks).
