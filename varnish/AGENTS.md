@@ -18,4 +18,4 @@ Actual domain logic (Ctx, HTTP, workspace, backends, VDP/VFP, ACL, subroutine, c
 - **`ffi` feature** gates the raw `varnish_sys::ffi` re-export + `pass_ffi`/ffi-only tests. Only enable for low-level/backend code needing direct C struct access.
 - Objects: struct + `impl` block go **outside** the `#[vmod]` module body — only fns/methods go inside. Constructor = any method returning `Self`.
 - `#[shared_per_task]` / `#[shared_per_vcl]` type must stay consistent across the whole vmod.
-- Curated `ffi` re-export list (feature off) must stay in sync with `use_ffi_items` in `varnish-macros/src/generator.rs` — don't edit one without the other.
+- `varnish::ffi` (when the `ffi` feature is **off**) must export **at least** the items referenced by `use_ffi_items` in `varnish-macros/src/generator.rs` (generated code does `use varnish::ffi::{...}`). If codegen starts using new raw FFI items, update both places accordingly.
