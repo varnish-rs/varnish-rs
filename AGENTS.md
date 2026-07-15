@@ -10,7 +10,7 @@ Rust framework for writing Varnish Cache VMODs (modules). Safe wrappers over `li
 | `varnish-macros` | proc-macro crate: `#[vmod]`, `derive(VscMetric)`, `run_vtc_tests!` | [varnish-macros/AGENTS.md](varnish-macros/AGENTS.md) |
 | `varnish` | public facade crate, what VMOD authors depend on | [varnish/AGENTS.md](varnish/AGENTS.md) |
 | `varnish/tests` | trybuild+insta macro-output tests, `vmod_test` integration subcrate | [varnish/tests/AGENTS.md](varnish/tests/AGENTS.md) |
-| `examples/*` | 14 example VMODs + `stat_tree` bin | [examples/AGENTS.md](examples/AGENTS.md) |
+| `examples/*` | 15 example VMODs + `stat_tree` bin | [examples/AGENTS.md](examples/AGENTS.md) |
 
 Dependency direction: `varnish-sys` ← `varnish-macros` ← `varnish` ← examples. `varnish` is a thin facade re-exporting the other two.
 

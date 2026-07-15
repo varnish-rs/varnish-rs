@@ -2,7 +2,7 @@
 
 See also: [varnish/](../AGENTS.md) · [backend subsystem](../varnish-sys/src/vcl/backend/AGENTS.md)
 
-14 minimal VMODs + `stat_tree` binary, all workspace members. Each demonstrates one framework feature in isolation — read the matching one before implementing similar functionality elsewhere.
+15 minimal VMODs + `stat_tree` binary, all workspace members. Each demonstrates one framework feature in isolation — read the matching one before implementing similar functionality elsewhere.
 
 ## Shared skeleton (every vmod_* crate)
 
