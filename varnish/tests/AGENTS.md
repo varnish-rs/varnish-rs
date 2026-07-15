@@ -14,6 +14,6 @@ Two unrelated things live here: macro-output test fixtures, and a real integrati
 
 ## `vmod_test/` subcrate
 
-Real workspace member, crate name `vmod_test`, VCL module name `rustest` (`import rustest from "${vmod}";` — that's the name to look for at the VCL-import/build-artifact boundary, not the crate name), `varnish = { features = ["ffi"] }`. Exercises nearly every framework feature: workspace reservation, hashing controls, probes, IP building, blobs, backends. Embeds `varnish::run_vtc_tests!("tests/*.vtc")` with 16 `.vtc` files.
+Real workspace member, crate name `vmod_test`, VCL module name `rustest` (`import rustest from "${vmod}";` — that's the name to look for at the VCL-import/build-artifact boundary, not the crate name), `varnish = { features = ["ffi"] }`. Exercises nearly every framework feature: workspace reservation, hashing controls, probes, IP building, blobs, backends. Embeds `varnish::run_vtc_tests!("tests/*.vtc")` over a `tests/*.vtc` file per scenario.
 
 **This is the closest thing to a full `varnishd` integration test** — when adding a new framework feature, add coverage here (or in a matching `examples/vmod_*`), not just unit tests.
