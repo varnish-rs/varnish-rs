@@ -1,4 +1,4 @@
-use std::ffi::{c_char, c_int, c_void, CStr, CString};
+use std::ffi::{c_char, c_int, c_uint, c_void, CStr, CString};
 use std::marker::PhantomData;
 use std::mem::size_of;
 use std::net::{SocketAddr, TcpStream};
@@ -298,7 +298,7 @@ pub enum StreamClose {
     VclFailure,
 }
 
-fn sc_to_ptr(sc: StreamClose) -> ffi::stream_close_t {
+pub(crate) fn sc_to_ptr(sc: StreamClose) -> ffi::stream_close_t {
     unsafe {
         match sc {
             StreamClose::RemClose => ffi::SC_REM_CLOSE.as_ptr(),
@@ -365,7 +365,7 @@ pub struct NativeBackendBuilder<'a> {
     proxy_header: Option<u32>,
     backend_wait_limit: Option<u32>,
     #[cfg(varnishsys_90_sslflags)]
-    sslflags: std::ffi::c_uint,
+    sslflags: c_uint,
 }
 
 /// Macro to generate builder setter methods

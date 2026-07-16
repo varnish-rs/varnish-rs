@@ -1,0 +1,72 @@
+varnishtest "echo backend forwards bereq body via Ctx::req_body_read/req_body_status - happy path"
+
+server s1 {} -start
+
+varnish v1 -vcl+backend {
+    import std;
+    import echo_backend from "${vmod}";
+
+    sub vcl_init {
+        new echo = echo_backend.new();
+    }
+
+    sub vcl_recv {
+        if (req.http.x-cache-body == "1") {
+            std.cache_req_body(1MB);
+        }
+        set req.backend_hint = echo.backend();
+        return (pass);
+    }
+} -start
+
+# streamed body: read live from the client via VRB_Iterate
+client c1 {
+    txreq -method "POST" -body "hello world"
+    rxresp
+    expect resp.status == 200
+    expect resp.http.x-had-body == "1"
+    expect resp.http.x-body-status == "Length"
+    expect resp.body == "hello world"
+} -run
+
+# cached body: std.cache_req_body() forces bo.bereq_body, read via ObjIterate
+client c2 {
+    txreq -method "POST" -hdr "x-cache-body: 1" -body "cached body"
+    rxresp
+    expect resp.status == 200
+    expect resp.http.x-had-body == "1"
+    expect resp.http.x-body-status == "Cached"
+    expect resp.body == "cached body"
+} -run
+
+# no body at all: req_body_read() must return Ok(false) without touching the writer
+client c3 {
+    txreq -method "GET"
+    rxresp
+    expect resp.status == 200
+    expect resp.http.x-had-body == "0"
+    expect resp.http.x-body-status == "None"
+    expect resp.bodylen == 0
+} -run
+
+# large streamed body: exercises multiple write_all() calls across VRB_Iterate chunks
+# (verified out-of-band with a counting Write wrapper: 512KiB arrives as 33 chunks)
+client c5 {
+    txreq -method "POST" -bodylen 524288
+    rxresp
+    expect resp.status == 200
+    expect resp.http.x-had-body == "1"
+    expect resp.http.x-body-status == "Length"
+    expect resp.bodylen == 524288
+} -run
+
+# client declares a body longer than what it actually sends, then stops (half-close):
+# VRB_Iterate must see this as a short read (BS_ERROR), req_body_read() must
+# return Err, and the fetch must fail instead of hanging or panicking
+client c6 {
+    txreq -method "POST" -hdr "Content-Length: 100"
+    send "too short"
+    shutdown -write
+    rxresp
+    expect resp.status == 400
+} -run

@@ -1,11 +1,15 @@
 //! Expose the Varnish context [`vrt_ctx`] as a Rust object
 //!
 use std::ffi::{c_int, c_uint, c_void, CStr};
+use std::io::{self, Write};
 use std::net::SocketAddr;
 
 use crate::ffi;
 use crate::ffi::{vrt_ctx, VRT_call, VRT_check_call, VRT_fail, VRT_handled, VRT_CTX_MAGIC};
-use crate::vcl::{subroutine::Subroutine, Acl, HttpHeaders, LogTag, TestWS, VclError, Workspace};
+use crate::vcl::{
+    sc_to_ptr, subroutine::Subroutine, Acl, HttpHeaders, LogTag, StreamClose, TestWS, VclError,
+    VclResult, Workspace,
+};
 
 /// VCL context
 ///
@@ -41,6 +45,43 @@ pub struct Ctx<'a> {
     pub ws: Workspace<'a>,
 
     req: Option<Req<'a>>,
+}
+
+/// The status of a request or response body, mirroring Varnish's `body_status_t`
+/// (see `tbl/body_status.h`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BodyStatus {
+    /// No body.
+    None,
+    /// An error occurred while producing/reading the body.
+    Error,
+    /// Chunked transfer encoding; the length isn't known upfront.
+    Chunked,
+    /// A known length (e.g. `Content-Length`).
+    Length,
+    /// The body ends when the connection closes; the length isn't known upfront.
+    Eof,
+    /// The body has already been consumed by someone else.
+    Taken,
+    /// The body has been fully read and is cached as an object.
+    Cached,
+}
+
+impl BodyStatus {
+    fn from_raw(ptr: ffi::body_status_t) -> Self {
+        unsafe {
+            match ptr {
+                p if p == ffi::BS_NONE.as_ptr() => Self::None,
+                p if p == ffi::BS_ERROR.as_ptr() => Self::Error,
+                p if p == ffi::BS_CHUNKED.as_ptr() => Self::Chunked,
+                p if p == ffi::BS_LENGTH.as_ptr() => Self::Length,
+                p if p == ffi::BS_EOF.as_ptr() => Self::Eof,
+                p if p == ffi::BS_TAKEN.as_ptr() => Self::Taken,
+                p if p == ffi::BS_CACHED.as_ptr() => Self::Cached,
+                _ => unreachable!("unknown body_status_t"),
+            }
+        }
+    }
 }
 
 impl<'a> Ctx<'a> {
@@ -213,6 +254,155 @@ impl<'a> Ctx<'a> {
             0 => Ok(*v),
             _ => Err("req.body iteration failed".into()),
         }
+    }
+
+    /// Return the current status of the backend request body (`bereq`'s body).
+    ///
+    /// Meant to be called from [`VclBackend::get_response`](crate::vcl::VclBackend::get_response),
+    /// where the busyobj is guaranteed to be set. If the body has already been
+    /// cached as an object (e.g. after `std.cache_req_body()`, or on a fetch
+    /// retry), returns [`BodyStatus::Cached`]; otherwise reflects the live
+    /// client body's status, or [`BodyStatus::None`] if there is no client
+    /// request to read from.
+    pub fn req_body_status(&self) -> VclResult<BodyStatus> {
+        let bo = unsafe { self.raw.bo.as_ref() }
+            .ok_or("bereq.body isn't available in this context (not a backend fetch)")?;
+
+        if !bo.req.is_null() {
+            let status = BodyStatus::from_raw(unsafe { (*bo.req).req_body_status });
+            // mirrors V1F_SendReq's `AZ(bo->req)` in its `bo->bereq_body != NULL`
+            // branch: a live `bo.req` and an already-cached `bo.bereq_body` are
+            // mutually exclusive by the time a backend runs.
+            assert!(
+                bo.bereq_body.is_null(),
+                "bo.req and bo.bereq_body are both set"
+            );
+            return Ok(status);
+        }
+        Ok(if bo.bereq_body.is_null() {
+            BodyStatus::None
+        } else {
+            BodyStatus::Cached
+        })
+    }
+
+    /// Copy the backend request body (`bereq`'s body) into `writer`.
+    ///
+    /// Meant to be called from [`VclBackend::get_response`](crate::vcl::VclBackend::get_response),
+    /// where the busyobj is guaranteed to be set. Transparently handles both a
+    /// body already cached as an object (e.g. after `std.cache_req_body()`, or
+    /// on a fetch retry) and a body streamed live from the client, hiding the
+    /// underlying `ObjIterate`/`VRB_Iterate` choice and bookkeeping.
+    ///
+    /// To consume the body without keeping it, pass [`std::io::sink()`] as `writer`.
+    ///
+    /// Returns `Ok(false)` without touching `writer` if there is no body at all.
+    /// Returns `Err(_)` if called outside a backend context, if the client body
+    /// stream itself failed to read, or if `writer` errors (the `io::Error` is
+    /// captured and turned into a [`VclError`]). Mirroring upstream's
+    /// `V1F_SendReq`, a failure while iterating an already-cached body is not
+    /// treated as fatal on its own (only a `writer` error is).
+    pub fn req_body_read<W: Write>(&mut self, writer: &mut W) -> VclResult<bool> {
+        /// State threaded through Varnish's body-iterate C callback via its `priv_` pointer.
+        struct BodyWriterState<'w, W: Write> {
+            writer: &'w mut W,
+            error: Option<io::Error>,
+        }
+
+        /// Bridges Varnish's body-iterate callback (`objiterate_f`) to `W::write_all`.
+        ///
+        /// Monomorphized per `W`. `ObjIterate`/`VRB_Iterate` call this synchronously
+        /// and sequentially, so at most one `&mut` derived from `priv_` is ever live,
+        /// and it never outlives that call.
+        unsafe extern "C" fn write_body_iterate<W: Write>(
+            priv_: *mut c_void,
+            _flush: c_uint,
+            ptr: *const c_void,
+            len: isize,
+        ) -> c_int {
+            if ptr.is_null() || len <= 0 {
+                return 0;
+            }
+            let state = priv_
+                .cast::<BodyWriterState<W>>()
+                .as_mut()
+                .expect("body-iterate callback priv pointer must not be null");
+            let buf = std::slice::from_raw_parts(ptr.cast::<u8>(), len as usize);
+            match state.writer.write_all(buf) {
+                Ok(()) => 0,
+                Err(e) => {
+                    state.error = Some(e);
+                    1
+                }
+            }
+        }
+
+        let status = self.req_body_status()?;
+        if status == BodyStatus::None {
+            return Ok(false);
+        }
+
+        let bo = unsafe { self.raw.bo.as_mut() }
+            .ok_or("bereq.body isn't available in this context (not a backend fetch)")?;
+
+        let mut state = BodyWriterState {
+            writer,
+            error: None,
+        };
+        let state_ptr: *mut BodyWriterState<W> = &raw mut state;
+
+        if status == BodyStatus::Cached {
+            // a previously-cached bereq.body (e.g. via std.cache_req_body(), or a
+            // retried fetch) takes priority, mirroring V1F_SendReq. Its return
+            // value is deliberately ignored, same as upstream's `(void)ObjIterate(...)`
+            // in V1F_SendReq: it conflates "callback stopped iteration" with an
+            // internal storage error, and upstream never treats it as fatal here.
+            unsafe {
+                ffi::ObjIterate(
+                    bo.wrk,
+                    bo.bereq_body,
+                    state_ptr.cast::<c_void>(),
+                    Some(write_body_iterate::<W>),
+                    0,
+                );
+            }
+            if let Some(e) = state.error.take() {
+                return Err(e.to_string().into());
+            }
+        } else {
+            let rv = unsafe {
+                ffi::VRB_Iterate(
+                    bo.wrk,
+                    bo.vsl.as_mut_ptr(),
+                    bo.req,
+                    Some(write_body_iterate::<W>),
+                    state_ptr.cast::<c_void>(),
+                )
+            };
+
+            // bookkeeping mirrored from V1F_SendReq: needed regardless of whether
+            // the writer itself failed, since it reflects the now-(partially-)
+            // consumed client body stream.
+            let req = unsafe { &mut *bo.req };
+            unsafe {
+                if req.req_body_status != ffi::BS_CACHED.as_ptr() {
+                    bo.no_retry = c"bereq.body not cached".as_ptr();
+                }
+                if req.req_body_status == ffi::BS_ERROR.as_ptr() {
+                    req.doclose = sc_to_ptr(StreamClose::RxBody);
+                    bo.err_code = 400;
+                }
+            }
+
+            if let Some(e) = state.error.take() {
+                return Err(e.to_string().into());
+            }
+            if rv < 0 {
+                return Err("bereq.body (streamed) read error".into());
+            }
+        }
+
+        Ok(true)
     }
 
     /// Return a shared reference to the client request object, if present.
