@@ -49,6 +49,14 @@ pub struct Ctx<'a> {
 
 /// The status of a request or response body, mirroring Varnish's `body_status_t`
 /// (see `tbl/body_status.h`).
+///
+/// `Taken`, `Eof`, and `Error` aren't exercised by this crate's own tests:
+/// `Taken` is the state `req_body_read`'s own `no_retry` bookkeeping exists to
+/// prevent a caller from ever observing after a retry; `Error`-as-a-returned-status
+/// can't be observed by a `VclBackend` because a body read failure aborts the
+/// fetch before any response (and thus any status read after the fact) exists;
+/// `Eof` is uncommon for request bodies specifically (no `Content-Length` or
+/// `Transfer-Encoding`, relying on connection close).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BodyStatus {
     /// No body.
@@ -297,11 +305,17 @@ impl<'a> Ctx<'a> {
     /// To consume the body without keeping it, pass [`std::io::sink()`] as `writer`.
     ///
     /// Returns `Ok(false)` without touching `writer` if there is no body at all.
+    /// Returns `Ok(true)` once the full body has been copied into `writer`.
     /// Returns `Err(_)` if called outside a backend context, if the client body
     /// stream itself failed to read, or if `writer` errors (the `io::Error` is
     /// captured and turned into a [`VclError`]). Mirroring upstream's
     /// `V1F_SendReq`, a failure while iterating an already-cached body is not
     /// treated as fatal on its own (only a `writer` error is).
+    ///
+    /// Side effect: if the body isn't already cached, reading it marks the
+    /// fetch as non-retryable (`bo.no_retry`), mirroring `V1F_SendReq` — call
+    /// `std.cache_req_body()` in `vcl_recv` first if the backend may need to
+    /// retry after reading the body.
     pub fn req_body_read<W: Write>(&mut self, writer: &mut W) -> VclResult<bool> {
         /// State threaded through Varnish's body-iterate C callback via its `priv_` pointer.
         struct BodyWriterState<'w, W: Write> {
@@ -357,6 +371,9 @@ impl<'a> Ctx<'a> {
             // value is deliberately ignored, same as upstream's `(void)ObjIterate(...)`
             // in V1F_SendReq: it conflates "callback stopped iteration" with an
             // internal storage error, and upstream never treats it as fatal here.
+            // Untested: a failing cached-storage iteration isn't easily forced
+            // from VCL, so this specific claim rests on reading V1F_SendReq, not
+            // on a `.vtc` reproduction.
             unsafe {
                 ffi::ObjIterate(
                     bo.wrk,

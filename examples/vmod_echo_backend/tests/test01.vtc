@@ -49,9 +49,12 @@ client c3 {
     expect resp.bodylen == 0
 } -run
 
-# large streamed body: exercises multiple write_all() calls across VRB_Iterate chunks
-# (verified out-of-band with a counting Write wrapper: 512KiB arrives as 33 chunks)
-client c5 {
+# large streamed body: exercises multiple write_all() calls across VRB_Iterate chunks.
+# One-time check with a since-removed counting Write wrapper confirmed 512KiB
+# arrived as 33 separate write() calls; this test itself only proves the body
+# round-trips correctly, not the chunk count (nothing here re-verifies that on
+# every run).
+client c4 {
     txreq -method "POST" -bodylen 524288
     rxresp
     expect resp.status == 200
@@ -63,10 +66,35 @@ client c5 {
 # client declares a body longer than what it actually sends, then stops (half-close):
 # VRB_Iterate must see this as a short read (BS_ERROR), req_body_read() must
 # return Err, and the fetch must fail instead of hanging or panicking
-client c6 {
+client c5 {
     txreq -method "POST" -hdr "Content-Length: 100"
     send "too short"
     shutdown -write
     rxresp
     expect resp.status == 400
+} -run
+
+# chunked transfer encoding (BS_CHUNKED, length unknown upfront): exercises the
+# BodyStatus::Chunked branch, which none of the other clients touch (they only
+# ever produce Length/Cached/None)
+client c6 {
+    txreq -method "POST" -nolen -hdr "Transfer-encoding: chunked"
+    chunked {hello }
+    chunkedlen 5
+    chunkedlen 0
+    rxresp
+    expect resp.status == 200
+    expect resp.http.x-had-body == "1"
+    expect resp.http.x-body-status == "Chunked"
+    expect resp.bodylen == 11
+} -run
+
+# the C side reads the whole body successfully, but the *writer* fails partway:
+# req_body_read() must propagate the writer's own io::Error (status 503, generic
+# backend-fetch-failure) rather than the streamed-read-error path's 400 (c5),
+# since a writer failure doesn't set req.req_body_status to BS_ERROR itself
+client c7 {
+    txreq -method "POST" -hdr "x-fail-after-bytes: 3" -body "hello world"
+    rxresp
+    expect resp.status == 503
 } -run

@@ -1,4 +1,4 @@
-use std::io::Cursor;
+use std::io::{Cursor, Write};
 
 use varnish::vcl::{Backend, Ctx, VclBackend, VclError, VclResponse, VclResult};
 
@@ -41,8 +41,27 @@ impl VclBackend<EchoResponse> for EchoBackend {
     fn get_response(&self, ctx: &mut Ctx) -> VclResult<Option<EchoResponse>> {
         let status = format!("{:?}", ctx.req_body_status()?);
 
-        let mut body = Vec::new();
-        let had_body = ctx.req_body_read(&mut body)?;
+        // `x-fail-after-bytes`, if present, demonstrates that a `req_body_read()`
+        // error surfaced by the *writer itself* (as opposed to a C-side read
+        // error) propagates correctly.
+        let fail_after = ctx
+            .http_bereq
+            .as_ref()
+            .and_then(|h| h.header("x-fail-after-bytes"))
+            .and_then(|v| std::str::from_utf8(v.as_ref()).ok()?.parse::<usize>().ok());
+
+        let (had_body, body) = if let Some(remaining) = fail_after {
+            let mut writer = FailAfter {
+                remaining,
+                inner: Vec::new(),
+            };
+            let had_body = ctx.req_body_read(&mut writer)?;
+            (had_body, writer.inner)
+        } else {
+            let mut body = Vec::new();
+            let had_body = ctx.req_body_read(&mut body)?;
+            (had_body, body)
+        };
 
         let beresp = ctx.http_beresp.as_mut().expect("http_beresp must be set");
         beresp.set_status(200);
@@ -52,6 +71,29 @@ impl VclBackend<EchoResponse> for EchoBackend {
         Ok(Some(EchoResponse {
             inner: Cursor::new(body),
         }))
+    }
+}
+
+/// A `Write` that errors once `remaining` bytes have been accepted, to exercise
+/// `req_body_read`'s writer-error path (as opposed to a C-side read failure).
+struct FailAfter {
+    inner: Vec<u8>,
+    remaining: usize,
+}
+
+impl Write for FailAfter {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        if self.remaining == 0 {
+            return Err(std::io::Error::other("synthetic write failure for testing"));
+        }
+        let n = buf.len().min(self.remaining);
+        let written = self.inner.write(&buf[..n])?;
+        self.remaining -= written;
+        Ok(written)
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.inner.flush()
     }
 }
 
