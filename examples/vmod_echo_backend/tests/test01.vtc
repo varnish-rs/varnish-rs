@@ -65,7 +65,13 @@ client c4 {
 
 # client declares a body longer than what it actually sends, then stops (half-close):
 # VRB_Iterate must see this as a short read (BS_ERROR), req_body_read() must
-# return Err, and the fetch must fail instead of hanging or panicking
+# return Err, and the fetch must fail instead of hanging or panicking. Pin this
+# to the actual Varnish-side failure, not just the resulting 400, so a future
+# change that produces 400 for an unrelated reason doesn't pass silently.
+logexpect l1 -v v1 -g raw {
+    expect * * FetchError "straight insufficient bytes"
+} -start
+
 client c5 {
     txreq -method "POST" -hdr "Content-Length: 100"
     send "too short"
@@ -73,6 +79,8 @@ client c5 {
     rxresp
     expect resp.status == 400
 } -run
+
+logexpect l1 -wait
 
 # chunked transfer encoding (BS_CHUNKED, length unknown upfront): exercises the
 # BodyStatus::Chunked branch, which none of the other clients touch (they only
@@ -91,10 +99,24 @@ client c6 {
 
 # the C side reads the whole body successfully, but the *writer* fails partway:
 # req_body_read() must propagate the writer's own io::Error (status 503, generic
-# backend-fetch-failure) rather than the streamed-read-error path's 400 (c5),
-# since a writer failure doesn't set req.req_body_status to BS_ERROR itself
+# backend-fetch-failure) rather than the streamed-read-error path's 400 (c5).
+# req_body_read() explicitly skips the C-side BS_ERROR bookkeeping whenever the
+# failure was writer-caused, keeping these two error paths distinct
 client c7 {
     txreq -method "POST" -hdr "x-fail-after-bytes: 3" -body "hello world"
+    rxresp
+    expect resp.status == 503
+} -run
+
+# same writer-error path as c7, but with a body large enough to span multiple
+# VRB_Iterate/write_all() chunks (c4 confirmed 512KiB arrives over many calls).
+# Without the `state.error.is_none()` guard in req_body_read's streamed branch,
+# a writer failure on a non-final chunk also leaves the C side's
+# req_body_status as BS_ERROR (mirrors vrb_pull), which used to get
+# misattributed as the c5 short-read case (400) instead of surfacing as this
+# writer's own error (503)
+client c8 {
+    txreq -method "POST" -hdr "x-fail-after-bytes: 3" -bodylen 524288
     rxresp
     expect resp.status == 503
 } -run

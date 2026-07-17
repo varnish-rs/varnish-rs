@@ -49,14 +49,15 @@ pub struct Ctx<'a> {
 
 /// The status of a request or response body, mirroring Varnish's `body_status_t`
 /// (see `tbl/body_status.h`).
-///
-/// `Taken`, `Eof`, and `Error` aren't exercised by this crate's own tests:
-/// `Taken` is the state `req_body_read`'s own `no_retry` bookkeeping exists to
-/// prevent a caller from ever observing after a retry; `Error`-as-a-returned-status
-/// can't be observed by a `VclBackend` because a body read failure aborts the
-/// fetch before any response (and thus any status read after the fact) exists;
-/// `Eof` is uncommon for request bodies specifically (no `Content-Length` or
-/// `Transfer-Encoding`, relying on connection close).
+// `Taken`, `Eof`, and `Error` aren't exercised by this crate's own tests:
+// `Taken` is the state `req_body_read`'s own `no_retry` bookkeeping exists to
+// prevent a caller from ever observing after a retry; `Error`-as-a-returned-status
+// isn't hit by this crate's own example/tests (which only call `req_body_status`
+// once and surface read failures as `Err` directly), but nothing stops a
+// `VclBackend` from calling `req_body_status()` again after a failed
+// `req_body_read()` and observing `Error` itself; `Eof` is uncommon for request
+// bodies specifically (no `Content-Length` or `Transfer-Encoding`, relying on
+// connection close).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BodyStatus {
     /// No body.
@@ -405,7 +406,15 @@ impl<'a> Ctx<'a> {
                 if req.req_body_status != ffi::BS_CACHED.as_ptr() {
                     bo.no_retry = c"bereq.body not cached".as_ptr();
                 }
-                if req.req_body_status == ffi::BS_ERROR.as_ptr() {
+                // Only treat this as an upstream RX-body failure if the *writer*
+                // didn't cause it: mirroring vrb_pull, any early `func()` failure
+                // (including ours, from a `writer` error) also leaves the C side's
+                // `req_body_status` as `BS_ERROR` unless it happened to coincide
+                // with the last chunk read off the wire — so without this guard, a
+                // writer error on a multi-chunk body would incorrectly get flagged
+                // as a client-stream failure (`doclose`/400) here, even though the
+                // writer's own `Err` below already reports it correctly.
+                if state.error.is_none() && req.req_body_status == ffi::BS_ERROR.as_ptr() {
                     req.doclose = sc_to_ptr(StreamClose::RxBody);
                     bo.err_code = 400;
                 }
