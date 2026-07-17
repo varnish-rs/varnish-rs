@@ -26,7 +26,7 @@ varnish v1 -vcl+backend {
 } -start
 
 # VCL forces a retry on the first attempt; the body wasn't cached (no
-# std.cache_req_body()), so req_body_read() must have set bo.no_retry, and
+# std.cache_req_body()), so req_body() must have set bo.no_retry, and
 # Varnish must refuse the retry rather than try to re-read the consumed body
 client c1 {
     txreq -method "POST" -hdr "x-force-retry: 1" -body "retry me"
@@ -42,6 +42,6 @@ client c2 {
     rxresp
     expect resp.status == 200
     expect resp.http.x-had-body == "1"
-    expect resp.http.x-body-status == "Cached"
+    expect resp.http.x-body-state == "Cached"
     expect resp.body == "retry me"
 } -run

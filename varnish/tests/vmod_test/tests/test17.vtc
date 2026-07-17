@@ -3,7 +3,7 @@ varnishtest "req_body_as_string() called from every vcl_* subroutine must not cr
 # mirrors test16.vtc (same 13 routines, same client/server structure), but
 # vcl_recv calls std.cache_req_body() unconditionally first, so the backend
 # side reads bereq's body as a cached object (ObjIterate) instead of
-# streaming it live from the client (VRB_Iterate) - see the body_status_debug
+# streaming it live from the client (VRB_Iterate) - see the body_state_debug
 # assertions on c11/c12/c13 below for where that actually changes anything.
 
 # exactly 5 of the 13 client requests below actually reach a real backend
@@ -118,7 +118,7 @@ varnish v1 -vcl+backend {
     sub vcl_backend_fetch {
         if (bereq.http.routine == "backend_fetch") {
             set bereq.http.x-result = rustest.req_body_as_string();
-            set bereq.http.x-status = rustest.req_body_status_as_string();
+            set bereq.http.x-state = rustest.req_body_state_as_string();
         }
         if (bereq.http.routine == "backend_error") {
             return (error(500));
@@ -128,17 +128,17 @@ varnish v1 -vcl+backend {
     sub vcl_backend_response {
         if (bereq.http.routine == "backend_fetch") {
             set beresp.http.body_string = bereq.http.x-result;
-            set beresp.http.body_status_debug = bereq.http.x-status;
+            set beresp.http.body_state_debug = bereq.http.x-state;
         }
         if (bereq.http.routine == "backend_response") {
-            set beresp.http.body_status_debug = rustest.req_body_status_as_string();
+            set beresp.http.body_state_debug = rustest.req_body_state_as_string();
             set beresp.http.body_string = rustest.req_body_as_string();
         }
     }
 
     sub vcl_backend_error {
         if (bereq.http.routine == "backend_error") {
-            set beresp.http.body_status_debug = rustest.req_body_status_as_string();
+            set beresp.http.body_state_debug = rustest.req_body_state_as_string();
             set beresp.http.body_string = rustest.req_body_as_string();
         }
     }
@@ -211,27 +211,27 @@ client c10 {
     expect resp.http.body_string == ""
 } -run
 
-# backend context: bereq's body is now the cached object (BodyStatus::Cached),
+# backend context: bereq's body is now the cached object (BodyState::Cached),
 # read via ObjIterate instead of VRB_Iterate.
 client c11 {
     txreq -url "/backend_fetch" -hdr "routine: backend_fetch" -body "hello backend fetch"
     rxresp
     expect resp.status == 200
-    expect resp.http.body_status_debug == "Ok(Cached)"
+    expect resp.http.body_state_debug == "Ok(Cached)"
     expect resp.http.body_string == "hello backend fetch"
 } -run
 
 
 # unlike vcl_backend_fetch, by the time vcl_backend_response runs, the plain
 # default backend has already forwarded bereq's body (cached or not) to the
-# real upstream and dropped its reference - req_body_status() reports None
+# real upstream and dropped its reference - req_body_state() reports None
 # here regardless of whether the body was cached (same outcome as the
 # streamed variant's test16.vtc c12).
 client c12 {
     txreq -url "/backend_response" -hdr "routine: backend_response" -body "hello backend response"
     rxresp
     expect resp.status == 200
-    expect resp.http.body_status_debug == "Ok(None)"
+    expect resp.http.body_state_debug == "Ok(None)"
     expect resp.http.body_string == ""
 } -run
 
@@ -239,7 +239,7 @@ client c13 {
     txreq -url "/backend_error" -hdr "routine: backend_error" -body "hello backend error"
     rxresp
     expect resp.status == 500
-    expect resp.http.body_status_debug == "Ok(Cached)"
+    expect resp.http.body_state_debug == "Ok(Cached)"
     expect resp.http.body_string == "hello backend error"
 } -run
 
@@ -248,8 +248,8 @@ client c13 {
 # cache_req_fsm.c) - but bo.req/bo.bereq_body are both still unset at that
 # point (bo.req is only assigned after vcl_pipe returns, and bo.bereq_body
 # stays unset here even with std.cache_req_body() called earlier, verified
-# empirically), so the call doesn't fail at all: req_body_status() sees
-# BodyStatus::None and req_body_read() returns Ok(false)/"" cleanly, same as
+# empirically), so the call doesn't fail at all: req_body_state() sees
+# BodyState::None and req_body() returns Ok(false)/"" cleanly, same as
 # calling it with no body anywhere else. Run last: piping closes the backend
 # connection (TX_PIPE), so it can't be followed by another rxreq on the same
 # pooled connection.

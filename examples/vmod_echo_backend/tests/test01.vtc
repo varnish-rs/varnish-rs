@@ -1,4 +1,4 @@
-varnishtest "echo backend forwards bereq body via Ctx::req_body_read/req_body_status - happy path"
+varnishtest "echo backend forwards bereq body via Ctx::req_body/req_body_state - happy path"
 
 server s1 {} -start
 
@@ -25,7 +25,7 @@ client c1 {
     rxresp
     expect resp.status == 200
     expect resp.http.x-had-body == "1"
-    expect resp.http.x-body-status == "Length"
+    expect resp.http.x-body-state == "Length"
     expect resp.body == "hello world"
 } -run
 
@@ -35,17 +35,17 @@ client c2 {
     rxresp
     expect resp.status == 200
     expect resp.http.x-had-body == "1"
-    expect resp.http.x-body-status == "Cached"
+    expect resp.http.x-body-state == "Cached"
     expect resp.body == "cached body"
 } -run
 
-# no body at all: req_body_read() must return Ok(false) without touching the writer
+# no body at all: req_body() must return Ok(false) without touching the writer
 client c3 {
     txreq -method "GET"
     rxresp
     expect resp.status == 200
     expect resp.http.x-had-body == "0"
-    expect resp.http.x-body-status == "None"
+    expect resp.http.x-body-state == "None"
     expect resp.bodylen == 0
 } -run
 
@@ -59,12 +59,12 @@ client c4 {
     rxresp
     expect resp.status == 200
     expect resp.http.x-had-body == "1"
-    expect resp.http.x-body-status == "Length"
+    expect resp.http.x-body-state == "Length"
     expect resp.bodylen == 524288
 } -run
 
 # client declares a body longer than what it actually sends, then stops (half-close):
-# VRB_Iterate must see this as a short read (BS_ERROR), req_body_read() must
+# VRB_Iterate must see this as a short read (BS_ERROR), req_body() must
 # return Err, and the fetch must fail instead of hanging or panicking. Pin this
 # to the actual Varnish-side failure, not just the resulting 400, so a future
 # change that produces 400 for an unrelated reason doesn't pass silently.
@@ -83,7 +83,7 @@ client c5 {
 logexpect l1 -wait
 
 # chunked transfer encoding (BS_CHUNKED, length unknown upfront): exercises the
-# BodyStatus::Chunked branch, which none of the other clients touch (they only
+# BodyState::Chunked branch, which none of the other clients touch (they only
 # ever produce Length/Cached/None)
 client c6 {
     txreq -method "POST" -nolen -hdr "Transfer-encoding: chunked"
@@ -93,14 +93,14 @@ client c6 {
     rxresp
     expect resp.status == 200
     expect resp.http.x-had-body == "1"
-    expect resp.http.x-body-status == "Chunked"
+    expect resp.http.x-body-state == "Chunked"
     expect resp.bodylen == 11
 } -run
 
 # the C side reads the whole body successfully, but the *writer* fails partway:
-# req_body_read() must propagate the writer's own io::Error (status 503, generic
+# req_body() must propagate the writer's own io::Error (status 503, generic
 # backend-fetch-failure) rather than the streamed-read-error path's 400 (c5).
-# req_body_read() explicitly skips the C-side BS_ERROR bookkeeping whenever the
+# req_body() explicitly skips the C-side BS_ERROR bookkeeping whenever the
 # failure was writer-caused, keeping these two error paths distinct
 client c7 {
     txreq -method "POST" -hdr "x-fail-after-bytes: 3" -body "hello world"
@@ -110,7 +110,7 @@ client c7 {
 
 # same writer-error path as c7, but with a body large enough to span multiple
 # VRB_Iterate/write_all() chunks (c4 confirmed 512KiB arrives over many calls).
-# Without the `state.error.is_none()` guard in req_body_read's streamed branch,
+# Without the `state.error.is_none()` guard in req_body's streamed branch,
 # a writer failure on a non-final chunk also leaves the C side's
 # req_body_status as BS_ERROR (mirrors vrb_pull), which used to get
 # misattributed as the c5 short-read case (400) instead of surfacing as this

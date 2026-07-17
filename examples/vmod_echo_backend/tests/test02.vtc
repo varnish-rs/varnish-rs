@@ -24,6 +24,6 @@ client c1 {
     rxresp
     expect resp.status == 200
     expect resp.http.x-had-body == "0"
-    expect resp.http.x-body-status == "None"
+    expect resp.http.x-body-state == "None"
     expect resp.bodylen == 0
 } -run

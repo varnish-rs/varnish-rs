@@ -32,16 +32,16 @@ mod echo_backend {
     }
 }
 
-/// [`EchoBackend`] demonstrates [`Ctx::req_body_read`]: it copies bereq's body
+/// [`EchoBackend`] demonstrates [`Ctx::req_body`]: it copies bereq's body
 /// (whether streamed live from the client or already cached) and sends it back
 /// as the response body, unmodified.
 struct EchoBackend;
 
 impl VclBackend<EchoResponse> for EchoBackend {
     fn get_response(&self, ctx: &mut Ctx) -> VclResult<Option<EchoResponse>> {
-        let status = format!("{:?}", ctx.req_body_status()?);
+        let state = format!("{:?}", ctx.req_body_state()?);
 
-        // `x-fail-after-bytes`, if present, demonstrates that a `req_body_read()`
+        // `x-fail-after-bytes`, if present, demonstrates that a `req_body()`
         // error surfaced by the *writer itself* (as opposed to a C-side read
         // error) propagates correctly.
         let fail_after = ctx
@@ -55,18 +55,18 @@ impl VclBackend<EchoResponse> for EchoBackend {
                 remaining,
                 inner: Vec::new(),
             };
-            let had_body = ctx.req_body_read(&mut writer)?;
+            let had_body = ctx.req_body(&mut writer)?;
             (had_body, writer.inner)
         } else {
             let mut body = Vec::new();
-            let had_body = ctx.req_body_read(&mut body)?;
+            let had_body = ctx.req_body(&mut body)?;
             (had_body, body)
         };
 
         let beresp = ctx.http_beresp.as_mut().expect("http_beresp must be set");
         beresp.set_status(200);
         beresp.set_header("x-had-body", if had_body { "1" } else { "0" })?;
-        beresp.set_header("x-body-status", &status)?;
+        beresp.set_header("x-body-state", &state)?;
 
         Ok(Some(EchoResponse {
             inner: Cursor::new(body),
@@ -75,7 +75,7 @@ impl VclBackend<EchoResponse> for EchoBackend {
 }
 
 /// A `Write` that errors once `remaining` bytes have been accepted, to exercise
-/// `req_body_read`'s writer-error path (as opposed to a C-side read failure).
+/// `req_body`'s writer-error path (as opposed to a C-side read failure).
 struct FailAfter {
     inner: Vec<u8>,
     remaining: usize,

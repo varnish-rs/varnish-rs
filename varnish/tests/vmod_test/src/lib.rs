@@ -122,22 +122,22 @@ mod rustest {
         Ok(buf.finish())
     }
 
-    /// Read `bereq`'s body via `Ctx::req_body_read` and return it as a `String`.
+    /// Read `bereq`'s body via `Ctx::req_body` and return it as a `String`.
     ///
     /// Only meaningful from a backend context (`vcl_backend_fetch`/`vcl_backend_response`/
-    /// `vcl_backend_error`) - calling it anywhere else fails gracefully (`req_body_status`
+    /// `vcl_backend_error`) - calling it anywhere else fails gracefully (`req_body_state`
     /// returns `Err`), same as any other vmod function returning `Result` - except from
     /// `vcl_pipe`, where `bo` is non-null but body-less, so the call harmlessly succeeds
     /// with an empty result instead (see `tests/test16.vtc`/`test17.vtc`).
     pub fn req_body_as_string(ctx: &mut Ctx) -> Result<String, VclError> {
         let mut buf = Vec::new();
-        ctx.req_body_read(&mut buf)?;
+        ctx.req_body(&mut buf)?;
         String::from_utf8(buf).map_err(|e| e.utf8_error().into())
     }
 
-    /// Debug helper: `Ctx::req_body_status()`'s result as a `String`, never fails.
-    pub fn req_body_status_as_string(ctx: &mut Ctx) -> String {
-        format!("{:?}", ctx.req_body_status())
+    /// Debug helper: `Ctx::req_body_state()`'s result as a `String`, never fails.
+    pub fn req_body_state_as_string(ctx: &mut Ctx) -> String {
+        format!("{:?}", ctx.req_body_state())
     }
 
     pub fn default_arg(#[default("foo")] arg: &str) -> &str {

@@ -121,7 +121,7 @@ varnish v1 -vcl+backend {
             set beresp.http.body_string = bereq.http.x-result;
         }
         if (bereq.http.routine == "backend_response") {
-            set beresp.http.body_status_debug = rustest.req_body_status_as_string();
+            set beresp.http.body_state_debug = rustest.req_body_state_as_string();
             set beresp.http.body_string = rustest.req_body_as_string();
         }
     }
@@ -218,7 +218,7 @@ client c11 {
 
 # unlike vcl_backend_fetch, by the time vcl_backend_response runs the plain
 # default backend has already streamed bereq's body to the real upstream and
-# dropped its reference to it - req_body_status() correctly reports None (no
+# dropped its reference to it - req_body_state() correctly reports None (no
 # crash, no error, just nothing left to read). Reading the real body from
 # backend context only works from vcl_backend_fetch (or a custom VclBackend's
 # get_response, which runs at that same stage).
@@ -226,7 +226,7 @@ client c12 {
     txreq -url "/backend_response" -hdr "routine: backend_response" -body "hello backend response"
     rxresp
     expect resp.status == 200
-    expect resp.http.body_status_debug == "Ok(None)"
+    expect resp.http.body_state_debug == "Ok(None)"
     expect resp.http.body_string == ""
 } -run
 
@@ -245,7 +245,7 @@ client c13 {
 # non-null bo into vcl_pipe (see cnt_pipe's VCL_pipe_method(..., bo, ...) in
 # cache_req_fsm.c) - but bo.req/bo.bereq_body are both still unset at that
 # point (bo.req is only assigned after vcl_pipe returns), so the call doesn't
-# fail at all: req_body_status() sees BodyStatus::None and req_body_read()
+# fail at all: req_body_state() sees BodyState::None and req_body()
 # returns Ok(false)/"" cleanly, same as calling it with no body anywhere else.
 # Run last: piping closes the backend connection (TX_PIPE), so it can't be
 # followed by another rxreq on the same pooled connection.

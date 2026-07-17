@@ -26,7 +26,7 @@ See also: [workspace root](../AGENTS.md) · [varnish/](../varnish/AGENTS.md) · 
 | `vmod_infiniteloop` | ignoring restart/retry limits — VCL control-flow edge case |
 | `vmod_restricted_callsites` | `#[restrict(...)]` — limits which VCL subs may call a fn, enforced at load time |
 | `vmod_native_backend`, `vmod_simple_backend` | custom backend/director impls (`VclBackend`/`VclResponse`) |
-| `vmod_echo_backend` | reads `bereq`'s body (`Ctx::req_body_read`/`req_body_status`) and echoes it back — streamed, cached, short-read-error, and retry-without-cache cases |
+| `vmod_echo_backend` | reads `bereq`'s body (`Ctx::req_body`/`req_body_state`) and echoes it back — streamed, cached, short-read-error, and retry-without-cache cases |
 | `vmod_round_robin` | round-robin director, load balancing across backends |
 | `vmod_vdp` | Delivery Processor — mutates `resp.body` on way out to client |
 | `vmod_vfp` | Fetch Processor — mutates body as received from backend |
