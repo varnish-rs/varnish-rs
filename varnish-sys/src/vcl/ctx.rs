@@ -397,10 +397,13 @@ impl<'a> Ctx<'a> {
     ///     BodyState::None => {
     ///         // no body at all - nothing to read, nothing to worry about.
     ///     }
-    ///     _ => {
+    ///     BodyState::Length | BodyState::Chunked | BodyState::Eof => {
     ///         // live and not cached: reading now consumes it. Only do this if
     ///         // you're sure no backend/retry downstream also needs it, or call
     ///         // `std.cache_req_body()` first if they might.
+    ///     }
+    ///     BodyState::Taken | BodyState::Error => {
+    ///         // already gone (consumed elsewhere) or failed - nothing left to read.
     ///     }
     /// }
     /// # Ok(()) }

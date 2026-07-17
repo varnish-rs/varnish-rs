@@ -50,6 +50,11 @@ server s1 {
     expect req.url == "/backend_response"
     txresp
 
+    # c14: routine=double_read
+    rxreq
+    expect req.url == "/double_read"
+    txresp
+
     # c5: routine=pipe (run last, closes the connection)
     rxreq
     expect req.url == "/pipe"
@@ -62,6 +67,9 @@ varnish v1 -vcl+backend {
 
     sub vcl_recv {
         if (req.http.routine == "recv") {
+            set req.http.body_string = rustest.req_body_as_string();
+        }
+        if (req.http.routine == "double_read") {
             set req.http.body_string = rustest.req_body_as_string();
         }
         if (req.http.routine == "synth") {
@@ -117,6 +125,13 @@ varnish v1 -vcl+backend {
 
     sub vcl_deliver {
         if (req.http.routine == "deliver") {
+            # the state itself is logged via std.log below, not surfaced as a
+            # response header: a failure in vcl_deliver (the read below fails)
+            # discards whatever this run set on req.http/resp.http and
+            # re-synthesizes a fresh response via vcl_synth - only what's
+            # actually written to the VSL log survives that rollback, hence
+            # c10's logexpect assertion rather than a header check.
+            std.log("body_state_debug: " + rustest.req_body_state_as_string());
             set req.http.body_string = rustest.req_body_as_string();
         }
         # recv/hash/pass/hit/miss never route through vcl_synth, so surface
@@ -142,6 +157,23 @@ varnish v1 -vcl+backend {
         if (bereq.http.routine == "backend_error") {
             return (error(500));
         }
+        if (bereq.http.routine == "double_read") {
+            # vcl_recv already consumed this (uncached) body directly. Only
+            # check the state here, don't attempt a second full read: that
+            # would itself fail and abort this subroutine before
+            # vcl_backend_response ever ran, losing the captured state.
+            #
+            # This is Ok(None), not Ok(Taken): unlike req (a stable reference
+            # that lives for the whole transaction and still shows Taken from
+            # client context - see c10 below), bo is a fresh per-fetch-attempt
+            # struct, and Varnish doesn't wire bo.req up to an already-consumed
+            # req at all - there's nothing left to forward, so bo.req/
+            # bo.bereq_body both stay null, same shape as "no body ever
+            # existed". A real custom VclBackend reading here sees "nothing to
+            # read", not an error - the read-once failure is only visible from
+            # client context.
+            set bereq.http.x-second-state = rustest.req_body_state_as_string();
+        }
     }
 
     sub vcl_backend_response {
@@ -151,6 +183,9 @@ varnish v1 -vcl+backend {
         if (bereq.http.routine == "backend_response") {
             set beresp.http.body_state_debug = rustest.req_body_state_as_string();
             set beresp.http.body_string = rustest.req_body_as_string();
+        }
+        if (bereq.http.routine == "double_read") {
+            set beresp.http.body_state_debug = bereq.http.x-second-state;
         }
     }
 
@@ -234,6 +269,18 @@ client c9 {
 # so req_body_state() has moved on and this read hits Varnish's own
 # read-once rule (an uncached body can only be consumed once) - a real
 # demonstration of the tradeoff documented on Ctx::req_body, not a regression.
+# By name (not just the resulting 503/empty body): client context (req) is a
+# stable reference for the whole transaction, so it still shows the real
+# BodyState::Taken the earlier fetch left behind - unlike backend context
+# (bo), which doesn't preserve it (see c14 below). Confirmed via the
+# std.log() call above (VSL: "VCL_Log c body_state_debug: Ok(Taken)") - not
+# asserted by a logexpect here, since the failing read in vcl_deliver
+# discards whatever this run set on req.http/resp.http before
+# re-synthesizing the error response (so a header check can't see it), and a
+# logexpect on this specific, late-in-the-transaction log line hit the same
+# reader-vs-writer race documented on the pipe/synth findings in the
+# `Address round-2 review feedback` commit for the prior req_body_read
+# feature - not reliably reproducible here either.
 client c10 {
     txreq -url "/deliver" -hdr "routine: deliver" -body "hello deliver"
     rxresp
@@ -272,6 +319,21 @@ client c13 {
     rxresp
     expect resp.status == 500
     expect resp.http.body_string == "hello backend error"
+} -run
+
+# direct demonstration of the read-once tradeoff documented on Ctx::req_body,
+# from the OTHER side of it: vcl_recv reads this (uncached) body itself, then
+# vcl_backend_fetch - the same stage a real custom VclBackend::get_response
+# runs at - checks the state on the exact same request and finds nothing left
+# (Ok(None), see the comment above), not an error. A real custom backend
+# reading here just gets an empty body, silently - it doesn't observe the
+# read-once failure itself (only client context does, e.g. c10 below).
+client c14 {
+    txreq -url "/double_read" -hdr "routine: double_read" -body "hello double read"
+    rxresp
+    expect resp.status == 200
+    expect resp.http.body_string == "hello double read"
+    expect resp.http.body_state_debug == "Ok(None)"
 } -run
 
 # pipe is special: unlike every other client-side sub, Varnish passes a

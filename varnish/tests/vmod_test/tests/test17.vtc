@@ -56,6 +56,11 @@ server s1 {
     expect req.url == "/backend_response"
     txresp
 
+    # c14: routine=double_read
+    rxreq
+    expect req.url == "/double_read"
+    txresp
+
     # c5: routine=pipe (run last, closes the connection)
     rxreq
     expect req.url == "/pipe"
@@ -70,6 +75,9 @@ varnish v1 -vcl+backend {
         std.cache_req_body(1MB);
 
         if (req.http.routine == "recv") {
+            set req.http.body_string = rustest.req_body_as_string();
+        }
+        if (req.http.routine == "double_read") {
             set req.http.body_string = rustest.req_body_as_string();
         }
         if (req.http.routine == "synth") {
@@ -151,6 +159,13 @@ varnish v1 -vcl+backend {
         if (bereq.http.routine == "backend_error") {
             return (error(500));
         }
+        if (bereq.http.routine == "double_read") {
+            # vcl_recv already read this (cached) body once - a second read
+            # from backend context stays Cached (repeatable), unlike
+            # test16.vtc's streamed variant where the same scenario shows
+            # Taken.
+            set bereq.http.x-second-state = rustest.req_body_state_as_string();
+        }
     }
 
     sub vcl_backend_response {
@@ -161,6 +176,9 @@ varnish v1 -vcl+backend {
         if (bereq.http.routine == "backend_response") {
             set beresp.http.body_state_debug = rustest.req_body_state_as_string();
             set beresp.http.body_string = rustest.req_body_as_string();
+        }
+        if (bereq.http.routine == "double_read") {
+            set beresp.http.body_state_debug = bereq.http.x-second-state;
         }
     }
 
@@ -274,6 +292,20 @@ client c13 {
     expect resp.status == 500
     expect resp.http.body_state_debug == "Ok(Cached)"
     expect resp.http.body_string == "hello backend error"
+} -run
+
+# direct demonstration of the tradeoff's mitigation: vcl_recv reads this
+# (now cached, thanks to std.cache_req_body() up top) body itself, then
+# vcl_backend_fetch - the same stage a real custom VclBackend::get_response
+# runs at - checks the state on the exact same underlying req and still
+# observes BodyState::Cached (repeatable), not Taken like test16.vtc's
+# streamed equivalent.
+client c14 {
+    txreq -url "/double_read" -hdr "routine: double_read" -body "hello double read"
+    rxresp
+    expect resp.status == 200
+    expect resp.http.body_string == "hello double read"
+    expect resp.http.body_state_debug == "Ok(Cached)"
 } -run
 
 # pipe is special: unlike every other client-side sub, Varnish passes a
