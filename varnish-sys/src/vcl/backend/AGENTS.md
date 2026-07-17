@@ -10,7 +10,7 @@ Lets a VMOD implement a custom Varnish backend (director) in Rust — health-che
 - `backend_ref.rs` — backend reference/handle glue.
 - `director.rs` — VMOD director glue (routing requests to a backend impl).
 
-Reading `bereq`'s body from `VclBackend::get_response`: `Ctx::req_body`/`req_body_state` in [`../ctx.rs`](../AGENTS.md), not here — backend-only (needs `ctx.raw.bo`), but kept next to the client-side `cached_req_body` for symmetry.
+Reading `bereq`'s body from `VclBackend::get_response`: `Ctx::req_body`/`req_body_state` in [`../ctx.rs`](../AGENTS.md), not here. Despite living next to backend-only code, these also work from client context (`vcl_recv` and later, before `bo` exists) — see the read-once-if-uncached tradeoff documented on `Ctx::req_body`.
 
 ## Real usage — read these examples alongside this code
 

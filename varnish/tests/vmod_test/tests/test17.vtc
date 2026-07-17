@@ -1,22 +1,44 @@
 varnishtest "req_body_as_string() called from every vcl_* subroutine must not crash - cached body"
 
 # mirrors test16.vtc (same 13 routines, same client/server structure), but
-# vcl_recv calls std.cache_req_body() unconditionally first, so the backend
-# side reads bereq's body as a cached object (ObjIterate) instead of
-# streaming it live from the client (VRB_Iterate) - see the body_state_debug
-# assertions on c11/c12/c13 below for where that actually changes anything.
+# vcl_recv calls std.cache_req_body() unconditionally first, so every read
+# (client or backend context) sees a cached, repeatably-readable body instead
+# of a live, read-once one - see the body_state_debug assertions below for
+# where that actually changes the outcome vs. test16.vtc.
 
-# exactly 5 of the 13 client requests below actually reach a real backend
-# connection - every other routine's call fails (or, for backend_error,
-# forces return(error(500))) before any fetch/connect is dispatched. These 5
-# pairs are matched in client-execution order, so reordering the client
-# blocks below (or changing which routine short-circuits before/after a
-# fetch) desyncs this list - a mismatch shows up as a hang/timeout here, not
-# a clean assertion failure, so keep the -url expectation on each rxreq.
+# now that Ctx::req_body works from client context too (not just backend), 9 of
+# these 13 client requests reach a real backend connection: purge/synth never
+# fetch (their default action is return(synth(200)), handled entirely by
+# vcl_synth), and backend_error's forced return(error(500)) preempts the real
+# upstream connect. These 9 pairs are matched in client-execution order, so
+# reordering the client blocks below (or changing which routine short-circuits
+# before/after a fetch) desyncs this list - a mismatch shows up as a
+# hang/timeout here, not a clean assertion failure, so keep the -url
+# expectation on each rxreq.
 server s1 {
+    # c1: routine=recv
+    rxreq
+    expect req.url == "/recv"
+    txresp
+
+    # c2: routine=hash
+    rxreq
+    expect req.url == "/hash"
+    txresp
+
+    # c3: routine=pass
+    rxreq
+    expect req.url == "/pass"
+    txresp
+
     # c7: cache-priming GET
     rxreq
     expect req.url == "/hit"
+    txresp
+
+    # c9: routine=miss
+    rxreq
+    expect req.url == "/miss"
     txresp
 
     # c10: routine=deliver
@@ -105,6 +127,12 @@ varnish v1 -vcl+backend {
         if (req.http.routine == "deliver") {
             set req.http.body_string = rustest.req_body_as_string();
         }
+        # recv/hash/pass/hit/miss never route through vcl_synth, so surface
+        # whatever they captured here instead - unless beresp already provided
+        # one (backend_fetch/backend_response), which takes priority.
+        if (!resp.http.body_string) {
+            set resp.http.body_string = req.http.body_string;
+        }
     }
 
     sub vcl_synth {
@@ -144,43 +172,42 @@ varnish v1 -vcl+backend {
     }
 } -start
 
-# each of these fails gracefully (bo is null client-side), confirming the call
-# doesn't crash - it just fails the VCL task, same as any other Result-returning
-# vmod function would. std.cache_req_body() only affects the backend-side view
-# of the body, so these client-context outcomes are identical to the streamed
-# variant (test16.vtc).
+# client context reads the cached body directly (repeatable, non-destructive -
+# unlike test16.vtc's live/read-once body), so these succeed with the real
+# content, same as test16.vtc.
 client c1 {
     txreq -url "/recv" -hdr "routine: recv" -body "hello recv"
     rxresp
-    expect resp.status == 503
-    expect resp.http.body_string == ""
+    expect resp.status == 200
+    expect resp.http.body_string == "hello recv"
 } -run
 
 client c2 {
     txreq -url "/hash" -hdr "routine: hash" -body "hello hash"
     rxresp
-    expect resp.status == 503
-    expect resp.http.body_string == ""
+    expect resp.status == 200
+    expect resp.http.body_string == "hello hash"
 } -run
 
 client c3 {
     txreq -url "/pass" -hdr "routine: pass" -body "hello pass"
     rxresp
-    expect resp.status == 503
-    expect resp.http.body_string == ""
+    expect resp.status == 200
+    expect resp.http.body_string == "hello pass"
 } -run
 
 client c4 {
     txreq -req "PURGE" -url "/purge" -hdr "routine: purge" -body "hello purge"
     rxresp
-    expect resp.status == 503
-    expect resp.http.body_string == ""
+    expect resp.status == 200
+    expect resp.http.body_string == "hello purge"
 } -run
 
 client c6 {
     txreq -url "/synth" -hdr "routine: synth" -body "hello synth"
     rxresp
-    expect resp.status == 500
+    expect resp.status == 200
+    expect resp.http.body_string == "hello synth"
 } -run
 
 # prime the cache for the /hit URL, then hit it
@@ -193,22 +220,29 @@ client c7 {
 client c8 {
     txreq -url "/hit" -hdr "routine: hit"
     rxresp
-    expect resp.status == 503
+    expect resp.status == 200
     expect resp.http.body_string == ""
 } -run
 
 client c9 {
     txreq -url "/miss" -hdr "routine: miss" -body "hello miss"
     rxresp
-    expect resp.status == 503
-    expect resp.http.body_string == ""
+    expect resp.status == 200
+    expect resp.http.body_string == "hello miss"
 } -run
 
+# unlike test16.vtc, this now succeeds: the earlier real backend fetch already
+# read this request's body, but because it was cached (via std.cache_req_body()
+# up top), that read went through ObjIterate - repeatable, non-destructive -
+# so it's still fully readable here in vcl_deliver. This is exactly the
+# tradeoff documented on Ctx::req_body: cache first if anything downstream
+# (a backend, a retry, or - as here - a later subroutine) needs to read the
+# body too.
 client c10 {
     txreq -url "/deliver" -hdr "routine: deliver" -body "hello deliver"
     rxresp
-    expect resp.status == 503
-    expect resp.http.body_string == ""
+    expect resp.status == 200
+    expect resp.http.body_string == "hello deliver"
 } -run
 
 # backend context: bereq's body is now the cached object (BodyState::Cached),
@@ -220,7 +254,6 @@ client c11 {
     expect resp.http.body_state_debug == "Ok(Cached)"
     expect resp.http.body_string == "hello backend fetch"
 } -run
-
 
 # unlike vcl_backend_fetch, by the time vcl_backend_response runs, the plain
 # default backend has already forwarded bereq's body (cached or not) to the
@@ -248,7 +281,8 @@ client c13 {
 # cache_req_fsm.c) - but bo.req/bo.bereq_body are both still unset at that
 # point (bo.req is only assigned after vcl_pipe returns, and bo.bereq_body
 # stays unset here even with std.cache_req_body() called earlier, verified
-# empirically), so the call doesn't fail at all: req_body_state() sees
+# empirically), so the client-context fallback in req_body/req_body_state is
+# never reached here at all (bo isn't null): req_body_state() sees
 # BodyState::None and req_body() returns Ok(false)/"" cleanly, same as
 # calling it with no body anywhere else. Run last: piping closes the backend
 # connection (TX_PIPE), so it can't be followed by another rxreq on the same

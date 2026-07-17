@@ -53,13 +53,16 @@ import rustest from "path/to/librustest.so";
 
 ### Function `STRING rustest.req_body_as_string()`
 
-Read `bereq`'s body via `Ctx::req_body` and return it as a `String`.
+Read the request body via `Ctx::req_body` and return it as a `String`.
 
-Only meaningful from a backend context (`vcl_backend_fetch`/`vcl_backend_response`/
-`vcl_backend_error`) - calling it anywhere else fails gracefully (`req_body_state`
-returns `Err`), same as any other vmod function returning `Result` - except from
-`vcl_pipe`, where `bo` is non-null but body-less, so the call harmlessly succeeds
-with an empty result instead (see `tests/test16.vtc`/`test17.vtc`).
+Works from both backend context (`vcl_backend_fetch`/`vcl_backend_response`/
+`vcl_backend_error` - reads `bereq`'s body) and client context (`vcl_recv` and
+later, before any backend is involved - reads `req`'s body directly). Fails
+gracefully (`req_body_state` returns `Err`) only when called from neither
+context at all (e.g. `vcl_init`/`vcl_fini`) - except from `vcl_pipe`, where
+`bo` is non-null but body-less, so the call harmlessly succeeds with an
+empty result instead (see `tests/test16.vtc`/`test17.vtc`, which exercise
+every `vcl_*` subroutine and document each case).
 
 ### Function `STRING rustest.req_body_state_as_string()`
 

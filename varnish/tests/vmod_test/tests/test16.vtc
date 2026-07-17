@@ -1,16 +1,38 @@
 varnishtest "req_body_as_string() called from every vcl_* subroutine must not crash - streamed body"
 
-# exactly 5 of the 13 client requests below actually reach a real backend
-# connection - every other routine's call fails (or, for backend_error,
-# forces return(error(500))) before any fetch/connect is dispatched. These 5
-# pairs are matched in client-execution order, so reordering the client
-# blocks below (or changing which routine short-circuits before/after a
-# fetch) desyncs this list - a mismatch shows up as a hang/timeout here, not
-# a clean assertion failure, so keep the -url expectation on each rxreq.
+# now that Ctx::req_body works from client context too (not just backend), 9 of
+# these 13 client requests reach a real backend connection: purge/synth never
+# fetch (their default action is return(synth(200)), handled entirely by
+# vcl_synth), and backend_error's forced return(error(500)) preempts the real
+# upstream connect. These 9 pairs are matched in client-execution order, so
+# reordering the client blocks below (or changing which routine short-circuits
+# before/after a fetch) desyncs this list - a mismatch shows up as a
+# hang/timeout here, not a clean assertion failure, so keep the -url
+# expectation on each rxreq.
 server s1 {
+    # c1: routine=recv
+    rxreq
+    expect req.url == "/recv"
+    txresp
+
+    # c2: routine=hash
+    rxreq
+    expect req.url == "/hash"
+    txresp
+
+    # c3: routine=pass
+    rxreq
+    expect req.url == "/pass"
+    txresp
+
     # c7: cache-priming GET
     rxreq
     expect req.url == "/hit"
+    txresp
+
+    # c9: routine=miss
+    rxreq
+    expect req.url == "/miss"
     txresp
 
     # c10: routine=deliver
@@ -97,6 +119,12 @@ varnish v1 -vcl+backend {
         if (req.http.routine == "deliver") {
             set req.http.body_string = rustest.req_body_as_string();
         }
+        # recv/hash/pass/hit/miss never route through vcl_synth, so surface
+        # whatever they captured here instead - unless beresp already provided
+        # one (backend_fetch/backend_response), which takes priority.
+        if (!resp.http.body_string) {
+            set resp.http.body_string = req.http.body_string;
+        }
     }
 
     sub vcl_synth {
@@ -133,51 +161,48 @@ varnish v1 -vcl+backend {
     }
 } -start
 
-# each of these fails gracefully (bo is null client-side), confirming the call
-# doesn't crash - it just fails the VCL task, same as any other Result-returning
-# vmod function would. (A logexpect pinning the VCL_Error message was
-# considered here, mirroring examples/vmod_echo_backend/tests/test01.vtc, but
-# dropped: all 8 client-context cases below log the identical message, so
-# pinning any one of them to *this specific* request rather than a stale
-# match from an earlier client needs a vxid-scoped -q filter, which isn't
-# worth the added complexity when the 503 + empty body is already
-# unambiguous in this fully-controlled synthetic VCL.)
+# client context now reads the live body directly (Ctx::req_body works from
+# vcl_recv/vcl_hash/vcl_pass too, not just backend context) - these succeed
+# with the real content, and the request still reaches the real backend
+# normally afterwards (the already-consumed body just isn't re-forwarded).
 client c1 {
     txreq -url "/recv" -hdr "routine: recv" -body "hello recv"
     rxresp
-    expect resp.status == 503
-    expect resp.http.body_string == ""
+    expect resp.status == 200
+    expect resp.http.body_string == "hello recv"
 } -run
 
 client c2 {
     txreq -url "/hash" -hdr "routine: hash" -body "hello hash"
     rxresp
-    expect resp.status == 503
-    expect resp.http.body_string == ""
+    expect resp.status == 200
+    expect resp.http.body_string == "hello hash"
 } -run
 
 client c3 {
     txreq -url "/pass" -hdr "routine: pass" -body "hello pass"
     rxresp
-    expect resp.status == 503
-    expect resp.http.body_string == ""
+    expect resp.status == 200
+    expect resp.http.body_string == "hello pass"
 } -run
 
+# purge never reaches a real backend (its default action is return(synth(200))),
+# so this succeeds the same way, reported via vcl_synth's fallback.
 client c4 {
     txreq -req "PURGE" -url "/purge" -hdr "routine: purge" -body "hello purge"
     rxresp
-    expect resp.status == 503
-    expect resp.http.body_string == ""
+    expect resp.status == 200
+    expect resp.http.body_string == "hello purge"
 } -run
 
-# synth is also special: a failed call inside vcl_synth itself can't be
-# recovered by calling vcl_synth again (Varnish doesn't recurse), so it falls
-# back to a bare, header-less 500 instead of the usual synth-driven 503 - still
-# just a graceful VCL-level failure, not a crash.
+# synth also succeeds now: bo is null in vcl_synth (reached here via
+# vcl_recv's own explicit return(synth(200)), before touching the body), so
+# the call falls into the client-context branch and reads the live body.
 client c6 {
     txreq -url "/synth" -hdr "routine: synth" -body "hello synth"
     rxresp
-    expect resp.status == 500
+    expect resp.status == 200
+    expect resp.http.body_string == "hello synth"
 } -run
 
 # prime the cache for the /hit URL, then hit it
@@ -187,20 +212,28 @@ client c7 {
     expect resp.status == 200
 } -run
 
+# no body sent at all: req_body() returns Ok(false) - still a success, just
+# with nothing to report.
 client c8 {
     txreq -url "/hit" -hdr "routine: hit"
     rxresp
-    expect resp.status == 503
+    expect resp.status == 200
     expect resp.http.body_string == ""
 } -run
 
 client c9 {
     txreq -url "/miss" -hdr "routine: miss" -body "hello miss"
     rxresp
-    expect resp.status == 503
-    expect resp.http.body_string == ""
+    expect resp.status == 200
+    expect resp.http.body_string == "hello miss"
 } -run
 
+# deliver is the one client-context case that still fails, and for a genuinely
+# different reason than before: by the time vcl_deliver runs, the real
+# backend fetch already consumed this (uncached) body forwarding it upstream,
+# so req_body_state() has moved on and this read hits Varnish's own
+# read-once rule (an uncached body can only be consumed once) - a real
+# demonstration of the tradeoff documented on Ctx::req_body, not a regression.
 client c10 {
     txreq -url "/deliver" -hdr "routine: deliver" -body "hello deliver"
     rxresp
@@ -244,10 +277,11 @@ client c13 {
 # pipe is special: unlike every other client-side sub, Varnish passes a
 # non-null bo into vcl_pipe (see cnt_pipe's VCL_pipe_method(..., bo, ...) in
 # cache_req_fsm.c) - but bo.req/bo.bereq_body are both still unset at that
-# point (bo.req is only assigned after vcl_pipe returns), so the call doesn't
-# fail at all: req_body_state() sees BodyState::None and req_body()
-# returns Ok(false)/"" cleanly, same as calling it with no body anywhere else.
-# Run last: piping closes the backend connection (TX_PIPE), so it can't be
+# point (bo.req is only assigned after vcl_pipe returns), so the client-context
+# fallback in req_body/req_body_state is never reached here at all (bo isn't
+# null): req_body_state() sees BodyState::None and req_body() returns
+# Ok(false)/"" cleanly, same as calling it with no body anywhere else. Run
+# last: piping closes the backend connection (TX_PIPE), so it can't be
 # followed by another rxreq on the same pooled connection.
 client c5 {
     txreq -url "/pipe" -hdr "routine: pipe" -body "hello pipe"
