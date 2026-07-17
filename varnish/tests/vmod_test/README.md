@@ -57,7 +57,9 @@ Read `bereq`'s body via `Ctx::req_body_read` and return it as a `String`.
 
 Only meaningful from a backend context (`vcl_backend_fetch`/`vcl_backend_response`/
 `vcl_backend_error`) - calling it anywhere else fails gracefully (`req_body_status`
-returns `Err`), same as any other vmod function returning `Result`.
+returns `Err`), same as any other vmod function returning `Result` - except from
+`vcl_pipe`, where `bo` is non-null but body-less, so the call harmlessly succeeds
+with an empty result instead (see `tests/test16.vtc`/`test17.vtc`).
 
 ### Function `STRING rustest.req_body_status_as_string()`
 
