@@ -1,0 +1,256 @@
+varnishtest "req_body_as_string() called from every vcl_* subroutine must not crash - streamed body"
+
+# exactly 5 of the 13 client requests below actually reach a real backend
+# connection - every other routine's call fails (or, for backend_error,
+# forces return(error(500))) before any fetch/connect is dispatched. These 5
+# pairs are matched in client-execution order, so reordering the client
+# blocks below (or changing which routine short-circuits before/after a
+# fetch) desyncs this list - a mismatch shows up as a hang/timeout here, not
+# a clean assertion failure, so keep the -url expectation on each rxreq.
+server s1 {
+    # c7: cache-priming GET
+    rxreq
+    expect req.url == "/hit"
+    txresp
+
+    # c10: routine=deliver
+    rxreq
+    expect req.url == "/deliver"
+    txresp
+
+    # c11: routine=backend_fetch
+    rxreq
+    expect req.url == "/backend_fetch"
+    txresp
+
+    # c12: routine=backend_response
+    rxreq
+    expect req.url == "/backend_response"
+    txresp
+
+    # c5: routine=pipe (run last, closes the connection)
+    rxreq
+    expect req.url == "/pipe"
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import std;
+    import rustest from "${vmod}";
+
+    sub vcl_recv {
+        if (req.http.routine == "recv") {
+            set req.http.body_string = rustest.req_body_as_string();
+        }
+        if (req.http.routine == "synth") {
+            return (synth(200));
+        }
+        if (req.http.routine == "pipe") {
+            return (pipe);
+        }
+        if (req.http.routine == "pass") {
+            return (pass);
+        }
+        if (req.http.routine == "purge") {
+            return (purge);
+        }
+        return (hash);
+    }
+
+    sub vcl_hash {
+        if (req.http.routine == "hash") {
+            set req.http.body_string = rustest.req_body_as_string();
+        }
+    }
+
+    sub vcl_purge {
+        if (req.http.routine == "purge") {
+            set req.http.body_string = rustest.req_body_as_string();
+        }
+    }
+
+    sub vcl_pipe {
+        if (req.http.routine == "pipe") {
+            set req.http.body_string = rustest.req_body_as_string();
+        }
+    }
+
+    sub vcl_pass {
+        if (req.http.routine == "pass") {
+            set req.http.body_string = rustest.req_body_as_string();
+        }
+    }
+
+    sub vcl_hit {
+        if (req.http.routine == "hit") {
+            set req.http.body_string = rustest.req_body_as_string();
+        }
+    }
+
+    sub vcl_miss {
+        if (req.http.routine == "miss") {
+            set req.http.body_string = rustest.req_body_as_string();
+        }
+    }
+
+    sub vcl_deliver {
+        if (req.http.routine == "deliver") {
+            set req.http.body_string = rustest.req_body_as_string();
+        }
+    }
+
+    sub vcl_synth {
+        if (req.http.routine == "synth") {
+            set resp.http.body_string = rustest.req_body_as_string();
+        } else {
+            set resp.http.body_string = req.http.body_string;
+        }
+    }
+
+    sub vcl_backend_fetch {
+        if (bereq.http.routine == "backend_fetch") {
+            set bereq.http.x-result = rustest.req_body_as_string();
+        }
+        if (bereq.http.routine == "backend_error") {
+            return (error(500));
+        }
+    }
+
+    sub vcl_backend_response {
+        if (bereq.http.routine == "backend_fetch") {
+            set beresp.http.body_string = bereq.http.x-result;
+        }
+        if (bereq.http.routine == "backend_response") {
+            set beresp.http.body_status_debug = rustest.req_body_status_as_string();
+            set beresp.http.body_string = rustest.req_body_as_string();
+        }
+    }
+
+    sub vcl_backend_error {
+        if (bereq.http.routine == "backend_error") {
+            set beresp.http.body_string = rustest.req_body_as_string();
+        }
+    }
+} -start
+
+# each of these fails gracefully (bo is null client-side), confirming the call
+# doesn't crash - it just fails the VCL task, same as any other Result-returning
+# vmod function would. (A logexpect pinning the VCL_Error message was
+# considered here, mirroring examples/vmod_echo_backend/tests/test01.vtc, but
+# dropped: all 8 client-context cases below log the identical message, so
+# pinning any one of them to *this specific* request rather than a stale
+# match from an earlier client needs a vxid-scoped -q filter, which isn't
+# worth the added complexity when the 503 + empty body is already
+# unambiguous in this fully-controlled synthetic VCL.)
+client c1 {
+    txreq -url "/recv" -hdr "routine: recv" -body "hello recv"
+    rxresp
+    expect resp.status == 503
+    expect resp.http.body_string == ""
+} -run
+
+client c2 {
+    txreq -url "/hash" -hdr "routine: hash" -body "hello hash"
+    rxresp
+    expect resp.status == 503
+    expect resp.http.body_string == ""
+} -run
+
+client c3 {
+    txreq -url "/pass" -hdr "routine: pass" -body "hello pass"
+    rxresp
+    expect resp.status == 503
+    expect resp.http.body_string == ""
+} -run
+
+client c4 {
+    txreq -req "PURGE" -url "/purge" -hdr "routine: purge" -body "hello purge"
+    rxresp
+    expect resp.status == 503
+    expect resp.http.body_string == ""
+} -run
+
+# synth is also special: a failed call inside vcl_synth itself can't be
+# recovered by calling vcl_synth again (Varnish doesn't recurse), so it falls
+# back to a bare, header-less 500 instead of the usual synth-driven 503 - still
+# just a graceful VCL-level failure, not a crash.
+client c6 {
+    txreq -url "/synth" -hdr "routine: synth" -body "hello synth"
+    rxresp
+    expect resp.status == 500
+} -run
+
+# prime the cache for the /hit URL, then hit it
+client c7 {
+    txreq -url "/hit"
+    rxresp
+    expect resp.status == 200
+} -run
+
+client c8 {
+    txreq -url "/hit" -hdr "routine: hit"
+    rxresp
+    expect resp.status == 503
+    expect resp.http.body_string == ""
+} -run
+
+client c9 {
+    txreq -url "/miss" -hdr "routine: miss" -body "hello miss"
+    rxresp
+    expect resp.status == 503
+    expect resp.http.body_string == ""
+} -run
+
+client c10 {
+    txreq -url "/deliver" -hdr "routine: deliver" -body "hello deliver"
+    rxresp
+    expect resp.status == 503
+    expect resp.http.body_string == ""
+} -run
+
+# backend context: bo is set, so the read actually succeeds and returns the real body
+client c11 {
+    txreq -url "/backend_fetch" -hdr "routine: backend_fetch" -body "hello backend fetch"
+    rxresp
+    expect resp.status == 200
+    expect resp.http.body_string == "hello backend fetch"
+} -run
+
+# unlike vcl_backend_fetch, by the time vcl_backend_response runs the plain
+# default backend has already streamed bereq's body to the real upstream and
+# dropped its reference to it - req_body_status() correctly reports None (no
+# crash, no error, just nothing left to read). Reading the real body from
+# backend context only works from vcl_backend_fetch (or a custom VclBackend's
+# get_response, which runs at that same stage).
+client c12 {
+    txreq -url "/backend_response" -hdr "routine: backend_response" -body "hello backend response"
+    rxresp
+    expect resp.status == 200
+    expect resp.http.body_status_debug == "Ok(None)"
+    expect resp.http.body_string == ""
+} -run
+
+# vcl_backend_fetch forces return(error(500)) before any real upstream
+# connection happens, so bereq's body is still untouched when vcl_backend_error
+# runs - the read succeeds with the real content. Status stays 500 (from the
+# forced error()), since we don't override it.
+client c13 {
+    txreq -url "/backend_error" -hdr "routine: backend_error" -body "hello backend error"
+    rxresp
+    expect resp.status == 500
+    expect resp.http.body_string == "hello backend error"
+} -run
+
+# pipe is special: unlike every other client-side sub, Varnish passes a
+# non-null bo into vcl_pipe (see cnt_pipe's VCL_pipe_method(..., bo, ...) in
+# cache_req_fsm.c) - but bo.req/bo.bereq_body are both still unset at that
+# point (bo.req is only assigned after vcl_pipe returns), so the call doesn't
+# fail at all: req_body_status() sees BodyStatus::None and req_body_read()
+# returns Ok(false)/"" cleanly, same as calling it with no body anywhere else.
+# Run last: piping closes the backend connection (TX_PIPE), so it can't be
+# followed by another rxreq on the same pooled connection.
+client c5 {
+    txreq -url "/pipe" -hdr "routine: pipe" -body "hello pipe"
+    rxresp
+    expect resp.status == 200
+} -run
