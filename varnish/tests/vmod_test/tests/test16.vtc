@@ -165,13 +165,19 @@ varnish v1 -vcl+backend {
             #
             # This is Ok(None), not Ok(Taken): unlike req (a stable reference
             # that lives for the whole transaction and still shows Taken from
-            # client context - see c10 below), bo is a fresh per-fetch-attempt
-            # struct, and Varnish doesn't wire bo.req up to an already-consumed
-            # req at all - there's nothing left to forward, so bo.req/
-            # bo.bereq_body both stay null, same shape as "no body ever
-            # existed". A real custom VclBackend reading here sees "nothing to
-            # read", not an error - the read-once failure is only visible from
-            # client context.
+            # client context - see c10 below), bo.req gets cleared before
+            # vcl_backend_fetch even runs. Per Varnish's own cache_fetch.c
+            # (vbf_stp_mkbereq): bo->req is wired up unconditionally when the
+            # fetch task is created, then nulled via
+            # VBO_SetState(BOS_REQ_DONE) as soon as bo->req->req_body_status
+            # reports zero bytes still available - a check that can't tell
+            # "already consumed" (BS_TAKEN) apart from "never had a body"
+            # (BS_NONE), since both report zero available. So this isn't a
+            # deliberate already-consumed check, just an incidental side
+            # effect of sharing that no-more-bytes code path. Either way, a
+            # real custom VclBackend reading here sees "nothing to read", not
+            # an error - the read-once failure is only visible from client
+            # context.
             set bereq.http.x-second-state = rustest.req_body_state_as_string();
         }
     }
@@ -269,24 +275,27 @@ client c9 {
 # so req_body_state() has moved on and this read hits Varnish's own
 # read-once rule (an uncached body can only be consumed once) - a real
 # demonstration of the tradeoff documented on Ctx::req_body, not a regression.
-# By name (not just the resulting 503/empty body): client context (req) is a
-# stable reference for the whole transaction, so it still shows the real
-# BodyState::Taken the earlier fetch left behind - unlike backend context
-# (bo), which doesn't preserve it (see c14 below). Confirmed via the
-# std.log() call above (VSL: "VCL_Log c body_state_debug: Ok(Taken)") - not
-# asserted by a logexpect here, since the failing read in vcl_deliver
-# discards whatever this run set on req.http/resp.http before
-# re-synthesizing the error response (so a header check can't see it), and a
-# logexpect on this specific, late-in-the-transaction log line hit the same
-# reader-vs-writer race documented on the pipe/synth findings in the
-# `Address round-2 review feedback` commit for the prior req_body_read
-# feature - not reliably reproducible here either.
+# By name (not just the resulting 503/empty body), via the std.log() call
+# above: client context (req) is a stable reference for the whole
+# transaction, so it still shows the real BodyState::Taken the earlier fetch
+# left behind - unlike backend context (bo), which doesn't preserve it (see
+# c14 below). Uses -d 1 (start-at-head) rather than the default tail-follow,
+# since the failing read in vcl_deliver discards whatever this run set on
+# req.http/resp.http before re-synthesizing the error response, so a response
+# header can't carry this value out - only the VSL log survives that
+# rollback, and -d 1 avoids racing the log writer to attach in time. Safe
+# here (unlike the 8-identical-messages case declined elsewhere in this
+# file's history) since this exact message is unique to this one client.
+logexpect l1 -v v1 -d 1 -g raw {
+    expect * * VCL_Log {body_state_debug: Ok\(Taken\)}
+} -start
 client c10 {
     txreq -url "/deliver" -hdr "routine: deliver" -body "hello deliver"
     rxresp
     expect resp.status == 503
     expect resp.http.body_string == ""
 } -run
+logexpect l1 -wait
 
 # backend context: bo is set, so the read actually succeeds and returns the real body
 client c11 {

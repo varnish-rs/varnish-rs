@@ -162,8 +162,9 @@ varnish v1 -vcl+backend {
         if (bereq.http.routine == "double_read") {
             # vcl_recv already read this (cached) body once - a second read
             # from backend context stays Cached (repeatable), unlike
-            # test16.vtc's streamed variant where the same scenario shows
-            # Taken.
+            # test16.vtc's streamed variant, which shows None (see that
+            # file's own double_read comment for why - Taken is a different
+            # scenario there, c10/deliver, not this one).
             set bereq.http.x-second-state = rustest.req_body_state_as_string();
         }
     }
@@ -298,8 +299,8 @@ client c13 {
 # (now cached, thanks to std.cache_req_body() up top) body itself, then
 # vcl_backend_fetch - the same stage a real custom VclBackend::get_response
 # runs at - checks the state on the exact same underlying req and still
-# observes BodyState::Cached (repeatable), not Taken like test16.vtc's
-# streamed equivalent.
+# observes BodyState::Cached (repeatable), unlike test16.vtc's streamed
+# equivalent, which sees None there (see that file's own comment).
 client c14 {
     txreq -url "/double_read" -hdr "routine: double_read" -body "hello double read"
     rxresp
