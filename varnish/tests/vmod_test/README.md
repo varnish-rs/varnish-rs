@@ -58,12 +58,14 @@ Read the request body via `Ctx::req_body` and return it as a `String`.
 Works from both backend context (`vcl_backend_fetch`/`vcl_backend_response`/
 `vcl_backend_error` - reads `bereq`'s body) and client context (`vcl_recv` and
 later, before any backend is involved - reads `req`'s body directly). Fails
-gracefully (`req_body_state` returns `Err`) when called from neither context
-at all (e.g. `vcl_init`/`vcl_fini` - not exercised by this crate's own tests,
-since a failing vmod call there fails VCL *loading* itself, not a per-request
-task, so it can't share a VCL with the other cases below), and also from
-client context if an uncached body was already consumed by an earlier read
-(a real backend fetch forwarding it upstream, or a prior call here) - see
+gracefully when called from neither context at all (`req_body_state` itself
+returns `Err` there - e.g. `vcl_init`/`vcl_fini`, not exercised by this
+crate's own tests, since a failing vmod call there fails VCL *loading*
+itself, not a per-request task, so it can't share a VCL with the other cases
+below), and also from client context if an uncached body was already
+consumed by an earlier read (a real backend fetch forwarding it upstream, or
+a prior call here) - there, `req_body_state` itself still reports
+`Ok(BodyState::Taken)`, it's this function's own read that then fails - see
 `tests/test16.vtc`'s c10. `vcl_pipe` is the one exception where it doesn't
 fail: `bo` is non-null but body-less there, so the call harmlessly succeeds
 with an empty result instead (see `tests/test16.vtc`/`test17.vtc`, which
