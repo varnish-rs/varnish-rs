@@ -1,6 +1,6 @@
 varnishtest "req_body_as_string() called from every vcl_* subroutine must not crash - cached body"
 
-# mirrors test16.vtc (same 13 routines, same client/server structure), but
+# mirrors test16.vtc (same 14 routines, same client/server structure), but
 # vcl_recv calls std.cache_req_body() unconditionally first, so every read
 # (client or backend context) sees a cached, repeatably-readable body instead
 # of a live, read-once one - see the body_state_debug assertions below for
