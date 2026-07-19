@@ -59,13 +59,15 @@ Works from both backend context (`vcl_backend_fetch`/`vcl_backend_response`/
 `vcl_backend_error` - reads `bereq`'s body) and client context (`vcl_recv` and
 later, before any backend is involved - reads `req`'s body directly). Fails
 gracefully (`req_body_state` returns `Err`) when called from neither context
-at all (e.g. `vcl_init`/`vcl_fini`), and also from client context if an
-uncached body was already consumed by an earlier read (a real backend fetch
-forwarding it upstream, or a prior call here) - see `tests/test16.vtc`'s c10.
-`vcl_pipe` is the one exception where it doesn't fail: `bo` is non-null but
-body-less there, so the call harmlessly succeeds with an empty result instead
-(see `tests/test16.vtc`/`test17.vtc`, which exercise every `vcl_*` subroutine
-and document each case).
+at all (e.g. `vcl_init`/`vcl_fini` - not exercised by this crate's own tests,
+since a failing vmod call there fails VCL *loading* itself, not a per-request
+task, so it can't share a VCL with the other cases below), and also from
+client context if an uncached body was already consumed by an earlier read
+(a real backend fetch forwarding it upstream, or a prior call here) - see
+`tests/test16.vtc`'s c10. `vcl_pipe` is the one exception where it doesn't
+fail: `bo` is non-null but body-less there, so the call harmlessly succeeds
+with an empty result instead (see `tests/test16.vtc`/`test17.vtc`, which
+exercise every per-request `vcl_*` subroutine and document each case).
 
 ### Function `STRING rustest.req_body_state_as_string()`
 
