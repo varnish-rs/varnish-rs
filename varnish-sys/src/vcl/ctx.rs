@@ -49,15 +49,17 @@ pub struct Ctx<'a> {
 
 /// The state of a request or response body, mirroring Varnish's `body_status_t`
 /// (see `tbl/body_status.h`).
-// `Taken`, `Eof`, and `Error` aren't exercised by this crate's own tests:
-// `Taken` is the state `req_body`'s own `no_retry` bookkeeping exists to
-// prevent a caller from ever observing after a retry; `Error`-as-a-returned-state
-// isn't hit by this crate's own example/tests (which only call `req_body_state`
-// once and surface read failures as `Err` directly), but nothing stops a
-// `VclBackend` from calling `req_body_state()` again after a failed
-// `req_body()` and observing `Error` itself; `Eof` is uncommon for request
-// bodies specifically (no `Content-Length` or `Transfer-Encoding`, relying on
-// connection close).
+// `Eof` and `Error` aren't exercised by this crate's own tests: `Error`-as-a-
+// returned-state isn't hit by this crate's own example/tests (which only call
+// `req_body_state` once and surface read failures as `Err` directly), but
+// nothing stops a `VclBackend` from calling `req_body_state()` again after a
+// failed `req_body()` and observing `Error` itself; `Eof` is uncommon for
+// request bodies specifically (no `Content-Length` or `Transfer-Encoding`,
+// relying on connection close). `Taken` *is* exercised - see
+// `varnish/tests/vmod_test/tests/test16.vtc`'s c10, which pins it by name:
+// an uncached body already consumed when the real backend fetch forwarded
+// it upstream (not a call into this crate - Varnish's own core does that),
+// observed afterward from client context in `vcl_deliver`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BodyState {
     /// No body.

@@ -1,10 +1,10 @@
 varnishtest "req_body_as_string() called from every vcl_* subroutine must not crash - streamed body"
 
-# now that Ctx::req_body works from client context too (not just backend), 9 of
-# these 13 client requests reach a real backend connection: purge/synth never
-# fetch (their default action is return(synth(200)), handled entirely by
-# vcl_synth), and backend_error's forced return(error(500)) preempts the real
-# upstream connect. These 9 pairs are matched in client-execution order, so
+# now that Ctx::req_body works from client context too (not just backend), 10
+# of these 14 client requests reach a real backend connection: purge/synth
+# never fetch (their default action is return(synth(200)), handled entirely
+# by vcl_synth), and backend_error's forced return(error(500)) preempts the
+# real upstream connect. These 10 pairs are matched in client-execution order, so
 # reordering the client blocks below (or changing which routine short-circuits
 # before/after a fetch) desyncs this list - a mismatch shows up as a
 # hang/timeout here, not a clean assertion failure, so keep the -url
