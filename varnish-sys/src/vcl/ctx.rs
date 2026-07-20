@@ -81,15 +81,22 @@ pub enum BodyState {
 impl BodyState {
     fn from_raw(ptr: ffi::body_status_t) -> Self {
         unsafe {
-            match ptr {
-                p if p == ffi::BS_NONE.as_ptr() => Self::None,
-                p if p == ffi::BS_ERROR.as_ptr() => Self::Error,
-                p if p == ffi::BS_CHUNKED.as_ptr() => Self::Chunked,
-                p if p == ffi::BS_LENGTH.as_ptr() => Self::Length,
-                p if p == ffi::BS_EOF.as_ptr() => Self::Eof,
-                p if p == ffi::BS_TAKEN.as_ptr() => Self::Taken,
-                p if p == ffi::BS_CACHED.as_ptr() => Self::Cached,
-                _ => unreachable!("unknown body_status_t"),
+            if ptr == ffi::BS_NONE.as_ptr() {
+                Self::None
+            } else if ptr == ffi::BS_ERROR.as_ptr() {
+                Self::Error
+            } else if ptr == ffi::BS_CHUNKED.as_ptr() {
+                Self::Chunked
+            } else if ptr == ffi::BS_LENGTH.as_ptr() {
+                Self::Length
+            } else if ptr == ffi::BS_EOF.as_ptr() {
+                Self::Eof
+            } else if ptr == ffi::BS_TAKEN.as_ptr() {
+                Self::Taken
+            } else if ptr == ffi::BS_CACHED.as_ptr() {
+                Self::Cached
+            } else {
+                unreachable!("unknown body_status_t")
             }
         }
     }
