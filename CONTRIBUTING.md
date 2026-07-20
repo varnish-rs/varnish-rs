@@ -1,3 +1,22 @@
+# Before pushing
+
+Run `CI=true just ci-test-latest` before every push — it mirrors the "latest"
+CI job (build, fmt, clippy, test, doctest) with warnings-as-errors, including
+the `cargo doc` pass that catches broken rustdoc intra-doc links. Plain
+`cargo build`/`clippy`/`test` won't catch a broken link or most warnings on
+their own, since they don't run with `-D warnings` or build docs.
+
+If your change touches anything behind a version-gated
+`#[cfg(varnishsys_*)]`, also run `just ci-test-all-versions` (requires
+Docker). A single local Varnish install only exercises one cfg combination —
+e.g. an import used on Varnish 9.0+ but unused (and thus a hard error in CI)
+on 8.0 won't show up otherwise.
+
+CI's macOS job can't be reproduced locally. If it's the only failure and your
+diff doesn't plausibly touch platform-specific code, rerun it
+(`gh run rerun --failed`) before spending time investigating — it may just be
+a flake.
+
 # Testing
 
 There are two types of tests in this project:
