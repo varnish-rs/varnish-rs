@@ -333,22 +333,18 @@ impl<'a> Ctx<'a> {
     /// client body's state is.
     pub fn req_body_state(&self) -> VclResult<BodyState> {
         if let Some(bo) = unsafe { self.raw.bo.as_ref() } {
-            if !bo.req.is_null() {
-                let state = BodyState::from_raw(unsafe { (*bo.req).req_body_status });
-                // mirrors V1F_SendReq's `AZ(bo->req)` in its `bo->bereq_body != NULL`
-                // branch: a live `bo.req` and an already-cached `bo.bereq_body` are
-                // mutually exclusive by the time a backend runs.
-                assert!(
-                    bo.bereq_body.is_null(),
-                    "bo.req and bo.bereq_body are both set"
-                );
-                return Ok(state);
+            // mirrors V1F_SendReq's `AZ(bo->req)` in its `bo->bereq_body != NULL`
+            // branch: a live `bo.req` and an already-cached `bo.bereq_body` are
+            // normally mutually exclusive by the time a backend runs, but prefer
+            // the cached body rather than assert the invariant, so an unexpected
+            // combination degrades gracefully instead of panicking the worker.
+            if !bo.bereq_body.is_null() {
+                return Ok(BodyState::Cached);
             }
-            return Ok(if bo.bereq_body.is_null() {
-                BodyState::None
-            } else {
-                BodyState::Cached
-            });
+            if !bo.req.is_null() {
+                return Ok(BodyState::from_raw(unsafe { (*bo.req).req_body_status }));
+            }
+            return Ok(BodyState::None);
         }
         if let Some(req) = self.req.as_ref() {
             return Ok(BodyState::from_raw(req.raw.req_body_status));

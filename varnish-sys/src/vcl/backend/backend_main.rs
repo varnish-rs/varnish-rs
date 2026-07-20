@@ -1,4 +1,6 @@
-use std::ffi::{c_char, c_int, c_uint, c_void, CStr, CString};
+#[cfg(varnishsys_90_sslflags)]
+use std::ffi::c_uint;
+use std::ffi::{c_char, c_int, c_void, CStr, CString};
 use std::marker::PhantomData;
 use std::mem::size_of;
 use std::net::{SocketAddr, TcpStream};

@@ -55,6 +55,8 @@ import rustest from "path/to/librustest.so";
 
 Read the request body via `Ctx::req_body` and return it as a `String`.
 
+Fails if the body isn't valid UTF-8.
+
 Works from both backend context (`vcl_backend_fetch`/`vcl_backend_response`/
 `vcl_backend_error` - reads `bereq`'s body) and client context (`vcl_recv` and
 later, before any backend is involved - reads `req`'s body directly). Fails
