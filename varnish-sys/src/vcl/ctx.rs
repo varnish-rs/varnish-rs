@@ -370,7 +370,8 @@ impl<'a> Ctx<'a> {
     ///
     /// **Read-once tradeoff**: per Varnish's own rule, an uncached body can be
     /// read exactly once - either by you here, or later by whatever backend
-    /// ends up handling this request (a custom [`VclBackend::get_response`],
+    /// ends up handling this request (a custom
+    /// [`VclBackend::get_response`](crate::vcl::VclBackend::get_response),
     /// or a plain upstream backend forwarding it). Read it once in `vcl_recv`
     /// without caching first, and that *later* read fails
     /// (`BodyState::Taken`/an error), not this one. Call `std.cache_req_body()`
