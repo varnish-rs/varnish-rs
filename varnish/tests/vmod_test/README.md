@@ -51,6 +51,32 @@ import rustest from "path/to/librustest.so";
 
 ### Function `STRING rustest.req_body()`
 
+### Function `STRING rustest.req_body_as_string()`
+
+Read the request body via `Ctx::req_body` and return it as a `String`.
+
+Fails if the body isn't valid UTF-8.
+
+Works from both backend context (`vcl_backend_fetch`/`vcl_backend_response`/
+`vcl_backend_error` - reads `bereq`'s body) and client context (`vcl_recv` and
+later, before any backend is involved - reads `req`'s body directly). Fails
+gracefully when called from neither context at all (`req_body_state` itself
+returns `Err` there - e.g. `vcl_init`/`vcl_fini`, not exercised by this
+crate's own tests, since a failing vmod call there fails VCL *loading*
+itself, not a per-request task, so it can't share a VCL with the other cases
+below), and also from client context if an uncached body was already
+consumed by an earlier read (a real backend fetch forwarding it upstream, or
+a prior call here) - there, `req_body_state` itself still reports
+`Ok(BodyState::Taken)`, it's this function's own read that then fails - see
+`tests/test16.vtc`'s c10. `vcl_pipe` is the one exception where it doesn't
+fail: `bo` is non-null but body-less there, so the call harmlessly succeeds
+with an empty result instead (see `tests/test16.vtc`/`test17.vtc`, which
+exercise every per-request `vcl_*` subroutine and document each case).
+
+### Function `STRING rustest.req_body_state_as_string()`
+
+Debug helper: `Ctx::req_body_state()`'s result as a `String`, never fails.
+
 ### Function `STRING rustest.default_arg(STRING arg = "foo")`
 
 ### Function `STRING rustest.cowprobe_prop([PROBE probe])`

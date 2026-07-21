@@ -1,0 +1,47 @@
+varnishtest "echo backend: retry without a cached body must be refused (bo.no_retry)"
+
+server s1 {} -start
+
+varnish v1 -vcl+backend {
+    import std;
+    import echo_backend from "${vmod}";
+
+    sub vcl_init {
+        new echo = echo_backend.new();
+    }
+
+    sub vcl_recv {
+        if (req.http.x-cache-body == "1") {
+            std.cache_req_body(1MB);
+        }
+        set req.backend_hint = echo.backend();
+        return (pass);
+    }
+
+    sub vcl_backend_response {
+        if (bereq.http.x-force-retry == "1" && bereq.retries == 0) {
+            return (retry);
+        }
+    }
+} -start
+
+# VCL forces a retry on the first attempt; the body wasn't cached (no
+# std.cache_req_body()), so req_body() must have set bo.no_retry, and
+# Varnish must refuse the retry rather than try to re-read the consumed body
+client c1 {
+    txreq -method "POST" -hdr "x-force-retry: 1" -body "retry me"
+    rxresp
+    expect resp.status == 503
+} -run
+
+# same forced retry, but the body is cached first: the cached-body path never
+# sets bo.no_retry, so Varnish retries cleanly and the second attempt still has
+# the cached body available to echo back
+client c2 {
+    txreq -method "POST" -hdr "x-cache-body: 1" -hdr "x-force-retry: 1" -body "retry me"
+    rxresp
+    expect resp.status == 200
+    expect resp.http.x-had-body == "1"
+    expect resp.http.x-body-state == "Cached"
+    expect resp.body == "retry me"
+} -run

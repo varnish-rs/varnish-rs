@@ -93,6 +93,15 @@ ci-test-latest: ci-test test-doc
 # Run minimal subset of tests to ensure compatibility with MSRV
 ci-test-msrv: env-info test
 
+# Run `ci-test` against every supported Varnish version via Docker (catches version-gated cfg issues)
+ci-test-all-versions:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    for ver in {{supported_varnish_vers}}; do
+        echo "--------- Running ci-test for Varnish $ver"
+        {{just_executable()}} docker-run $ver "just ci-test"
+    done
+
 # Clean all build artifacts
 clean:
     cargo clean
