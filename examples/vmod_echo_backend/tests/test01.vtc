@@ -115,8 +115,15 @@ client c7 {
 # req_body_status as BS_ERROR (mirrors vrb_pull), which used to get
 # misattributed as the c5 short-read case (400) instead of surfacing as this
 # writer's own error (503)
+#
+# non_fatal around txreq: Varnish can answer 503 (and tear down the
+# connection) before this client finishes writing all 512KiB, so the
+# client's own write can legitimately fail with EPIPE/"Broken pipe" -
+# that's not a test failure, just this race, so don't let it abort the vtc.
 client c8 {
+    non_fatal
     txreq -method "POST" -hdr "x-fail-after-bytes: 3" -bodylen 524288
+    fatal
     rxresp
     expect resp.status == 503
 } -run
