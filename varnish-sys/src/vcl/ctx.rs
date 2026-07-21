@@ -104,6 +104,11 @@ struct BodyWriterState<'w, W: Write> {
 /// Monomorphized per `W`. `ObjIterate`/`VRB_Iterate` call this synchronously
 /// and sequentially, so at most one `&mut` derived from `priv_` is ever live,
 /// and it never outlives that call. Used by [`Ctx::req_body`].
+///
+/// The `ptr.is_null() || len <= 0` guard below means `W::write_all` (and thus
+/// a caller's own `Write` impl) is never invoked with an empty buffer through
+/// this path — callers of [`Ctx::req_body`] can rely on that when implementing
+/// `W`.
 unsafe extern "C" fn write_body_iterate<W: Write>(
     priv_: *mut c_void,
     _flush: c_uint,
@@ -405,6 +410,9 @@ impl<'a> Ctx<'a> {
     /// ```
     ///
     /// To consume the body without keeping it, pass [`std::io::sink()`] as `writer`.
+    ///
+    /// `writer` is only ever fed non-empty chunks — a custom `Write` impl
+    /// doesn't need to handle a zero-length `buf` in its `write`.
     ///
     /// Returns `Ok(false)` without touching `writer` if there is no body at all.
     /// Returns `Ok(true)` once the full body has been copied into `writer`.
