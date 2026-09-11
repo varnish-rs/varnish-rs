@@ -49,9 +49,7 @@ fn vtc_basic() {
     if let Err(err) = ::varnish::varnishtest::run_one_test(
         &dylib_path,
         env!("CARGO_PKG_NAME"),
-        ::std::path::Path::new(
-            "{MANIFEST_DIR}/tests/vtc_fixtures/basic.vtc",
-        ),
+        ::std::path::Path::new("{MANIFEST_DIR}/tests/vtc_fixtures/basic.vtc"),
         option_env!("VARNISHTEST_DURATION").unwrap_or("10s"),
         false,
     ) {
@@ -70,9 +68,7 @@ fn vtc_has_dashes() {
     if let Err(err) = ::varnish::varnishtest::run_one_test(
         &dylib_path,
         env!("CARGO_PKG_NAME"),
-        ::std::path::Path::new(
-            "{MANIFEST_DIR}/tests/vtc_fixtures/has-dashes.vtc",
-        ),
+        ::std::path::Path::new("{MANIFEST_DIR}/tests/vtc_fixtures/has-dashes.vtc"),
         option_env!("VARNISHTEST_DURATION").unwrap_or("10s"),
         false,
     ) {
