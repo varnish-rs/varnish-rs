@@ -772,99 +772,96 @@ unsafe extern "C" fn wrap_gethdrs<S: VclBackend<T>, T: VclResponse>(
     assert!(!be.vcl_name.is_null()); // FIXME: is this validation needed?
     validate_vdir(be); // FIXME: is this validation needed?
 
-    match backend.get_response(&mut ctx) {
-        Ok(res) => {
-            // default to HTTP/1.1 200 if the backend didn't provide anything
-            let beresp = ctx
-                .http_beresp
-                .as_mut()
-                .expect("http_beresp must be set during backend gethdrs");
-            if beresp.status().is_none() {
-                beresp.set_status(200);
-            }
-            if beresp.proto().is_none() {
-                if let Err(e) = beresp.set_proto("HTTP/1.1") {
-                    ctx.fail(format!("{:?}: {e}", bep.get_type()));
-                    return 1;
-                }
-            }
-            let bo = ctx
-                .raw
-                .bo
-                .as_mut()
-                .expect("busyobj must not be null during backend gethdrs");
-            let Some(htc) = ffi::WS_Alloc(bo.ws.as_mut_ptr(), size_of::<ffi::http_conn>() as u32)
-                .cast::<ffi::http_conn>()
-                .as_mut()
-            else {
-                ctx.fail(format!("{}: insufficient workspace", bep.get_type()));
-                return -1;
-            };
-            htc.magic = ffi::HTTP_CONN_MAGIC;
-            htc.doclose = &raw const ffi::SC_REM_CLOSE[0];
-            htc.content_length = 0;
-            match res {
-                None => {
-                    htc.body_status = ffi::BS_NONE.as_ptr();
-                }
-                Some(transfer) => {
-                    match transfer.len() {
-                        None => {
-                            htc.body_status = ffi::BS_CHUNKED.as_ptr();
-                            htc.content_length = -1;
-                        }
-                        Some(0) => {
-                            htc.body_status = ffi::BS_NONE.as_ptr();
-                        }
-                        Some(l) => {
-                            htc.body_status = ffi::BS_LENGTH.as_ptr();
-                            htc.content_length = l as isize;
-                        }
-                    }
-                    htc.priv_ = Box::into_raw(Box::new(transfer)).cast::<c_void>();
-                    // build a vfp to wrap the VclResponse object if there's something to push
-                    if htc.body_status != ffi::BS_NONE.as_ptr() {
-                        let Some(vfp) =
-                            ffi::WS_Alloc(bo.ws.as_mut_ptr(), size_of::<ffi::vfp>() as u32)
-                                .cast::<ffi::vfp>()
-                                .as_mut()
-                        else {
-                            ctx.fail(format!("{}: insufficient workspace", bep.get_type()));
-                            return -1;
-                        };
-                        let Ok(t) = Workspace::from_ptr(bo.ws.as_mut_ptr())
-                            .copy_bytes_with_null(bep.get_type())
-                        else {
-                            ctx.fail(format!("{}: insufficient workspace", bep.get_type()));
-                            return -1;
-                        };
-
-                        vfp.name = t.b;
-                        vfp.init = None;
-                        vfp.pull = Some(vfp_pull::<T>);
-                        vfp.fini = None;
-                        vfp.priv1 = null();
-
-                        let Some(vfe) = ffi::VFP_Push(bo.vfc, vfp).as_mut() else {
-                            ctx.fail(format!("{}: couldn't insert vfp", bep.get_type()));
-                            return -1;
-                        };
-                        // we don't need to clean vfe.priv1 at the vfp level, the backend will
-                        // do it in wrap_finish
-                        vfe.priv1 = htc.priv_;
-                    }
-                }
-            }
-
-            bo.htc = htc;
-            0
-        }
+    let res = match backend.get_response(&mut ctx) {
+        Ok(res) => res,
         Err(s) => {
             let typ = bep.get_type();
             ctx.log(LogTag::FetchError, format!("{typ}: {s}"));
-            1
+            return 1;
+        }
+    };
+
+    // default to HTTP/1.1 200 if the backend didn't provide anything
+    let beresp = ctx
+        .http_beresp
+        .as_mut()
+        .expect("http_beresp must be set during backend gethdrs");
+    if beresp.status().is_none() {
+        beresp.set_status(200);
+    }
+    if beresp.proto().is_none() {
+        if let Err(e) = beresp.set_proto("HTTP/1.1") {
+            ctx.fail(format!("{:?}: {e}", bep.get_type()));
+            return 1;
         }
     }
+    let bo = ctx
+        .raw
+        .bo
+        .as_mut()
+        .expect("busyobj must not be null during backend gethdrs");
+    let Some(htc) = ffi::WS_Alloc(bo.ws.as_mut_ptr(), size_of::<ffi::http_conn>() as u32)
+        .cast::<ffi::http_conn>()
+        .as_mut()
+    else {
+        ctx.fail(format!("{}: insufficient workspace", bep.get_type()));
+        return -1;
+    };
+    htc.magic = ffi::HTTP_CONN_MAGIC;
+    htc.doclose = &raw const ffi::SC_REM_CLOSE[0];
+    htc.content_length = 0;
+    let Some(transfer) = res else {
+        htc.body_status = ffi::BS_NONE.as_ptr();
+        bo.htc = htc;
+        return 0;
+    };
+
+    match transfer.len() {
+        None => {
+            htc.body_status = ffi::BS_CHUNKED.as_ptr();
+            htc.content_length = -1;
+        }
+        Some(0) => {
+            htc.body_status = ffi::BS_NONE.as_ptr();
+        }
+        Some(l) => {
+            htc.body_status = ffi::BS_LENGTH.as_ptr();
+            htc.content_length = l as isize;
+        }
+    }
+    htc.priv_ = Box::into_raw(Box::new(transfer)).cast::<c_void>();
+    // build a vfp to wrap the VclResponse object if there's something to push
+    if htc.body_status != ffi::BS_NONE.as_ptr() {
+        let Some(vfp) = ffi::WS_Alloc(bo.ws.as_mut_ptr(), size_of::<ffi::vfp>() as u32)
+            .cast::<ffi::vfp>()
+            .as_mut()
+        else {
+            ctx.fail(format!("{}: insufficient workspace", bep.get_type()));
+            return -1;
+        };
+        let Ok(t) = Workspace::from_ptr(bo.ws.as_mut_ptr()).copy_bytes_with_null(bep.get_type())
+        else {
+            ctx.fail(format!("{}: insufficient workspace", bep.get_type()));
+            return -1;
+        };
+
+        vfp.name = t.b;
+        vfp.init = None;
+        vfp.pull = Some(vfp_pull::<T>);
+        vfp.fini = None;
+        vfp.priv1 = null();
+
+        let Some(vfe) = ffi::VFP_Push(bo.vfc, vfp).as_mut() else {
+            ctx.fail(format!("{}: couldn't insert vfp", bep.get_type()));
+            return -1;
+        };
+        // we don't need to clean vfe.priv1 at the vfp level, the backend will
+        // do it in wrap_finish
+        vfe.priv1 = htc.priv_;
+    }
+
+    bo.htc = htc;
+    0
 }
 
 unsafe extern "C" fn wrap_healthy<S: VclBackend<T>, T: VclResponse>(
