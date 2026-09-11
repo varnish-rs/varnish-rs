@@ -4,17 +4,17 @@ source: varnish-macros/src/tests.rs
 #[cfg(test)]
 #[allow(dead_code)]
 const _VTC_REBUILD_ANCHOR_0: &[u8] = include_bytes!(
-    "{MANIFEST_DIR}/tests/vtc_fixtures/01_numeric_prefix.vtc"
+    "{MANIFEST_DIR}/tests/vtc_fixtures/01_numeric_prefix.vtc",
 );
 #[cfg(test)]
 #[allow(dead_code)]
 const _VTC_REBUILD_ANCHOR_1: &[u8] = include_bytes!(
-    "{MANIFEST_DIR}/tests/vtc_fixtures/basic.vtc"
+    "{MANIFEST_DIR}/tests/vtc_fixtures/basic.vtc",
 );
 #[cfg(test)]
 #[allow(dead_code)]
 const _VTC_REBUILD_ANCHOR_2: &[u8] = include_bytes!(
-    "{MANIFEST_DIR}/tests/vtc_fixtures/has-dashes.vtc"
+    "{MANIFEST_DIR}/tests/vtc_fixtures/has-dashes.vtc",
 );
 #[cfg(test)]
 #[test]

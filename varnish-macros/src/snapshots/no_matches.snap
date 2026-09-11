@@ -6,6 +6,6 @@ source: varnish-macros/src/tests.rs
 fn vtc_no_files_found() {
     panic!(
         "{}",
-        "no VTC test files matched pattern \"{MANIFEST_DIR}/tests/vtc_fixtures/*.does_not_exist\""
+        "no VTC test files matched pattern \"{MANIFEST_DIR}/tests/vtc_fixtures/*.does_not_exist\"",
     );
 }
