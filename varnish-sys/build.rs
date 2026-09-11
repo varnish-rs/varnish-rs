@@ -29,6 +29,7 @@ fn emit_version_cfgs(version: &str) {
     if version == "trunk" {
         // Treat trunk at least as latest Varnish
         println!("cargo::rustc-cfg=varnishsys_90_sslflags");
+        println!("cargo::rustc-cfg=varnishsys_trunk_sslcafile");
         return;
     }
     let ver = semver::Version::parse(version)
@@ -61,6 +62,8 @@ fn detect_varnish() -> Option<VarnishInfo> {
 
     // 9.0 adds ssl_flags to the backend SSL struct
     println!("cargo::rustc-check-cfg=cfg(varnishsys_90_sslflags)");
+    // trunk adds ssl_ca_file to vrt_endpoint (not yet in a stable release)
+    println!("cargo::rustc-check-cfg=cfg(varnishsys_trunk_sslcafile)");
 
     let bindings =
         PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR environment variable must be set"))

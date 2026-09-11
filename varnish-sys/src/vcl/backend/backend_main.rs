@@ -368,6 +368,8 @@ pub struct NativeBackendBuilder<'a> {
     backend_wait_limit: Option<u32>,
     #[cfg(varnishsys_90_sslflags)]
     sslflags: c_uint,
+    #[cfg(varnishsys_trunk_sslcafile)]
+    ssl_ca_file: Option<&'a CStr>,
     probe: Option<&'a VCL_PROBE>,
 }
 
@@ -400,6 +402,8 @@ impl<'a> NativeBackendBuilder<'a> {
             backend_wait_limit: None,
             #[cfg(varnishsys_90_sslflags)]
             sslflags: 0,
+            #[cfg(varnishsys_trunk_sslcafile)]
+            ssl_ca_file: None,
             probe: None,
         }
     }
@@ -420,6 +424,8 @@ impl<'a> NativeBackendBuilder<'a> {
             backend_wait_limit: None,
             #[cfg(varnishsys_90_sslflags)]
             sslflags: 0,
+            #[cfg(varnishsys_trunk_sslcafile)]
+            ssl_ca_file: None,
             probe: None,
         }
     }
@@ -516,6 +522,13 @@ impl<'a> NativeBackendBuilder<'a> {
         self
     }
 
+    #[cfg(varnishsys_trunk_sslcafile)]
+    builder_setter!(
+        ssl_ca_file,
+        &'a CStr,
+        "Set the path to a CA certificate file used to verify the backend's TLS certificate."
+    );
+
     /// Build the native backend with a VCL. This can be used in cases where there's no [Ctx], like
     /// in a background thread.
     ///
@@ -571,6 +584,11 @@ impl<'a> NativeBackendBuilder<'a> {
             },
             #[cfg(varnishsys_90_sslflags)]
             sslflags: self.sslflags,
+            #[cfg(varnishsys_trunk_sslcafile)]
+            ssl_ca_file: match self.ssl_ca_file {
+                Some(s) => s.as_ptr(),
+                None => null(),
+            },
         });
 
         // in case of an IP, we need a buffer that'll live until we've passed endpoint to VRT_new_backend
