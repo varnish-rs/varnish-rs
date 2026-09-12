@@ -16,15 +16,55 @@ mod rustest {
     use std::time::Duration;
 
     use varnish::ffi::{VCL_BLOB, VCL_STRING};
+    use varnish::set_header;
     use varnish::vcl::{CowProbe, Ctx, Event, FetchFilters, Probe, Request, VclError, Workspace};
 
     use super::VFPTest;
 
+    /// Exercises the direct-value branch of `set_header!`
     pub fn set_hdr(ctx: &mut Ctx, name: &str, value: &str) -> Result<(), VclError> {
         if let Some(ref mut req) = ctx.http_req {
-            Ok(req.set_header(name, value)?)
+            Ok(set_header!(req, name, value)?)
         } else {
             Err("http_req isn't accessible".into())
+        }
+    }
+
+    /// Exercises the format-template branch of `set_header!`
+    pub fn set_hdr_fmt(ctx: &mut Ctx, name: &str, id: i64, backend: &str) -> Result<(), VclError> {
+        if let Some(ref mut req) = ctx.http_req {
+            Ok(set_header!(req, name, "id={} backend={}", id, backend)?)
+        } else {
+            Err("http_req isn't accessible".into())
+        }
+    }
+
+    /// Exercises the bare-literal branch of `set_header!`, which must interpolate captured
+    /// identifiers rather than emit `{count}` verbatim
+    pub fn set_hdr_literal(ctx: &mut Ctx, name: &str, count: i64) -> Result<(), VclError> {
+        if let Some(ref mut req) = ctx.http_req {
+            Ok(set_header!(req, name, "count={count} {{braced}}")?)
+        } else {
+            Err("http_req isn't accessible".into())
+        }
+    }
+
+    /// Tries to set a `size`-byte header value, returning the error message, or "" on success
+    pub fn try_big_hdr(ctx: &mut Ctx, name: &str, size: i64, use_fmt: bool) -> String {
+        let n = usize::try_from(size).unwrap_or(0);
+        let Some(ref mut req) = ctx.http_req else {
+            return "no req".to_string();
+        };
+        let value = "x".repeat(n);
+        let res = if use_fmt {
+            // four copies, so the formatted value alone overflows the workspace
+            set_header!(req, name, "{value}{value}{value}{value}")
+        } else {
+            set_header!(req, name, value.as_str())
+        };
+        match res {
+            Ok(()) => String::new(),
+            Err(e) => e.as_str().to_string(),
         }
     }
 

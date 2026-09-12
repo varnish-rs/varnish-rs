@@ -11,13 +11,15 @@
 //! the case. Future work needs to sanitize the headers to make this safer to use. It is tracked in
 //! this [issue](https://github.com/varnish-rs/varnish-rs/issues/4).
 
+use std::fmt;
+use std::io::Write;
 use std::mem::transmute;
 use std::slice::from_raw_parts_mut;
 
 use crate::ffi;
-use crate::ffi::VslTag;
+use crate::ffi::{txt, VslTag};
 use crate::vcl::str_or_bytes::StrOrBytes;
-use crate::vcl::{VclResult, Workspace};
+use crate::vcl::{VclError, VclResult, Workspace, WsStrBuffer};
 
 // C constants pop up as u32, but header indexing uses u16, redefine
 // some stuff to avoid casting all the time
@@ -43,11 +45,14 @@ impl HttpHeaders<'_> {
         })
     }
 
-    fn change_header<'a>(&mut self, idx: u16, value: impl Into<StrOrBytes<'a>>) -> VclResult<()> {
-        assert!(idx < self.raw.nhd);
+    /// Returns the workspace this HTTP object allocates from.
+    fn ws(&self) -> Workspace<'_> {
+        Workspace::from_ptr(self.raw.ws)
+    }
 
-        /* XXX: aliasing warning, it's the same pointer as the one in Ctx */
-        let mut ws = Workspace::from_ptr(self.raw.ws);
+    /// Points the header slot at `idx` to an already allocated header line.
+    fn store_header(&mut self, idx: u16, hdr: txt) {
+        assert!(idx < self.raw.nhd);
         unsafe {
             let hd = self
                 .raw
@@ -55,7 +60,7 @@ impl HttpHeaders<'_> {
                 .offset(idx as isize)
                 .as_mut()
                 .expect("HTTP header descriptor pointer must not be null");
-            *hd = ws.copy_bytes_with_null(value.into())?;
+            *hd = hdr;
             let hdf = self
                 .raw
                 .hdf
@@ -64,36 +69,74 @@ impl HttpHeaders<'_> {
                 .expect("HTTP header flags pointer must not be null");
             *hdf = 0;
         }
-        Ok(())
     }
 
-    fn set_header_raw<'a>(&mut self, raw: impl Into<StrOrBytes<'a>>) -> VclResult<()> {
+    /// Appends an already allocated header line and logs it.
+    ///
+    /// # Errors
+    ///
+    /// Fails if all header slots are taken.
+    fn push_header(&mut self, hdr: txt) -> VclResult<()> {
         assert!(self.raw.nhd <= self.raw.shd);
         if self.raw.nhd == self.raw.shd {
             return Err(c"no more header slot".into());
         }
         let idx = self.raw.nhd;
         self.raw.nhd += 1;
-        let res = self.change_header(idx, raw);
-        if res.is_ok() {
-            unsafe {
-                ffi::VSLbt(
-                    self.raw.vsl,
-                    transmute::<u32, VslTag>((self.raw.logtag as u32) + u32::from(HDR_FIRST)),
-                    *self.raw.hd.add(idx as usize),
-                );
-            }
-        } else {
-            self.raw.nhd -= 1;
+        self.store_header(idx, hdr);
+        unsafe {
+            ffi::VSLbt(
+                self.raw.vsl,
+                transmute::<u32, VslTag>((self.raw.logtag as u32) + u32::from(HDR_FIRST)),
+                *self.raw.hd.add(idx as usize),
+            );
         }
-        res
+        Ok(())
     }
 
-    /// Append a new header using `name` and `value`. This can fail if we run out of internal slots
-    /// to store the new header
+    fn change_header<'a>(&mut self, idx: u16, value: impl Into<StrOrBytes<'a>>) -> VclResult<()> {
+        let hdr = self.ws().copy_bytes_with_null(value.into())?;
+        self.store_header(idx, hdr);
+        Ok(())
+    }
+
+    /// Appends a `name: value` header, writing it into the Varnish workspace.
+    ///
+    /// NUL bytes in `name` or `value` are not rejected, and truncate the header as seen by the
+    /// C layers, matching `VRT_SetHdr`.
+    ///
+    /// # Errors
+    ///
+    /// Fails if all header slots are taken, or if the workspace is out of memory.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// http.set_header("X-Foo", "bar")?;
+    /// assert_eq!(http.header("X-Foo").unwrap().as_ref(), b"bar");
+    /// ```
     pub fn set_header(&mut self, name: &str, value: &str) -> VclResult<()> {
-        // FIXME: optimize this to avoid allocating a temporary string
-        self.set_header_raw(&format!("{name}: {value}"))
+        let hdr = alloc_header_line(&mut self.ws(), name, &[value.as_bytes()])?;
+        self.push_header(hdr)
+    }
+
+    /// Appends a header whose value is formatted into the Varnish workspace.
+    ///
+    /// NUL bytes in `name` or the formatted value are not rejected, and truncate the header as
+    /// seen by the C layers, matching `VRT_SetHdr`.
+    ///
+    /// # Errors
+    ///
+    /// Fails if all header slots are taken, or if the workspace is out of memory.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// http.set_header_fmt("X-Info", format_args!("id={id} backend={backend}"))?;
+    /// ```
+    pub fn set_header_fmt(&mut self, name: &str, args: fmt::Arguments<'_>) -> VclResult<()> {
+        let hdr = alloc_header_line_fmt(&mut self.ws(), name, args)?;
+        self.push_header(hdr)
     }
 
     /// Remove all headers matching `name` (case-insensitive). No-op if the header is absent.
@@ -238,11 +281,11 @@ impl HttpHeaders<'_> {
         if value.starts_with(b"W/") {
             return Ok(());
         }
-        let mut new_hdr = Vec::with_capacity(b"ETag: W/".len() + value.len());
-        new_hdr.extend_from_slice(b"ETag: W/");
-        new_hdr.extend_from_slice(value);
+        // Allocate first: `hdr` holds only raw pointers, so `value`'s borrow of `self` is
+        // released before the mutations below.
+        let hdr = alloc_header_line(&mut self.ws(), "ETag", &[b"W/", value])?;
         self.unset_header("ETag");
-        self.set_header_raw(new_hdr.as_slice())
+        self.push_header(hdr)
     }
 
     /// Returns the value of a header based on its name
@@ -261,6 +304,69 @@ impl HttpHeaders<'_> {
             cursor: HDR_FIRST as isize,
         }
     }
+}
+
+/// Writes `name: <parts...>` into the workspace, returning the header line.
+///
+/// Copies the fragments verbatim, bypassing `core::fmt`.
+fn alloc_header_line(ws: &mut Workspace<'_>, name: &str, parts: &[&[u8]]) -> VclResult<txt> {
+    let mut buf = ws.vcl_string_builder()?;
+    buf.extend_from_slice(name.as_bytes())?;
+    buf.extend_from_slice(b": ")?;
+    for part in parts {
+        buf.extend_from_slice(part)?;
+    }
+    Ok(finish_header_line(buf))
+}
+
+/// Same as [`alloc_header_line`], but formats the value with `core::fmt`.
+fn alloc_header_line_fmt(
+    ws: &mut Workspace<'_>,
+    name: &str,
+    args: fmt::Arguments<'_>,
+) -> VclResult<txt> {
+    let mut buf = ws.vcl_string_builder()?;
+    buf.extend_from_slice(name.as_bytes())?;
+    buf.extend_from_slice(b": ")?;
+    buf.write_fmt(args)
+        .map_err(|_| VclError::CStr(c"no space in the workspace for the header value"))?;
+    Ok(finish_header_line(buf))
+}
+
+/// Turns the bytes written to `buf` into a header line.
+///
+/// [`WsStrBuffer::finish`] NUL-terminates them and releases the unused workspace.
+fn finish_header_line(buf: WsStrBuffer<'_>) -> txt {
+    let len = buf.len();
+    let b = buf.finish().0;
+    txt {
+        b,
+        e: unsafe { b.add(len) },
+    }
+}
+
+/// Appends an HTTP header, writing it into the Varnish workspace.
+///
+/// # Examples
+///
+/// ```ignore
+/// set_header!(req, "X-Foo", value)?;                          // verbatim value
+/// set_header!(req, "X-Count", "count={count}")?;              // interpolated literal
+/// set_header!(req, "X-Info", "id={} backend={}", id, name)?;  // template plus arguments
+/// ```
+#[macro_export]
+macro_rules! set_header {
+    // Must come first: `$value:expr` below would match a literal too, silently emitting
+    // `{count}` instead of interpolating it.
+    ($http:expr, $name:expr, $fmt:literal) => {
+        $http.set_header_fmt($name, ::std::format_args!($fmt))
+    };
+    ($http:expr, $name:expr, $value:expr) => {
+        $http.set_header($name, $value)
+    };
+    ($http:expr, $name:expr, $fmt:expr, $($arg:tt)*) => {
+        $http.set_header_fmt($name, ::std::format_args!($fmt, $($arg)*))
+    };
 }
 
 impl<'a> IntoIterator for &'a HttpHeaders<'a> {
