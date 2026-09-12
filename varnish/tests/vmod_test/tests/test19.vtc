@@ -1,0 +1,46 @@
+varnishtest "set_header! fails gracefully when the workspace is exhausted"
+
+server s1 {
+    rxreq
+    # neither oversized header made it onto the request
+    expect req.http.x-big-direct == <undef>
+    expect req.http.x-big-fmt == <undef>
+    # nor did the one truncated by a NUL byte
+    expect req.http.x-nul == <undef>
+    # ...and the workspace is still usable afterwards
+    expect req.http.x-after == "still-works"
+    expect req.http.x-reserve == "ok ok ok"
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import rustest from "${vmod}";
+
+    sub vcl_recv {
+        # 1. a value far larger than the workspace must fail, not crash
+        set req.http.err-direct = rustest.try_big_hdr("x-big-direct", 200000, false);
+        set req.http.err-fmt    = rustest.try_big_hdr("x-big-fmt", 20000, true);
+        set req.http.err-nul    = rustest.try_nul_hdr("x-nul");
+
+        # 2. a normal header, then a reservation: varnishd asserts if the
+        #    failed attempts above leaked their workspace reservation
+        rustest.set_hdr("x-after", "still-works");
+        set req.http.x-reserve = rustest.ws_reserve("ok");
+        return (pass);
+    }
+
+    sub vcl_deliver {
+        set resp.http.err-direct = req.http.err-direct;
+        set resp.http.err-fmt    = req.http.err-fmt;
+        set resp.http.err-nul    = req.http.err-nul;
+    }
+} -start
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.status == 200
+    expect resp.http.err-direct == "Unable to allocate 200000 bytes in a Workspace"
+    expect resp.http.err-fmt == "no space in the workspace for the header value"
+    expect resp.http.err-nul == "NULL byte found in the header"
+} -run
