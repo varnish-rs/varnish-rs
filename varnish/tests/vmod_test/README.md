@@ -36,6 +36,11 @@ identifiers rather than emit `{count}` verbatim
 
 Tries to set a `size`-byte header value, returning the error message, or "" on success
 
+### Function `STRING rustest.try_nul_hdr(STRING name)`
+
+Tries to set a header value containing a NUL byte, returning the error message,
+or "" on success
+
 ### Function `VOID rustest.unset_hdr(STRING name)`
 
 ### Function `VOID rustest.set_url(STRING url)`

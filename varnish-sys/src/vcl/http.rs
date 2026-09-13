@@ -16,6 +16,8 @@ use std::io::Write;
 use std::mem::transmute;
 use std::slice::from_raw_parts_mut;
 
+use memchr::memchr;
+
 use crate::ffi;
 use crate::ffi::{txt, VslTag};
 use crate::vcl::str_or_bytes::StrOrBytes;
@@ -71,16 +73,21 @@ impl HttpHeaders<'_> {
         }
     }
 
-    /// Appends an already allocated header line and logs it.
-    ///
-    /// # Errors
-    ///
     /// Fails if all header slots are taken.
-    fn push_header(&mut self, hdr: txt) -> VclResult<()> {
+    ///
+    /// Callers check this before writing a header into the workspace, so that a failed
+    /// append does not consume workspace memory for the rest of the task.
+    fn check_header_slot(&self) -> VclResult<()> {
         assert!(self.raw.nhd <= self.raw.shd);
         if self.raw.nhd == self.raw.shd {
             return Err(c"no more header slot".into());
         }
+        Ok(())
+    }
+
+    /// Appends an already allocated header line and logs it.
+    fn push_header(&mut self, hdr: txt) -> VclResult<()> {
+        self.check_header_slot()?;
         let idx = self.raw.nhd;
         self.raw.nhd += 1;
         self.store_header(idx, hdr);
@@ -102,32 +109,29 @@ impl HttpHeaders<'_> {
 
     /// Appends a `name: value` header, writing it into the Varnish workspace.
     ///
-    /// NUL bytes in `name` or `value` are not rejected, and truncate the header as seen by the
-    /// C layers, matching `VRT_SetHdr`.
-    ///
     /// # Errors
     ///
-    /// Fails if all header slots are taken, or if the workspace is out of memory.
+    /// Fails if all header slots are taken, if the workspace is out of memory, or if `name` or
+    /// `value` contain a NUL byte, which would truncate the header as seen by the C layers.
     ///
     /// # Examples
     ///
     /// ```ignore
     /// http.set_header("X-Foo", "bar")?;
-    /// assert_eq!(http.header("X-Foo").unwrap().as_ref(), b"bar");
     /// ```
     pub fn set_header(&mut self, name: &str, value: &str) -> VclResult<()> {
+        self.check_header_slot()?;
         let hdr = alloc_header_line(&mut self.ws(), name, &[value.as_bytes()])?;
         self.push_header(hdr)
     }
 
     /// Appends a header whose value is formatted into the Varnish workspace.
     ///
-    /// NUL bytes in `name` or the formatted value are not rejected, and truncate the header as
-    /// seen by the C layers, matching `VRT_SetHdr`.
-    ///
     /// # Errors
     ///
-    /// Fails if all header slots are taken, or if the workspace is out of memory.
+    /// Fails if all header slots are taken, if the workspace is out of memory, or if `name` or
+    /// the formatted value contain a NUL byte, which would truncate the header as seen by the
+    /// C layers.
     ///
     /// # Examples
     ///
@@ -135,6 +139,7 @@ impl HttpHeaders<'_> {
     /// http.set_header_fmt("X-Info", format_args!("id={id} backend={backend}"))?;
     /// ```
     pub fn set_header_fmt(&mut self, name: &str, args: fmt::Arguments<'_>) -> VclResult<()> {
+        self.check_header_slot()?;
         let hdr = alloc_header_line_fmt(&mut self.ws(), name, args)?;
         self.push_header(hdr)
     }
@@ -316,7 +321,7 @@ fn alloc_header_line(ws: &mut Workspace<'_>, name: &str, parts: &[&[u8]]) -> Vcl
     for part in parts {
         buf.extend_from_slice(part)?;
     }
-    Ok(finish_header_line(buf))
+    finish_header_line(buf)
 }
 
 /// Same as [`alloc_header_line`], but formats the value with `core::fmt`.
@@ -330,22 +335,34 @@ fn alloc_header_line_fmt(
     buf.extend_from_slice(b": ")?;
     buf.write_fmt(args)
         .map_err(|_| VclError::CStr(c"no space in the workspace for the header value"))?;
-    Ok(finish_header_line(buf))
+    finish_header_line(buf)
 }
 
 /// Turns the bytes written to `buf` into a header line.
 ///
 /// [`WsStrBuffer::finish`] NUL-terminates them and releases the unused workspace.
-fn finish_header_line(buf: WsStrBuffer<'_>) -> txt {
+///
+/// # Errors
+///
+/// Fails if the line contains a NUL byte, which would truncate the header as seen by the C
+/// layers. Dropping `buf` reclaims the workspace it holds.
+fn finish_header_line(buf: WsStrBuffer<'_>) -> VclResult<txt> {
+    if memchr(0, buf.as_ref()).is_some() {
+        return Err(VclError::CStr(c"NULL byte found in the header"));
+    }
     let len = buf.len();
     let b = buf.finish().0;
-    txt {
+    Ok(txt {
         b,
         e: unsafe { b.add(len) },
-    }
+    })
 }
 
 /// Appends an HTTP header, writing it into the Varnish workspace.
+///
+/// Convenience syntax over the two underlying methods: a string literal value goes to
+/// [`HttpHeaders::set_header_fmt`] (the formatting path), anything else to
+/// [`HttpHeaders::set_header`] (cheaper path).
 ///
 /// # Examples
 ///

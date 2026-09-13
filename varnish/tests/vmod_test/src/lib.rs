@@ -68,6 +68,18 @@ mod rustest {
         }
     }
 
+    /// Tries to set a header value containing a NUL byte, returning the error message,
+    /// or "" on success
+    pub fn try_nul_hdr(ctx: &mut Ctx, name: &str) -> String {
+        let Some(ref mut req) = ctx.http_req else {
+            return "no req".to_string();
+        };
+        match req.set_header(name, "a\0b") {
+            Ok(()) => String::new(),
+            Err(e) => e.as_str().to_string(),
+        }
+    }
+
     pub fn unset_hdr(ctx: &mut Ctx, name: &str) -> Result<(), &'static str> {
         if let Some(ref mut req) = ctx.http_req {
             req.unset_header(name);
