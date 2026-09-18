@@ -8,8 +8,10 @@ edition.workspace = true
 crate-type = ["cdylib"]
 
 [dependencies]
-varnish.workspace = true
-varnish-sys.workspace = true
+# Pinned to `full`: uses the native-backend API, which is gated out under the vrt-only surface.
+# Without this pin, a workspace-wide `--no-default-features` build would break this example.
+varnish = { workspace = true, features = ["full"] }
+varnish-sys = { workspace = true, features = ["full"] }
 
 [lints]
 workspace = true

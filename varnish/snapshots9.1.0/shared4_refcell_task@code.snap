@@ -112,9 +112,9 @@ mod refcell_task {
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_refcell_task_Data: vmod_data = vmod_data {
-            vrt_major: 0,
-            vrt_minor: 0,
-            file_id: c"686523a0e99b4c99a05e49c3f870cfc5afd3c6b6579050704d6eb58472dde5ce"
+            vrt_major: 0u32,
+            vrt_minor: 0u32,
+            file_id: c"0b2370f65ab622d6e29a6f8f6b2893183ebe7428b06f4d000177b2b7c7d6f19a"
                 .as_ptr(),
             name: c"refcell_task".as_ptr(),
             func_name: c"Vmod_vmod_refcell_task_Func".as_ptr(),

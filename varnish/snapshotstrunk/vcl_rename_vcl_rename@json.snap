@@ -8,7 +8,7 @@ VMOD_JSON_SPEC
     "2.0",
     "vcl_rename",
     "Vmod_vmod_vcl_rename_Func",
-    "55160ce71c366c87549c77c64344bc0a954b417a9280b810a1c7ef85e73e08e5",
+    "268dafc1eed3632bffe7c0a6954bd2521561322edfc8df6d635081dfda246b12",
     "Varnish (version) (hash)",
     "0",
     "0"
