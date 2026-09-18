@@ -2,6 +2,7 @@ use std::ffi::c_void;
 use std::ptr;
 
 use crate::ffi::{vmod_data, vmod_priv, vmod_priv_methods, vrt_ctx};
+#[cfg(feature = "full")]
 use crate::validate_vrt_ctx;
 use crate::vcl::PerVclState;
 
@@ -75,20 +76,29 @@ impl vmod_priv {
     }
 
     /// A Varnish callback function to clean up the `PerVclState` object.
-    /// Similar to `on_fini`, but also unregisters filters.
+    /// Similar to `on_fini`, but also unregisters filters (under `full`; the vrt-only
+    /// surface has no fetch/delivery filters to unregister).
     ///
     /// SAFETY: `priv_` must be a valid pointer to a `T` object or `NULL`.
-    pub unsafe extern "C" fn on_fini_per_vcl<T>(ctx: *const vrt_ctx, mut priv_: *mut c_void) {
+    pub unsafe extern "C" fn on_fini_per_vcl<T>(
+        #[cfg_attr(not(feature = "full"), allow(unused_variables))] ctx: *const vrt_ctx,
+        mut priv_: *mut c_void,
+    ) {
         if let Some(obj) = get_owned_bbox::<PerVclState<T>>(&mut priv_) {
-            let PerVclState {
-                mut fetch_filters,
-                mut delivery_filters,
-                user_data,
-            } = *obj;
-            let ctx = validate_vrt_ctx(ctx);
-            ctx.fetch_filters(&mut fetch_filters).unregister_all();
-            ctx.delivery_filters(&mut delivery_filters).unregister_all();
-            drop(user_data);
+            #[cfg(feature = "full")]
+            {
+                let PerVclState {
+                    mut fetch_filters,
+                    mut delivery_filters,
+                    user_data,
+                } = *obj;
+                let ctx = validate_vrt_ctx(ctx);
+                ctx.fetch_filters(&mut fetch_filters).unregister_all();
+                ctx.delivery_filters(&mut delivery_filters).unregister_all();
+                drop(user_data);
+            }
+            #[cfg(not(feature = "full"))]
+            drop(obj);
         }
     }
 }

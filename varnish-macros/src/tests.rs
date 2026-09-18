@@ -107,9 +107,14 @@ fn test_file(filepath: &Path) {
         if let syn::Item::Mod(mut item) = item {
             assert!(!has_vmod, "Multiple vmod modules found in {file}");
             has_vmod = true;
-            // FIXME: use this attribute as an arg for the test
-            let _arg =
-                remove_attr(&mut item.attrs, "vmod").expect("vmod attribute must be present");
+            let arg = remove_attr(&mut item.attrs, "vmod").expect("vmod attribute must be present");
+            // `args` here must mirror exactly what `#[proc_macro_attribute] fn vmod(args, ...)`
+            // receives for real: just the tokens inside `#[vmod(...)]`'s parens (empty for a
+            // bare `#[vmod]`), not the attribute itself.
+            let args = match &arg.meta {
+                syn::Meta::List(list) => list.tokens.clone(),
+                _ => TokenStream::new(),
+            };
             let name = format!(
                 "{}_{}",
                 filepath
@@ -118,9 +123,7 @@ fn test_file(filepath: &Path) {
                     .to_string_lossy(),
                 item.ident
             );
-            test(&name, quote! {}, item);
-            // FIXME: pass proper attribute info
-            // test(&name, quote! { #arg }, item);
+            test(&name, args, item);
         } else if let syn::Item::Struct(item) = item {
             // Check if this has #[derive(VscMetric)]
             for attr in &item.attrs {

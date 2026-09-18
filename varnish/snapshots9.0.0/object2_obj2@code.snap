@@ -172,9 +172,9 @@ mod obj2 {
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_obj2_Data: vmod_data = vmod_data {
-            vrt_major: 0,
-            vrt_minor: 0,
-            file_id: c"c90ca6b4ec2f9db8e6a3d620e0e530af19a24ef8a10aa41d62e9e1cb05b73027"
+            vrt_major: 0u32,
+            vrt_minor: 0u32,
+            file_id: c"2e3f21d1adb42863ba0a4c244be09431c850fc19b2a1b1b9b3aae17d6eebee2c"
                 .as_ptr(),
             name: c"obj2".as_ptr(),
             func_name: c"Vmod_vmod_obj2_Func".as_ptr(),

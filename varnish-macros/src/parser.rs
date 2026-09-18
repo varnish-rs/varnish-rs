@@ -126,6 +126,17 @@ impl VmodInfo {
     }
 
     pub fn validate(&self, item: &ItemMod, errors: &mut Errors) {
+        if let Some(abi) = &self.params.abi {
+            if abi != "strict" && abi != "vrt" {
+                errors.add(
+                    item,
+                    &format!(
+                        "invalid `abi` value {abi:?} in #[vmod(...)] — must be \"strict\" or \"vrt\""
+                    ),
+                );
+            }
+        }
+
         if self.count_funcs(|v| matches!(v.func_type, FuncType::Event)) > 1 {
             errors.add(
                 &item,

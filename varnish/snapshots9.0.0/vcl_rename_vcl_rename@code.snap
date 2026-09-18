@@ -137,9 +137,9 @@ mod vcl_rename {
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_vcl_rename_Data: vmod_data = vmod_data {
-            vrt_major: 0,
-            vrt_minor: 0,
-            file_id: c"55160ce71c366c87549c77c64344bc0a954b417a9280b810a1c7ef85e73e08e5"
+            vrt_major: 0u32,
+            vrt_minor: 0u32,
+            file_id: c"268dafc1eed3632bffe7c0a6954bd2521561322edfc8df6d635081dfda246b12"
                 .as_ptr(),
             name: c"vcl_rename".as_ptr(),
             func_name: c"Vmod_vmod_vcl_rename_Func".as_ptr(),

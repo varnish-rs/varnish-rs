@@ -48,21 +48,18 @@
 
 use std::borrow::Cow;
 use std::ffi::CStr;
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::ptr::{null, null_mut};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use crate::ffi::{
-    http, sa_family_t, vsa_suckaddr_len, vtim_dur, vtim_real, VSA_BuildFAP, VSA_GetPtr, VSA_Port,
-    PF_INET, PF_INET6, VCL_ACL, VCL_BACKEND, VCL_BLOB, VCL_BODY, VCL_BOOL, VCL_DURATION, VCL_ENUM,
-    VCL_HEADER, VCL_HTTP, VCL_INT, VCL_IP, VCL_PROBE, VCL_REAL, VCL_REGEX, VCL_STEVEDORE,
+    http, vtim_dur, vtim_real, VCL_ACL, VCL_BACKEND, VCL_BLOB, VCL_BODY, VCL_BOOL, VCL_DURATION,
+    VCL_ENUM, VCL_HEADER, VCL_HTTP, VCL_INT, VCL_IP, VCL_PROBE, VCL_REAL, VCL_REGEX, VCL_STEVEDORE,
     VCL_STRANDS, VCL_STRING, VCL_SUB, VCL_TIME, VCL_VCL,
 };
+use crate::vcl::{subroutine::Subroutine, Acl, VclError, Workspace};
 
-use crate::vcl::{
-    from_vcl_probe, into_vcl_probe, subroutine::Subroutine, Acl, BackendRef, CowProbe, Probe,
-    VclError, Workspace,
-};
+#[cfg(feature = "full")]
+pub(crate) use full::write_ip_to_buf;
 
 /// Convert a Rust type into a VCL one
 ///
@@ -230,64 +227,11 @@ impl From<VCL_INT> for i64 {
     }
 }
 
-//
 // VCL_IP
-//
 default_null_ptr!(VCL_IP);
-impl From<VCL_IP> for Option<SocketAddr> {
-    fn from(value: VCL_IP) -> Self {
-        let value = value.0;
-        if value.is_null() {
-            return None;
-        }
-        unsafe {
-            let mut ptr = null();
-            let fam = VSA_GetPtr(value, &raw mut ptr) as u32;
-            let port = VSA_Port(value) as u16;
 
-            match fam {
-                PF_INET => {
-                    let buf: &[u8; 4] = std::slice::from_raw_parts(ptr.cast::<u8>(), 4)
-                        .try_into()
-                        .expect("IPv4 address bytes slice must always be 4 bytes");
-                    Some(SocketAddr::new(IpAddr::V4(Ipv4Addr::from(*buf)), port))
-                }
-                PF_INET6 => {
-                    let buf: &[u8; 16] = std::slice::from_raw_parts(ptr.cast::<u8>(), 16)
-                        .try_into()
-                        .expect("IPv6 address bytes slice must always be 16 bytes");
-                    Some(SocketAddr::new(IpAddr::V6(Ipv6Addr::from(*buf)), port))
-                }
-                _ => None,
-            }
-        }
-    }
-}
-
-//
 // VCL_PROBE
-//
 default_null_ptr!(VCL_PROBE);
-impl IntoVCL<VCL_PROBE> for CowProbe<'_> {
-    fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_PROBE, VclError> {
-        into_vcl_probe(self, ws)
-    }
-}
-impl IntoVCL<VCL_PROBE> for Probe {
-    fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_PROBE, VclError> {
-        into_vcl_probe(self, ws)
-    }
-}
-impl From<VCL_PROBE> for Option<CowProbe<'_>> {
-    fn from(value: VCL_PROBE) -> Self {
-        from_vcl_probe(value)
-    }
-}
-impl From<VCL_PROBE> for Option<Probe> {
-    fn from(value: VCL_PROBE) -> Self {
-        from_vcl_probe(value)
-    }
-}
 
 //
 // VCL_REAL
@@ -419,28 +363,6 @@ default_null_ptr!(mut VCL_VCL);
 // VCL_BACKEND
 default_null_ptr!(VCL_BACKEND);
 
-use std::ffi::c_void;
-use std::num::NonZeroUsize;
-use std::ptr;
-
-impl IntoVCL<VCL_BACKEND> for BackendRef {
-    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
-        unsafe { Ok(self.vcl_ptr()) }
-    }
-}
-
-impl IntoVCL<VCL_BACKEND> for Option<BackendRef> {
-    fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
-        unsafe { Ok(self.map_or(VCL_BACKEND(null()), |b: BackendRef| b.vcl_ptr())) }
-    }
-}
-
-impl From<VCL_BACKEND> for Option<BackendRef> {
-    fn from(value: VCL_BACKEND) -> Self {
-        unsafe { BackendRef::new(value) }
-    }
-}
-
 // VCL_SUB
 default_null_ptr!(VCL_SUB);
 impl From<VCL_SUB> for Subroutine {
@@ -458,53 +380,150 @@ impl IntoVCL<VCL_SUB> for Subroutine {
 
 default_null_ptr!(VCL_REGEX);
 
-unsafe fn write_ip_to_ptr(ip: SocketAddr, p: *mut c_void) {
-    match ip {
-        SocketAddr::V4(sa) => {
-            assert!(!VSA_BuildFAP(
-                p,
-                PF_INET as sa_family_t,
-                sa.ip().octets().as_slice().as_ptr().cast::<c_void>(),
-                4,
-                ptr::from_ref::<u16>(&sa.port().to_be()).cast::<c_void>(),
-                2
-            )
-            .is_null());
-        }
-        SocketAddr::V6(sa) => {
-            assert!(!VSA_BuildFAP(
-                p,
-                PF_INET6 as sa_family_t,
-                sa.ip().octets().as_slice().as_ptr().cast::<c_void>(),
-                16,
-                ptr::from_ref::<u16>(&sa.port().to_be()).cast::<c_void>(),
-                2
-            )
-            .is_null());
+// Everything below needs vsa.h/backend/probe APIs that don't exist under the vrt-only surface
+// (or, for the IP write direction, don't exist anywhere in vrt.h at all — see the note on
+// `write_ip_to_ptr`). Grouped into one module so the `full` gate isn't repeated on every item.
+#[cfg(feature = "full")]
+mod full {
+    use std::ffi::c_void;
+    use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
+    use std::num::NonZeroUsize;
+    use std::ptr;
+
+    use crate::ffi::{
+        sa_family_t, vsa_suckaddr_len, VSA_BuildFAP, VSA_GetPtr, VSA_Port, PF_INET, PF_INET6,
+        VCL_BACKEND, VCL_IP, VCL_PROBE,
+    };
+    use crate::vcl::{
+        from_vcl_probe, into_vcl_probe, BackendRef, CowProbe, Probe, VclError, Workspace,
+    };
+
+    use super::IntoVCL;
+
+    // `VSA_GetPtr`/`VSA_Port` are vsa.h-only; no vrt.h-native way to read a `VCL_IP`'s bytes
+    // exists yet either (see the `write_ip_to_ptr` note below).
+    impl From<VCL_IP> for Option<SocketAddr> {
+        fn from(value: VCL_IP) -> Self {
+            let value = value.0;
+            if value.is_null() {
+                return None;
+            }
+            unsafe {
+                let mut ptr = ptr::null();
+                let fam = VSA_GetPtr(value, &raw mut ptr) as u32;
+                let port = VSA_Port(value) as u16;
+
+                match fam {
+                    PF_INET => {
+                        let buf: &[u8; 4] = std::slice::from_raw_parts(ptr.cast::<u8>(), 4)
+                            .try_into()
+                            .expect("IPv4 address bytes slice must always be 4 bytes");
+                        Some(SocketAddr::new(IpAddr::V4(Ipv4Addr::from(*buf)), port))
+                    }
+                    PF_INET6 => {
+                        let buf: &[u8; 16] = std::slice::from_raw_parts(ptr.cast::<u8>(), 16)
+                            .try_into()
+                            .expect("IPv6 address bytes slice must always be 16 bytes");
+                        Some(SocketAddr::new(IpAddr::V6(Ipv6Addr::from(*buf)), port))
+                    }
+                    _ => None,
+                }
+            }
         }
     }
-}
 
-pub(crate) unsafe fn write_ip_to_buf(ip: SocketAddr, buf: &mut [u8]) {
-    assert_eq!(buf.len(), vsa_suckaddr_len);
-    write_ip_to_ptr(ip, buf.as_mut_ptr().cast::<c_void>());
-}
-impl IntoVCL<VCL_IP> for SocketAddr {
-    fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_IP, VclError> {
-        unsafe {
-            // We cannot use sizeof::<suckaddr>() because suckaddr is a zero-sized
-            // struct from Rust's perspective
-            let size =
-                NonZeroUsize::new(vsa_suckaddr_len).expect("vsa_suckaddr_len must be non-zero");
-            let p = ws.alloc(size);
-            if p.is_null() {
-                Err(VclError::WsOutOfMemory(size))?;
+    // Probe conversions are tied to the (full-only) backend/probe subsystem.
+    impl IntoVCL<VCL_PROBE> for CowProbe<'_> {
+        fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_PROBE, VclError> {
+            into_vcl_probe(self, ws)
+        }
+    }
+    impl IntoVCL<VCL_PROBE> for Probe {
+        fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_PROBE, VclError> {
+            into_vcl_probe(self, ws)
+        }
+    }
+    impl From<VCL_PROBE> for Option<CowProbe<'_>> {
+        fn from(value: VCL_PROBE) -> Self {
+            from_vcl_probe(value)
+        }
+    }
+    impl From<VCL_PROBE> for Option<Probe> {
+        fn from(value: VCL_PROBE) -> Self {
+            from_vcl_probe(value)
+        }
+    }
+
+    impl IntoVCL<VCL_BACKEND> for BackendRef {
+        fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
+            unsafe { Ok(self.vcl_ptr()) }
+        }
+    }
+
+    impl IntoVCL<VCL_BACKEND> for Option<BackendRef> {
+        fn into_vcl(self, _: &mut Workspace) -> Result<VCL_BACKEND, VclError> {
+            unsafe { Ok(self.map_or(VCL_BACKEND(ptr::null()), |b: BackendRef| b.vcl_ptr())) }
+        }
+    }
+
+    impl From<VCL_BACKEND> for Option<BackendRef> {
+        fn from(value: VCL_BACKEND) -> Self {
+            unsafe { BackendRef::new(value) }
+        }
+    }
+
+    // No vrt.h-native way exists to construct a `VCL_IP` from raw bytes (only read-accessors
+    // like `VRT_VSA_GetPtr` on an *existing* `VCL_IP`) — this is an upstream API gap, not
+    // fixable here.
+    unsafe fn write_ip_to_ptr(ip: SocketAddr, p: *mut c_void) {
+        match ip {
+            SocketAddr::V4(sa) => {
+                assert!(!VSA_BuildFAP(
+                    p,
+                    PF_INET as sa_family_t,
+                    sa.ip().octets().as_slice().as_ptr().cast::<c_void>(),
+                    4,
+                    ptr::from_ref::<u16>(&sa.port().to_be()).cast::<c_void>(),
+                    2
+                )
+                .is_null());
             }
+            SocketAddr::V6(sa) => {
+                assert!(!VSA_BuildFAP(
+                    p,
+                    PF_INET6 as sa_family_t,
+                    sa.ip().octets().as_slice().as_ptr().cast::<c_void>(),
+                    16,
+                    ptr::from_ref::<u16>(&sa.port().to_be()).cast::<c_void>(),
+                    2
+                )
+                .is_null());
+            }
+        }
+    }
 
-            let buf = std::slice::from_raw_parts_mut(p.cast::<u8>(), vsa_suckaddr_len);
-            write_ip_to_buf(self, buf);
+    pub(crate) unsafe fn write_ip_to_buf(ip: SocketAddr, buf: &mut [u8]) {
+        assert_eq!(buf.len(), vsa_suckaddr_len);
+        write_ip_to_ptr(ip, buf.as_mut_ptr().cast::<c_void>());
+    }
 
-            Ok(VCL_IP(p.cast()))
+    impl IntoVCL<VCL_IP> for SocketAddr {
+        fn into_vcl(self, ws: &mut Workspace) -> Result<VCL_IP, VclError> {
+            unsafe {
+                // We cannot use sizeof::<suckaddr>() because suckaddr is a zero-sized
+                // struct from Rust's perspective
+                let size =
+                    NonZeroUsize::new(vsa_suckaddr_len).expect("vsa_suckaddr_len must be non-zero");
+                let p = ws.alloc(size);
+                if p.is_null() {
+                    Err(VclError::WsOutOfMemory(size))?;
+                }
+
+                let buf = std::slice::from_raw_parts_mut(p.cast::<u8>(), vsa_suckaddr_len);
+                write_ip_to_buf(self, buf);
+
+                Ok(VCL_IP(p.cast()))
+            }
         }
     }
 }

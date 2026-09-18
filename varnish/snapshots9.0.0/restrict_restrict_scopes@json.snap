@@ -8,7 +8,7 @@ VMOD_JSON_SPEC
     "2.0",
     "restrict_scopes",
     "Vmod_vmod_restrict_scopes_Func",
-    "776ba51c758eea75219a10903fd4c86c6b8d9d9ac226d6c856ced2dbff5bf420",
+    "0bfc8ea8f27ee4f54234cf447fb6842b115c0c0c7e7e23372688d6580fc3e348",
     "Varnish (version) (hash)",
     "0",
     "0"
