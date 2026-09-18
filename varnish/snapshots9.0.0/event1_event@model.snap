@@ -4,6 +4,7 @@ source: varnish-macros/src/tests.rs
 VmodInfo {
     params: VmodParams {
         docs: None,
+        abi: None,
     },
     ident: "event",
     docs: "",

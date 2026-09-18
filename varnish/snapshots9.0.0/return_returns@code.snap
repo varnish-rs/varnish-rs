@@ -39,9 +39,9 @@ mod returns {
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_returns_Data: vmod_data = vmod_data {
-            vrt_major: 0,
-            vrt_minor: 0,
-            file_id: c"bd1f4833656f22cf08282405aeddd291f808ebdd475a80e267ea40cec9376409"
+            vrt_major: 0u32,
+            vrt_minor: 0u32,
+            file_id: c"8d59b6088339a98ad907d2f9e9d959f427b05801a9645704c3f68e418c899bfa"
                 .as_ptr(),
             name: c"returns".as_ptr(),
             func_name: c"Vmod_vmod_returns_Func".as_ptr(),

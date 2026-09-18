@@ -17,9 +17,9 @@ readme = "README.md"
 
 [workspace.dependencies]
 # These versions should match the package.version above, and will be updated by release-plz.
-varnish = { path = "./varnish", version = "0.7.2" }
+varnish = { path = "./varnish", version = "0.7.2", default-features = false }
 varnish-macros = { path = "./varnish-macros", version = "0.7.2" }
-varnish-sys = { path = "./varnish-sys", version = "0.7.2" }
+varnish-sys = { path = "./varnish-sys", version = "0.7.2", default-features = false }
 #
 # These dependencies are used by one or more crates, and easier to maintain in one place.
 bindgen_helpers = "0.6.1"

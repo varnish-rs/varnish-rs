@@ -5,7 +5,9 @@ publish = false
 edition.workspace = true
 
 [dependencies]
-varnish.workspace = true
+# Pinned to `full`: uses `Ctx::response_buffer` (VSB-based), gated out under the vrt-only surface.
+# Without this pin, a workspace-wide `--no-default-features` build would break this example.
+varnish = { workspace = true, features = ["full"] }
 
 [lib]
 crate-type = ["cdylib"]

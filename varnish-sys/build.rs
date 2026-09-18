@@ -6,7 +6,17 @@ use bindgen_helpers as bindgen;
 use bindgen_helpers::{rename_enum, Renamer};
 
 static BINDINGS_FILE: &str = "bindings.for-docs";
+static BINDINGS_FILE_VRT: &str = "bindings-vrt.for-docs";
 static BINDINGS_FILE_VER: &str = "9.0.3";
+
+/// Picks the checked-in bindings snapshot matching the active `full` feature state.
+fn bindings_file() -> &'static str {
+    if cfg!(feature = "full") {
+        BINDINGS_FILE
+    } else {
+        BINDINGS_FILE_VRT
+    }
+}
 
 struct VarnishInfo {
     bindings: PathBuf,
@@ -95,6 +105,7 @@ fn generate_bindings(info: &VarnishInfo) {
 
     println!("cargo::rustc-link-lib=varnishapi");
     println!("cargo::rerun-if-changed=c_code/wrapper.h");
+    let full_abi_define = cfg!(feature = "full").then_some("-DVARNISH_RS_FULL_ABI".to_string());
     let bindings_builder = bindgen::Builder::default()
         .header("c_code/wrapper.h")
         .blocklist_item("FP_.*")
@@ -105,13 +116,17 @@ fn generate_bindings(info: &VarnishInfo) {
         // call any of them through these bindings — std already provides them.
         .blocklist_function("memcpy|memmove|memset|memcmp|strlen|bcmp")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
-        .clang_args(info.varnish_paths.iter().map(|i| {
-            format!(
-                "-I{}",
-                i.to_str()
-                    .expect("varnish include path must be valid UTF-8")
-            )
-        }))
+        .clang_args(
+            full_abi_define
+                .into_iter()
+                .chain(info.varnish_paths.iter().map(|i| {
+                    format!(
+                        "-I{}",
+                        i.to_str()
+                            .expect("varnish include path must be valid UTF-8")
+                    )
+                })),
+        )
         .ctypes_prefix("::std::ffi")
         .derive_copy(true)
         .derive_debug(true)
@@ -138,19 +153,20 @@ fn generate_bindings(info: &VarnishInfo) {
         .write_to_file(&info.bindings)
         .expect("Couldn't write bindings!");
 
-    // Compare generated file to the checked-in `bindings.for-docs` file,
-    // and if they differ, raise a warning.
+    // Compare generated file to the checked-in bindings snapshot matching the active
+    // `full` feature state, and if they differ, raise a warning.
+    let bindings_file = bindings_file();
     let generated =
         fs::read_to_string(&info.bindings).expect("failed to read generated bindings file");
-    let checked_in = fs::read_to_string(BINDINGS_FILE).unwrap_or_default();
+    let checked_in = fs::read_to_string(bindings_file).unwrap_or_default();
     if generated != checked_in {
         println!(
-            "cargo::warning=Generated bindings from Varnish {info} differ from checked-in {BINDINGS_FILE}. Update with   cp {} varnish-sys/{BINDINGS_FILE}",
+            "cargo::warning=Generated bindings from Varnish {info} differ from checked-in {bindings_file}. Update with   cp {} varnish-sys/{bindings_file}",
             info.bindings.display()
         );
     } else if BINDINGS_FILE_VER != info.version {
         println!(
-            r#"cargo::warning=Generated bindings **version** from Varnish {info} differ from checked-in {BINDINGS_FILE}. Update `build.rs` file with   BINDINGS_FILE_VER = "{info}""#
+            r#"cargo::warning=Generated bindings **version** from Varnish {info} differ from checked-in {bindings_file}. Update `build.rs` file with   BINDINGS_FILE_VER = "{info}""#
         );
     }
 }
@@ -174,8 +190,9 @@ fn find_include_dir(out_path: &PathBuf) -> Option<(Vec<PathBuf>, String)> {
         Err(e) => {
             // See https://docs.rs/about/builds#detecting-docsrs
             if env::var("DOCS_RS").is_ok() {
+                let bindings_file = bindings_file();
                 eprintln!("libvarnish not found, using saved bindings for the doc.rs: {e}");
-                fs::copy(BINDINGS_FILE, out_path)
+                fs::copy(bindings_file, out_path)
                     .expect("failed to copy bindings file for docs.rs");
                 println!("cargo::metadata=version_number={BINDINGS_FILE_VER}");
                 // detect_varnish() short-circuits when this returns None, so

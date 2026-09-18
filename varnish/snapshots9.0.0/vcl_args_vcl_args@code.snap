@@ -34,9 +34,9 @@ mod vcl_args {
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_vcl_args_Data: vmod_data = vmod_data {
-            vrt_major: 0,
-            vrt_minor: 0,
-            file_id: c"cf940e5ee9fadce80fad56b4600fd4f7d9d90a0dc2c91cd3d8b99bcbef7271d0"
+            vrt_major: 0u32,
+            vrt_minor: 0u32,
+            file_id: c"daf92ca8bbf69362ec2fb6931563ff7e76af4ad61e6bafe7c4d18c3ac3fe5569"
                 .as_ptr(),
             name: c"vcl_args".as_ptr(),
             func_name: c"Vmod_vmod_vcl_args_Func".as_ptr(),

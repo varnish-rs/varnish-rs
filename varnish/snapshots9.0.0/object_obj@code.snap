@@ -285,9 +285,9 @@ mod obj {
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_obj_Data: vmod_data = vmod_data {
-            vrt_major: 0,
-            vrt_minor: 0,
-            file_id: c"95335543a305005bf00d0f2dcf61f2161606c9815eb6de4eed8d4302257e2c11"
+            vrt_major: 0u32,
+            vrt_minor: 0u32,
+            file_id: c"19e1bbaeca773583838a7c5cefb862b68b334329d90ae5536c4b811cce5d6658"
                 .as_ptr(),
             name: c"obj".as_ptr(),
             func_name: c"Vmod_vmod_obj_Func".as_ptr(),

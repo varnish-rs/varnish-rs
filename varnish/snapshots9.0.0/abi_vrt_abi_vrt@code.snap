@@ -1,7 +1,7 @@
 ---
 source: varnish-macros/src/tests.rs
 ---
-mod tuple {
+mod abi_vrt {
     #[allow(non_snake_case, unused_imports, unused_qualifications, unused_variables)]
     #[allow(clippy::needless_question_mark, clippy::new_without_default)]
     #[automatically_derived]
@@ -16,28 +16,29 @@ mod tuple {
         };
         use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
         use super::*;
-        static PRIV_TASK_METHODS: vmod_priv_methods = vmod_priv_methods {
-            magic: VMOD_PRIV_METHODS_MAGIC,
-            type_: c"PerTask < '_ >".as_ptr(),
-            fini: Some(vmod_priv::on_fini::<PerTask<'_>>),
-        };
-        unsafe extern "C" fn vmod_c_ref_to_slice_lifetime(
+        unsafe extern "C" fn vmod_c_scalar_fn(
             __ctx: *mut vrt_ctx,
-            tsk_vals: *mut vmod_priv,
+            x: VCL_INT,
+        ) -> VCL_INT {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(super::scalar_fn(x.into()).into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        unsafe extern "C" fn vmod_c_echo(
+            __ctx: *mut vrt_ctx,
+            s: VCL_STRING,
         ) -> VCL_STRING {
             let mut __ctx = Ctx::from_ptr(__ctx);
-            let mut __obj_per_task = (*tsk_vals).take();
             let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
-                Ok(
-                    super::ref_to_slice_lifetime(&mut __obj_per_task)
-                        .into_vcl(&mut __ctx.ws)?,
-                )
+                Ok(super::echo(s.try_into()?).into_vcl(&mut __ctx.ws)?)
             };
-            let __result = __call_user_func();
-            if let Some(obj) = __obj_per_task {
-                (*tsk_vals).put(obj, &PRIV_TASK_METHODS);
-            }
-            __result
+            __call_user_func()
                 .unwrap_or_else(|err| {
                     __ctx.fail(err);
                     Default::default()
@@ -45,25 +46,26 @@ mod tuple {
         }
         #[repr(C)]
         pub struct VmodExports {
-            vmod_c_ref_to_slice_lifetime: Option<
-                unsafe extern "C" fn(
-                    __ctx: *mut vrt_ctx,
-                    tsk_vals: *mut vmod_priv,
-                ) -> VCL_STRING,
+            vmod_c_scalar_fn: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, x: VCL_INT) -> VCL_INT,
+            >,
+            vmod_c_echo: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, s: VCL_STRING) -> VCL_STRING,
             >,
         }
         pub static VMOD_EXPORTS: VmodExports = VmodExports {
-            vmod_c_ref_to_slice_lifetime: Some(vmod_c_ref_to_slice_lifetime),
+            vmod_c_scalar_fn: Some(vmod_c_scalar_fn),
+            vmod_c_echo: Some(vmod_c_echo),
         };
         #[allow(non_upper_case_globals)]
         #[no_mangle]
-        pub static Vmod_tuple_Data: vmod_data = vmod_data {
-            vrt_major: 0u32,
-            vrt_minor: 0u32,
-            file_id: c"6142e626e445cf933f6b83141c9f8df0269ecf307aa77947da8ea7c109afcf0d"
+        pub static Vmod_abi_vrt_Data: vmod_data = vmod_data {
+            vrt_major: 23u32,
+            vrt_minor: 1u32,
+            file_id: c"2af96772bbac9b92c65f625f75a6f631687e7ba4dbb3472eab456dff85798003"
                 .as_ptr(),
-            name: c"tuple".as_ptr(),
-            func_name: c"Vmod_vmod_tuple_Func".as_ptr(),
+            name: c"abi_vrt".as_ptr(),
+            func_name: c"Vmod_vmod_abi_vrt_Func".as_ptr(),
             func_len: ::std::mem::size_of::<VmodExports>() as c_int,
             func: &VMOD_EXPORTS as *const _ as *const c_void,
             abi: VMOD_ABI_Version.as_ptr(),
@@ -74,10 +76,10 @@ mod tuple {
         };
         const JSON: &CStr = c"(moved to @json.snap files)";
     }
-    use super::PerTask;
-    pub fn ref_to_slice_lifetime<'a>(
-        tsk_vals: &mut Option<Box<PerTask<'a>>>,
-    ) -> Option<&'a str> {
-        tsk_vals.as_ref().as_deref().map(|v| v.data)
+    pub fn scalar_fn(x: i64) -> i64 {
+        x
+    }
+    pub fn echo(s: &str) -> String {
+        s.to_string()
     }
 }

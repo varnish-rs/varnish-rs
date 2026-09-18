@@ -9,7 +9,9 @@ name = "stat_tree"
 path = "src/main.rs"
 
 [dependencies]
-varnish = { workspace = true }
+# Pinned to `full`: uses `MetricsReader`, which is gated out under the vrt-only surface.
+# Without this pin, a workspace-wide `--no-default-features` build would break this example.
+varnish = { workspace = true, features = ["full"] }
 clap = { workspace = true }
 
 [lints]

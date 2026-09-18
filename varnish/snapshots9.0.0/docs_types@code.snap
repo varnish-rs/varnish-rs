@@ -122,9 +122,9 @@ mod types {
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_types_Data: vmod_data = vmod_data {
-            vrt_major: 0,
-            vrt_minor: 0,
-            file_id: c"73af3e239c26709b3704928b316f2e69f39231fe8bdbf154a61cc612cf882dac"
+            vrt_major: 0u32,
+            vrt_minor: 0u32,
+            file_id: c"53f899a1adcc72b4ae95d8db2cfd7a20591f0d69cf2b6eff5ab62baa96579b45"
                 .as_ptr(),
             name: c"types".as_ptr(),
             func_name: c"Vmod_vmod_types_Func".as_ptr(),

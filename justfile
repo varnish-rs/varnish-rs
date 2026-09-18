@@ -11,6 +11,10 @@ default_varnish_ver := '9.0'
 # Make sure to update CI with the changes.
 supported_varnish_vers := '8.0 9.0'
 
+# Examples confirmed to build without the `full` Cargo feature (i.e. under the vrt-only $ABI
+# surface). Update this list whenever an example gains/loses that property.
+vrt_compatible_examples := '-p vmod_timestamp -p vmod_error -p vmod_object -p vmod_restricted_callsites -p vmod_blobutils'
+
 # if running in CI, treat warnings as errors by setting RUSTFLAGS and RUSTDOCFLAGS to '-D warnings' unless they are already set
 # Use `CI=true just ci-test` to run the same tests as in GitHub CI.
 # Use `just env-info` to see the current values of RUSTFLAGS and RUSTDOCFLAGS
@@ -67,6 +71,28 @@ build:
 # Quick compile without building a binary
 check:
     cargo check {{packages}} {{features}} {{targets}}
+
+# Check the vrt-only ($ABI vrt) API surface: everything gated behind the `full` Cargo feature
+# must stay off. Checks the crate itself, plus the examples confirmed to build without `full`.
+#
+# Deliberately NOT `cargo check --workspace --no-default-features`: Cargo unifies features per
+# package across the whole workspace's dependency graph, so a workspace-wide check would keep
+# passing even if a vrt-compatible example regressed (lost a required `#[cfg(feature =
+# "full")]` gate) — as long as some OTHER, `full`-pinned example (e.g. a custom-backend one) is
+# still part of that same resolution to silently union `full` back in. Selecting only the
+# vrt-compatible examples via `-p` avoids that contamination, since none of them request `full`
+# themselves.
+check-vrt-abi:
+    cargo check -p varnish-sys -p varnish --no-default-features
+    cargo check {{vrt_compatible_examples}} --no-default-features
+    cargo clippy -p varnish-sys -p varnish --no-default-features
+    # Actually builds each example's cdylib with vrt-only bindings and runs its `.vtc` suite
+    # against a real varnishd, proving the ABI version handshake and symbol resolution work at
+    # runtime — `cargo check`/`clippy` above only prove the code type-checks. `cargo build` first
+    # because the `.vtc` harness looks for an already-built `.so` on disk; `cargo test` alone
+    # only builds the test binary, not the cdylib.
+    cargo build {{vrt_compatible_examples}} --no-default-features
+    cargo test {{vrt_compatible_examples}} --no-default-features
 
 # Generate code coverage report to upload to codecov.io
 ci-coverage: env-info && \

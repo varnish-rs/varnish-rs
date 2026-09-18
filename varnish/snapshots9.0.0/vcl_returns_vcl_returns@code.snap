@@ -483,9 +483,9 @@ mod vcl_returns {
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_vcl_returns_Data: vmod_data = vmod_data {
-            vrt_major: 0,
-            vrt_minor: 0,
-            file_id: c"46631c2a1aab2110aaac7b09f4d73227e17d61d2b17d60baf5a894096b1361ca"
+            vrt_major: 0u32,
+            vrt_minor: 0u32,
+            file_id: c"a464dd698cc366c8fea1051c0f6694fb871451705c595c3b2511c43102a9887e"
                 .as_ptr(),
             name: c"vcl_returns".as_ptr(),
             func_name: c"Vmod_vmod_vcl_returns_Func".as_ptr(),

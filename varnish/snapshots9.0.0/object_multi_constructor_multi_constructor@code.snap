@@ -125,9 +125,9 @@ mod multi_constructor {
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_multi_constructor_Data: vmod_data = vmod_data {
-            vrt_major: 0,
-            vrt_minor: 0,
-            file_id: c"772c7596098c06a44b27ccbdb5d02ff214cd7195de3502130ecad33f8387f348"
+            vrt_major: 0u32,
+            vrt_minor: 0u32,
+            file_id: c"21ee6182eec317e563d32c0ab0011cbe0b8d21b9bf91639bec82ee60febcec97"
                 .as_ptr(),
             name: c"multi_constructor".as_ptr(),
             func_name: c"Vmod_vmod_multi_constructor_Func".as_ptr(),
