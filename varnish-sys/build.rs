@@ -12,6 +12,7 @@ struct VarnishInfo {
     bindings: PathBuf,
     varnish_paths: Vec<PathBuf>,
     version: String,
+    pre_vcache: bool,
 }
 
 impl VarnishInfo {
@@ -20,6 +21,8 @@ impl VarnishInfo {
         Self {
             bindings,
             varnish_paths,
+            pre_vcache: version == "trunk"
+                || semver::Version::parse(&version).unwrap() < semver::Version::new(9, 1, 0),
             version,
         }
     }
@@ -29,13 +32,16 @@ fn emit_version_cfgs(version: &str) {
     if version == "trunk" {
         // Treat trunk at least as latest Varnish
         println!("cargo::rustc-cfg=varnishsys_90_sslflags");
-        println!("cargo::rustc-cfg=varnishsys_trunk_sslcafile");
+        println!("cargo::rustc-cfg=varnishsys_91_sslcafile");
         return;
     }
     let ver = semver::Version::parse(version)
         .unwrap_or_else(|_| panic!("varnishapi invalid version: {version}"));
     if ver >= semver::Version::new(9, 0, 0) {
         println!("cargo::rustc-cfg=varnishsys_90_sslflags");
+        if ver >= semver::Version::new(9, 1, 0) {
+            println!("cargo::rustc-cfg=varnishsys_91_sslcafile");
+        }
     } else if ver < semver::Version::new(8, 0, 0) {
         println!(
             "cargo::warning=Varnish {version} is not supported and may not work with this crate"
@@ -63,7 +69,7 @@ fn detect_varnish() -> Option<VarnishInfo> {
     // 9.0 adds ssl_flags to the backend SSL struct
     println!("cargo::rustc-check-cfg=cfg(varnishsys_90_sslflags)");
     // trunk adds ssl_ca_file to vrt_endpoint (not yet in a stable release)
-    println!("cargo::rustc-check-cfg=cfg(varnishsys_trunk_sslcafile)");
+    println!("cargo::rustc-check-cfg=cfg(varnishsys_91_sslcafile)");
 
     let bindings =
         PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR environment variable must be set"))
@@ -95,7 +101,7 @@ fn generate_bindings(info: &VarnishInfo) {
 
     println!("cargo::rustc-link-lib=varnishapi");
     println!("cargo::rerun-if-changed=c_code/wrapper.h");
-    let bindings_builder = bindgen::Builder::default()
+    let mut bindings_builder = bindgen::Builder::default()
         .header("c_code/wrapper.h")
         .blocklist_item("FP_.*")
         .blocklist_item("FILE")
@@ -128,6 +134,10 @@ fn generate_bindings(info: &VarnishInfo) {
         // FIXME: some enums should probably be done as rustified_enum (exhaustive)
         .rustified_non_exhaustive_enum(ren.get_regex_str())
         .parse_callbacks(Box::new(ren));
+
+    if info.pre_vcache {
+        bindings_builder = bindings_builder.clang_args(["-DPRE_VCACHE"]);
+    }
 
     let bindings = bindings_builder
         .generate()
