@@ -1,0 +1,165 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VMOD_JSON_SPEC
+[
+  [
+    "$VMOD",
+    "2.0",
+    "vcl_rename",
+    "Vmod_vmod_vcl_rename_Func",
+    "55160ce71c366c87549c77c64344bc0a954b417a9280b810a1c7ef85e73e08e5",
+    "Varnish (version) (hash)",
+    "0",
+    "0"
+  ],
+  [
+    "$CPROTO",
+    "
+struct vmod_vcl_rename_kv;
+
+typedef VCL_INT td_vmod_vcl_rename_foo(
+    VRT_CTX
+);
+
+typedef VCL_INT td_vmod_vcl_rename_renamed_fn(
+    VRT_CTX
+);
+
+struct arg_vmod_vcl_rename_kv_new {
+  char valid_cap;
+  VCL_INT cap;
+};
+
+typedef VCL_VOID td_vmod_vcl_rename_kv_new(
+    VRT_CTX,
+    struct vmod_vcl_rename_kv **,
+    const char *,
+    struct arg_vmod_vcl_rename_kv_new *
+);
+
+typedef VCL_VOID td_vmod_vcl_rename_kv__fini(
+    struct vmod_vcl_rename_kv **
+);
+
+typedef VCL_STRING td_vmod_vcl_rename_kv_get(
+    VRT_CTX,
+    struct vmod_vcl_rename_kv *,
+    VCL_STRING
+);
+
+typedef VCL_VOID td_vmod_vcl_rename_kv_set(
+    VRT_CTX,
+    struct vmod_vcl_rename_kv *,
+    VCL_STRING,
+    VCL_STRING
+);
+
+struct Vmod_vmod_vcl_rename_Func {
+  td_vmod_vcl_rename_foo *f_foo;
+  td_vmod_vcl_rename_renamed_fn *f_renamed_fn;
+  td_vmod_vcl_rename_kv_new *f_kv_new;
+  td_vmod_vcl_rename_kv__fini *f_kv__fini;
+  td_vmod_vcl_rename_kv_get *f_kv_get;
+  td_vmod_vcl_rename_kv_set *f_kv_set;
+};
+
+static struct Vmod_vmod_vcl_rename_Func Vmod_vmod_vcl_rename_Func;"
+  ],
+  [
+    "$FUNC",
+    "foo",
+    [
+      [
+        "INT"
+      ],
+      "Vmod_vmod_vcl_rename_Func.f_foo",
+      ""
+    ]
+  ],
+  [
+    "$FUNC",
+    "bar",
+    [
+      [
+        "INT"
+      ],
+      "Vmod_vmod_vcl_rename_Func.f_renamed_fn",
+      ""
+    ]
+  ],
+  [
+    "$OBJ",
+    "make",
+    {
+      "NULL_OK": false
+    },
+    "struct vmod_vcl_rename_kv",
+    [
+      "$INIT",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_vcl_rename_Func.f_kv_new",
+        "struct arg_vmod_vcl_rename_kv_new",
+        [
+          "INT",
+          "cap",
+          "cap",
+          null,
+          null,
+          true
+        ]
+      ]
+    ],
+    [
+      "$FINI",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_vcl_rename_Func.f_kv__fini",
+        ""
+      ]
+    ],
+    [
+      "$METHOD",
+      "get",
+      [
+        [
+          "STRING"
+        ],
+        "Vmod_vmod_vcl_rename_Func.f_kv_get",
+        "",
+        [
+          "STRING",
+          "key",
+          "key"
+        ]
+      ]
+    ],
+    [
+      "$METHOD",
+      "store",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_vcl_rename_Func.f_kv_set",
+        "",
+        [
+          "STRING",
+          "key",
+          "key"
+        ],
+        [
+          "STRING",
+          "value",
+          "value"
+        ]
+      ]
+    ]
+  ]
+]
+

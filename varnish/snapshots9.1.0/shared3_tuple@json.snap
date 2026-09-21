@@ -1,0 +1,47 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VMOD_JSON_SPEC
+[
+  [
+    "$VMOD",
+    "2.0",
+    "tuple",
+    "Vmod_vmod_tuple_Func",
+    "f48632ff5d6055bc788e5c6e8475595e9dfb59430a49cef5785361f63a792bb6",
+    "Varnish (version) (hash)",
+    "0",
+    "0"
+  ],
+  [
+    "$CPROTO",
+    "
+typedef VCL_STRING td_vmod_tuple_ref_to_slice_lifetime(
+    VRT_CTX,
+    struct vmod_priv *
+);
+
+struct Vmod_vmod_tuple_Func {
+  td_vmod_tuple_ref_to_slice_lifetime *f_ref_to_slice_lifetime;
+};
+
+static struct Vmod_vmod_tuple_Func Vmod_vmod_tuple_Func;"
+  ],
+  [
+    "$FUNC",
+    "ref_to_slice_lifetime",
+    [
+      [
+        "STRING"
+      ],
+      "Vmod_vmod_tuple_Func.f_ref_to_slice_lifetime",
+      "",
+      [
+        "PRIV_TASK",
+        "tsk_vals",
+        "tsk_vals"
+      ]
+    ]
+  ]
+]
+

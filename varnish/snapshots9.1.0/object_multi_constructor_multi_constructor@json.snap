@@ -1,0 +1,205 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VMOD_JSON_SPEC
+[
+  [
+    "$VMOD",
+    "2.0",
+    "multi_constructor",
+    "Vmod_vmod_multi_constructor_Func",
+    "772c7596098c06a44b27ccbdb5d02ff214cd7195de3502130ecad33f8387f348",
+    "Varnish (version) (hash)",
+    "0",
+    "0"
+  ],
+  [
+    "$CPROTO",
+    "
+struct vmod_multi_constructor_kv;
+
+struct arg_vmod_multi_constructor_kv_new {
+  char valid_cap;
+  VCL_INT cap;
+};
+
+typedef VCL_VOID td_vmod_multi_constructor_kv_new(
+    VRT_CTX,
+    struct vmod_multi_constructor_kv **,
+    const char *,
+    struct arg_vmod_multi_constructor_kv_new *
+);
+
+typedef VCL_VOID td_vmod_multi_constructor_kv_new_fixed(
+    VRT_CTX,
+    struct vmod_multi_constructor_kv **,
+    const char *
+);
+
+typedef VCL_VOID td_vmod_multi_constructor_kv__fini(
+    struct vmod_multi_constructor_kv **
+);
+
+typedef VCL_VOID td_vmod_multi_constructor_kv_set(
+    VRT_CTX,
+    struct vmod_multi_constructor_kv *,
+    VCL_STRING,
+    VCL_STRING
+);
+
+typedef VCL_STRING td_vmod_multi_constructor_kv_get(
+    VRT_CTX,
+    struct vmod_multi_constructor_kv *,
+    VCL_STRING
+);
+
+struct Vmod_vmod_multi_constructor_Func {
+  td_vmod_multi_constructor_kv_new *f_kv_new;
+  td_vmod_multi_constructor_kv_new_fixed *f_kv_new_fixed;
+  td_vmod_multi_constructor_kv__fini *f_kv__fini;
+  td_vmod_multi_constructor_kv_set *f_kv_set;
+  td_vmod_multi_constructor_kv_get *f_kv_get;
+};
+
+static struct Vmod_vmod_multi_constructor_Func Vmod_vmod_multi_constructor_Func;"
+  ],
+  [
+    "$OBJ",
+    "new",
+    {
+      "NULL_OK": false
+    },
+    "struct vmod_multi_constructor_kv",
+    [
+      "$INIT",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_multi_constructor_Func.f_kv_new",
+        "struct arg_vmod_multi_constructor_kv_new",
+        [
+          "INT",
+          "cap",
+          "cap",
+          null,
+          null,
+          true
+        ]
+      ]
+    ],
+    [
+      "$FINI",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_multi_constructor_Func.f_kv__fini",
+        ""
+      ]
+    ],
+    [
+      "$METHOD",
+      "set",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_multi_constructor_Func.f_kv_set",
+        "",
+        [
+          "STRING",
+          "key",
+          "key"
+        ],
+        [
+          "STRING",
+          "value",
+          "value"
+        ]
+      ]
+    ],
+    [
+      "$METHOD",
+      "get",
+      [
+        [
+          "STRING"
+        ],
+        "Vmod_vmod_multi_constructor_Func.f_kv_get",
+        "",
+        [
+          "STRING",
+          "key",
+          "key"
+        ]
+      ]
+    ]
+  ],
+  [
+    "$OBJ",
+    "new_fixed",
+    {
+      "NULL_OK": false
+    },
+    "struct vmod_multi_constructor_kv",
+    [
+      "$INIT",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_multi_constructor_Func.f_kv_new_fixed",
+        ""
+      ]
+    ],
+    [
+      "$FINI",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_multi_constructor_Func.f_kv__fini",
+        ""
+      ]
+    ],
+    [
+      "$METHOD",
+      "set",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_multi_constructor_Func.f_kv_set",
+        "",
+        [
+          "STRING",
+          "key",
+          "key"
+        ],
+        [
+          "STRING",
+          "value",
+          "value"
+        ]
+      ]
+    ],
+    [
+      "$METHOD",
+      "get",
+      [
+        [
+          "STRING"
+        ],
+        "Vmod_vmod_multi_constructor_Func.f_kv_get",
+        "",
+        [
+          "STRING",
+          "key",
+          "key"
+        ]
+      ]
+    ]
+  ]
+]
+

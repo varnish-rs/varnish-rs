@@ -1,0 +1,87 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VmodInfo {
+    params: VmodParams {
+        docs: None,
+    },
+    ident: "non_new_constructor",
+    docs: "",
+    funcs: [],
+    objects: [
+        ObjInfo {
+            ident: "kv",
+            docs: "",
+            constructors: [
+                FuncInfo {
+                    func_type: Constructor,
+                    ident: "create",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: true,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "cap",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Optional,
+                                    default: Null,
+                                    ty_info: I64,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: SelfType,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
+            destructor: FuncInfo {
+                func_type: Destructor,
+                ident: "_fini",
+                vcl_name: None,
+                docs: "",
+                has_optional_args: false,
+                args: [],
+                output_ty: Default,
+                out_result: false,
+                restrict: [],
+            },
+            funcs: [
+                FuncInfo {
+                    func_type: Method,
+                    ident: "get",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "self",
+                            docs: "",
+                            ty: SelfType,
+                        },
+                        ParamTypeInfo {
+                            ident: "key",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Regular,
+                                    default: Null,
+                                    ty_info: Str,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: String,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
+        },
+    ],
+    shared_types: SharedTypes {
+        shared_per_task_ty: None,
+        shared_per_vcl_ty: None,
+    },
+}
