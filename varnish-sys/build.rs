@@ -68,7 +68,7 @@ fn detect_varnish() -> Option<VarnishInfo> {
 
     // 9.0 adds ssl_flags to the backend SSL struct
     println!("cargo::rustc-check-cfg=cfg(varnishsys_90_sslflags)");
-    // trunk adds ssl_ca_file to vrt_endpoint (not yet in a stable release)
+    // 9.1 adds ssl_ca_file to vrt_endpoint (not yet in a stable release)
     println!("cargo::rustc-check-cfg=cfg(varnishsys_91_sslcafile)");
 
     let bindings =
