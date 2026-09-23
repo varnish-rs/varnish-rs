@@ -21,8 +21,8 @@ impl VarnishInfo {
         Self {
             bindings,
             varnish_paths,
-            pre_vcache: version == "trunk"
-                || semver::Version::parse(&version).unwrap() < semver::Version::new(9, 1, 0),
+            pre_vcache: version != "trunk"
+                && semver::Version::parse(&version).unwrap() < semver::Version::new(9, 1, 0),
             version,
         }
     }

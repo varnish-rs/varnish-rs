@@ -6,7 +6,7 @@ features := '--all-features'  # Enable all features
 targets := '--all-targets'  # For all targets (lib, bin, tests, examples, benches)
 
 # which version of Varnish to install by default. Update the `supported_varnish_vers` variable below.
-default_varnish_ver := '9.0'
+default_varnish_ver := '9.1'
 
 # Make sure to update CI with the changes.
 supported_varnish_vers := '9.0 9.1'
