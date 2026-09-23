@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.1](https://github.com/varnish-rs/varnish-rs/compare/varnish-sys-v0.8.0...varnish-sys-v0.8.1) - 2026-09-23
+
+### Fixed
+
+- fix comment ([#326](https://github.com/varnish-rs/varnish-rs/pull/326))
+
+### Other
+
+- post release tweaks ([#328](https://github.com/varnish-rs/varnish-rs/pull/328))
+
 ## [0.8.0](https://github.com/gquintard/varnish-rs-fork/compare/varnish-sys-v0.7.2...varnish-sys-v0.8.0) - 2026-09-21
 
 ### Other
