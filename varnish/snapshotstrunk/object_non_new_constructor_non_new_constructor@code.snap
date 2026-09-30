@@ -86,7 +86,7 @@ mod non_new_constructor {
         pub static Vmod_non_new_constructor_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"289d6d0d8d8143bec47372189d68191ceb5fb2df2e7af10a587c6db7e6ba1d32"
+            file_id: c"ec7d56bea30b74a1f993fbd719640a5b57bf881c7261d1644f6d4d760dd14d75"
                 .as_ptr(),
             name: c"non_new_constructor".as_ptr(),
             func_name: c"Vmod_vmod_non_new_constructor_Func".as_ptr(),

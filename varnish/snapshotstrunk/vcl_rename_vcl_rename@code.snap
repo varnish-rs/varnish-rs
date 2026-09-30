@@ -139,7 +139,7 @@ mod vcl_rename {
         pub static Vmod_vcl_rename_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"55160ce71c366c87549c77c64344bc0a954b417a9280b810a1c7ef85e73e08e5"
+            file_id: c"fec3a536125d1fa104c0c7eebf3d6a913e4abd7f9a8b7d856546096de3ef7442"
                 .as_ptr(),
             name: c"vcl_rename".as_ptr(),
             func_name: c"Vmod_vmod_vcl_rename_Func".as_ptr(),

@@ -41,6 +41,7 @@ mod tests;
 /// - `impl` blocks' public methods are exported as VMOD object methods. The object itself may reside outside the module.
 ///   - A public method returning `Self` or `Result<Self, _>` is treated as the object constructor.
 ///   - `#[vcl_name]` attribute on an object constructor's argument will set it to the VCL name.
+///   - Methods take `&self`, or `&mut self` if restricted to `vcl_init`/`vcl_fini` (see `#[restrict]`).
 ///
 /// The `#[vmod]` attribute can only be applied to a module. All `pub` functions in that module
 /// are exported as VMOD functions. `impl` blocks export their `pub` methods as VMOD object
@@ -81,6 +82,33 @@ mod tests;
 ///     /// Callable from both client and backend contexts
 ///     #[restrict(client, backend)]
 ///     pub fn client_or_backend() -> i64 { 3 }
+/// }
+/// ```
+///
+/// ### `&mut self` methods
+///
+/// An object method restricted only to `vcl_init`, `vcl_fini` and/or `housekeeping` may take
+/// `&mut self` instead of `&self`. These subroutines run on the CLI thread while no request can
+/// reach the object, so exclusive access is guaranteed, and setup-only state needs no `Mutex`.
+/// Such a method cannot take `&mut Ctx`: calling a VCL subroutine from it could re-enter the
+/// object while it is mutably borrowed. Use `&Ctx` and return `Result::Err` to report failures.
+///
+/// ```rust,ignore
+/// # use varnish::vmod;
+/// pub struct InitCounter { value: i64 }
+///
+/// #[vmod]
+/// mod example {
+///     use super::InitCounter;
+///
+///     impl InitCounter {
+///         pub fn counter() -> Self { Self { value: 0 } }
+///
+///         #[restrict(vcl_init)]
+///         pub fn add(&mut self, value: i64) { self.value += value; }
+///
+///         pub fn get(&self) -> i64 { self.value }
+///     }
 /// }
 /// ```
 ///
