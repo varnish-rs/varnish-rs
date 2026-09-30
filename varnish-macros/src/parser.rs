@@ -334,6 +334,13 @@ impl FuncInfo {
             }
         }
 
+        if args
+            .iter()
+            .any(|a| matches!(a.ty, ParamType::SelfType { is_mut: true }))
+        {
+            check_mut_self_method(signature, &restrict, &args, &mut errors);
+        }
+
         let has_optional_args = args.iter().any(
             |arg| matches!(&arg.ty, ParamType::Value(v) if matches!(v.kind, ParamKind::Optional)),
         );
@@ -361,6 +368,44 @@ impl FuncInfo {
             args,
             restrict,
         })
+    }
+}
+
+/// Scopes in which an object method may take `&mut self`: these only run on the CLI thread,
+/// while no task can reach the object, so exclusive access is guaranteed.
+const HOUSEKEEPING_SCOPES: &[&str] = &["vcl_init", "vcl_fini", "housekeeping"];
+
+fn check_mut_self_method(
+    signature: &Signature,
+    restrict: &[String],
+    args: &[ParamTypeInfo],
+    errors: &mut Errors,
+) {
+    if restrict.is_empty() {
+        errors.add(
+            signature,
+            "`&mut self` methods require `#[restrict(vcl_init)]`, `#[restrict(vcl_fini)]` or `#[restrict(housekeeping)]`",
+        );
+    }
+    for scope in restrict {
+        if !HOUSEKEEPING_SCOPES.contains(&scope.as_str()) {
+            errors.add(
+                signature,
+                &format!(
+                    "`&mut self` methods cannot be restricted to '{scope}'. Allowed scopes: {}",
+                    HOUSEKEEPING_SCOPES.join(", ")
+                ),
+            );
+        }
+    }
+    if args
+        .iter()
+        .any(|a| matches!(a.ty, ParamType::Context { is_mut: true }))
+    {
+        errors.add(
+            signature,
+            "`&mut self` methods cannot take `&mut Ctx` (a VCL sub call could re-enter the object); use `&Ctx`",
+        );
     }
 }
 

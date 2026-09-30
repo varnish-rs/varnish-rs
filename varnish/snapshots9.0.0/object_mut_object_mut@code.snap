@@ -1,0 +1,230 @@
+---
+source: varnish-macros/src/tests.rs
+---
+mod object_mut {
+    #[allow(non_snake_case, unused_imports, unused_qualifications, unused_variables)]
+    #[allow(clippy::needless_question_mark, clippy::new_without_default)]
+    #[automatically_derived]
+    mod varnish_generated {
+        use std::ffi::{c_char, c_int, c_uint, c_void, CStr};
+        use std::ptr::null;
+        use varnish::ffi::{
+            VCL_ACL, VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP,
+            VCL_PROBE, VCL_REAL, VCL_STRING, VCL_SUB, VCL_TIME, VCL_VOID,
+            VMOD_ABI_Version, VclEvent, vmod_data, vmod_priv, vrt_ctx,
+            VMOD_PRIV_METHODS_MAGIC, vmod_priv_methods,
+        };
+        use varnish::vcl::{Ctx, IntoVCL, PerVclState, Workspace};
+        use super::*;
+        unsafe extern "C" fn vmod_c_Counter_new(
+            __ctx: *mut vrt_ctx,
+            __objp: *mut *mut Counter,
+            __vcl_name: *const c_char,
+        ) {
+            let __result = Box::new(super::Counter::new());
+            *__objp = Box::into_raw(__result);
+        }
+        unsafe extern "C" fn vmod_c_Counter__fini(__objp: *mut *mut Counter) {
+            drop(Box::from_raw(*__objp));
+            *__objp = ::std::ptr::null_mut();
+        }
+        unsafe extern "C" fn vmod_c_Counter_set(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::Counter,
+            value: VCL_INT,
+        ) {
+            if __ctx.is_null() {
+                return;
+            }
+            if !__ctx.is_null()
+                && (*__ctx).method
+                    & (::varnish::vcl::subroutine::bitmask::HOUSEKEEPING) as c_uint == 0
+            {
+                Ctx::from_ptr(__ctx).fail("'set' is only allowed in: housekeeping");
+                return;
+            }
+            let __obj = (__obj as *mut super::Counter)
+                .as_mut()
+                .expect("object pointer must not be null");
+            __obj.set(value.into())
+        }
+        unsafe extern "C" fn vmod_c_Counter_add(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::Counter,
+            value: VCL_INT,
+        ) {
+            if __ctx.is_null() {
+                return;
+            }
+            if !__ctx.is_null()
+                && (*__ctx).method
+                    & (::varnish::vcl::subroutine::bitmask::INIT) as c_uint == 0
+            {
+                Ctx::from_ptr(__ctx).fail("'add' is only allowed in: vcl_init");
+                return;
+            }
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __obj = (__obj as *mut super::Counter)
+                .as_mut()
+                .expect("object pointer must not be null");
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(__obj.add(&__ctx, value.into())?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                })
+        }
+        unsafe extern "C" fn vmod_c_Counter_add_ws(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::Counter,
+            value: VCL_INT,
+        ) {
+            if __ctx.is_null() {
+                return;
+            }
+            if !__ctx.is_null()
+                && (*__ctx).method
+                    & (::varnish::vcl::subroutine::bitmask::INIT) as c_uint == 0
+            {
+                Ctx::from_ptr(__ctx).fail("'add_ws' is only allowed in: vcl_init");
+                return;
+            }
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __obj = (__obj as *mut super::Counter)
+                .as_mut()
+                .expect("object pointer must not be null");
+            __obj.add_ws(&mut __ctx.ws, value.into())
+        }
+        unsafe extern "C" fn vmod_c_Counter_reset(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::Counter,
+        ) {
+            if __ctx.is_null() {
+                return;
+            }
+            if !__ctx.is_null()
+                && (*__ctx).method
+                    & (::varnish::vcl::subroutine::bitmask::INIT
+                        | ::varnish::vcl::subroutine::bitmask::FINI) as c_uint == 0
+            {
+                Ctx::from_ptr(__ctx)
+                    .fail("'reset' is only allowed in: vcl_init, vcl_fini");
+                return;
+            }
+            let __obj = (__obj as *mut super::Counter)
+                .as_mut()
+                .expect("object pointer must not be null");
+            __obj.reset()
+        }
+        unsafe extern "C" fn vmod_c_Counter_get(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::Counter,
+        ) -> VCL_INT {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(__obj.get().into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        #[repr(C)]
+        pub struct VmodExports {
+            vmod_c_Counter_new: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __objp: *mut *mut Counter,
+                    __vcl_name: *const c_char,
+                ),
+            >,
+            vmod_c_Counter__fini: Option<
+                unsafe extern "C" fn(__objp: *mut *mut Counter),
+            >,
+            vmod_c_Counter_set: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::Counter,
+                    value: VCL_INT,
+                ),
+            >,
+            vmod_c_Counter_add: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::Counter,
+                    value: VCL_INT,
+                ),
+            >,
+            vmod_c_Counter_add_ws: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::Counter,
+                    value: VCL_INT,
+                ),
+            >,
+            vmod_c_Counter_reset: Option<
+                unsafe extern "C" fn(__ctx: *mut vrt_ctx, __obj: *const super::Counter),
+            >,
+            vmod_c_Counter_get: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::Counter,
+                ) -> VCL_INT,
+            >,
+        }
+        pub static VMOD_EXPORTS: VmodExports = VmodExports {
+            vmod_c_Counter_new: Some(vmod_c_Counter_new),
+            vmod_c_Counter__fini: Some(vmod_c_Counter__fini),
+            vmod_c_Counter_set: Some(vmod_c_Counter_set),
+            vmod_c_Counter_add: Some(vmod_c_Counter_add),
+            vmod_c_Counter_add_ws: Some(vmod_c_Counter_add_ws),
+            vmod_c_Counter_reset: Some(vmod_c_Counter_reset),
+            vmod_c_Counter_get: Some(vmod_c_Counter_get),
+        };
+        #[allow(non_upper_case_globals)]
+        #[no_mangle]
+        pub static Vmod_object_mut_Data: vmod_data = vmod_data {
+            vrt_major: 0,
+            vrt_minor: 0,
+            file_id: c"570c59404f3f063f488430514eefb11c0ff894ca02219d156a9b1f1afacd3de5"
+                .as_ptr(),
+            name: c"object_mut".as_ptr(),
+            func_name: c"Vmod_vmod_object_mut_Func".as_ptr(),
+            func_len: ::std::mem::size_of::<VmodExports>() as c_int,
+            func: &VMOD_EXPORTS as *const _ as *const c_void,
+            abi: VMOD_ABI_Version.as_ptr(),
+            json: JSON.as_ptr(),
+            proto: null(),
+            vcs: c"".as_ptr(),
+            version: c"".as_ptr(),
+        };
+        const JSON: &CStr = c"(moved to @json.snap files)";
+    }
+    use super::Counter;
+    use varnish::vcl::{Ctx, Workspace};
+    impl Counter {
+        pub fn new() -> Self {
+            Self { value: 0 }
+        }
+        /// Only callable from vcl_init and vcl_fini, so `&mut self` is allowed.
+        pub fn set(&mut self, value: i64) {
+            self.value = value;
+        }
+        pub fn add(&mut self, _ctx: &Ctx, value: i64) -> Result<(), String> {
+            self.value += value;
+            Ok(())
+        }
+        pub fn add_ws(&mut self, _ws: &mut Workspace, value: i64) {
+            self.value += value;
+        }
+        pub fn reset(&mut self) {
+            self.value = 0;
+        }
+        pub fn get(&self) -> i64 {
+            self.value
+        }
+    }
+}

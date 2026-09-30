@@ -46,3 +46,18 @@ Only callable from `vcl_recv` and `vcl_hash`
 **Restricted to:** `client`, `backend`
 
 Callable from both client and backend contexts
+
+## Object `InitCounter`
+
+### Constructor `restricted_callsites.counter()`
+
+### Method `VOID <object>.add(INT value)`
+
+**Restricted to:** `vcl_init`
+
+Add to the counter. Methods restricted to `vcl_init`/`vcl_fini` (or `housekeeping`)
+may take `&mut self`: they run on the CLI thread while no request can reach the object.
+
+### Method `INT <object>.get()`
+
+Read the counter from any subroutine

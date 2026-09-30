@@ -59,7 +59,9 @@ VmodInfo {
                         ParamTypeInfo {
                             ident: "self",
                             docs: "",
-                            ty: SelfType,
+                            ty: SelfType {
+                                is_mut: false,
+                            },
                         },
                         ParamTypeInfo {
                             ident: "key",
