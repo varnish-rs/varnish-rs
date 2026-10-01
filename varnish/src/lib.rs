@@ -462,6 +462,9 @@ pub use varnish_sys::vcl;
 // Re-export the report_details_json macro
 pub use varnish_sys::report_details_json;
 
+// Re-export the set_header macro
+pub use varnish_sys::set_header;
+
 #[cfg(not(feature = "ffi"))]
 #[doc(hidden)]
 pub mod ffi {

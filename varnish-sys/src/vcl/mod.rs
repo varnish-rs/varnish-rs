@@ -25,4 +25,6 @@ pub use vsb::*;
 pub use ws::*;
 pub use ws_str_buffer::WsStrBuffer;
 
+pub use crate::set_header;
+
 pub use crate::ffi::{VclEvent as Event, VslTag as LogTag};
