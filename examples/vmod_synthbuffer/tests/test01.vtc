@@ -19,6 +19,7 @@ varnish v1 -vcl+backend {
     }
 
     sub vcl_synth {
+        set resp.storage = storage.Transient;
         synthbuffer.push("hello ");
         synthbuffer.push_reverse("world");
         return (deliver);

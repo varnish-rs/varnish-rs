@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0](https://github.com/gquintard/varnish-rs-fork/compare/varnish-sys-v0.7.2...varnish-sys-v0.8.0) - 2026-09-21
+
+### Other
+
+- update varnish-sys/bindings.for-doc
+- compile on both 9.0 and 9.1
+- Fix CI: clippy lint, snapshot flakes, and Varnish-trunk build ([#322](https://github.com/gquintard/varnish-rs-fork/pull/322))
+- Blocklist libc runtime symbols from bindgen output ([#319](https://github.com/gquintard/varnish-rs-fork/pull/319))
+- Add Ctx::response_buffer() and vmod_synthbuffer example ([#316](https://github.com/gquintard/varnish-rs-fork/pull/316))
+- Add Ctx::subroutine() to expose the currently executing VCL subroutine ([#315](https://github.com/gquintard/varnish-rs-fork/pull/315))
+
 ### Added
 
 - Add Ctx::subroutine() to expose the currently executing VCL subroutine ([#315](https://github.com/varnish-rs/varnish-rs/pull/315))
