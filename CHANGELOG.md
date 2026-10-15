@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Breaking:** `VclBackend::pipe()` now borrows the client stream (`&mut TcpStream`) instead of taking ownership of it. Dropping the owned stream closed the client fd, which Varnish then closed again, panicking the child with `EBADF` (also hit by the default implementation) ([#331](https://github.com/varnish-rs/varnish-rs/issues/331))
+
 ## [0.8.0](https://github.com/gquintard/varnish-rs-fork/compare/varnish-sys-v0.7.2...varnish-sys-v0.8.0) - 2026-09-21
 
 ### Other

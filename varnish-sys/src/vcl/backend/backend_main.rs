@@ -2,7 +2,7 @@
 use std::ffi::c_uint;
 use std::ffi::{c_char, c_int, c_void, CStr, CString};
 use std::marker::PhantomData;
-use std::mem::size_of;
+use std::mem::{size_of, ManuallyDrop};
 use std::net::{SocketAddr, TcpStream};
 use std::os::unix::io::FromRawFd;
 use std::ptr;
@@ -166,11 +166,14 @@ pub trait VclBackend<T: VclResponse> {
     }
 
     /// If your backend is used inside `vcl_pipe`, this method is in charge of sending the request
-    /// headers that Varnish already read, and then the body. The second argument, a `TcpStream` is
+    /// headers that Varnish already read, and then the body. The second argument, a `&mut TcpStream` is
     /// the raw client stream that Varnish was using (converted from a raw fd).
     ///
+    /// The stream is only borrowed: Varnish still owns the underlying file descriptor and closes
+    /// it once this method returns, so don't close it yourself.
+    ///
     /// Once done, you should return a `StreamClose` describing how/why the transaction ended.
-    fn pipe(&self, ctx: &mut Ctx, _tcp_stream: TcpStream) -> StreamClose {
+    fn pipe(&self, ctx: &mut Ctx, _tcp_stream: &mut TcpStream) -> StreamClose {
         ctx.log(LogTag::Error, "Backend does not support pipe");
         StreamClose::TxError
     }
@@ -276,8 +279,8 @@ impl<S: VclBackend<T>, T: VclResponse> AsRef<BackendRef> for Backend<S, T> {
 
 /// Return type for [`VclBackend::pipe`]
 ///
-/// When piping a response, the backend is in charge of closing the file descriptor (which is done
-/// automatically by the rust layer), but also to provide how/why it got closed.
+/// When piping a response, the backend reports how/why the transaction ended. Varnish then closes
+/// the client file descriptor itself, using this value as the close reason.
 #[derive(Debug, Clone, Copy)]
 pub enum StreamClose {
     RemClose,
@@ -751,10 +754,12 @@ unsafe extern "C" fn wrap_pipe<S: VclBackend<T>, T: VclResponse>(
     let sp = req.validated_session();
     let fd = sp.fd;
     assert_ne!(fd, 0);
-    let tcp_stream = TcpStream::from_raw_fd(fd);
+    // Varnish owns the fd and closes it (SES_Close) after we return, so the
+    // stream must never be dropped, or the fd would be closed twice.
+    let mut tcp_stream = ManuallyDrop::new(TcpStream::from_raw_fd(fd));
 
     let backend: &S = get_backend(validate_director(be));
-    sc_to_ptr(backend.pipe(&mut ctx, tcp_stream))
+    sc_to_ptr(backend.pipe(&mut ctx, &mut tcp_stream))
 }
 
 // CStr is tied to the lifetime of bep, but we only use it for error messages
