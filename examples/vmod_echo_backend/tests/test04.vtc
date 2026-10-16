@@ -25,7 +25,8 @@ client c1 {
     rxresp
     expect resp.status == 200
     expect resp.http.x-piped == "1"
-    expect resp.body == "/first"
+    expect resp.http.x-url == "/first"
+    expect resp.bodylen == 0
     expect_close
 } -run
 
@@ -33,7 +34,7 @@ client c2 {
     txreq -url "/second"
     rxresp
     expect resp.status == 200
-    expect resp.body == "/second"
+    expect resp.http.x-url == "/second"
     expect_close
 } -run
 

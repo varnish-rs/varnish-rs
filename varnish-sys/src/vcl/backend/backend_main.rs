@@ -2,9 +2,8 @@
 use std::ffi::c_uint;
 use std::ffi::{c_char, c_int, c_void, CStr, CString};
 use std::marker::PhantomData;
-use std::mem::{size_of, ManuallyDrop};
-use std::net::{SocketAddr, TcpStream};
-use std::os::unix::io::FromRawFd;
+use std::mem::size_of;
+use std::net::SocketAddr;
 use std::ptr;
 use std::ptr::{null, null_mut};
 use std::time::SystemTime;
@@ -16,7 +15,7 @@ use crate::ffi::{
 #[cfg(varnishsys_90_sslflags)]
 use crate::ffi::{BSSL_F_ENABLE, BSSL_F_NOVERIFY, BSSL_F_VERIFY_HOST};
 use crate::utils::get_backend;
-use crate::vcl::{Buffer, Ctx, IntoVCL, LogTag, VclError, VclResult, Workspace};
+use crate::vcl::{Buffer, Ctx, IntoVCL, LogTag, PipeRequest, VclError, VclResult, Workspace};
 use crate::{
     ffi, validate_director, validate_vdir, validate_vfp_ctx, validate_vfp_entry, validate_vrt_ctx,
 };
@@ -165,41 +164,35 @@ pub trait VclBackend<T: VclResponse> {
         (true, SystemTime::UNIX_EPOCH)
     }
 
-    /// If your backend is used inside `vcl_pipe`, this method is in charge of sending the request
-    /// headers that Varnish already read, and then the body. The second argument, a `&TcpStream` is
-    /// the raw client stream that Varnish was using (converted from a raw fd). `Read` and `Write`
-    /// are implemented for `&TcpStream`, so bind it mutably (`mut tcp_stream: &TcpStream`) to use
-    /// them.
+    /// If your backend is used inside `vcl_pipe`, this method is in charge of the whole
+    /// transaction, as core does for its own backends:
+    /// 1. connect to the backend and send it the request headers (`ctx.http_bereq`), counting
+    ///    them with [`PipeAcct::add_bereq_hdrbytes`](crate::vcl::PipeAcct::add_bereq_hdrbytes),
+    /// 2. send it what Varnish already consumed from the client, with
+    ///    [`PipeRequest::forward_preamble`],
+    /// 3. copy bytes both ways between [`PipeRequest::client`] and the backend until either side
+    ///    closes, counting them with [`PipeAcct::add_in`](crate::vcl::PipeAcct::add_in)/[`PipeAcct::add_out`](crate::vcl::PipeAcct::add_out). Core's own
+    ///    backends also stop after [`PipeRequest::pipe_timeout`] without traffic, and at
+    ///    [`PipeRequest::deadline`].
     ///
-    /// The stream is only borrowed, through a shared reference so it can't be moved out or
-    /// replaced: Varnish still owns the underlying file descriptor and closes it once this method
-    /// returns, so don't close it yourself. Notably, an implementation can't take a mutable
-    /// borrow to swap the stream out and drop it:
+    /// Once done, return a [`StreamClose`] describing how/why the transaction ended, usually
+    /// [`StreamClose::TxPipe`]. Varnish then closes the client connection.
     ///
-    /// ```compile_fail,E0053
-    /// use std::net::TcpStream;
-    /// use varnish_sys::vcl::{Ctx, StreamClose, VclBackend, VclError};
+    /// When `pipe()` returns, the `PipeAcct` log record is emitted, plus the `Pipe`/`PipeSess`
+    /// timestamps if the pipe started (see [`PipeRequest`]). The `MAIN.s_pipe_hdrbytes`,
+    /// `MAIN.s_pipe_in` and `MAIN.s_pipe_out` counters are not updated: Varnish exposes no way
+    /// to do it from a VMOD.
     ///
-    /// struct Thief;
+    /// `ctx` logs to the client request's transaction. Only use it from the calling thread.
     ///
-    /// impl VclBackend<()> for Thief {
-    ///     fn get_response(&self, _ctx: &mut Ctx) -> Result<Option<()>, VclError> {
-    ///         Ok(None)
-    ///     }
+    /// The default implementation refuses the pipe ([`PipeRequest::refuse`]).
     ///
-    ///     fn pipe(&self, _ctx: &mut Ctx, tcp_stream: &mut TcpStream) -> StreamClose {
-    ///         // would close Varnish's fd early, and leak the replacement
-    ///         let replacement = tcp_stream.try_clone().unwrap();
-    ///         drop(std::mem::replace(tcp_stream, replacement));
-    ///         StreamClose::TxPipe
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// Once done, you should return a `StreamClose` describing how/why the transaction ended.
-    fn pipe(&self, ctx: &mut Ctx, _tcp_stream: &TcpStream) -> StreamClose {
+    /// Never called for TLS client sessions (`-A`): [`PipeRequest::client`] is the raw socket,
+    /// whose bytes are encrypted. Such pipes are refused, logging
+    /// `Backend does not support pipe: TLS session`.
+    fn pipe(&self, ctx: &mut Ctx, req: &mut PipeRequest<'_>) -> StreamClose {
         ctx.log(LogTag::Error, "Backend does not support pipe");
-        StreamClose::TxError
+        req.refuse()
     }
 
     /// The method will get called when the VCL changes temperature or is discarded. It's notably a
@@ -774,18 +767,29 @@ unsafe extern "C" fn wrap_pipe<S: VclBackend<T>, T: VclResponse>(
     be: VCL_BACKEND,
 ) -> ffi::stream_close_t {
     let mut ctx = Ctx::from_ptr(ctxp);
+    let bo = ctx.raw.bo;
+    assert!(!bo.is_null(), "vcl_pipe ctx must have a busyobj");
+    let sp = ctx.raw.validated_req().validated_session();
+    let (is_tls, fd) = (!sp.tls.is_null(), sp.fd);
+    // On a TLS session, the client fd carries ciphertext: core pipes through the session's
+    // TLS layer (`htc->oper`), which a raw `TcpStream` would bypass. Refuse like a director
+    // without pipe support (`ReqAcct`, no `PipeAcct`).
+    if is_tls {
+        ctx.log(LogTag::Error, "Backend does not support pipe: TLS session");
+        return sc_to_ptr(StreamClose::TxError);
+    }
+    assert!(fd > 0);
     let req = ctx.raw.validated_req();
-    let sp = req.validated_session();
-    let fd = sp.fd;
-    assert_ne!(fd, 0);
-    // Varnish owns the fd and closes it (SES_Close) after we return, so the
-    // stream must never be dropped, or the fd would be closed twice.
-    // Only a shared reference is handed out, so pipe() can't move the
-    // stream out of the ManuallyDrop (e.g. with mem::replace) and drop it.
-    let tcp_stream = ManuallyDrop::new(TcpStream::from_raw_fd(fd));
+    // Like core's backends ("This is hackish..." in `vbe_dir_http1pipe`): the request header
+    // bytes move from `ReqAcct` to `PipeAcct`.
+    let req_hdrbytes = std::mem::take(&mut req.acct.req_hdrbytes);
+    let req: *mut ffi::req = req;
 
+    let mut preq = PipeRequest::new(req, bo, fd);
     let backend: &S = get_backend(validate_director(be));
-    sc_to_ptr(backend.pipe(&mut ctx, &tcp_stream))
+    let sc = backend.pipe(&mut ctx, &mut preq);
+    preq.finish(req_hdrbytes);
+    sc_to_ptr(sc)
 }
 
 // CStr is tied to the lifetime of bep, but we only use it for error messages

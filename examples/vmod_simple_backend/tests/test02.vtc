@@ -24,6 +24,17 @@ logexpect l1 -v v1 -g raw {
     expect * * Error "Backend does not support pipe"
 } -start
 
+# A refused pipe is accounted like a request that was never piped: ReqAcct
+# with the request header bytes, no PipeAcct nor Pipe timestamp.
+logexpect l2 -v v1 -g request {
+    fail add *  PipeAcct
+    fail add *  Timestamp   "^Pipe:"
+    expect * *  ReqURL      "^/pipe$"
+    expect * =  ReqAcct     "^[1-9][0-9]* 0 [1-9][0-9]* 0 0 0$"
+    expect * =  End
+    fail clear
+} -start
+
 client c1 {
     txreq -url "/pipe"
     expect_close
@@ -35,6 +46,7 @@ client c2 {
 } -run
 
 logexpect l1 -wait
+logexpect l2 -wait
 
 varnish v1 -expect MGT.child_panic == 0
 varnish v1 -expect MAIN.sc_tx_error == 2
