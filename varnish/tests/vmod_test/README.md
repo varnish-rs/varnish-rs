@@ -21,6 +21,26 @@ import rustest from "path/to/librustest.so";
 
 ### Function `VOID rustest.set_hdr(STRING name, STRING value)`
 
+Exercises the direct-value branch of `set_header!`
+
+### Function `VOID rustest.set_hdr_fmt(STRING name, INT id, STRING backend)`
+
+Exercises the format-template branch of `set_header!`
+
+### Function `VOID rustest.set_hdr_literal(STRING name, INT count)`
+
+Exercises the bare-literal branch of `set_header!`, which must interpolate captured
+identifiers rather than emit `{count}` verbatim
+
+### Function `STRING rustest.try_big_hdr(STRING name, INT size, BOOL use_fmt)`
+
+Tries to set a `size`-byte header value, returning the error message, or "" on success
+
+### Function `STRING rustest.try_nul_hdr(STRING name)`
+
+Tries to set a header value containing a NUL byte, returning the error message,
+or "" on success
+
 ### Function `VOID rustest.unset_hdr(STRING name)`
 
 ### Function `VOID rustest.set_url(STRING url)`

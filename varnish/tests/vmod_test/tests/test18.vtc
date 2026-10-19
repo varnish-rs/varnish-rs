@@ -1,0 +1,26 @@
+varnishtest "set_header! macro"
+
+server s1 {
+    rxreq
+    expect req.http.x-foo == "bar"
+    expect req.http.x-info == "id=42 backend=default"
+    expect req.http.x-lit == "count=7 {braced}"
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import rustest from "${vmod}";
+
+    sub vcl_recv {
+        rustest.set_hdr("x-foo", "bar");
+        rustest.set_hdr_fmt("x-info", 42, "default");
+        rustest.set_hdr_literal("x-lit", 7);
+        return (pass);
+    }
+} -start
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.status == 200
+} -run
