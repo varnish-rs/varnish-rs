@@ -8,7 +8,7 @@ See also: [workspace root](../AGENTS.md) · [varnish-sys](../varnish-sys/AGENTS.
 - `#[derive(VscMetric)]` (attrs `counter`, `gauge`, `bitmap`) — derives VSC metric structs.
 - `run_vtc_tests!("glob")` — generates one `#[test]` per matching `.vtc` file.
 
-`build.rs` reads `DEP_VARNISHAPI_VERSION_NUMBER` (from `varnish-sys`'s `links = "varnishapi"`), sets `cfg(varnishsys_77_vmod_data)` + `VARNISHAPI_VERSION_NUMBER` env — couples codegen to installed Varnish version.
+`build.rs` reads `DEP_VARNISHAPI_VERSION_NUMBER` (from `varnish-sys`'s `links = "varnishapi"`), sets the `VARNISHAPI_VERSION_NUMBER` env var — couples codegen to installed Varnish version.
 
 ## Pipeline model
 

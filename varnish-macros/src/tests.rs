@@ -65,7 +65,11 @@ fn run_vtc_tests_macro_expansion() {
     with_settings!({ omit_expression => true, prepend_module_to_snapshot => false }, {
         for (name, input) in cases {
             let tokens = vtc_tests::generate(input.clone());
-            let rendered = render_tokens(&tokens.to_string()).replace(manifest_dir, "{MANIFEST_DIR}");
+            // Substitute the manifest dir before formatting, not after: its real length varies
+            // between checkouts and would otherwise perturb prettyplease's line-wrapping
+            // decisions, making the snapshot depend on where the repo happens to be cloned.
+            let raw = tokens.to_string().replace(manifest_dir, "{MANIFEST_DIR}");
+            let rendered = render_tokens(&raw);
             let rendered = RE_GLOB_POS.replace_all(&rendered, "near position N:").into_owned();
             assert_snapshot!(*name, rendered);
         }

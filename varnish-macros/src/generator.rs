@@ -226,13 +226,9 @@ impl Generator {
         let c_func_name = self.names.func_struct_name().force_cstr();
         let func_name = quote! { func_name: #c_func_name.as_ptr(), };
 
-        let vmod_data_extras = if cfg!(varnishsys_77_vmod_data) {
-            quote! {
-                vcs: c"".as_ptr(),  // FIXME: value?
-                version: c"".as_ptr(),  // FIXME: value?
-            }
-        } else {
-            quote! {}
+        let vmod_data_extras = quote! {
+            vcs: c"".as_ptr(),  // FIXME: value?
+            version: c"".as_ptr(),  // FIXME: value?
         };
 
         quote!(

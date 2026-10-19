@@ -4,6 +4,7 @@ extern crate core;
 //    but a nightly version is having issues with it
 #[allow(improper_ctypes)]
 #[allow(non_snake_case)]
+#[allow(clippy::manual_div_ceil)]
 #[expect(non_camel_case_types, non_upper_case_globals, unused_qualifications)]
 #[expect(
     clippy::approx_constant,

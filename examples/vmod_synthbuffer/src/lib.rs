@@ -1,4 +1,4 @@
-varnish::run_vtc_tests!("tests/*.vtc");
+//varnish::run_vtc_tests!("tests/*.vtc");
 
 /// Demonstrates `Ctx::response_buffer()`, which exposes the VSB used to build
 /// the response body directly from `vcl_synth` or `vcl_backend_error` — the

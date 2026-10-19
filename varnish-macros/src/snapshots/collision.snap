@@ -4,12 +4,12 @@ source: varnish-macros/src/tests.rs
 #[cfg(test)]
 #[allow(dead_code)]
 const _VTC_REBUILD_ANCHOR_0: &[u8] = include_bytes!(
-    "{MANIFEST_DIR}/tests/vtc_fixtures_collision/foo-bar.vtc"
+    "{MANIFEST_DIR}/tests/vtc_fixtures_collision/foo-bar.vtc",
 );
 #[cfg(test)]
 #[allow(dead_code)]
 const _VTC_REBUILD_ANCHOR_1: &[u8] = include_bytes!(
-    "{MANIFEST_DIR}/tests/vtc_fixtures_collision/foo_bar.vtc"
+    "{MANIFEST_DIR}/tests/vtc_fixtures_collision/foo_bar.vtc",
 );
 #[cfg(test)]
 #[test]
