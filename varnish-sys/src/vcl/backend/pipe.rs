@@ -79,8 +79,9 @@ impl PipeAcct {
         self.out.load(Ordering::Relaxed)
     }
 
-    /// When the first `add_*` call happened, or `None` if none did. This starts the pipe (see
-    /// [`PipeRequest`]).
+    /// When the first `add_*` call happened, or `None` if none did. That call starts the pipe if
+    /// nothing did before, but this time is only its `Pipe` timestamp if no [`PipeRequest`] method
+    /// started it (see [`PipeRequest::started`]).
     pub fn t_first(&self) -> Option<SystemTime> {
         load_time(&self.t_first).map(to_system_time)
     }
@@ -130,6 +131,14 @@ fn to_system_time(secs: f64) -> SystemTime {
 /// [`take_pipelined`](Self::take_pipelined) or [`forward_preamble`](Self::forward_preamble), or
 /// the first [`PipeAcct`] `add_*` call, whichever comes first. [`client`](Self::client) never
 /// does, so the client socket can be set up before connecting to the backend.
+///
+/// The `Pipe` timestamp, also returned by [`started`](Self::started), is the time of the first
+/// `take_pipelined()`/`forward_preamble()` call, logged right away, even if `add_*` calls came
+/// first. Only if neither is ever called is it the time of the first `add_*` call, logged once
+/// `pipe()` returns. Core stamps `Pipe` once it has sent the request headers and the cached body,
+/// just before the pipelined bytes. Following the steps of
+/// [`VclBackend::pipe`](crate::vcl::VclBackend::pipe), `forward_preamble()` stamps it after the
+/// request headers, but before the cached body.
 ///
 /// Once `pipe()` returns, `wrap_pipe` logs the `PipeAcct` record, plus the `Pipe` and `PipeSess`
 /// timestamps if the pipe started, like core does for its own backends. A `pipe()` that returns
@@ -299,26 +308,34 @@ impl<'a> PipeRequest<'a> {
         StreamClose::TxError
     }
 
-    /// Whether the pipe started, and when.
+    /// Whether the pipe started, and when: its `Pipe` timestamp (see [`PipeRequest`]).
+    ///
+    /// That is the time of the first `take_pipelined()`/`forward_preamble()` call once there was
+    /// one, even if [`PipeAcct`] `add_*` calls came first. Before that, it is the time of the
+    /// first `add_*` call, which `wrap_pipe` logs as `Pipe` if no such call follows.
     pub fn started(&self) -> Option<SystemTime> {
         self.started_secs().map(to_system_time)
     }
 
     fn started_secs(&self) -> Option<f64> {
-        match (self.t_start.get(), load_time(&self.acct.t_first)) {
-            (Some(a), Some(b)) => Some(a.min(b)),
-            (a, b) => a.or(b),
-        }
+        self.t_start.get().or_else(|| load_time(&self.acct.t_first))
     }
 
     fn start(&self) {
+        if let Some(now) = self.mark_start() {
+            // SAFETY: `req` is valid for `'a`.
+            unsafe { ts_req(self.req, c"Pipe", now) };
+        }
+    }
+
+    /// Sets the start time to now if unset, returning it only when it did.
+    fn mark_start(&self) -> Option<f64> {
         if self.t_start.get().is_some() {
-            return;
+            return None;
         }
         let now = now();
         self.t_start.set(Some(now));
-        // SAFETY: `req` is valid for `'a`.
-        unsafe { ts_req(self.req, c"Pipe", now) };
+        Some(now)
     }
 
     /// Logs what core's own backends log at the end of a pipe: the `PipeSess` timestamp and
@@ -448,7 +465,12 @@ unsafe fn ts_req(req: *mut ffi::req, event: &CStr, now: f64) {
 mod tests {
     use std::io::{self, Write};
 
-    use super::{forward, write_counted, PipeAcct};
+    use std::net::TcpListener;
+    use std::os::unix::io::AsRawFd;
+    use std::time::Duration;
+
+    use super::{forward, to_system_time, write_counted, PipeAcct, PipeRequest};
+    use crate::ffi;
 
     /// Accepts `budget` bytes, at most `chunk` per `write()` (after one `Interrupted`), then
     /// fails.
@@ -538,6 +560,29 @@ mod tests {
         let mut w = flaky(100);
         acct.write_out(&mut w, b"abcdef").unwrap();
         assert_eq!((acct.out_bytes(), acct.in_bytes()), (10, 5));
+    }
+
+    #[test]
+    fn started_prefers_mark_start_over_first_accounting() {
+        // SAFETY: `req` is plain data, and zeroed is valid for what `started()` and
+        // `mark_start()` read.
+        let mut req: Box<ffi::req> = Box::new(unsafe { std::mem::zeroed() });
+        let sock = TcpListener::bind("127.0.0.1:0").unwrap();
+        // SAFETY: `req` outlives `preq`, which never reads `bo`; `client` is `ManuallyDrop`, so
+        // `sock` keeps owning the fd.
+        let preq =
+            unsafe { PipeRequest::new(&raw mut *req, std::ptr::null_mut(), sock.as_raw_fd()) };
+
+        assert_eq!(preq.started(), None);
+        preq.acct().add_bereq_hdrbytes(42);
+        let t_first = preq.acct().t_first().unwrap();
+        assert_eq!(preq.started(), Some(t_first));
+
+        std::thread::sleep(Duration::from_millis(5));
+        // What `start()` logs as `Pipe`.
+        let t_start = to_system_time(preq.mark_start().unwrap());
+        assert!(t_start > t_first);
+        assert_eq!(preq.started(), Some(t_start));
     }
 
     #[test]
