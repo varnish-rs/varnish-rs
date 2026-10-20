@@ -1,10 +1,12 @@
 mod backend_main;
 mod backend_ref;
 mod director;
+mod pipe;
 
 pub use backend_main::*;
 pub use backend_ref::{BackendRef, ProbeResult};
 pub use director::{Director, VclDirector};
+pub use pipe::{PipeAcct, PipeRequest};
 
 /// Creates a JSON string with custom indentation and writes it to a Buffer:
 /// - Top level line has no indentation

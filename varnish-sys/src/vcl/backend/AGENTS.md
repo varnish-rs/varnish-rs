@@ -9,13 +9,14 @@ Lets a VMOD implement a custom Varnish backend (director) in Rust — health-che
 - `backend_main.rs` (biggest file in crate) — `Backend<S,T>`, `VclBackend`/`VclResponse` traits (what a VMOD implements), `NativeBackendBuilder`, `StreamClose`, `sc_to_ptr` (`pub(crate)` — also called from `../ctx.rs`). Has unit tests.
 - `backend_ref.rs` — backend reference/handle glue.
 - `director.rs` — VMOD director glue (routing requests to a backend impl).
+- `pipe.rs` — `PipeRequest`/`PipeAcct`, what `VclBackend::pipe` gets for `vcl_pipe`; also the `PipeAcct`/timestamp logging `wrap_pipe` does once `pipe()` returns.
 
 Reading `bereq`'s body from `VclBackend::get_response`: `Ctx::req_body`/`req_body_state` in [`../ctx.rs`](../AGENTS.md), not here. Despite living next to backend-only code, these also work from client context (`vcl_recv` and later, before `bo` exists) — see the read-once-if-uncached tradeoff documented on `Ctx::req_body`.
 
 ## Real usage — read these examples alongside this code
 
 - `examples/vmod_native_backend`, `examples/vmod_simple_backend` — implement `VclBackend`/`VclResponse` directly.
-- `examples/vmod_echo_backend` — same, plus reads/forwards `bereq`'s body via `Ctx::req_body`.
+- `examples/vmod_echo_backend` — same, plus reads/forwards `bereq`'s body via `Ctx::req_body`, and implements `pipe()` with `PipeRequest`.
 - `examples/vmod_round_robin` — director picking among multiple backends.
 
 ## Gotcha
