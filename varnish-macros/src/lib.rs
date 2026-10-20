@@ -39,6 +39,7 @@ mod tests;
 ///   - `#[shared_per_task]` attribute on a function argument will treat it as a `PRIV_TASK` object.
 ///   - `#[shared_per_vcl]` attribute on a function argument will treat it as a `PRIV_VCL` object.
 /// - `impl` blocks' public methods are exported as VMOD object methods. The object itself may reside outside the module.
+///   - Each object must have exactly one `impl` block inside the module.
 ///   - A public method returning `Self` or `Result<Self, _>` is treated as the object constructor.
 ///   - `#[vcl_name]` attribute on an object constructor's argument will set it to the VCL name.
 ///   - Methods take `&self`, or `&mut self` if restricted to `vcl_init`/`vcl_fini` (see `#[restrict]`).
@@ -92,6 +93,10 @@ mod tests;
 /// reach the object, so exclusive access is guaranteed, and setup-only state needs no `Mutex`.
 /// Such a method cannot take `&mut Ctx`: calling a VCL subroutine from it could re-enter the
 /// object while it is mutably borrowed. Use `&Ctx` and return `Result::Err` to report failures.
+/// For the same reason, once an object has a `&mut self` method, its `&self` methods may only
+/// take `&mut Ctx` if they are restricted to scopes excluding `vcl_init` and `vcl_fini`
+/// (e.g. `#[restrict(client, backend)]`), otherwise a subroutine they call could invoke the
+/// `&mut self` method while `&self` is still borrowed.
 ///
 /// ```rust,ignore
 /// # use varnish::vmod;

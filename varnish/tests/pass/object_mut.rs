@@ -2,13 +2,16 @@ use varnish::vmod;
 
 fn main() {}
 
+pub struct Plain;
+
 pub struct Counter {
     value: i64,
 }
 
 #[vmod]
 mod object_mut {
-    use super::Counter;
+    use super::{Counter, Plain};
+    use varnish::vcl::subroutine::Subroutine;
     use varnish::vcl::{Ctx, Workspace};
 
     impl Counter {
@@ -40,6 +43,41 @@ mod object_mut {
 
         pub fn get(&self) -> i64 {
             self.value
+        }
+
+        /// `&mut Ctx` is fine on a `&self` method that can't run in vcl_init/vcl_fini.
+        #[restrict(client, backend)]
+        pub fn run(&self, ctx: &mut Ctx, sub: Subroutine) -> i64 {
+            _ = ctx.call_sub(sub);
+            self.value
+        }
+
+        #[restrict(client)]
+        pub fn run_client(&self, ctx: &mut Ctx, sub: Subroutine) -> i64 {
+            _ = ctx.call_sub(sub);
+            self.value
+        }
+
+        #[restrict(backend)]
+        pub fn run_backend(&self, ctx: &mut Ctx, sub: Subroutine) -> i64 {
+            _ = ctx.call_sub(sub);
+            self.value
+        }
+
+        /// `&Ctx` cannot call a VCL sub, so it is allowed in any scope.
+        pub fn get_ctx(&self, _ctx: &Ctx) -> i64 {
+            self.value
+        }
+    }
+
+    /// Without any `&mut self` method, `&mut Ctx` is allowed in any scope.
+    impl Plain {
+        pub fn plain() -> Self {
+            Self
+        }
+
+        pub fn run(&self, ctx: &mut Ctx, sub: Subroutine) {
+            _ = ctx.call_sub(sub);
         }
     }
 }

@@ -34,6 +34,7 @@ impl VmodInfo {
         let mut errors = Errors::new();
         let mut funcs = Vec::<FuncInfo>::new();
         let mut objects = Vec::<ObjInfo>::new();
+        let mut object_idents = std::collections::HashSet::<String>::new();
         let mut shared_types = SharedTypes::default();
 
         if let Some((_, content)) = &mut item.content {
@@ -54,6 +55,15 @@ impl VmodInfo {
                     }
                     Item::Impl(impl_item) => {
                         // an object
+                        if let Some(ident) = parser_utils::as_simple_ty(&impl_item.self_ty) {
+                            if !object_idents.insert(ident.to_string()) {
+                                errors.add(
+                                    &impl_item.self_ty,
+                                    &format!("Object `{ident}` already has an `impl` block. All its methods must be in a single `impl` block"),
+                                );
+                                continue;
+                            }
+                        }
                         if let Some(obj) =
                             errors.on_err(ObjInfo::parse(impl_item, &mut shared_types))
                         {
@@ -206,6 +216,7 @@ impl ObjInfo {
         }
 
         let mut funcs = Vec::new();
+        let mut func_sigs = Vec::new();
         let mut constructors = Vec::new();
         for item in &mut item_impl.items {
             if let ImplItem::Fn(fn_item) = item {
@@ -221,10 +232,13 @@ impl ObjInfo {
                 if matches!(func.func_type, FuncType::Constructor) {
                     constructors.push(func);
                 } else {
+                    func_sigs.push(fn_item.sig.clone());
                     funcs.push(func);
                 }
             }
         }
+
+        check_mut_self_reentry(&funcs, &func_sigs, &mut errors);
 
         if constructors.is_empty() {
             errors.add(
@@ -406,6 +420,48 @@ fn check_mut_self_method(
             signature,
             "`&mut self` methods cannot take `&mut Ctx` (a VCL sub call could re-enter the object); use `&Ctx`",
         );
+    }
+}
+
+/// If any method of an object takes `&mut self`, no `&self` method of that object may call a VCL
+/// subroutine (i.e. take `&mut Ctx`) while it can run in `vcl_init`/`vcl_fini`: the subroutine
+/// could call the `&mut self` method while the outer `&self` borrow is still alive.
+fn check_mut_self_reentry(funcs: &[FuncInfo], sigs: &[Signature], errors: &mut Errors) {
+    let Some(mut_method) = funcs.iter().find(|f| {
+        f.args
+            .iter()
+            .any(|a| matches!(a.ty, ParamType::SelfType { is_mut: true }))
+    }) else {
+        return;
+    };
+    for (func, sig) in funcs.iter().zip(sigs) {
+        let is_shared_self = func
+            .args
+            .iter()
+            .any(|a| matches!(a.ty, ParamType::SelfType { is_mut: false }));
+        let may_run_in_housekeeping = func.restrict.is_empty()
+            || func
+                .restrict
+                .iter()
+                .any(|s| HOUSEKEEPING_SCOPES.contains(&s.as_str()));
+        if !is_shared_self || !may_run_in_housekeeping {
+            continue;
+        }
+        // A successfully parsed function has exactly one `ParamTypeInfo` per signature input.
+        let mut_ctx_arg = func
+            .args
+            .iter()
+            .zip(&sig.inputs)
+            .find(|(a, _)| matches!(a.ty, ParamType::Context { is_mut: true }));
+        if let Some((_, arg)) = mut_ctx_arg {
+            errors.add(
+                arg,
+                &format!(
+                    "`&self` methods cannot take `&mut Ctx` in vcl_init/vcl_fini when the object has a `&mut self` method (`{}`): a VCL sub call could re-enter it. Restrict this method to `client`/`backend` scopes, or use `&Ctx`",
+                    mut_method.ident
+                ),
+            );
+        }
     }
 }
 

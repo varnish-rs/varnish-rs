@@ -132,6 +132,112 @@ mod object_mut {
                     Default::default()
                 })
         }
+        unsafe extern "C" fn vmod_c_Counter_run(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::Counter,
+            sub: VCL_SUB,
+        ) -> VCL_INT {
+            if !__ctx.is_null()
+                && (*__ctx).method
+                    & (::varnish::vcl::subroutine::bitmask::CLIENT
+                        | ::varnish::vcl::subroutine::bitmask::BACKEND) as c_uint == 0
+            {
+                Ctx::from_ptr(__ctx).fail("'run' is only allowed in: client, backend");
+                return Default::default();
+            }
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(__obj.run(&mut __ctx, sub.into()).into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        unsafe extern "C" fn vmod_c_Counter_run_client(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::Counter,
+            sub: VCL_SUB,
+        ) -> VCL_INT {
+            if !__ctx.is_null()
+                && (*__ctx).method
+                    & (::varnish::vcl::subroutine::bitmask::CLIENT) as c_uint == 0
+            {
+                Ctx::from_ptr(__ctx).fail("'run_client' is only allowed in: client");
+                return Default::default();
+            }
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(__obj.run_client(&mut __ctx, sub.into()).into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        unsafe extern "C" fn vmod_c_Counter_run_backend(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::Counter,
+            sub: VCL_SUB,
+        ) -> VCL_INT {
+            if !__ctx.is_null()
+                && (*__ctx).method
+                    & (::varnish::vcl::subroutine::bitmask::BACKEND) as c_uint == 0
+            {
+                Ctx::from_ptr(__ctx).fail("'run_backend' is only allowed in: backend");
+                return Default::default();
+            }
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(__obj.run_backend(&mut __ctx, sub.into()).into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        unsafe extern "C" fn vmod_c_Counter_get_ctx(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::Counter,
+        ) -> VCL_INT {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
+            let mut __call_user_func = || -> Result<_, ::varnish::vcl::VclError> {
+                Ok(__obj.get_ctx(&__ctx).into_vcl(&mut __ctx.ws)?)
+            };
+            __call_user_func()
+                .unwrap_or_else(|err| {
+                    __ctx.fail(err);
+                    Default::default()
+                })
+        }
+        unsafe extern "C" fn vmod_c_Plain_plain(
+            __ctx: *mut vrt_ctx,
+            __objp: *mut *mut Plain,
+            __vcl_name: *const c_char,
+        ) {
+            let __result = Box::new(super::Plain::plain());
+            *__objp = Box::into_raw(__result);
+        }
+        unsafe extern "C" fn vmod_c_Plain__fini(__objp: *mut *mut Plain) {
+            drop(Box::from_raw(*__objp));
+            *__objp = ::std::ptr::null_mut();
+        }
+        unsafe extern "C" fn vmod_c_Plain_run(
+            __ctx: *mut vrt_ctx,
+            __obj: *const super::Plain,
+            sub: VCL_SUB,
+        ) {
+            let mut __ctx = Ctx::from_ptr(__ctx);
+            let __obj = __obj.as_ref().expect("object pointer must not be null");
+            __obj.run(&mut __ctx, sub.into())
+        }
         #[repr(C)]
         pub struct VmodExports {
             vmod_c_Counter_new: Option<
@@ -174,6 +280,48 @@ mod object_mut {
                     __obj: *const super::Counter,
                 ) -> VCL_INT,
             >,
+            vmod_c_Counter_run: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::Counter,
+                    sub: VCL_SUB,
+                ) -> VCL_INT,
+            >,
+            vmod_c_Counter_run_client: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::Counter,
+                    sub: VCL_SUB,
+                ) -> VCL_INT,
+            >,
+            vmod_c_Counter_run_backend: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::Counter,
+                    sub: VCL_SUB,
+                ) -> VCL_INT,
+            >,
+            vmod_c_Counter_get_ctx: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::Counter,
+                ) -> VCL_INT,
+            >,
+            vmod_c_Plain_plain: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __objp: *mut *mut Plain,
+                    __vcl_name: *const c_char,
+                ),
+            >,
+            vmod_c_Plain__fini: Option<unsafe extern "C" fn(__objp: *mut *mut Plain)>,
+            vmod_c_Plain_run: Option<
+                unsafe extern "C" fn(
+                    __ctx: *mut vrt_ctx,
+                    __obj: *const super::Plain,
+                    sub: VCL_SUB,
+                ),
+            >,
         }
         pub static VMOD_EXPORTS: VmodExports = VmodExports {
             vmod_c_Counter_new: Some(vmod_c_Counter_new),
@@ -183,13 +331,20 @@ mod object_mut {
             vmod_c_Counter_add_ws: Some(vmod_c_Counter_add_ws),
             vmod_c_Counter_reset: Some(vmod_c_Counter_reset),
             vmod_c_Counter_get: Some(vmod_c_Counter_get),
+            vmod_c_Counter_run: Some(vmod_c_Counter_run),
+            vmod_c_Counter_run_client: Some(vmod_c_Counter_run_client),
+            vmod_c_Counter_run_backend: Some(vmod_c_Counter_run_backend),
+            vmod_c_Counter_get_ctx: Some(vmod_c_Counter_get_ctx),
+            vmod_c_Plain_plain: Some(vmod_c_Plain_plain),
+            vmod_c_Plain__fini: Some(vmod_c_Plain__fini),
+            vmod_c_Plain_run: Some(vmod_c_Plain_run),
         };
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_object_mut_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"570c59404f3f063f488430514eefb11c0ff894ca02219d156a9b1f1afacd3de5"
+            file_id: c"727ac62ff39462334225ad47236fb2390ea43554de0271f6e9122b8236b3b062"
                 .as_ptr(),
             name: c"object_mut".as_ptr(),
             func_name: c"Vmod_vmod_object_mut_Func".as_ptr(),
@@ -203,7 +358,8 @@ mod object_mut {
         };
         const JSON: &CStr = c"(moved to @json.snap files)";
     }
-    use super::Counter;
+    use super::{Counter, Plain};
+    use varnish::vcl::subroutine::Subroutine;
     use varnish::vcl::{Ctx, Workspace};
     impl Counter {
         pub fn new() -> Self {
@@ -225,6 +381,32 @@ mod object_mut {
         }
         pub fn get(&self) -> i64 {
             self.value
+        }
+        /// `&mut Ctx` is fine on a `&self` method that can't run in vcl_init/vcl_fini.
+        pub fn run(&self, ctx: &mut Ctx, sub: Subroutine) -> i64 {
+            _ = ctx.call_sub(sub);
+            self.value
+        }
+        pub fn run_client(&self, ctx: &mut Ctx, sub: Subroutine) -> i64 {
+            _ = ctx.call_sub(sub);
+            self.value
+        }
+        pub fn run_backend(&self, ctx: &mut Ctx, sub: Subroutine) -> i64 {
+            _ = ctx.call_sub(sub);
+            self.value
+        }
+        /// `&Ctx` cannot call a VCL sub, so it is allowed in any scope.
+        pub fn get_ctx(&self, _ctx: &Ctx) -> i64 {
+            self.value
+        }
+    }
+    /// Without any `&mut self` method, `&mut Ctx` is allowed in any scope.
+    impl Plain {
+        pub fn plain() -> Self {
+            Self
+        }
+        pub fn run(&self, ctx: &mut Ctx, sub: Subroutine) {
+            _ = ctx.call_sub(sub);
         }
     }
 }

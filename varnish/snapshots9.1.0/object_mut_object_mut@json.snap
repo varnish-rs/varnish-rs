@@ -8,7 +8,7 @@ VMOD_JSON_SPEC
     "2.0",
     "object_mut",
     "Vmod_vmod_object_mut_Func",
-    "570c59404f3f063f488430514eefb11c0ff894ca02219d156a9b1f1afacd3de5",
+    "727ac62ff39462334225ad47236fb2390ea43554de0271f6e9122b8236b3b062",
     "Varnish (version) (hash)",
     "0",
     "0"
@@ -17,6 +17,8 @@ VMOD_JSON_SPEC
     "$CPROTO",
     "
 struct vmod_object_mut_Counter;
+
+struct vmod_object_mut_Plain;
 
 typedef VCL_VOID td_vmod_object_mut_Counter_new(
     VRT_CTX,
@@ -56,6 +58,45 @@ typedef VCL_INT td_vmod_object_mut_Counter_get(
     struct vmod_object_mut_Counter *
 );
 
+typedef VCL_INT td_vmod_object_mut_Counter_run(
+    VRT_CTX,
+    struct vmod_object_mut_Counter *,
+    VCL_SUB
+);
+
+typedef VCL_INT td_vmod_object_mut_Counter_run_client(
+    VRT_CTX,
+    struct vmod_object_mut_Counter *,
+    VCL_SUB
+);
+
+typedef VCL_INT td_vmod_object_mut_Counter_run_backend(
+    VRT_CTX,
+    struct vmod_object_mut_Counter *,
+    VCL_SUB
+);
+
+typedef VCL_INT td_vmod_object_mut_Counter_get_ctx(
+    VRT_CTX,
+    struct vmod_object_mut_Counter *
+);
+
+typedef VCL_VOID td_vmod_object_mut_Plain_plain(
+    VRT_CTX,
+    struct vmod_object_mut_Plain **,
+    const char *
+);
+
+typedef VCL_VOID td_vmod_object_mut_Plain__fini(
+    struct vmod_object_mut_Plain **
+);
+
+typedef VCL_VOID td_vmod_object_mut_Plain_run(
+    VRT_CTX,
+    struct vmod_object_mut_Plain *,
+    VCL_SUB
+);
+
 struct Vmod_vmod_object_mut_Func {
   td_vmod_object_mut_Counter_new *f_Counter_new;
   td_vmod_object_mut_Counter__fini *f_Counter__fini;
@@ -64,6 +105,13 @@ struct Vmod_vmod_object_mut_Func {
   td_vmod_object_mut_Counter_add_ws *f_Counter_add_ws;
   td_vmod_object_mut_Counter_reset *f_Counter_reset;
   td_vmod_object_mut_Counter_get *f_Counter_get;
+  td_vmod_object_mut_Counter_run *f_Counter_run;
+  td_vmod_object_mut_Counter_run_client *f_Counter_run_client;
+  td_vmod_object_mut_Counter_run_backend *f_Counter_run_backend;
+  td_vmod_object_mut_Counter_get_ctx *f_Counter_get_ctx;
+  td_vmod_object_mut_Plain_plain *f_Plain_plain;
+  td_vmod_object_mut_Plain__fini *f_Plain__fini;
+  td_vmod_object_mut_Plain_run *f_Plain_run;
 };
 
 static struct Vmod_vmod_object_mut_Func Vmod_vmod_object_mut_Func;"
@@ -188,6 +236,128 @@ static struct Vmod_vmod_object_mut_Func Vmod_vmod_object_mut_Func;"
         ],
         "Vmod_vmod_object_mut_Func.f_Counter_get",
         ""
+      ]
+    ],
+    [
+      "$METHOD",
+      "run",
+      [
+        [
+          "INT"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter_run",
+        "",
+        [
+          "SUB",
+          "sub",
+          "sub"
+        ]
+      ]
+    ],
+    [
+      "$RESTRICT",
+      [
+        "client",
+        "backend"
+      ]
+    ],
+    [
+      "$METHOD",
+      "run_client",
+      [
+        [
+          "INT"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter_run_client",
+        "",
+        [
+          "SUB",
+          "sub",
+          "sub"
+        ]
+      ]
+    ],
+    [
+      "$RESTRICT",
+      [
+        "client"
+      ]
+    ],
+    [
+      "$METHOD",
+      "run_backend",
+      [
+        [
+          "INT"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter_run_backend",
+        "",
+        [
+          "SUB",
+          "sub",
+          "sub"
+        ]
+      ]
+    ],
+    [
+      "$RESTRICT",
+      [
+        "backend"
+      ]
+    ],
+    [
+      "$METHOD",
+      "get_ctx",
+      [
+        [
+          "INT"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter_get_ctx",
+        ""
+      ]
+    ]
+  ],
+  [
+    "$OBJ",
+    "plain",
+    {
+      "NULL_OK": false
+    },
+    "struct vmod_object_mut_Plain",
+    [
+      "$INIT",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Plain_plain",
+        ""
+      ]
+    ],
+    [
+      "$FINI",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Plain__fini",
+        ""
+      ]
+    ],
+    [
+      "$METHOD",
+      "run",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Plain_run",
+        "",
+        [
+          "SUB",
+          "sub",
+          "sub"
+        ]
       ]
     ]
   ]
