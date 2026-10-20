@@ -201,20 +201,7 @@ impl<'a> PipeRequest<'a> {
         self.start();
         // SAFETY: `req` is valid for `'a` (see `new`), and so is its `htc` while a client request
         // is processed.
-        unsafe {
-            let htc = (*self.req).htc;
-            if htc.is_null() || (*htc).pipeline_b.is_null() {
-                return None;
-            }
-            let b = (*htc).pipeline_b;
-            let e = (*htc).pipeline_e;
-            (*htc).pipeline_b = ptr::null_mut();
-            (*htc).pipeline_e = ptr::null_mut();
-            let len = usize::try_from(e.offset_from(b)).ok()?;
-            // `b..e` lies in `req->ws`, which core only resets after `.http1pipe` returns, and
-            // `'a` can't outlive `pipe()`.
-            Some(std::slice::from_raw_parts(b.cast::<u8>(), len))
-        }
+        unsafe { take_pipelined(self.req) }
     }
 
     /// The request body, if VCL cached it (`std.cache_req_body()`), as a list of chunks.
@@ -233,25 +220,29 @@ impl<'a> PipeRequest<'a> {
     /// The cached body is counted as "out" and the pipelined bytes as "in". Counting the body as
     /// "out" (backend to client) looks wrong, but it is what core does for its own backends, so
     /// the `PipeAcct` records match.
+    ///
+    /// On error, the bytes written before it are still counted, as core does for the request body
+    /// (core does not count a partial write of the pipelined bytes, it treats it as fatal).
     pub fn forward_preamble<W: Write>(&mut self, origin: &mut W) -> io::Result<()> {
         self.start();
         // SAFETY: `req` is valid for `'a`.
-        if unsafe { (*self.req).req_body_status } == unsafe { ffi::BS_CACHED.as_ptr() } {
+        let cached = unsafe { (*self.req).req_body_status } == unsafe { ffi::BS_CACHED.as_ptr() };
+        let chunks = if cached {
             // A failed iteration must not go unnoticed: the backend would wait for a body that
             // never comes.
-            let chunks = self
-                .cached_body()
-                .map_err(|e| io::Error::other(e.to_string()))?;
-            for chunk in chunks {
-                origin.write_all(chunk)?;
-                self.acct.add_out(chunk.len() as u64);
-            }
-        }
-        if let Some(bytes) = self.take_pipelined() {
-            origin.write_all(bytes)?;
-            self.acct.add_in(bytes.len() as u64);
-        }
-        Ok(())
+            self.cached_body()
+                .map_err(|e| io::Error::other(e.to_string()))?
+        } else {
+            Vec::new()
+        };
+        let req = self.req;
+        // SAFETY: `req` is valid for `'a`, and so is its `htc`.
+        forward(
+            origin,
+            &chunks,
+            || unsafe { take_pipelined(req) },
+            &self.acct,
+        )
     }
 
     /// The accounting logged when `pipe()` returns.
@@ -368,6 +359,60 @@ impl<'a> PipeRequest<'a> {
     }
 }
 
+/// [`PipeRequest::take_pipelined`], without starting the pipe.
+///
+/// SAFETY: `req` must be valid for `'b`, and so must its `htc` (if set).
+unsafe fn take_pipelined<'b>(req: *mut ffi::req) -> Option<&'b [u8]> {
+    let htc = (*req).htc;
+    if htc.is_null() || (*htc).pipeline_b.is_null() {
+        return None;
+    }
+    let b = (*htc).pipeline_b;
+    let e = (*htc).pipeline_e;
+    (*htc).pipeline_b = ptr::null_mut();
+    (*htc).pipeline_e = ptr::null_mut();
+    let len = usize::try_from(e.offset_from(b)).ok()?;
+    // `b..e` lies in `req->ws`, which core only resets after `.http1pipe` returns, and `'b` can't
+    // outlive `pipe()`.
+    Some(std::slice::from_raw_parts(b.cast::<u8>(), len))
+}
+
+/// [`PipeRequest::forward_preamble`] once its inputs are known: writes `body` (counted as "out"),
+/// then, if that worked, what `pipelined` returns (counted as "in"). The pipelined bytes are only
+/// taken once the body was sent, so a failed body write leaves them in place.
+fn forward<'b, W: Write>(
+    origin: &mut W,
+    body: &[&[u8]],
+    pipelined: impl FnOnce() -> Option<&'b [u8]>,
+    acct: &PipeAcct,
+) -> io::Result<()> {
+    for chunk in body {
+        write_counted(origin, chunk, |n| acct.add_out(n))?;
+    }
+    if let Some(bytes) = pipelined() {
+        write_counted(origin, bytes, |n| acct.add_in(n))?;
+    }
+    Ok(())
+}
+
+/// `write_all()`, but passes each successful `write()` length to `count`, so bytes sent before an
+/// error are still counted, like core does (`V1F_SendReq()` and `rdf_rw()` count what `write()`
+/// returned, even on a later failure).
+fn write_counted<W: Write>(w: &mut W, mut buf: &[u8], count: impl Fn(u64)) -> io::Result<()> {
+    while !buf.is_empty() {
+        match w.write(buf) {
+            Ok(0) => return Err(io::ErrorKind::WriteZero.into()),
+            Ok(n) => {
+                count(n as u64);
+                buf = &buf[n..];
+            }
+            Err(e) if e.kind() == io::ErrorKind::Interrupted => {}
+            Err(e) => return Err(e),
+        }
+    }
+    Ok(())
+}
+
 /// `VSLb_ts_req()`, which is a `static inline` in Varnish 9.0's `cache.h`, so not bindable there.
 ///
 /// SAFETY: `req` must be valid.
@@ -384,4 +429,109 @@ unsafe fn ts_req(req: *mut ffi::req, event: &CStr, now: f64) {
         &raw mut r.t_prev,
         ffi::vtim_real(now),
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::{self, Write};
+
+    use super::{forward, write_counted, PipeAcct};
+
+    /// Accepts `budget` bytes, at most `chunk` per `write()` (after one `Interrupted`), then
+    /// fails.
+    struct Flaky {
+        budget: usize,
+        chunk: usize,
+        interrupted: bool,
+        written: Vec<u8>,
+    }
+
+    impl Write for Flaky {
+        fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+            if !self.interrupted {
+                self.interrupted = true;
+                return Err(io::ErrorKind::Interrupted.into());
+            }
+            if self.budget == 0 {
+                return Err(io::ErrorKind::BrokenPipe.into());
+            }
+            let n = buf.len().min(self.budget).min(self.chunk);
+            self.budget -= n;
+            self.written.extend_from_slice(&buf[..n]);
+            Ok(n)
+        }
+
+        fn flush(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
+
+    fn flaky(budget: usize) -> Flaky {
+        Flaky {
+            budget,
+            chunk: 3,
+            interrupted: false,
+            written: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn partial_write_is_counted() {
+        let acct = PipeAcct::default();
+        let mut w = flaky(7);
+        let err = write_counted(&mut w, b"0123456789", |n| acct.add_in(n)).unwrap_err();
+        assert_eq!(err.kind(), io::ErrorKind::BrokenPipe);
+        assert_eq!(acct.in_bytes(), 7);
+        assert_eq!(w.written, b"0123456");
+    }
+
+    #[test]
+    fn full_write_is_counted() {
+        let acct = PipeAcct::default();
+        let mut w = flaky(100);
+        write_counted(&mut w, b"0123456789", |n| acct.add_in(n)).unwrap();
+        assert_eq!(acct.in_bytes(), 10);
+        assert_eq!(w.written, b"0123456789");
+    }
+
+    #[test]
+    fn write_zero_is_an_error() {
+        struct Zero;
+        impl Write for Zero {
+            fn write(&mut self, _: &[u8]) -> io::Result<usize> {
+                Ok(0)
+            }
+            fn flush(&mut self) -> io::Result<()> {
+                Ok(())
+            }
+        }
+        let acct = PipeAcct::default();
+        let err = write_counted(&mut Zero, b"x", |n| acct.add_in(n)).unwrap_err();
+        assert_eq!(err.kind(), io::ErrorKind::WriteZero);
+        assert_eq!(acct.in_bytes(), 0);
+    }
+
+    #[test]
+    fn forward_counts_body_as_out_and_pipelined_as_in() {
+        let body: [&[u8]; 2] = [b"abc", b"de"];
+
+        let acct = PipeAcct::default();
+        let mut w = flaky(100);
+        forward(&mut w, &body, || Some(&b"0123"[..]), &acct).unwrap();
+        assert_eq!(w.written, b"abcde0123");
+        assert_eq!((acct.out_bytes(), acct.in_bytes()), (5, 4));
+
+        // Fails in the pipelined bytes: the sent prefix is "in".
+        let acct = PipeAcct::default();
+        let mut w = flaky(7);
+        assert!(forward(&mut w, &body, || Some(&b"0123"[..]), &acct).is_err());
+        assert_eq!((acct.out_bytes(), acct.in_bytes()), (5, 2));
+
+        // Fails in the body: the sent prefix is "out", and the pipelined bytes are not taken.
+        let acct = PipeAcct::default();
+        let mut w = flaky(4);
+        let res = forward(&mut w, &body, || panic!("taken after a failed body"), &acct);
+        assert!(res.is_err());
+        assert_eq!((acct.out_bytes(), acct.in_bytes()), (4, 0));
+    }
 }
