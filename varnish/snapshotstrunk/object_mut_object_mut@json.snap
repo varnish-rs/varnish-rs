@@ -1,0 +1,365 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VMOD_JSON_SPEC
+[
+  [
+    "$VMOD",
+    "2.0",
+    "object_mut",
+    "Vmod_vmod_object_mut_Func",
+    "727ac62ff39462334225ad47236fb2390ea43554de0271f6e9122b8236b3b062",
+    "Varnish (version) (hash)",
+    "0",
+    "0"
+  ],
+  [
+    "$CPROTO",
+    "
+struct vmod_object_mut_Counter;
+
+struct vmod_object_mut_Plain;
+
+typedef VCL_VOID td_vmod_object_mut_Counter_new(
+    VRT_CTX,
+    struct vmod_object_mut_Counter **,
+    const char *
+);
+
+typedef VCL_VOID td_vmod_object_mut_Counter__fini(
+    struct vmod_object_mut_Counter **
+);
+
+typedef VCL_VOID td_vmod_object_mut_Counter_set(
+    VRT_CTX,
+    struct vmod_object_mut_Counter *,
+    VCL_INT
+);
+
+typedef VCL_VOID td_vmod_object_mut_Counter_add(
+    VRT_CTX,
+    struct vmod_object_mut_Counter *,
+    VCL_INT
+);
+
+typedef VCL_VOID td_vmod_object_mut_Counter_add_ws(
+    VRT_CTX,
+    struct vmod_object_mut_Counter *,
+    VCL_INT
+);
+
+typedef VCL_VOID td_vmod_object_mut_Counter_reset(
+    VRT_CTX,
+    struct vmod_object_mut_Counter *
+);
+
+typedef VCL_INT td_vmod_object_mut_Counter_get(
+    VRT_CTX,
+    struct vmod_object_mut_Counter *
+);
+
+typedef VCL_INT td_vmod_object_mut_Counter_run(
+    VRT_CTX,
+    struct vmod_object_mut_Counter *,
+    VCL_SUB
+);
+
+typedef VCL_INT td_vmod_object_mut_Counter_run_client(
+    VRT_CTX,
+    struct vmod_object_mut_Counter *,
+    VCL_SUB
+);
+
+typedef VCL_INT td_vmod_object_mut_Counter_run_backend(
+    VRT_CTX,
+    struct vmod_object_mut_Counter *,
+    VCL_SUB
+);
+
+typedef VCL_INT td_vmod_object_mut_Counter_get_ctx(
+    VRT_CTX,
+    struct vmod_object_mut_Counter *
+);
+
+typedef VCL_VOID td_vmod_object_mut_Plain_plain(
+    VRT_CTX,
+    struct vmod_object_mut_Plain **,
+    const char *
+);
+
+typedef VCL_VOID td_vmod_object_mut_Plain__fini(
+    struct vmod_object_mut_Plain **
+);
+
+typedef VCL_VOID td_vmod_object_mut_Plain_run(
+    VRT_CTX,
+    struct vmod_object_mut_Plain *,
+    VCL_SUB
+);
+
+struct Vmod_vmod_object_mut_Func {
+  td_vmod_object_mut_Counter_new *f_Counter_new;
+  td_vmod_object_mut_Counter__fini *f_Counter__fini;
+  td_vmod_object_mut_Counter_set *f_Counter_set;
+  td_vmod_object_mut_Counter_add *f_Counter_add;
+  td_vmod_object_mut_Counter_add_ws *f_Counter_add_ws;
+  td_vmod_object_mut_Counter_reset *f_Counter_reset;
+  td_vmod_object_mut_Counter_get *f_Counter_get;
+  td_vmod_object_mut_Counter_run *f_Counter_run;
+  td_vmod_object_mut_Counter_run_client *f_Counter_run_client;
+  td_vmod_object_mut_Counter_run_backend *f_Counter_run_backend;
+  td_vmod_object_mut_Counter_get_ctx *f_Counter_get_ctx;
+  td_vmod_object_mut_Plain_plain *f_Plain_plain;
+  td_vmod_object_mut_Plain__fini *f_Plain__fini;
+  td_vmod_object_mut_Plain_run *f_Plain_run;
+};
+
+static struct Vmod_vmod_object_mut_Func Vmod_vmod_object_mut_Func;"
+  ],
+  [
+    "$OBJ",
+    "new",
+    {
+      "NULL_OK": false
+    },
+    "struct vmod_object_mut_Counter",
+    [
+      "$INIT",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter_new",
+        ""
+      ]
+    ],
+    [
+      "$FINI",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter__fini",
+        ""
+      ]
+    ],
+    [
+      "$METHOD",
+      "set",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter_set",
+        "",
+        [
+          "INT",
+          "value",
+          "value"
+        ]
+      ]
+    ],
+    [
+      "$RESTRICT",
+      [
+        "housekeeping"
+      ]
+    ],
+    [
+      "$METHOD",
+      "add",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter_add",
+        "",
+        [
+          "INT",
+          "value",
+          "value"
+        ]
+      ]
+    ],
+    [
+      "$RESTRICT",
+      [
+        "vcl_init"
+      ]
+    ],
+    [
+      "$METHOD",
+      "add_ws",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter_add_ws",
+        "",
+        [
+          "INT",
+          "value",
+          "value"
+        ]
+      ]
+    ],
+    [
+      "$RESTRICT",
+      [
+        "vcl_init"
+      ]
+    ],
+    [
+      "$METHOD",
+      "reset",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter_reset",
+        ""
+      ]
+    ],
+    [
+      "$RESTRICT",
+      [
+        "vcl_init",
+        "vcl_fini"
+      ]
+    ],
+    [
+      "$METHOD",
+      "get",
+      [
+        [
+          "INT"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter_get",
+        ""
+      ]
+    ],
+    [
+      "$METHOD",
+      "run",
+      [
+        [
+          "INT"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter_run",
+        "",
+        [
+          "SUB",
+          "sub",
+          "sub"
+        ]
+      ]
+    ],
+    [
+      "$RESTRICT",
+      [
+        "client",
+        "backend"
+      ]
+    ],
+    [
+      "$METHOD",
+      "run_client",
+      [
+        [
+          "INT"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter_run_client",
+        "",
+        [
+          "SUB",
+          "sub",
+          "sub"
+        ]
+      ]
+    ],
+    [
+      "$RESTRICT",
+      [
+        "client"
+      ]
+    ],
+    [
+      "$METHOD",
+      "run_backend",
+      [
+        [
+          "INT"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter_run_backend",
+        "",
+        [
+          "SUB",
+          "sub",
+          "sub"
+        ]
+      ]
+    ],
+    [
+      "$RESTRICT",
+      [
+        "backend"
+      ]
+    ],
+    [
+      "$METHOD",
+      "get_ctx",
+      [
+        [
+          "INT"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Counter_get_ctx",
+        ""
+      ]
+    ]
+  ],
+  [
+    "$OBJ",
+    "plain",
+    {
+      "NULL_OK": false
+    },
+    "struct vmod_object_mut_Plain",
+    [
+      "$INIT",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Plain_plain",
+        ""
+      ]
+    ],
+    [
+      "$FINI",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Plain__fini",
+        ""
+      ]
+    ],
+    [
+      "$METHOD",
+      "run",
+      [
+        [
+          "VOID"
+        ],
+        "Vmod_vmod_object_mut_Func.f_Plain_run",
+        "",
+        [
+          "SUB",
+          "sub",
+          "sub"
+        ]
+      ]
+    ]
+  ]
+]
+

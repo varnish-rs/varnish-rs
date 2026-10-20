@@ -124,7 +124,7 @@ mod types {
         pub static Vmod_types_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"73af3e239c26709b3704928b316f2e69f39231fe8bdbf154a61cc612cf882dac"
+            file_id: c"834304ab2343881693e432a5e61bc806204c0cc40834e6b7d43647cf6391ec0d"
                 .as_ptr(),
             name: c"types".as_ptr(),
             func_name: c"Vmod_vmod_types_Func".as_ptr(),

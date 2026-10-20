@@ -1,0 +1,419 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VmodInfo {
+    params: VmodParams {
+        docs: None,
+    },
+    ident: "object_mut",
+    docs: "",
+    funcs: [],
+    objects: [
+        ObjInfo {
+            ident: "Counter",
+            docs: "",
+            constructors: [
+                FuncInfo {
+                    func_type: Constructor,
+                    ident: "new",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [],
+                    output_ty: SelfType,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
+            destructor: FuncInfo {
+                func_type: Destructor,
+                ident: "_fini",
+                vcl_name: None,
+                docs: "",
+                has_optional_args: false,
+                args: [],
+                output_ty: Default,
+                out_result: false,
+                restrict: [],
+            },
+            funcs: [
+                FuncInfo {
+                    func_type: Method,
+                    ident: "set",
+                    vcl_name: None,
+                    docs: "Only callable from vcl_init and vcl_fini, so `&mut self` is allowed.",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "self",
+                            docs: "",
+                            ty: SelfType {
+                                is_mut: true,
+                            },
+                        },
+                        ParamTypeInfo {
+                            ident: "value",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Regular,
+                                    default: Null,
+                                    ty_info: I64,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: Default,
+                    out_result: false,
+                    restrict: [
+                        "housekeeping",
+                    ],
+                },
+                FuncInfo {
+                    func_type: Method,
+                    ident: "add",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "self",
+                            docs: "",
+                            ty: SelfType {
+                                is_mut: true,
+                            },
+                        },
+                        ParamTypeInfo {
+                            ident: "_ctx",
+                            docs: "",
+                            ty: Context {
+                                is_mut: false,
+                            },
+                        },
+                        ParamTypeInfo {
+                            ident: "value",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Regular,
+                                    default: Null,
+                                    ty_info: I64,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: Default,
+                    out_result: true,
+                    restrict: [
+                        "vcl_init",
+                    ],
+                },
+                FuncInfo {
+                    func_type: Method,
+                    ident: "add_ws",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "self",
+                            docs: "",
+                            ty: SelfType {
+                                is_mut: true,
+                            },
+                        },
+                        ParamTypeInfo {
+                            ident: "_ws",
+                            docs: "",
+                            ty: Workspace {
+                                is_mut: true,
+                            },
+                        },
+                        ParamTypeInfo {
+                            ident: "value",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Regular,
+                                    default: Null,
+                                    ty_info: I64,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: Default,
+                    out_result: false,
+                    restrict: [
+                        "vcl_init",
+                    ],
+                },
+                FuncInfo {
+                    func_type: Method,
+                    ident: "reset",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "self",
+                            docs: "",
+                            ty: SelfType {
+                                is_mut: true,
+                            },
+                        },
+                    ],
+                    output_ty: Default,
+                    out_result: false,
+                    restrict: [
+                        "vcl_init",
+                        "vcl_fini",
+                    ],
+                },
+                FuncInfo {
+                    func_type: Method,
+                    ident: "get",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "self",
+                            docs: "",
+                            ty: SelfType {
+                                is_mut: false,
+                            },
+                        },
+                    ],
+                    output_ty: ParamType(
+                        I64,
+                    ),
+                    out_result: false,
+                    restrict: [],
+                },
+                FuncInfo {
+                    func_type: Method,
+                    ident: "run",
+                    vcl_name: None,
+                    docs: "`&mut Ctx` is fine on a `&self` method that can't run in vcl_init/vcl_fini.",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "self",
+                            docs: "",
+                            ty: SelfType {
+                                is_mut: false,
+                            },
+                        },
+                        ParamTypeInfo {
+                            ident: "ctx",
+                            docs: "",
+                            ty: Context {
+                                is_mut: true,
+                            },
+                        },
+                        ParamTypeInfo {
+                            ident: "sub",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Regular,
+                                    default: Null,
+                                    ty_info: Sub,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: ParamType(
+                        I64,
+                    ),
+                    out_result: false,
+                    restrict: [
+                        "client",
+                        "backend",
+                    ],
+                },
+                FuncInfo {
+                    func_type: Method,
+                    ident: "run_client",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "self",
+                            docs: "",
+                            ty: SelfType {
+                                is_mut: false,
+                            },
+                        },
+                        ParamTypeInfo {
+                            ident: "ctx",
+                            docs: "",
+                            ty: Context {
+                                is_mut: true,
+                            },
+                        },
+                        ParamTypeInfo {
+                            ident: "sub",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Regular,
+                                    default: Null,
+                                    ty_info: Sub,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: ParamType(
+                        I64,
+                    ),
+                    out_result: false,
+                    restrict: [
+                        "client",
+                    ],
+                },
+                FuncInfo {
+                    func_type: Method,
+                    ident: "run_backend",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "self",
+                            docs: "",
+                            ty: SelfType {
+                                is_mut: false,
+                            },
+                        },
+                        ParamTypeInfo {
+                            ident: "ctx",
+                            docs: "",
+                            ty: Context {
+                                is_mut: true,
+                            },
+                        },
+                        ParamTypeInfo {
+                            ident: "sub",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Regular,
+                                    default: Null,
+                                    ty_info: Sub,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: ParamType(
+                        I64,
+                    ),
+                    out_result: false,
+                    restrict: [
+                        "backend",
+                    ],
+                },
+                FuncInfo {
+                    func_type: Method,
+                    ident: "get_ctx",
+                    vcl_name: None,
+                    docs: "`&Ctx` cannot call a VCL sub, so it is allowed in any scope.",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "self",
+                            docs: "",
+                            ty: SelfType {
+                                is_mut: false,
+                            },
+                        },
+                        ParamTypeInfo {
+                            ident: "_ctx",
+                            docs: "",
+                            ty: Context {
+                                is_mut: false,
+                            },
+                        },
+                    ],
+                    output_ty: ParamType(
+                        I64,
+                    ),
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
+        },
+        ObjInfo {
+            ident: "Plain",
+            docs: "Without any `&mut self` method, `&mut Ctx` is allowed in any scope.",
+            constructors: [
+                FuncInfo {
+                    func_type: Constructor,
+                    ident: "plain",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [],
+                    output_ty: SelfType,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
+            destructor: FuncInfo {
+                func_type: Destructor,
+                ident: "_fini",
+                vcl_name: None,
+                docs: "",
+                has_optional_args: false,
+                args: [],
+                output_ty: Default,
+                out_result: false,
+                restrict: [],
+            },
+            funcs: [
+                FuncInfo {
+                    func_type: Method,
+                    ident: "run",
+                    vcl_name: None,
+                    docs: "",
+                    has_optional_args: false,
+                    args: [
+                        ParamTypeInfo {
+                            ident: "self",
+                            docs: "",
+                            ty: SelfType {
+                                is_mut: false,
+                            },
+                        },
+                        ParamTypeInfo {
+                            ident: "ctx",
+                            docs: "",
+                            ty: Context {
+                                is_mut: true,
+                            },
+                        },
+                        ParamTypeInfo {
+                            ident: "sub",
+                            docs: "",
+                            ty: Value(
+                                ParamInfo {
+                                    kind: Regular,
+                                    default: Null,
+                                    ty_info: Sub,
+                                },
+                            ),
+                        },
+                    ],
+                    output_ty: Default,
+                    out_result: false,
+                    restrict: [],
+                },
+            ],
+        },
+    ],
+    shared_types: SharedTypes {
+        shared_per_task_ty: None,
+        shared_per_vcl_ty: None,
+    },
+}
