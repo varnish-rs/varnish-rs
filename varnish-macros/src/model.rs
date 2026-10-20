@@ -58,6 +58,14 @@ impl SharedTypes {
 #[darling(default)]
 pub struct VmodParams {
     pub docs: Option<String>,
+    /// The VMOD's declared `$ABI` stanza: `"strict"` (default, matches today's behavior — the
+    /// vmod is checked against an exact Varnish build at load time) or `"vrt"` (the vmod only
+    /// relies on the portable `vdef.h`/`vrt.h`/`vrt_obj.h`/`vcl.h` surface, checked via a loose
+    /// major/minor version comparison instead). This is purely declarative, mirroring upstream
+    /// `vmodtool.py`'s `$ABI` stanza — it's on the vmod author to only use APIs compatible with
+    /// what they declare (typically by also building with `default-features = false` on their
+    /// `varnish` dependency, which enforces the cut at compile time).
+    pub abi: Option<String>,
 }
 
 /// Represents the object information parsed from an `impl` block.

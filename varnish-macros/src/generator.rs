@@ -32,14 +32,31 @@ pub struct Generator {
     pub file_id: CString,
     pub functions: Vec<FuncProcessor>,
     pub objects: Vec<ObjProcessor>,
+    /// The `vmod_data.vrt_major`/`vrt_minor` values, and the matching JSON header
+    /// `major`/`minor` fields (see [`gen_json`](Self::gen_json)). `(0, 0)` for `$ABI strict`
+    /// (the default — checked via an exact `VMOD_ABI_Version` match), or the real
+    /// `VRT_MAJOR_VERSION`/`VRT_MINOR_VERSION` for `$ABI vrt` (checked via a loose
+    /// major/minor comparison instead). Determined once, directly from the `abi` argument
+    /// to `#[vmod(...)]` — deliberately not feature-detected, since a proc-macro crate can't
+    /// reliably see the eventual vmod crate's own feature resolution.
+    pub vrt_version: (u32, u32),
 }
 
 /// See also <https://varnish-cache.org/docs/7.6/reference/vmod.html>
 impl Generator {
     pub fn render(vmod: &VmodInfo) -> TokenStream {
+        let vrt_version = if vmod.params.abi.as_deref() == Some("vrt") {
+            (
+                varnish_sys::ffi::VRT_MAJOR_VERSION,
+                varnish_sys::ffi::VRT_MINOR_VERSION,
+            )
+        } else {
+            (0, 0)
+        };
         let mut obj = Self {
             names: Names::new(&vmod.ident),
             file_id: Self::calc_file_id(vmod).force_cstr(),
+            vrt_version,
             ..Self::default()
         };
         for info in &vmod.funcs {
@@ -128,8 +145,8 @@ impl Generator {
                 .to_str()
                 .expect("VMOD_ABI_Version must be valid UTF-8")
                 .into(),
-            "0".into(),
-            "0".into(),
+            self.vrt_version.0.to_string().into(),
+            self.vrt_version.1.to_string().into(),
         ]);
 
         let mut json: Vec<Value> = vec![header.into()];
@@ -225,6 +242,8 @@ impl Generator {
 
         let c_func_name = self.names.func_struct_name().force_cstr();
         let func_name = quote! { func_name: #c_func_name.as_ptr(), };
+        let vrt_major = self.vrt_version.0;
+        let vrt_minor = self.vrt_version.1;
 
         let vmod_data_extras = quote! {
             vcs: c"".as_ptr(),  // FIXME: value?
@@ -266,8 +285,8 @@ impl Generator {
                 #[allow(non_upper_case_globals)]
                 #[no_mangle]
                 pub static #vmod_name_data: vmod_data = vmod_data {
-                    vrt_major: 0,
-                    vrt_minor: 0,
+                    vrt_major: #vrt_major,
+                    vrt_minor: #vrt_minor,
                     file_id: #file_id.as_ptr(),
                     name: #c_name.as_ptr(),
                     #func_name

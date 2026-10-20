@@ -27,7 +27,10 @@ serde_json.workspace = true
 serde.workspace = true
 sha2.workspace = true
 syn.workspace = true
-varnish-sys.workspace = true
+# The proc-macro crate needs no `varnish-sys` features of its own — it must not pull in
+# `full` by default, since that would union it onto the shared `varnish-sys` package node
+# used by the actual (target-side) vmod crate, defeating the vrt-mode feature cut there.
+varnish-sys = { workspace = true, default-features = false }
 
 [dev-dependencies]
 insta.workspace = true

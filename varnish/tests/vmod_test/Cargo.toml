@@ -5,7 +5,9 @@ publish = false
 edition.workspace = true
 
 [dependencies]
-varnish = { workspace = true, features = ["ffi"]}
+# Pinned via `ffi` (which requires `full`): uses the VFP filter API, gated out under the vrt-only surface.
+# Without this pin, a workspace-wide `--no-default-features` build would break this example.
+varnish = { workspace = true, features = ["ffi"] }
 
 [lib]
 crate-type = ["cdylib"]

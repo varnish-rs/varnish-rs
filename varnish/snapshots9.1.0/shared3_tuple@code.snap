@@ -58,9 +58,9 @@ mod tuple {
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_tuple_Data: vmod_data = vmod_data {
-            vrt_major: 0,
-            vrt_minor: 0,
-            file_id: c"f48632ff5d6055bc788e5c6e8475595e9dfb59430a49cef5785361f63a792bb6"
+            vrt_major: 0u32,
+            vrt_minor: 0u32,
+            file_id: c"6142e626e445cf933f6b83141c9f8df0269ecf307aa77947da8ea7c109afcf0d"
                 .as_ptr(),
             name: c"tuple".as_ptr(),
             func_name: c"Vmod_vmod_tuple_Func".as_ptr(),

@@ -4,6 +4,7 @@ source: varnish-macros/src/tests.rs
 VmodInfo {
     params: VmodParams {
         docs: None,
+        abi: None,
     },
     ident: "types",
     docs: "main docs\n# Big header\n## sub header\nfoo bar\nMultiline\n* comment per https://github.com/rust-lang/rust/issues/32088\n*\n* The end",

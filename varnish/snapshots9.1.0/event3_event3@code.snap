@@ -164,9 +164,9 @@ mod event3 {
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_event3_Data: vmod_data = vmod_data {
-            vrt_major: 0,
-            vrt_minor: 0,
-            file_id: c"2e04e8a41fb633a6b2c76b6b78155396928a8dc4c57935089e8168db69187824"
+            vrt_major: 0u32,
+            vrt_minor: 0u32,
+            file_id: c"3f24402fcd00a4bea820a8150605f311e309a2b9ee7dedab4ed700aadafd08c5"
                 .as_ptr(),
             name: c"event3".as_ptr(),
             func_name: c"Vmod_vmod_event3_Func".as_ptr(),

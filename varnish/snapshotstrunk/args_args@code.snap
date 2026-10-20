@@ -31,9 +31,9 @@ mod args {
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_args_Data: vmod_data = vmod_data {
-            vrt_major: 0,
-            vrt_minor: 0,
-            file_id: c"34176cf6dcb520aaf98d4735d50abf7d0bdadaa2684e4fee87b6134a14e5f673"
+            vrt_major: 0u32,
+            vrt_minor: 0u32,
+            file_id: c"2227abf2daf07dc875793d08ca3b27b6c94ae606fb9ff4b85ab4ea65a03cb479"
                 .as_ptr(),
             name: c"args".as_ptr(),
             func_name: c"Vmod_vmod_args_Func".as_ptr(),
