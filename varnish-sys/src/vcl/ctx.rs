@@ -21,20 +21,25 @@ pub use full::{log, BodyState, TestCtx};
 /// the provided methods to interact with them. If they are not enough, the `raw` field is actually
 /// the C original pointer that can be used to directly, and unsafely, act on the structure.
 ///
-/// Which `http_*` are present will depend on which VCL sub routine the function is called from.
+/// The `http_*` fields are only available with the `full` Cargo feature (enabled by default), as
+/// the vrt-only ABI surface has no access to HTTP objects. When present, which `http_*` are set
+/// will depend on which VCL sub routine the function is called from.
 ///
-/// ``` rust
-/// # mod varnish { pub use varnish_sys::vcl; }
-/// use varnish::vcl::Ctx;
-///
-/// fn foo(ctx: &Ctx) {
-///     if let Some(ref req) = ctx.http_req {
-///         for (name, value) in req {
-///             println!("header {name} has value {value:?}");
-///         }
-///     }
-/// }
-/// ```
+#[cfg_attr(
+    feature = "full",
+    doc = r#"``` rust
+# mod varnish { pub use varnish_sys::vcl; }
+use varnish::vcl::Ctx;
+
+fn foo(ctx: &Ctx) {
+    if let Some(ref req) = ctx.http_req {
+        for (name, value) in req {
+            println!("header {name} has value {value:?}");
+        }
+    }
+}
+```"#
+)]
 #[derive(Debug)]
 pub struct Ctx<'a> {
     pub raw: &'a mut vrt_ctx,
