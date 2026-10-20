@@ -101,11 +101,9 @@ impl VclBackend<EchoResponse> for EchoBackend {
         .into_bytes();
         resp.extend_from_slice(&body);
         // The stream is only borrowed: Varnish closes the connection once we return.
-        match req.client().write_all(&resp) {
-            Ok(()) => {
-                req.acct().add_out(resp.len() as u64);
-                StreamClose::TxPipe
-            }
+        // `write_out()` counts what reaches the client, even if the write fails midway.
+        match req.acct().write_out(&mut req.client(), &resp) {
+            Ok(()) => StreamClose::TxPipe,
             Err(e) => {
                 ctx.log(LogTag::Error, format!("pipe write failed: {e}"));
                 StreamClose::TxError

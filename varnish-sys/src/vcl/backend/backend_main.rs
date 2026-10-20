@@ -171,9 +171,10 @@ pub trait VclBackend<T: VclResponse> {
     /// 2. send it what Varnish already consumed from the client, with
     ///    [`PipeRequest::forward_preamble`],
     /// 3. copy bytes both ways between [`PipeRequest::client`] and the backend until either side
-    ///    closes, counting them with [`PipeAcct::add_in`](crate::vcl::PipeAcct::add_in)/[`PipeAcct::add_out`](crate::vcl::PipeAcct::add_out). Core's own
-    ///    backends also stop after [`PipeRequest::pipe_timeout`] without traffic, and at
-    ///    [`PipeRequest::deadline`].
+    ///    closes, counting them with [`PipeAcct::add_in`](crate::vcl::PipeAcct::add_in)/[`PipeAcct::add_out`](crate::vcl::PipeAcct::add_out)
+    ///    (or writing them with [`PipeAcct::write_in`](crate::vcl::PipeAcct::write_in)/[`PipeAcct::write_out`](crate::vcl::PipeAcct::write_out),
+    ///    which also count what a failed write sent). Core's own backends also stop after
+    ///    [`PipeRequest::pipe_timeout`] without traffic, and at [`PipeRequest::deadline`].
     ///
     /// Once done, return a [`StreamClose`] describing how/why the transaction ended, usually
     /// [`StreamClose::TxPipe`]. Varnish then closes the client connection.

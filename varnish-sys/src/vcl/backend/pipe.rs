@@ -52,6 +52,18 @@ impl PipeAcct {
         self.touch();
     }
 
+    /// Writes all of `buf` to `backend`, like `write_all()`, counting each successful `write()`
+    /// with [`add_in`](Self::add_in). On error, the bytes written before it stay counted.
+    pub fn write_in<W: Write>(&self, backend: &mut W, buf: &[u8]) -> io::Result<()> {
+        write_counted(backend, buf, |n| self.add_in(n))
+    }
+
+    /// Writes all of `buf` to `client`, like `write_all()`, counting each successful `write()`
+    /// with [`add_out`](Self::add_out). On error, the bytes written before it stay counted.
+    pub fn write_out<W: Write>(&self, client: &mut W, buf: &[u8]) -> io::Result<()> {
+        write_counted(client, buf, |n| self.add_out(n))
+    }
+
     /// Backend request header bytes counted so far.
     pub fn bereq_hdrbytes(&self) -> u64 {
         self.bereq_hdr.load(Ordering::Relaxed)
@@ -387,10 +399,11 @@ fn forward<'b, W: Write>(
     acct: &PipeAcct,
 ) -> io::Result<()> {
     for chunk in body {
-        write_counted(origin, chunk, |n| acct.add_out(n))?;
+        // "out", like core, see `PipeRequest::forward_preamble`.
+        acct.write_out(origin, chunk)?;
     }
     if let Some(bytes) = pipelined() {
-        write_counted(origin, bytes, |n| acct.add_in(n))?;
+        acct.write_in(origin, bytes)?;
     }
     Ok(())
 }
@@ -509,6 +522,22 @@ mod tests {
         let err = write_counted(&mut Zero, b"x", |n| acct.add_in(n)).unwrap_err();
         assert_eq!(err.kind(), io::ErrorKind::WriteZero);
         assert_eq!(acct.in_bytes(), 0);
+    }
+
+    #[test]
+    fn acct_write_counts_partial_writes() {
+        let acct = PipeAcct::default();
+        let mut w = flaky(4);
+        assert!(acct.write_out(&mut w, b"abcdef").is_err());
+        assert_eq!((acct.out_bytes(), acct.in_bytes()), (4, 0));
+
+        let mut w = flaky(5);
+        assert!(acct.write_in(&mut w, b"abcdef").is_err());
+        assert_eq!((acct.out_bytes(), acct.in_bytes()), (4, 5));
+
+        let mut w = flaky(100);
+        acct.write_out(&mut w, b"abcdef").unwrap();
+        assert_eq!((acct.out_bytes(), acct.in_bytes()), (10, 5));
     }
 
     #[test]
