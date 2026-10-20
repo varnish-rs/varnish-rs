@@ -79,7 +79,7 @@ impl VclBackend<EchoResponse> for EchoBackend {
     /// When the VCL returns `pipe`, answer directly on the client connection
     /// with bereq's URL as the body. The stream is only borrowed: Varnish
     /// closes the connection once we return.
-    fn pipe(&self, ctx: &mut Ctx, tcp_stream: &mut TcpStream) -> StreamClose {
+    fn pipe(&self, ctx: &mut Ctx, mut tcp_stream: &TcpStream) -> StreamClose {
         let url = ctx
             .http_bereq
             .as_ref()

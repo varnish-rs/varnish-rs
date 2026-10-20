@@ -166,14 +166,38 @@ pub trait VclBackend<T: VclResponse> {
     }
 
     /// If your backend is used inside `vcl_pipe`, this method is in charge of sending the request
-    /// headers that Varnish already read, and then the body. The second argument, a `&mut TcpStream` is
-    /// the raw client stream that Varnish was using (converted from a raw fd).
+    /// headers that Varnish already read, and then the body. The second argument, a `&TcpStream` is
+    /// the raw client stream that Varnish was using (converted from a raw fd). `Read` and `Write`
+    /// are implemented for `&TcpStream`, so bind it mutably (`mut tcp_stream: &TcpStream`) to use
+    /// them.
     ///
-    /// The stream is only borrowed: Varnish still owns the underlying file descriptor and closes
-    /// it once this method returns, so don't close it yourself.
+    /// The stream is only borrowed, through a shared reference so it can't be moved out or
+    /// replaced: Varnish still owns the underlying file descriptor and closes it once this method
+    /// returns, so don't close it yourself. Notably, an implementation can't take a mutable
+    /// borrow to swap the stream out and drop it:
+    ///
+    /// ```compile_fail,E0053
+    /// use std::net::TcpStream;
+    /// use varnish_sys::vcl::{Ctx, StreamClose, VclBackend, VclError};
+    ///
+    /// struct Thief;
+    ///
+    /// impl VclBackend<()> for Thief {
+    ///     fn get_response(&self, _ctx: &mut Ctx) -> Result<Option<()>, VclError> {
+    ///         Ok(None)
+    ///     }
+    ///
+    ///     fn pipe(&self, _ctx: &mut Ctx, tcp_stream: &mut TcpStream) -> StreamClose {
+    ///         // would close Varnish's fd early, and leak the replacement
+    ///         let replacement = tcp_stream.try_clone().unwrap();
+    ///         drop(std::mem::replace(tcp_stream, replacement));
+    ///         StreamClose::TxPipe
+    ///     }
+    /// }
+    /// ```
     ///
     /// Once done, you should return a `StreamClose` describing how/why the transaction ended.
-    fn pipe(&self, ctx: &mut Ctx, _tcp_stream: &mut TcpStream) -> StreamClose {
+    fn pipe(&self, ctx: &mut Ctx, _tcp_stream: &TcpStream) -> StreamClose {
         ctx.log(LogTag::Error, "Backend does not support pipe");
         StreamClose::TxError
     }
@@ -756,10 +780,12 @@ unsafe extern "C" fn wrap_pipe<S: VclBackend<T>, T: VclResponse>(
     assert_ne!(fd, 0);
     // Varnish owns the fd and closes it (SES_Close) after we return, so the
     // stream must never be dropped, or the fd would be closed twice.
-    let mut tcp_stream = ManuallyDrop::new(TcpStream::from_raw_fd(fd));
+    // Only a shared reference is handed out, so pipe() can't move the
+    // stream out of the ManuallyDrop (e.g. with mem::replace) and drop it.
+    let tcp_stream = ManuallyDrop::new(TcpStream::from_raw_fd(fd));
 
     let backend: &S = get_backend(validate_director(be));
-    sc_to_ptr(backend.pipe(&mut ctx, &mut tcp_stream))
+    sc_to_ptr(backend.pipe(&mut ctx, &tcp_stream))
 }
 
 // CStr is tied to the lifetime of bep, but we only use it for error messages
