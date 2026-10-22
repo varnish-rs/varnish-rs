@@ -100,14 +100,16 @@ pub(crate) fn into_vcl_probe<T: AsRef<str>>(
 /// Helper to convert a VCL probe into a Rust probe wrapper
 pub(crate) fn from_vcl_probe<'a, T: From<Cow<'a, str>>>(value: VCL_PROBE) -> Option<Probe<T>> {
     let pr = unsafe { value.0.as_ref()? };
-    assert!(
-        (pr.url.is_null() && !pr.request.is_null()) || pr.request.is_null() && !pr.url.is_null()
-    );
+    // VCC rejects a probe with both, but one with neither is legal: like
+    // the native prober, treat it as a GET of "/".
+    debug_assert!(pr.url.is_null() || pr.request.is_null());
     Some(Probe {
-        request: if pr.url.is_null() {
+        request: if !pr.request.is_null() {
             Request::Text(from_str(pr.request).into())
-        } else {
+        } else if !pr.url.is_null() {
             Request::Url(from_str(pr.url).into())
+        } else {
+            Request::Url(Cow::Borrowed("/").into())
         },
         timeout: VCL_DURATION(pr.timeout).into(),
         interval: VCL_DURATION(pr.interval).into(),
@@ -125,5 +127,24 @@ fn from_str<'a>(value: *const c_char) -> Cow<'a, str> {
     } else {
         // FIXME: this should NOT be lossy IMO
         unsafe { CStr::from_ptr(value).to_string_lossy() }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn probe_without_url_or_request_is_get_root() {
+        let pr = vrt_backend_probe {
+            magic: VRT_BACKEND_PROBE_MAGIC,
+            ..Default::default()
+        };
+        let back: CowProbe<'_> =
+            from_vcl_probe(VCL_PROBE(&raw const pr)).expect("probe must not be null");
+        match back.request {
+            Request::Url(url) => assert_eq!(url, "/"),
+            Request::Text(text) => panic!("expected a URL probe, got text {text:?}"),
+        }
     }
 }
