@@ -73,8 +73,37 @@ pub trait VclDirector {
 ///
 /// Directors are typically used to implement load balancing strategies (round-robin,
 /// random, hash-based, etc.) by selecting from multiple backends.
+///
+/// `D` must be `'static`, for the same reason as [`Backend`](super::Backend)'s `S`: Varnish
+/// reaches it through a raw pointer on the registered `struct director`, which no Rust
+/// lifetime constrains.
+///
+/// ```compile_fail,E0597
+/// # mod varnish { pub use varnish_sys::vcl; }
+/// use varnish::vcl::{BackendRef, Ctx, Director, ProbeResult, VclDirector, VclResult};
+///
+/// struct Borrowed<'a>(&'a str);
+///
+/// impl VclDirector for Borrowed<'_> {
+///     fn resolve(&self, _ctx: &mut Ctx) -> Option<BackendRef> {
+///         let _ = self.0.len();
+///         None
+///     }
+///
+///     fn probe(&self, _ctx: &mut Ctx) -> ProbeResult {
+///         unimplemented!()
+///     }
+/// }
+///
+/// fn register(ctx: &mut Ctx) -> VclResult<()> {
+///     let name = String::from("borrowed");
+///     let dir = Director::new(ctx, "borrowed", "dir", Borrowed(&name))?;
+///     std::mem::forget(dir);
+///     Ok(())
+/// }
+/// ```
 #[derive(Debug)]
-pub struct Director<D: VclDirector> {
+pub struct Director<D: VclDirector + 'static> {
     #[expect(dead_code)]
     methods: Box<ffi::vdi_methods>,
     inner: Box<D>,
@@ -83,7 +112,7 @@ pub struct Director<D: VclDirector> {
     backend_ref: BackendRef,
 }
 
-impl<D: VclDirector> Director<D> {
+impl<D: VclDirector + 'static> Director<D> {
     /// Create a new director by calling `VRT_AddDirector`
     ///
     /// This registers the director with Varnish and sets up the appropriate callbacks.
@@ -162,7 +191,7 @@ impl<D: VclDirector> Director<D> {
     }
 }
 
-impl<D: VclDirector> Drop for Director<D> {
+impl<D: VclDirector + 'static> Drop for Director<D> {
     fn drop(&mut self) {
         unsafe {
             let mut bep = self.backend_ref.vcl_ptr();
@@ -171,7 +200,7 @@ impl<D: VclDirector> Drop for Director<D> {
     }
 }
 
-impl<D: VclDirector> AsRef<BackendRef> for Director<D> {
+impl<D: VclDirector + 'static> AsRef<BackendRef> for Director<D> {
     fn as_ref(&self) -> &BackendRef {
         &self.backend_ref
     }
