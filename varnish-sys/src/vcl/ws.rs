@@ -40,6 +40,9 @@ impl ffi::ws {
     pub(crate) unsafe fn release(&mut self, len: u32) {
         ffi::WS_Release(self, len);
     }
+    pub(crate) unsafe fn mark_overflow(&mut self) {
+        ffi::WS_MarkOverflow(self);
+    }
 }
 
 #[cfg(test)]
@@ -93,6 +96,9 @@ impl ffi::ws {
         assert!(ws.f.is_aligned());
         ws.r = ptr::null_mut::<c_char>();
     }
+
+    #[allow(clippy::unused_self)]
+    pub(crate) unsafe fn mark_overflow(&mut self) {}
 }
 
 /// A workspace object
