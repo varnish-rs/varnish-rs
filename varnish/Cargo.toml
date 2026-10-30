@@ -14,13 +14,13 @@ readme.workspace = true
 [features]
 default = ["full"]
 # Full ($ABI strict) API surface; see varnish-sys/Cargo.toml.
-full = ["varnish-sys/full"]
+full = ["varnish-sys/full", "varnish-macros/full"]
 # Raw `varnish_sys::ffi` passthrough only exposes the full struct layouts under `full`.
 ffi = ["full"]
 
 [dependencies]
 glob.workspace = true
-varnish-macros.workspace = true
+varnish-macros = { workspace = true, default-features = false }
 varnish-sys = { workspace = true, default-features = false }
 
 [dev-dependencies]

@@ -14,6 +14,14 @@ readme.workspace = true
 [lib]
 proc-macro = true
 
+[features]
+default = ["full"]
+# Mirrors `varnish/full`. The macro itself needs no `full`-only items, but the proc-macro is a
+# host dependency, and with resolver 2 its `varnish-sys` features are resolved separately from
+# the vmod's (target) `varnish-sys`. Keeping both feature sets identical lets cargo build
+# `varnish-sys` (and its bindgen run) once instead of twice.
+full = ["varnish-sys/full"]
+
 [build-dependencies]
 semver.workspace = true
 
@@ -27,9 +35,7 @@ serde_json.workspace = true
 serde.workspace = true
 sha2.workspace = true
 syn.workspace = true
-# The proc-macro crate needs no `varnish-sys` features of its own — it must not pull in
-# `full` by default, since that would union it onto the shared `varnish-sys` package node
-# used by the actual (target-side) vmod crate, defeating the vrt-mode feature cut there.
+# `full` is forwarded via this crate's own `full` feature, see [features] above.
 varnish-sys = { workspace = true, default-features = false }
 
 [dev-dependencies]
