@@ -459,9 +459,6 @@
 ///   Otherwise, your vmod can implement the event function and drop the structs on a cold event.
 pub use varnish_sys::vcl;
 
-// Re-export the report_details_json macro
-pub use varnish_sys::report_details_json;
-
 #[cfg(not(feature = "ffi"))]
 #[doc(hidden)]
 pub mod ffi {
@@ -482,8 +479,17 @@ pub use varnish_sys::ffi;
 
 pub mod varnishtest;
 
+// `MetricsReader` reads stats from a running varnishd via `vapi/vsm.h`+`vapi/vsc.h` — an
+// external, non-vrt API surface unrelated to in-VCL runtime.
+#[cfg(feature = "full")]
 mod metrics_reader;
-pub use metrics_reader::{Metric, MetricFormat, MetricsReader, MetricsReaderBuilder, Semantics};
+// `report_details_json` is backend-only (see vcl::backend), grouped here with the
+// MetricsReader re-exports so the `full` gate isn't repeated on each.
+#[cfg(feature = "full")]
+pub use {
+    metrics_reader::{Metric, MetricFormat, MetricsReader, MetricsReaderBuilder, Semantics},
+    varnish_sys::report_details_json,
+};
 
 mod metrics_publisher;
 pub use metrics_publisher::{Vsc, VscMetric};

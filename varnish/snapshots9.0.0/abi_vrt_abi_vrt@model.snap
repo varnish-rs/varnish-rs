@@ -1,0 +1,68 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VmodInfo {
+    params: VmodParams {
+        docs: None,
+        abi: Some(
+            "vrt",
+        ),
+    },
+    ident: "abi_vrt",
+    docs: "",
+    funcs: [
+        FuncInfo {
+            func_type: Function,
+            ident: "scalar_fn",
+            vcl_name: None,
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "x",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: I64,
+                        },
+                    ),
+                },
+            ],
+            output_ty: ParamType(
+                I64,
+            ),
+            out_result: false,
+            restrict: [],
+        },
+        FuncInfo {
+            func_type: Function,
+            ident: "echo",
+            vcl_name: None,
+            docs: "",
+            has_optional_args: false,
+            args: [
+                ParamTypeInfo {
+                    ident: "s",
+                    docs: "",
+                    ty: Value(
+                        ParamInfo {
+                            kind: Regular,
+                            default: Null,
+                            ty_info: Str,
+                        },
+                    ),
+                },
+            ],
+            output_ty: String,
+            out_result: false,
+            restrict: [],
+        },
+    ],
+    objects: [],
+    shared_types: SharedTypes {
+        shared_per_task_ty: None,
+        shared_per_vcl_ty: None,
+    },
+}

@@ -189,9 +189,9 @@ mod restrict_scopes {
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_restrict_scopes_Data: vmod_data = vmod_data {
-            vrt_major: 0,
-            vrt_minor: 0,
-            file_id: c"776ba51c758eea75219a10903fd4c86c6b8d9d9ac226d6c856ced2dbff5bf420"
+            vrt_major: 0u32,
+            vrt_minor: 0u32,
+            file_id: c"0bfc8ea8f27ee4f54234cf447fb6842b115c0c0c7e7e23372688d6580fc3e348"
                 .as_ptr(),
             name: c"restrict_scopes".as_ptr(),
             func_name: c"Vmod_vmod_restrict_scopes_Func".as_ptr(),
