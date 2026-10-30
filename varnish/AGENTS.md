@@ -15,7 +15,8 @@ Actual domain logic (Ctx, HTTP, workspace, backends, VDP/VFP, ACL, subroutine, c
 
 ## Gotchas
 
-- **`ffi` feature** gates the raw `varnish_sys::ffi` re-export + `pass_ffi`/ffi-only tests. Only enable for low-level/backend code needing direct C struct access.
+- **`full` feature** (default-on) selects the full `$ABI strict` API; off = vrt.h-only subset (`$ABI vrt`). It must enable **both** `varnish-sys/full` and `varnish-macros/full`: the proc-macro is a host dep, and resolver 2 resolves host features separately, so if the two sides disagree cargo builds `varnish-sys` (and runs bindgen) twice. Keep `varnish-sys`/`varnish-macros` deps at `default-features = false` (workspace + here) so only this feature drives them.
+- **`ffi` feature** (implies `full`) gates the raw `varnish_sys::ffi` re-export + `pass_ffi`/ffi-only tests. Only enable for low-level/backend code needing direct C struct access.
 - Objects: struct + `impl` block go **outside** the `#[vmod]` module body — only fns/methods go inside. Constructor = any method returning `Self`.
 - `#[shared_per_task]` / `#[shared_per_vcl]` type must stay consistent across the whole vmod.
 - `varnish::ffi` (when the `ffi` feature is **off**) must export **at least** the items referenced by `use_ffi_items` in `varnish-macros/src/generator.rs` (generated code does `use varnish::ffi::{...}`). If codegen starts using new raw FFI items, update both places accordingly.

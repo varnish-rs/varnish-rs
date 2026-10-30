@@ -42,6 +42,8 @@ TokenStream (attr args, ItemMod)
 
 `darling` parses `#[vmod(...)]` into `VmodParams` (currently only supports `docs` — new args go through darling in `parser.rs`). `syn`/`proc-macro2`/`quote` for AST+codegen. `prettyplease` used **only in tests** (`tests.rs`) to pretty-print generated code before snapshotting. `serde_json`/`sha2` for VCC JSON blob + CString hashing at codegen time. `glob` for `run_vtc_tests!` discovery. `varnish-sys` supplies `VALID_RESTRICT_SCOPES`.
 
+`full` feature (default-on) only forwards `varnish-sys/full` — the macro needs nothing from it. It exists so `varnish/full` can keep the host-side (proc-macro) `varnish-sys` feature set identical to the target-side one, letting cargo build `varnish-sys` once. Don't drop it or depend on `varnish-sys` with different features here.
+
 ## Testing — two systems, see [varnish/tests/AGENTS.md](../varnish/tests/AGENTS.md) for the fixture side
 
 1. `src/tests.rs` (insta): reads real fixtures from `varnish/tests/pass/*.rs` and `varnish/tests/pass_ffi/*.rs` (cross-crate!), runs parser/generator directly, snapshots 4 outputs per fixture (`@model`, `@docs`, `@code`, `@json`) into `varnish/snapshots<VARNISHAPI_VERSION>/` — one dir per supported Varnish version.
