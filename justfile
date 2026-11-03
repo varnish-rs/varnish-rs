@@ -94,6 +94,23 @@ check-vrt-abi:
     # only builds the test binary, not the cdylib.
     cargo build {{vrt_compatible_examples}} --no-default-features
     cargo test {{vrt_compatible_examples}} --no-default-features
+    just check-single-varnish-sys-build
+
+# Fail if a vmod build compiles `varnish-sys` more than once. The proc-macro (host) side and the
+# vmod (target) side must resolve to the same `varnish-sys` features, see `full` in varnish/Cargo.toml.
+check-single-varnish-sys-build:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # Examples pin their mode in Cargo.toml: vmod_example = full, vmod_counters = ffi, vmod_timestamp = vrt.
+    for pkg in vmod_example vmod_counters vmod_timestamp; do
+        count=$(cargo build -p $pkg --message-format=json \
+            | grep -c '"reason":"compiler-artifact".*"name":"varnish_sys"' || true)
+        if [ "$count" != 1 ]; then
+            echo "ERROR: varnish-sys was built $count times for 'cargo build -p $pkg', expected 1"
+            exit 1
+        fi
+    done
+    echo "varnish-sys is built once in full, ffi and vrt mode"
 
 # Generate code coverage report to upload to codecov.io
 ci-coverage: env-info && \
