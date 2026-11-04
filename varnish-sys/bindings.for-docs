@@ -491,6 +491,14 @@ impl<const N: usize> __BindgenBitfieldUnit<[u8; N]> {
         }
     }
 }
+#[derive(PartialEq, Eq, Copy, Clone, Debug, Hash)]
+#[repr(C, align(8))]
+pub struct __BindgenOpaqueArray8<T>(pub T);
+impl<T: Copy + Default, const N: usize> Default for __BindgenOpaqueArray8<[T; N]> {
+    fn default() -> Self {
+        Self([<T as Default>::default(); N])
+    }
+}
 #[derive(PartialEq, Copy, Clone, Hash, Debug, Default)]
 #[repr(C)]
 pub struct __BindgenComplex<T> {
@@ -853,6 +861,7 @@ pub const SO_RCVPRIORITY: u32 = 82;
 pub const SO_PASSRIGHTS: u32 = 83;
 pub const SO_INQ: u32 = 84;
 pub const SCM_INQ: u32 = 84;
+pub const SO_RIGHTS_NOTRUNC: u32 = 85;
 pub const SO_TIMESTAMP: u32 = 29;
 pub const SO_TIMESTAMPNS: u32 = 35;
 pub const SO_TIMESTAMPING: u32 = 37;
@@ -988,6 +997,7 @@ pub const SIG_ATOMIC_MAX: u32 = 2147483647;
 pub const SIZE_MAX: i32 = -1;
 pub const WINT_MIN: u32 = 0;
 pub const WINT_MAX: u32 = 4294967295;
+#[doc = " Fundamental numerical limits\n These limits track RFC8941\n We use hex notation because 999999999999.999 is not perfectly\n representable in ieee64 doubles."]
 pub const VRT_INTEGER_MAX: u64 = 999999999999999;
 pub const VRT_INTEGER_MIN: i64 = -999999999999999;
 pub const VRT_MAJOR_VERSION: u32 = 22;
@@ -996,6 +1006,7 @@ pub const STRANDS_MAGIC: u32 = 1566224790;
 pub const VRT_BLOB_MAGIC: u32 = 3776240542;
 pub const VRT_NULL_BLOB_TYPE: u32 = 4208873376;
 pub const VRT_CTX_MAGIC: u32 = 1807282395;
+#[doc = " We want the VCC to spit this structs out as const, but when VMODs\n come up with them we want to clone them into malloc'ed space which\n we can free again.\n We collect all the knowledge here by macroizing the fields and make\n a macro for handling them all.\n See also:  cache_backend.h & cache_backend_cfg.c\n One of those things..."]
 pub const BSSL_F_ENABLE: u32 = 1;
 pub const BSSL_F_NOSNI: u32 = 2;
 pub const BSSL_F_NOVERIFY: u32 = 4;
@@ -1422,8 +1433,6 @@ pub const VFP_ENTRY_MAGIC: u32 = 3190988839;
 pub const VFP_CTX_MAGIC: u32 = 1641665509;
 pub const VDP_ENTRY_MAGIC: u32 = 893302657;
 pub const VDP_CTX_MAGIC: u32 = 3998227959;
-pub const VMOD_ABI_Version: &::std::ffi::CStr =
-    c"Varnish 9.1.0 56dc2d99911131e4a4cd29c1d6c2c173abab64bc";
 pub const VSM_n_USAGE: &::std::ffi::CStr = c"[-n varnish_name]";
 pub const VSM_t_USAGE: &::std::ffi::CStr = c"[-t <seconds|off>]";
 pub const VSM_MGT_RUNNING: u32 = 2;
@@ -1476,6 +1485,8 @@ pub const VCL_RET_VCL: u32 = 18;
 pub const VCL_RET_MAX: u32 = 19;
 pub const VRT_TYPE_MAGIC: u32 = 2839788594;
 pub const VCL_CONF_MAGIC: u32 = 1946600713;
+pub const VMOD_ABI_Version: &::std::ffi::CStr =
+    c"Varnish 9.1.0 ffd36e9db9a1ec2bf6637deda180a87d40a13d0f";
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct iovec {
@@ -2495,7 +2506,7 @@ unsafe extern "C" {
         __dest: *mut ::std::ffi::c_void,
         __src: *const ::std::ffi::c_void,
         __c: ::std::ffi::c_int,
-        __n: ::std::ffi::c_ulong,
+        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
     ) -> *mut ::std::ffi::c_void;
 }
 unsafe extern "C" {
@@ -2516,7 +2527,7 @@ unsafe extern "C" {
     pub fn memchr(
         __s: *const ::std::ffi::c_void,
         __c: ::std::ffi::c_int,
-        __n: ::std::ffi::c_ulong,
+        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
     ) -> *mut ::std::ffi::c_void;
 }
 unsafe extern "C" {
@@ -2529,7 +2540,7 @@ unsafe extern "C" {
     pub fn strncpy(
         __dest: *mut ::std::ffi::c_char,
         __src: *const ::std::ffi::c_char,
-        __n: ::std::ffi::c_ulong,
+        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
     ) -> *mut ::std::ffi::c_char;
 }
 unsafe extern "C" {
@@ -2542,7 +2553,7 @@ unsafe extern "C" {
     pub fn strncat(
         __dest: *mut ::std::ffi::c_char,
         __src: *const ::std::ffi::c_char,
-        __n: ::std::ffi::c_ulong,
+        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
     ) -> *mut ::std::ffi::c_char;
 }
 unsafe extern "C" {
@@ -2555,7 +2566,7 @@ unsafe extern "C" {
     pub fn strncmp(
         __s1: *const ::std::ffi::c_char,
         __s2: *const ::std::ffi::c_char,
-        __n: ::std::ffi::c_ulong,
+        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
     ) -> ::std::ffi::c_int;
 }
 unsafe extern "C" {
@@ -2568,8 +2579,8 @@ unsafe extern "C" {
     pub fn strxfrm(
         __dest: *mut ::std::ffi::c_char,
         __src: *const ::std::ffi::c_char,
-        __n: ::std::ffi::c_ulong,
-    ) -> ::std::ffi::c_ulong;
+        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
+    ) -> __BindgenOpaqueArray8<[u8; 8usize]>;
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2627,7 +2638,7 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn strndup(
         __string: *const ::std::ffi::c_char,
-        __n: ::std::ffi::c_ulong,
+        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
     ) -> *mut ::std::ffi::c_char;
 }
 unsafe extern "C" {
@@ -2652,13 +2663,13 @@ unsafe extern "C" {
     pub fn strcspn(
         __s: *const ::std::ffi::c_char,
         __reject: *const ::std::ffi::c_char,
-    ) -> ::std::ffi::c_ulong;
+    ) -> __BindgenOpaqueArray8<[u8; 8usize]>;
 }
 unsafe extern "C" {
     pub fn strspn(
         __s: *const ::std::ffi::c_char,
         __accept: *const ::std::ffi::c_char,
-    ) -> ::std::ffi::c_ulong;
+    ) -> __BindgenOpaqueArray8<[u8; 8usize]>;
 }
 unsafe extern "C" {
     pub fn strpbrk(
@@ -2717,7 +2728,7 @@ unsafe extern "C" {
     pub fn mempcpy(
         __dest: *mut ::std::ffi::c_void,
         __src: *const ::std::ffi::c_void,
-        __n: ::std::ffi::c_ulong,
+        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
     ) -> *mut ::std::ffi::c_void;
 }
 unsafe extern "C" {
@@ -2741,11 +2752,11 @@ unsafe extern "C" {
     pub fn bcopy(
         __src: *const ::std::ffi::c_void,
         __dest: *mut ::std::ffi::c_void,
-        __n: ::std::ffi::c_ulong,
+        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
     );
 }
 unsafe extern "C" {
-    pub fn bzero(__s: *mut ::std::ffi::c_void, __n: ::std::ffi::c_ulong);
+    pub fn bzero(__s: *mut ::std::ffi::c_void, __n: __BindgenOpaqueArray8<[u8; 8usize]>);
 }
 unsafe extern "C" {
     pub fn index(__s: *const ::std::ffi::c_char, __c: ::std::ffi::c_int)
@@ -2776,7 +2787,7 @@ unsafe extern "C" {
     pub fn strncasecmp(
         __s1: *const ::std::ffi::c_char,
         __s2: *const ::std::ffi::c_char,
-        __n: ::std::ffi::c_ulong,
+        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
     ) -> ::std::ffi::c_int;
 }
 unsafe extern "C" {
@@ -2829,22 +2840,22 @@ unsafe extern "C" {
     pub fn stpncpy(
         __dest: *mut ::std::ffi::c_char,
         __src: *const ::std::ffi::c_char,
-        __n: ::std::ffi::c_ulong,
+        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
     ) -> *mut ::std::ffi::c_char;
 }
 unsafe extern "C" {
     pub fn strlcpy(
         __dest: *mut ::std::ffi::c_char,
         __src: *const ::std::ffi::c_char,
-        __n: ::std::ffi::c_ulong,
-    ) -> ::std::ffi::c_ulong;
+        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
+    ) -> __BindgenOpaqueArray8<[u8; 8usize]>;
 }
 unsafe extern "C" {
     pub fn strlcat(
         __dest: *mut ::std::ffi::c_char,
         __src: *const ::std::ffi::c_char,
-        __n: ::std::ffi::c_ulong,
-    ) -> ::std::ffi::c_ulong;
+        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
+    ) -> __BindgenOpaqueArray8<[u8; 8usize]>;
 }
 pub type __cfloat128 = __BindgenComplex<u128>;
 pub type _Float128 = u128;
@@ -12846,6 +12857,324 @@ unsafe extern "C" {
     pub fn VRT_RemoveFilter(ctx: *const vrt_ctx, arg1: *const vfp, arg2: *const vdp);
 }
 unsafe extern "C" {
+    pub static vsa_suckaddr_len: usize;
+}
+unsafe extern "C" {
+    pub static mut bogo_ip: *const suckaddr;
+}
+unsafe extern "C" {
+    pub static mut bogo_ip6: *const suckaddr;
+}
+unsafe extern "C" {
+    pub fn VSA_Init();
+}
+unsafe extern "C" {
+    pub fn VSA_Sane(arg1: *const suckaddr) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSA_Port(arg1: *const suckaddr) -> ::std::ffi::c_uint;
+}
+unsafe extern "C" {
+    pub fn VSA_Compare(arg1: *const suckaddr, arg2: *const suckaddr) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSA_Compare_IP(arg1: *const suckaddr, arg2: *const suckaddr) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSA_Clone(sua: *const suckaddr) -> *const suckaddr;
+}
+unsafe extern "C" {
+    pub fn VSA_getsockname(
+        arg1: ::std::ffi::c_int,
+        arg2: *mut ::std::ffi::c_void,
+        arg3: usize,
+    ) -> *const suckaddr;
+}
+unsafe extern "C" {
+    pub fn VSA_getpeername(
+        arg1: ::std::ffi::c_int,
+        arg2: *mut ::std::ffi::c_void,
+        arg3: usize,
+    ) -> *const suckaddr;
+}
+unsafe extern "C" {
+    pub fn VSA_free(arg1: *mut *const suckaddr);
+}
+unsafe extern "C" {
+    pub fn VSA_Get_Sockaddr(arg1: *const suckaddr, sl: *mut socklen_t)
+    -> *const ::std::ffi::c_void;
+}
+unsafe extern "C" {
+    pub fn VSA_Get_Proto(arg1: *const suckaddr) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSA_Malloc(s: *const ::std::ffi::c_void, sal: ::std::ffi::c_uint) -> *const suckaddr;
+}
+unsafe extern "C" {
+    pub fn VSA_Build(
+        d: *mut ::std::ffi::c_void,
+        s: *const ::std::ffi::c_void,
+        sal: ::std::ffi::c_uint,
+    ) -> *const suckaddr;
+}
+unsafe extern "C" {
+    pub fn VSA_BuildFAP(
+        d: *mut ::std::ffi::c_void,
+        fam: sa_family_t,
+        a: *const ::std::ffi::c_void,
+        al: ::std::ffi::c_uint,
+        p: *const ::std::ffi::c_void,
+        pl: ::std::ffi::c_uint,
+    ) -> *const suckaddr;
+}
+unsafe extern "C" {
+    pub fn VSA_GetPtr(
+        sua: *const suckaddr,
+        dst: *mut *const ::std::ffi::c_uchar,
+    ) -> ::std::ffi::c_int;
+}
+#[repr(C)]
+#[derive(Debug)]
+pub struct vsm {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct vsm_fantom {
+    pub priv_: usize,
+    pub priv2: usize,
+    pub b: *mut ::std::ffi::c_void,
+    pub e: *mut ::std::ffi::c_void,
+    pub category: *mut ::std::ffi::c_char,
+    pub ident: *mut ::std::ffi::c_char,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of vsm_fantom"][::std::mem::size_of::<vsm_fantom>() - 48usize];
+    ["Alignment of vsm_fantom"][::std::mem::align_of::<vsm_fantom>() - 8usize];
+    ["Offset of field: vsm_fantom::priv_"][::std::mem::offset_of!(vsm_fantom, priv_) - 0usize];
+    ["Offset of field: vsm_fantom::priv2"][::std::mem::offset_of!(vsm_fantom, priv2) - 8usize];
+    ["Offset of field: vsm_fantom::b"][::std::mem::offset_of!(vsm_fantom, b) - 16usize];
+    ["Offset of field: vsm_fantom::e"][::std::mem::offset_of!(vsm_fantom, e) - 24usize];
+    ["Offset of field: vsm_fantom::category"]
+        [::std::mem::offset_of!(vsm_fantom, category) - 32usize];
+    ["Offset of field: vsm_fantom::ident"][::std::mem::offset_of!(vsm_fantom, ident) - 40usize];
+};
+impl Default for vsm_fantom {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+unsafe extern "C" {
+    pub fn VSM_New() -> *mut vsm;
+}
+unsafe extern "C" {
+    pub fn VSM_Destroy(vd: *mut *mut vsm);
+}
+unsafe extern "C" {
+    pub fn VSM_Error(vd: *const vsm) -> *const ::std::ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn VSM_ResetError(vd: *mut vsm);
+}
+unsafe extern "C" {
+    pub fn VSM_Arg(
+        arg1: *mut vsm,
+        flag: ::std::ffi::c_char,
+        arg: *const ::std::ffi::c_char,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSM_Attach(arg1: *mut vsm, progress: ::std::ffi::c_int) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSM_Status(arg1: *mut vsm) -> ::std::ffi::c_uint;
+}
+unsafe extern "C" {
+    pub fn VSM__iter0(arg1: *const vsm, vf: *mut vsm_fantom);
+}
+unsafe extern "C" {
+    pub fn VSM__itern(arg1: *mut vsm, vf: *mut vsm_fantom) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSM_Map(arg1: *mut vsm, vf: *mut vsm_fantom) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSM_Unmap(arg1: *mut vsm, vf: *mut vsm_fantom) -> ::std::ffi::c_int;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct vsm_valid {
+    pub name: *const ::std::ffi::c_char,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of vsm_valid"][::std::mem::size_of::<vsm_valid>() - 8usize];
+    ["Alignment of vsm_valid"][::std::mem::align_of::<vsm_valid>() - 8usize];
+    ["Offset of field: vsm_valid::name"][::std::mem::offset_of!(vsm_valid, name) - 0usize];
+};
+impl Default for vsm_valid {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+unsafe extern "C" {
+    pub static VSM_invalid: [vsm_valid; 0usize];
+}
+unsafe extern "C" {
+    pub static VSM_valid: [vsm_valid; 0usize];
+}
+unsafe extern "C" {
+    pub fn VSM_StillValid(arg1: *const vsm, vf: *const vsm_fantom) -> *const vsm_valid;
+}
+unsafe extern "C" {
+    pub fn VSM_Get(
+        arg1: *mut vsm,
+        vf: *mut vsm_fantom,
+        category: *const ::std::ffi::c_char,
+        ident: *const ::std::ffi::c_char,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSM_Dup(
+        arg1: *mut vsm,
+        category: *const ::std::ffi::c_char,
+        ident: *const ::std::ffi::c_char,
+    ) -> *mut ::std::ffi::c_char;
+}
+#[repr(C)]
+#[derive(Debug)]
+pub struct vsc {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct VSC_level_desc {
+    pub name: *const ::std::ffi::c_char,
+    pub label: *const ::std::ffi::c_char,
+    pub sdesc: *const ::std::ffi::c_char,
+    pub ldesc: *const ::std::ffi::c_char,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of VSC_level_desc"][::std::mem::size_of::<VSC_level_desc>() - 32usize];
+    ["Alignment of VSC_level_desc"][::std::mem::align_of::<VSC_level_desc>() - 8usize];
+    ["Offset of field: VSC_level_desc::name"]
+        [::std::mem::offset_of!(VSC_level_desc, name) - 0usize];
+    ["Offset of field: VSC_level_desc::label"]
+        [::std::mem::offset_of!(VSC_level_desc, label) - 8usize];
+    ["Offset of field: VSC_level_desc::sdesc"]
+        [::std::mem::offset_of!(VSC_level_desc, sdesc) - 16usize];
+    ["Offset of field: VSC_level_desc::ldesc"]
+        [::std::mem::offset_of!(VSC_level_desc, ldesc) - 24usize];
+};
+impl Default for VSC_level_desc {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct VSC_point {
+    pub ptr: *const u64,
+    pub name: *const ::std::ffi::c_char,
+    pub ctype: *const ::std::ffi::c_char,
+    pub semantics: ::std::ffi::c_int,
+    pub format: ::std::ffi::c_int,
+    pub level: *const VSC_level_desc,
+    pub sdesc: *const ::std::ffi::c_char,
+    pub ldesc: *const ::std::ffi::c_char,
+    pub priv_: *mut ::std::ffi::c_void,
+    pub raw: ::std::ffi::c_uint,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of VSC_point"][::std::mem::size_of::<VSC_point>() - 72usize];
+    ["Alignment of VSC_point"][::std::mem::align_of::<VSC_point>() - 8usize];
+    ["Offset of field: VSC_point::ptr"][::std::mem::offset_of!(VSC_point, ptr) - 0usize];
+    ["Offset of field: VSC_point::name"][::std::mem::offset_of!(VSC_point, name) - 8usize];
+    ["Offset of field: VSC_point::ctype"][::std::mem::offset_of!(VSC_point, ctype) - 16usize];
+    ["Offset of field: VSC_point::semantics"]
+        [::std::mem::offset_of!(VSC_point, semantics) - 24usize];
+    ["Offset of field: VSC_point::format"][::std::mem::offset_of!(VSC_point, format) - 28usize];
+    ["Offset of field: VSC_point::level"][::std::mem::offset_of!(VSC_point, level) - 32usize];
+    ["Offset of field: VSC_point::sdesc"][::std::mem::offset_of!(VSC_point, sdesc) - 40usize];
+    ["Offset of field: VSC_point::ldesc"][::std::mem::offset_of!(VSC_point, ldesc) - 48usize];
+    ["Offset of field: VSC_point::priv_"][::std::mem::offset_of!(VSC_point, priv_) - 56usize];
+    ["Offset of field: VSC_point::raw"][::std::mem::offset_of!(VSC_point, raw) - 64usize];
+};
+impl Default for VSC_point {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub type VSC_new_f = ::std::option::Option<
+    unsafe extern "C" fn(
+        priv_: *mut ::std::ffi::c_void,
+        pt: *const VSC_point,
+    ) -> *mut ::std::ffi::c_void,
+>;
+pub type VSC_destroy_f = ::std::option::Option<
+    unsafe extern "C" fn(priv_: *mut ::std::ffi::c_void, pt: *const VSC_point),
+>;
+pub type VSC_iter_f = ::std::option::Option<
+    unsafe extern "C" fn(priv_: *mut ::std::ffi::c_void, pt: *const VSC_point) -> ::std::ffi::c_int,
+>;
+unsafe extern "C" {
+    pub fn VSC_New() -> *mut vsc;
+}
+unsafe extern "C" {
+    pub fn VSC_Destroy(arg1: *mut *mut vsc, arg2: *mut vsm);
+}
+unsafe extern "C" {
+    pub fn VSC_Arg(
+        arg1: *mut vsc,
+        arg: ::std::ffi::c_char,
+        opt: *const ::std::ffi::c_char,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSC_State(
+        arg1: *mut vsc,
+        arg2: VSC_new_f,
+        arg3: VSC_destroy_f,
+        arg4: *mut ::std::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn VSC_Iter(
+        arg1: *mut vsc,
+        arg2: *mut vsm,
+        arg3: VSC_iter_f,
+        priv_: *mut ::std::ffi::c_void,
+    ) -> ::std::ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn VSC_ChangeLevel(
+        arg1: *const VSC_level_desc,
+        arg2: ::std::ffi::c_int,
+    ) -> *const VSC_level_desc;
+}
+unsafe extern "C" {
+    pub fn VSC_IsRaw(arg1: *const vsc) -> ::std::ffi::c_uint;
+}
+unsafe extern "C" {
     pub fn VRT_r_client_identity(ctx: *const vrt_ctx) -> VCL_STRING;
 }
 unsafe extern "C" {
@@ -13569,370 +13898,6 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn VRT_stevedore_happy(arg1: VCL_STEVEDORE) -> VCL_BOOL;
 }
-#[doc = " This is the interface structure to a compiled VMOD\n (produced by vmodtool.py)"]
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct vmod_data {
-    pub vrt_major: ::std::ffi::c_uint,
-    pub vrt_minor: ::std::ffi::c_uint,
-    pub file_id: *const ::std::ffi::c_char,
-    pub name: *const ::std::ffi::c_char,
-    pub func_name: *const ::std::ffi::c_char,
-    pub func: *const ::std::ffi::c_void,
-    pub func_len: ::std::ffi::c_int,
-    pub proto: *const ::std::ffi::c_char,
-    pub json: *const ::std::ffi::c_char,
-    pub abi: *const ::std::ffi::c_char,
-    pub vcs: *const ::std::ffi::c_char,
-    pub version: *const ::std::ffi::c_char,
-}
-#[allow(clippy::unnecessary_operation, clippy::identity_op)]
-const _: () = {
-    ["Size of vmod_data"][::std::mem::size_of::<vmod_data>() - 88usize];
-    ["Alignment of vmod_data"][::std::mem::align_of::<vmod_data>() - 8usize];
-    ["Offset of field: vmod_data::vrt_major"]
-        [::std::mem::offset_of!(vmod_data, vrt_major) - 0usize];
-    ["Offset of field: vmod_data::vrt_minor"]
-        [::std::mem::offset_of!(vmod_data, vrt_minor) - 4usize];
-    ["Offset of field: vmod_data::file_id"][::std::mem::offset_of!(vmod_data, file_id) - 8usize];
-    ["Offset of field: vmod_data::name"][::std::mem::offset_of!(vmod_data, name) - 16usize];
-    ["Offset of field: vmod_data::func_name"]
-        [::std::mem::offset_of!(vmod_data, func_name) - 24usize];
-    ["Offset of field: vmod_data::func"][::std::mem::offset_of!(vmod_data, func) - 32usize];
-    ["Offset of field: vmod_data::func_len"][::std::mem::offset_of!(vmod_data, func_len) - 40usize];
-    ["Offset of field: vmod_data::proto"][::std::mem::offset_of!(vmod_data, proto) - 48usize];
-    ["Offset of field: vmod_data::json"][::std::mem::offset_of!(vmod_data, json) - 56usize];
-    ["Offset of field: vmod_data::abi"][::std::mem::offset_of!(vmod_data, abi) - 64usize];
-    ["Offset of field: vmod_data::vcs"][::std::mem::offset_of!(vmod_data, vcs) - 72usize];
-    ["Offset of field: vmod_data::version"][::std::mem::offset_of!(vmod_data, version) - 80usize];
-};
-impl Default for vmod_data {
-    fn default() -> Self {
-        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
-        unsafe {
-            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
-    }
-}
-unsafe extern "C" {
-    pub static vsa_suckaddr_len: usize;
-}
-unsafe extern "C" {
-    pub static mut bogo_ip: *const suckaddr;
-}
-unsafe extern "C" {
-    pub static mut bogo_ip6: *const suckaddr;
-}
-unsafe extern "C" {
-    pub fn VSA_Init();
-}
-unsafe extern "C" {
-    pub fn VSA_Sane(arg1: *const suckaddr) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSA_Port(arg1: *const suckaddr) -> ::std::ffi::c_uint;
-}
-unsafe extern "C" {
-    pub fn VSA_Compare(arg1: *const suckaddr, arg2: *const suckaddr) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSA_Compare_IP(arg1: *const suckaddr, arg2: *const suckaddr) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSA_Clone(sua: *const suckaddr) -> *const suckaddr;
-}
-unsafe extern "C" {
-    pub fn VSA_getsockname(
-        arg1: ::std::ffi::c_int,
-        arg2: *mut ::std::ffi::c_void,
-        arg3: usize,
-    ) -> *const suckaddr;
-}
-unsafe extern "C" {
-    pub fn VSA_getpeername(
-        arg1: ::std::ffi::c_int,
-        arg2: *mut ::std::ffi::c_void,
-        arg3: usize,
-    ) -> *const suckaddr;
-}
-unsafe extern "C" {
-    pub fn VSA_free(arg1: *mut *const suckaddr);
-}
-unsafe extern "C" {
-    pub fn VSA_Get_Sockaddr(arg1: *const suckaddr, sl: *mut socklen_t)
-    -> *const ::std::ffi::c_void;
-}
-unsafe extern "C" {
-    pub fn VSA_Get_Proto(arg1: *const suckaddr) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSA_Malloc(s: *const ::std::ffi::c_void, sal: ::std::ffi::c_uint) -> *const suckaddr;
-}
-unsafe extern "C" {
-    pub fn VSA_Build(
-        d: *mut ::std::ffi::c_void,
-        s: *const ::std::ffi::c_void,
-        sal: ::std::ffi::c_uint,
-    ) -> *const suckaddr;
-}
-unsafe extern "C" {
-    pub fn VSA_BuildFAP(
-        d: *mut ::std::ffi::c_void,
-        fam: sa_family_t,
-        a: *const ::std::ffi::c_void,
-        al: ::std::ffi::c_uint,
-        p: *const ::std::ffi::c_void,
-        pl: ::std::ffi::c_uint,
-    ) -> *const suckaddr;
-}
-unsafe extern "C" {
-    pub fn VSA_GetPtr(
-        sua: *const suckaddr,
-        dst: *mut *const ::std::ffi::c_uchar,
-    ) -> ::std::ffi::c_int;
-}
-#[repr(C)]
-#[derive(Debug)]
-pub struct vsm {
-    _unused: [u8; 0],
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct vsm_fantom {
-    pub priv_: usize,
-    pub priv2: usize,
-    pub b: *mut ::std::ffi::c_void,
-    pub e: *mut ::std::ffi::c_void,
-    pub category: *mut ::std::ffi::c_char,
-    pub ident: *mut ::std::ffi::c_char,
-}
-#[allow(clippy::unnecessary_operation, clippy::identity_op)]
-const _: () = {
-    ["Size of vsm_fantom"][::std::mem::size_of::<vsm_fantom>() - 48usize];
-    ["Alignment of vsm_fantom"][::std::mem::align_of::<vsm_fantom>() - 8usize];
-    ["Offset of field: vsm_fantom::priv_"][::std::mem::offset_of!(vsm_fantom, priv_) - 0usize];
-    ["Offset of field: vsm_fantom::priv2"][::std::mem::offset_of!(vsm_fantom, priv2) - 8usize];
-    ["Offset of field: vsm_fantom::b"][::std::mem::offset_of!(vsm_fantom, b) - 16usize];
-    ["Offset of field: vsm_fantom::e"][::std::mem::offset_of!(vsm_fantom, e) - 24usize];
-    ["Offset of field: vsm_fantom::category"]
-        [::std::mem::offset_of!(vsm_fantom, category) - 32usize];
-    ["Offset of field: vsm_fantom::ident"][::std::mem::offset_of!(vsm_fantom, ident) - 40usize];
-};
-impl Default for vsm_fantom {
-    fn default() -> Self {
-        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
-        unsafe {
-            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
-    }
-}
-unsafe extern "C" {
-    pub fn VSM_New() -> *mut vsm;
-}
-unsafe extern "C" {
-    pub fn VSM_Destroy(vd: *mut *mut vsm);
-}
-unsafe extern "C" {
-    pub fn VSM_Error(vd: *const vsm) -> *const ::std::ffi::c_char;
-}
-unsafe extern "C" {
-    pub fn VSM_ResetError(vd: *mut vsm);
-}
-unsafe extern "C" {
-    pub fn VSM_Arg(
-        arg1: *mut vsm,
-        flag: ::std::ffi::c_char,
-        arg: *const ::std::ffi::c_char,
-    ) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSM_Attach(arg1: *mut vsm, progress: ::std::ffi::c_int) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSM_Status(arg1: *mut vsm) -> ::std::ffi::c_uint;
-}
-unsafe extern "C" {
-    pub fn VSM__iter0(arg1: *const vsm, vf: *mut vsm_fantom);
-}
-unsafe extern "C" {
-    pub fn VSM__itern(arg1: *mut vsm, vf: *mut vsm_fantom) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSM_Map(arg1: *mut vsm, vf: *mut vsm_fantom) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSM_Unmap(arg1: *mut vsm, vf: *mut vsm_fantom) -> ::std::ffi::c_int;
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct vsm_valid {
-    pub name: *const ::std::ffi::c_char,
-}
-#[allow(clippy::unnecessary_operation, clippy::identity_op)]
-const _: () = {
-    ["Size of vsm_valid"][::std::mem::size_of::<vsm_valid>() - 8usize];
-    ["Alignment of vsm_valid"][::std::mem::align_of::<vsm_valid>() - 8usize];
-    ["Offset of field: vsm_valid::name"][::std::mem::offset_of!(vsm_valid, name) - 0usize];
-};
-impl Default for vsm_valid {
-    fn default() -> Self {
-        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
-        unsafe {
-            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
-    }
-}
-unsafe extern "C" {
-    pub static VSM_invalid: [vsm_valid; 0usize];
-}
-unsafe extern "C" {
-    pub static VSM_valid: [vsm_valid; 0usize];
-}
-unsafe extern "C" {
-    pub fn VSM_StillValid(arg1: *const vsm, vf: *const vsm_fantom) -> *const vsm_valid;
-}
-unsafe extern "C" {
-    pub fn VSM_Get(
-        arg1: *mut vsm,
-        vf: *mut vsm_fantom,
-        category: *const ::std::ffi::c_char,
-        ident: *const ::std::ffi::c_char,
-    ) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSM_Dup(
-        arg1: *mut vsm,
-        category: *const ::std::ffi::c_char,
-        ident: *const ::std::ffi::c_char,
-    ) -> *mut ::std::ffi::c_char;
-}
-#[repr(C)]
-#[derive(Debug)]
-pub struct vsc {
-    _unused: [u8; 0],
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct VSC_level_desc {
-    pub name: *const ::std::ffi::c_char,
-    pub label: *const ::std::ffi::c_char,
-    pub sdesc: *const ::std::ffi::c_char,
-    pub ldesc: *const ::std::ffi::c_char,
-}
-#[allow(clippy::unnecessary_operation, clippy::identity_op)]
-const _: () = {
-    ["Size of VSC_level_desc"][::std::mem::size_of::<VSC_level_desc>() - 32usize];
-    ["Alignment of VSC_level_desc"][::std::mem::align_of::<VSC_level_desc>() - 8usize];
-    ["Offset of field: VSC_level_desc::name"]
-        [::std::mem::offset_of!(VSC_level_desc, name) - 0usize];
-    ["Offset of field: VSC_level_desc::label"]
-        [::std::mem::offset_of!(VSC_level_desc, label) - 8usize];
-    ["Offset of field: VSC_level_desc::sdesc"]
-        [::std::mem::offset_of!(VSC_level_desc, sdesc) - 16usize];
-    ["Offset of field: VSC_level_desc::ldesc"]
-        [::std::mem::offset_of!(VSC_level_desc, ldesc) - 24usize];
-};
-impl Default for VSC_level_desc {
-    fn default() -> Self {
-        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
-        unsafe {
-            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
-    }
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct VSC_point {
-    pub ptr: *const u64,
-    pub name: *const ::std::ffi::c_char,
-    pub ctype: *const ::std::ffi::c_char,
-    pub semantics: ::std::ffi::c_int,
-    pub format: ::std::ffi::c_int,
-    pub level: *const VSC_level_desc,
-    pub sdesc: *const ::std::ffi::c_char,
-    pub ldesc: *const ::std::ffi::c_char,
-    pub priv_: *mut ::std::ffi::c_void,
-    pub raw: ::std::ffi::c_uint,
-}
-#[allow(clippy::unnecessary_operation, clippy::identity_op)]
-const _: () = {
-    ["Size of VSC_point"][::std::mem::size_of::<VSC_point>() - 72usize];
-    ["Alignment of VSC_point"][::std::mem::align_of::<VSC_point>() - 8usize];
-    ["Offset of field: VSC_point::ptr"][::std::mem::offset_of!(VSC_point, ptr) - 0usize];
-    ["Offset of field: VSC_point::name"][::std::mem::offset_of!(VSC_point, name) - 8usize];
-    ["Offset of field: VSC_point::ctype"][::std::mem::offset_of!(VSC_point, ctype) - 16usize];
-    ["Offset of field: VSC_point::semantics"]
-        [::std::mem::offset_of!(VSC_point, semantics) - 24usize];
-    ["Offset of field: VSC_point::format"][::std::mem::offset_of!(VSC_point, format) - 28usize];
-    ["Offset of field: VSC_point::level"][::std::mem::offset_of!(VSC_point, level) - 32usize];
-    ["Offset of field: VSC_point::sdesc"][::std::mem::offset_of!(VSC_point, sdesc) - 40usize];
-    ["Offset of field: VSC_point::ldesc"][::std::mem::offset_of!(VSC_point, ldesc) - 48usize];
-    ["Offset of field: VSC_point::priv_"][::std::mem::offset_of!(VSC_point, priv_) - 56usize];
-    ["Offset of field: VSC_point::raw"][::std::mem::offset_of!(VSC_point, raw) - 64usize];
-};
-impl Default for VSC_point {
-    fn default() -> Self {
-        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
-        unsafe {
-            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
-    }
-}
-pub type VSC_new_f = ::std::option::Option<
-    unsafe extern "C" fn(
-        priv_: *mut ::std::ffi::c_void,
-        pt: *const VSC_point,
-    ) -> *mut ::std::ffi::c_void,
->;
-pub type VSC_destroy_f = ::std::option::Option<
-    unsafe extern "C" fn(priv_: *mut ::std::ffi::c_void, pt: *const VSC_point),
->;
-pub type VSC_iter_f = ::std::option::Option<
-    unsafe extern "C" fn(priv_: *mut ::std::ffi::c_void, pt: *const VSC_point) -> ::std::ffi::c_int,
->;
-unsafe extern "C" {
-    pub fn VSC_New() -> *mut vsc;
-}
-unsafe extern "C" {
-    pub fn VSC_Destroy(arg1: *mut *mut vsc, arg2: *mut vsm);
-}
-unsafe extern "C" {
-    pub fn VSC_Arg(
-        arg1: *mut vsc,
-        arg: ::std::ffi::c_char,
-        opt: *const ::std::ffi::c_char,
-    ) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSC_State(
-        arg1: *mut vsc,
-        arg2: VSC_new_f,
-        arg3: VSC_destroy_f,
-        arg4: *mut ::std::ffi::c_void,
-    );
-}
-unsafe extern "C" {
-    pub fn VSC_Iter(
-        arg1: *mut vsc,
-        arg2: *mut vsm,
-        arg3: VSC_iter_f,
-        priv_: *mut ::std::ffi::c_void,
-    ) -> ::std::ffi::c_int;
-}
-unsafe extern "C" {
-    pub fn VSC_ChangeLevel(
-        arg1: *const VSC_level_desc,
-        arg2: ::std::ffi::c_int,
-    ) -> *const VSC_level_desc;
-}
-unsafe extern "C" {
-    pub fn VSC_IsRaw(arg1: *const vsc) -> ::std::ffi::c_uint;
-}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct vrt_type {
@@ -14120,6 +14085,52 @@ const _: () = {
         [::std::mem::offset_of!(VCL_conf, fini_func) - 200usize];
 };
 impl Default for VCL_conf {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[doc = " This is the interface structure to a compiled VMOD\n (produced by vmodtool.py)"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct vmod_data {
+    pub vrt_major: ::std::ffi::c_uint,
+    pub vrt_minor: ::std::ffi::c_uint,
+    pub file_id: *const ::std::ffi::c_char,
+    pub name: *const ::std::ffi::c_char,
+    pub func_name: *const ::std::ffi::c_char,
+    pub func: *const ::std::ffi::c_void,
+    pub func_len: ::std::ffi::c_int,
+    pub proto: *const ::std::ffi::c_char,
+    pub json: *const ::std::ffi::c_char,
+    pub abi: *const ::std::ffi::c_char,
+    pub vcs: *const ::std::ffi::c_char,
+    pub version: *const ::std::ffi::c_char,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of vmod_data"][::std::mem::size_of::<vmod_data>() - 88usize];
+    ["Alignment of vmod_data"][::std::mem::align_of::<vmod_data>() - 8usize];
+    ["Offset of field: vmod_data::vrt_major"]
+        [::std::mem::offset_of!(vmod_data, vrt_major) - 0usize];
+    ["Offset of field: vmod_data::vrt_minor"]
+        [::std::mem::offset_of!(vmod_data, vrt_minor) - 4usize];
+    ["Offset of field: vmod_data::file_id"][::std::mem::offset_of!(vmod_data, file_id) - 8usize];
+    ["Offset of field: vmod_data::name"][::std::mem::offset_of!(vmod_data, name) - 16usize];
+    ["Offset of field: vmod_data::func_name"]
+        [::std::mem::offset_of!(vmod_data, func_name) - 24usize];
+    ["Offset of field: vmod_data::func"][::std::mem::offset_of!(vmod_data, func) - 32usize];
+    ["Offset of field: vmod_data::func_len"][::std::mem::offset_of!(vmod_data, func_len) - 40usize];
+    ["Offset of field: vmod_data::proto"][::std::mem::offset_of!(vmod_data, proto) - 48usize];
+    ["Offset of field: vmod_data::json"][::std::mem::offset_of!(vmod_data, json) - 56usize];
+    ["Offset of field: vmod_data::abi"][::std::mem::offset_of!(vmod_data, abi) - 64usize];
+    ["Offset of field: vmod_data::vcs"][::std::mem::offset_of!(vmod_data, vcs) - 72usize];
+    ["Offset of field: vmod_data::version"][::std::mem::offset_of!(vmod_data, version) - 80usize];
+};
+impl Default for vmod_data {
     fn default() -> Self {
         let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
         unsafe {
