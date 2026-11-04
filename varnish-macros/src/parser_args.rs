@@ -250,6 +250,9 @@ impl ParamType {
             if !opt && arg_ty.must_be_optional() {
                 error! { "This type of argument must be declared as optional with `Option<...>`" }
             }
+            if let Some(msg) = arg_ty.unavailable_reason() {
+                error! { &msg }
+            }
             let default = Self::get_arg_opts(pat_ty, arg_ty)?;
             let has_required = Self::get_required_attr(pat_ty)?;
             let opt = if has_required {
@@ -423,6 +426,11 @@ impl OutputTy {
         let Some(ret_ty) = Self::try_parse(ty) else {
             Err(error(&ty, "This content type is not supported"))?
         };
+        if let Self::ParamType(param_ty) = &ret_ty {
+            if let Some(msg) = param_ty.unavailable_reason() {
+                Err(error(&ty, &msg))?;
+            }
+        }
 
         if matches!(func_type, Event) && !matches!(ret_ty, Self::Default) {
             Err(error(

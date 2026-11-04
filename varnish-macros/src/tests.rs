@@ -9,7 +9,7 @@ use regex::{Captures, Regex};
 use syn::{Data, DeriveInput, ItemMod, ItemStruct};
 
 use crate::gen_docs::gen_doc_content;
-use crate::generator::render_model;
+use crate::generator::render_model_abi;
 use crate::metrics::derive_vsc_metric;
 use crate::parser::tokens_to_model;
 use crate::parser_utils::remove_attr;
@@ -83,6 +83,28 @@ fn render_tokens(src: &str) -> String {
     }
 }
 
+/// `$ABI vrt` rendering, i.e. what a vmod built without the `full` feature gets.
+/// `vrt_major`/`vrt_minor` are deliberately not redacted: they're stable within a Varnish release.
+#[test]
+fn parse_vrt_abi() {
+    let version = env!("VARNISHAPI_VERSION_NUMBER");
+    let snapshot_path = format!("../../varnish/snapshots{version}");
+    with_settings!({ snapshot_path => snapshot_path, omit_expression => true, prepend_module_to_snapshot => false }, {
+        let item: ItemMod = syn::parse_quote! {
+            mod abi_vrt {
+                pub fn scalar_fn(x: i64) -> i64 {
+                    x
+                }
+
+                pub fn echo(s: &str) -> String {
+                    s.to_string()
+                }
+            }
+        };
+        test("abi_vrt", quote! {}, item, true);
+    });
+}
+
 fn run_parse_tests(path: &str) {
     let version = env!("VARNISHAPI_VERSION_NUMBER");
     let snapshot_path = format!("../../varnish/snapshots{version}");
@@ -123,7 +145,7 @@ fn test_file(filepath: &Path) {
                     .to_string_lossy(),
                 item.ident
             );
-            test(&name, args, item);
+            test(&name, args, item, false);
         } else if let syn::Item::Struct(item) = item {
             // Check if this has #[derive(VscMetric)]
             for attr in &item.attrs {
@@ -190,7 +212,9 @@ fn test_metric(name: &str, item: ItemStruct) {
     with_settings!({ snapshot_suffix => "code" }, { assert_snapshot!(name, code) });
 }
 
-fn test(name: &str, args: TokenStream, mut item_mod: ItemMod) {
+/// Render with `vrt == false` (`$ABI strict`, the `full` build) unless testing `$ABI vrt` explicitly,
+/// so snapshots don't depend on which features the test itself is built with.
+fn test(name: &str, args: TokenStream, mut item_mod: ItemMod, vrt: bool) {
     let Ok(info) = tokens_to_model(args, &mut item_mod).map_err(|err| {
         // On error, save the error output as a snapshot and return early.
         let err = err.into_compile_error();
@@ -202,7 +226,7 @@ fn test(name: &str, args: TokenStream, mut item_mod: ItemMod) {
     with_settings!({ snapshot_suffix => "model" }, { assert_snapshot!(name, format!("{info:#?}")) });
     with_settings!({ snapshot_suffix => "docs" }, { assert_snapshot!(name, gen_doc_content(&info)) });
 
-    let file = render_model(item_mod, &info).to_string();
+    let file = render_model_abi(item_mod, &info, vrt).to_string();
     let generated = parse_gen_code(name, &file);
 
     let mut code = RE_VARNISH_VER

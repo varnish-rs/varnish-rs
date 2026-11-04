@@ -60,9 +60,9 @@ mod abi_vrt {
         #[allow(non_upper_case_globals)]
         #[no_mangle]
         pub static Vmod_abi_vrt_Data: vmod_data = vmod_data {
-            vrt_major: 22u32,
-            vrt_minor: 2u32,
-            file_id: c"2af96772bbac9b92c65f625f75a6f631687e7ba4dbb3472eab456dff85798003"
+            vrt_major: 22,
+            vrt_minor: 2,
+            file_id: c"e10fb0b6a696d8ca22767aa15d76b85d0b027a5c4a34c8e5627d37207c234436"
                 .as_ptr(),
             name: c"abi_vrt".as_ptr(),
             func_name: c"Vmod_vmod_abi_vrt_Func".as_ptr(),
@@ -75,6 +75,15 @@ mod abi_vrt {
             version: c"".as_ptr(),
         };
         const JSON: &CStr = c"(moved to @json.snap files)";
+        const _: () = assert!(
+            !varnish::ffi::VARNISH_RS_FULL_ABI,
+            "this vmod declares `$ABI vrt` (`varnish` built without its `full` feature), but `varnish-sys` was built with `full`: enable `full` on `varnish`, or stop enabling it on `varnish-sys`",
+        );
+        const _: () = assert!(
+            varnish::ffi::VRT_MAJOR_VERSION == 22
+                && varnish::ffi::VRT_MINOR_VERSION == 2,
+            "`$ABI vrt` version 22.2 (from the varnish-macros build) does not match the vrt.h this vmod is compiled against",
+        );
     }
     pub fn scalar_fn(x: i64) -> i64 {
         x

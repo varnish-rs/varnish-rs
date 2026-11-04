@@ -35,6 +35,11 @@ extern crate core;
 )]
 pub mod ffi {
     include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+
+    /// Whether these bindings expose the full (`$ABI strict`) API surface. Checked at compile
+    /// time by `#[vmod]`-generated code, see `varnish-macros`.
+    #[doc(hidden)]
+    pub const VARNISH_RS_FULL_ABI: bool = cfg!(feature = "full");
 }
 
 mod extensions;

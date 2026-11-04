@@ -4,9 +4,6 @@ source: varnish-macros/src/tests.rs
 VmodInfo {
     params: VmodParams {
         docs: None,
-        abi: Some(
-            "vrt",
-        ),
     },
     ident: "abi_vrt",
     docs: "",

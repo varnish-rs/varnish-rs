@@ -4,7 +4,6 @@ source: varnish-macros/src/tests.rs
 VmodInfo {
     params: VmodParams {
         docs: None,
-        abi: None,
     },
     ident: "refcell_task",
     docs: "",

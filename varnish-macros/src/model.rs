@@ -58,14 +58,6 @@ impl SharedTypes {
 #[darling(default)]
 pub struct VmodParams {
     pub docs: Option<String>,
-    /// The VMOD's declared `$ABI` stanza: `"strict"` (default, matches today's behavior — the
-    /// vmod is checked against an exact Varnish build at load time) or `"vrt"` (the vmod only
-    /// relies on the portable `vdef.h`/`vrt.h`/`vrt_obj.h`/`vcl.h` surface, checked via a loose
-    /// major/minor version comparison instead). This is purely declarative, mirroring upstream
-    /// `vmodtool.py`'s `$ABI` stanza — it's on the vmod author to only use APIs compatible with
-    /// what they declare (typically by also building with `default-features = false` on their
-    /// `varnish` dependency, which enforces the cut at compile time).
-    pub abi: Option<String>,
 }
 
 /// Represents the object information parsed from an `impl` block.
@@ -261,6 +253,30 @@ impl ParamTy {
             | Self::VclType(_) => false,
             Self::BackendRef | Self::Probe | Self::ProbeCow | Self::SocketAddr => true,
         }
+    }
+
+    /// Types whose Rust conversions only exist with the `full` feature of `varnish`.
+    pub fn needs_full(self) -> bool {
+        matches!(
+            self,
+            Self::BackendRef | Self::Probe | Self::ProbeCow | Self::SocketAddr
+        )
+    }
+
+    /// Compile error message if this type can't be used in the current (`full` or vrt-only) build.
+    pub fn unavailable_reason(self) -> Option<String> {
+        (!cfg!(feature = "full") && self.needs_full()).then(|| {
+            let rust_ty = match self {
+                Self::BackendRef => "BackendRef",
+                Self::Probe => "Probe",
+                Self::ProbeCow => "CowProbe",
+                _ => "SocketAddr",
+            };
+            format!(
+                "`{rust_ty}` (VCL `{}`) requires the `full` feature of the `varnish` crate",
+                self.to_vcc_type()
+            )
+        })
     }
 
     /// Some VCL->Rust conversions require `TryFrom` instead of `From`,
