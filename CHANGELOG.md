@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Accept a VCL probe with neither `.url` nor `.request` as a `Probe` argument, treating it as a `GET /` like Varnish does, instead of panicking
+
 ## [0.8.0](https://github.com/gquintard/varnish-rs-fork/compare/varnish-sys-v0.7.2...varnish-sys-v0.8.0) - 2026-09-21
 
 ### Other

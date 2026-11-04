@@ -11,6 +11,10 @@ varnish v1 -vcl {
         .initial = 3;
         .window = 4;
     }
+    # neither .url nor .request: legal VCL, Varnish probes "GET /"
+    probe p2 {
+        .threshold = 0;
+    }
     backend be none;
 
     sub vcl_recv {
@@ -19,6 +23,7 @@ varnish v1 -vcl {
 
     sub vcl_synth {
         set resp.http.props = rustest.probe_prop(p1);
+        set resp.http.props2 = rustest.probe_prop(p2);
     }
 } -start
 
@@ -26,4 +31,5 @@ client c1 {
     txreq
     rxresp
     expect resp.http.props == "url:foo-0-1-2-3-4"
+    expect resp.http.props2 ~ "^url:/-0-"
 } -run
