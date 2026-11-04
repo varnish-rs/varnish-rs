@@ -87,6 +87,9 @@ check-vrt-abi:
     cargo check {{vrt_compatible_examples}} --no-default-features
     cargo clippy -p varnish-sys -p varnish --no-default-features
     cargo test --doc -p varnish-sys -p varnish --no-default-features
+    RUSTDOCFLAGS="-D warnings" cargo doc --no-deps -p varnish-sys -p varnish --no-default-features
+    # trybuild fixtures in vrt mode (`tests/pass_full` is skipped there)
+    cargo test -p varnish --no-default-features --test compile
     # Actually builds each example's cdylib with vrt-only bindings and runs its `.vtc` suite
     # against a real varnishd, proving the ABI version handshake and symbol resolution work at
     # runtime — `cargo check`/`clippy` above only prove the code type-checks. `cargo build` first

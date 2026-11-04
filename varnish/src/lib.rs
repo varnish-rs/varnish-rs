@@ -4,7 +4,10 @@
 //!
 //! For a guide to building a VMOD — project structure, `Cargo.toml`, VTC tests — see [`vcl`].
 //!
-//! To read Varnish statistics from an external program, see [`MetricsReader`].
+#![cfg_attr(
+    feature = "full",
+    doc = "To read Varnish statistics from an external program, see [`MetricsReader`]."
+)]
 
 // Re-publish some varnish_sys modules
 /// This module gathers the tools needed to build a vmod in `rust`.
@@ -425,38 +428,45 @@
 ///
 /// See [vmod_counter](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_counters) for the full example.
 ///
-/// # Backends and directors
-///
-/// See [vmod_simple_backend](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_simple_backend/) for a complete example of a `rust` vmod that simply send a string set at construction time.
-///
-/// As a C construct, [`crate::ffi::VCL_BACKEND`] can be a bit confusing to create and manipulate, notably as it
-/// involves a bunch of structures with different lifetimes and quite a lot of casting. This
-/// module hopes to alleviate those issues by handling the most of them and by offering a more
-/// idiomatic interface centered around vmod objects.
-///
-/// Here's what's in the toolbox:
-/// - [`vcl::Backend`]: an "actual" backend that can be used by Varnish to create an HTTP response. It
-///   relies on two traits:
-///   - [`vcl::VclBackend`] reports health, and generates the response headers
-///   - [`vcl::VclResponse`] for the response body writer, structs implementing that trait are
-///     returned by [`vcl::VclBackend::get_response`]
-/// - [`vcl::NativeBackend`]: a specialization of [`vcl::Backend`], relying on the native Varnish
-///   implementation providing IP and UDS backends
-/// - [`vcl::NativeBackendBuilder`]: a builder to easily create a [`vcl::NativeBackend`]
-/// - [`vcl::Director`]: a routing object doesn't create responses, but instead picks a [`vcl::Backend`]
-///   or [`vcl::Director`] object based on the HTTP request, based on the [`vcl::VclDirector`].
-/// - [`vcl::BackendRef`]: a refcounted wrapper around [`vcl::Backend`] and [`vcl::Director`], this is the primary
-///   type used for arguments and returns of vmod functions.
-///
-///   **Important:** all these types wrap refcounted C structures that Varnish will try to free
-///   when a VCL goes cold, which means you can't hold onto them forever. It's not as scary as it
-///   sounds, and you can approach this in two different ways.
-///
-///   Use a vmod object that will own them. The object will automatically be dropped at the end of
-///   the VCL lifetime, as will all its fields, and all the types above will automatically decrease
-///   their refcount to the underlying C structure when this happens.
-///
-///   Otherwise, your vmod can implement the event function and drop the structs on a cold event.
+#[cfg_attr(
+    feature = "full",
+    doc = r#"# Backends and directors
+
+See [vmod_simple_backend](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_simple_backend/) for a complete example of a `rust` vmod that simply send a string set at construction time.
+
+As a C construct, [`crate::ffi::VCL_BACKEND`] can be a bit confusing to create and manipulate, notably as it
+involves a bunch of structures with different lifetimes and quite a lot of casting. This
+module hopes to alleviate those issues by handling the most of them and by offering a more
+idiomatic interface centered around vmod objects.
+
+Here's what's in the toolbox:
+- [`vcl::Backend`]: an "actual" backend that can be used by Varnish to create an HTTP response. It
+  relies on two traits:
+  - [`vcl::VclBackend`] reports health, and generates the response headers
+  - [`vcl::VclResponse`] for the response body writer, structs implementing that trait are
+    returned by [`vcl::VclBackend::get_response`]
+- [`vcl::NativeBackend`]: a specialization of [`vcl::Backend`], relying on the native Varnish
+  implementation providing IP and UDS backends
+- [`vcl::NativeBackendBuilder`]: a builder to easily create a [`vcl::NativeBackend`]
+- [`vcl::Director`]: a routing object doesn't create responses, but instead picks a [`vcl::Backend`]
+  or [`vcl::Director`] object based on the HTTP request, based on the [`vcl::VclDirector`].
+- [`vcl::BackendRef`]: a refcounted wrapper around [`vcl::Backend`] and [`vcl::Director`], this is the primary
+  type used for arguments and returns of vmod functions.
+
+  **Important:** all these types wrap refcounted C structures that Varnish will try to free
+  when a VCL goes cold, which means you can't hold onto them forever. It's not as scary as it
+  sounds, and you can approach this in two different ways.
+
+  Use a vmod object that will own them. The object will automatically be dropped at the end of
+  the VCL lifetime, as will all its fields, and all the types above will automatically decrease
+  their refcount to the underlying C structure when this happens.
+
+  Otherwise, your vmod can implement the event function and drop the structs on a cold event."#
+)]
+#[cfg_attr(
+    not(feature = "full"),
+    doc = "# Backends and directors\n\nCustom backends and directors require the `full` feature."
+)]
 pub use varnish_sys::vcl;
 
 #[cfg(not(feature = "ffi"))]

@@ -41,6 +41,11 @@ fn parse_pass_tests() {
 }
 
 #[test]
+fn parse_pass_full_tests() {
+    run_parse_tests("../varnish/tests/pass_full/*.rs");
+}
+
+#[test]
 fn parse_pass_ffi_tests() {
     run_parse_tests("../varnish/tests/pass_ffi/*.rs");
 }

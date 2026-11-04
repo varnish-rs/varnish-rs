@@ -13,6 +13,13 @@ fn compile_valid() {
     compile_pass("tests/pass/*.rs");
 }
 
+// Fixtures using APIs that only exist with the `full` feature (filters, probes, `SocketAddr`).
+#[cfg(feature = "full")]
+#[test]
+fn compile_valid_full() {
+    compile_pass("tests/pass_full/*.rs");
+}
+
 #[cfg(feature = "ffi")]
 #[test]
 fn compile_valid_ffi_code() {
