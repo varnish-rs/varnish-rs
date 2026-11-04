@@ -1,0 +1,33 @@
+varnishtest "echo backend: pipe() gets the cached request body, then the pipelined bytes"
+
+# std.cache_req_body() consumes the body from the client before vcl_pipe, so
+# PipeRequest::forward_preamble() must send it first, then whatever the client
+# sent after it (here, the start of a second request) in the same write.
+
+server s1 {} -start
+
+varnish v1 -vcl+backend {
+    import std;
+    import echo_backend from "${vmod}";
+
+    sub vcl_init {
+        new echo = echo_backend.new();
+    }
+
+    sub vcl_recv {
+        std.cache_req_body(1KB);
+        set req.backend_hint = echo.backend();
+        return (pipe);
+    }
+} -start
+
+client c1 {
+    send "POST /cached HTTP/1.1\r\nHost: x\r\nContent-Length: 6\r\n\r\ncachedGET /next"
+    rxresp
+    expect resp.status == 200
+    expect resp.http.x-url == "/cached"
+    expect resp.body == "cachedGET /next"
+    expect_close
+} -run
+
+varnish v1 -expect MGT.child_panic == 0

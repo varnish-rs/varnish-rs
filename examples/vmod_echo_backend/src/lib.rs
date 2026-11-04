@@ -1,6 +1,9 @@
 use std::io::{Cursor, Write};
 
-use varnish::vcl::{Backend, Ctx, VclBackend, VclError, VclResponse, VclResult};
+use varnish::vcl::{
+    Backend, Ctx, HttpHeaders, LogTag, PipeRequest, StreamClose, VclBackend, VclError, VclResponse,
+    VclResult,
+};
 
 varnish::run_vtc_tests!("tests/*.vtc");
 
@@ -71,6 +74,41 @@ impl VclBackend<EchoResponse> for EchoBackend {
         Ok(Some(EchoResponse {
             inner: Cursor::new(body),
         }))
+    }
+
+    /// When the VCL returns `pipe`, answer directly on the client connection, echoing what
+    /// Varnish already consumed from it: the cached request body (`std.cache_req_body()`), then
+    /// the bytes the client sent along with the request headers. bereq's URL goes in `x-url`.
+    ///
+    /// A real backend would instead send `ctx.http_bereq` to its origin, then
+    /// [`PipeRequest::forward_preamble`] to that connection, then copy bytes both ways.
+    fn pipe(&self, ctx: &mut Ctx, req: &mut PipeRequest<'_>) -> StreamClose {
+        let url = ctx
+            .http_bereq
+            .as_ref()
+            .and_then(HttpHeaders::url)
+            .map(|u| String::from_utf8_lossy(u.as_ref()).into_owned())
+            .unwrap_or_default();
+        let mut body = Vec::new();
+        if let Err(e) = req.forward_preamble(&mut body) {
+            ctx.log(LogTag::Error, format!("pipe: preamble failed: {e}"));
+            return StreamClose::TxError;
+        }
+        let mut resp = format!(
+            "HTTP/1.1 200 OK\r\nx-piped: 1\r\nx-url: {url}\r\ncontent-length: {}\r\n\r\n",
+            body.len()
+        )
+        .into_bytes();
+        resp.extend_from_slice(&body);
+        // The stream is only borrowed: Varnish closes the connection once we return.
+        // `write_out()` counts what reaches the client, even if the write fails midway.
+        match req.acct().write_out(&mut req.client(), &resp) {
+            Ok(()) => StreamClose::TxPipe,
+            Err(e) => {
+                ctx.log(LogTag::Error, format!("pipe write failed: {e}"));
+                StreamClose::TxError
+            }
+        }
     }
 }
 

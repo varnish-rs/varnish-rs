@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Breaking:** `VclBackend::pipe()` now takes a `&mut PipeRequest` instead of the owned client stream. Besides the client connection (`client()`, a borrowed `&TcpStream`), it gives access to what Varnish already consumed from the client, which a pipe implementation had no way to forward before: the bytes read along with the request headers (`take_pipelined()`) and the cached request body (`cached_body()`), or both at once in core's order (`forward_preamble()`). It also exposes `pipe_timeout()`/`deadline()` and a `PipeAcct` byte counter (`write_in()`/`write_out()` write and count at once, partial writes included), logged as the `PipeAcct` record with the `Pipe`/`PipeSess` timestamps once `pipe()` returns, and `refuse()`, which the default implementation now uses. Pipes on TLS client sessions are refused before reaching `pipe()`, since the client stream is the raw (encrypted) socket ([#331](https://github.com/varnish-rs/varnish-rs/issues/331))
+
+### Fixed
+
+- `VclBackend::pipe()`, the default implementation included, no longer closes the client fd: it used to own the client stream, and dropping it closed the fd, which Varnish then closed again, panicking the child with `EBADF`. The stream is now only borrowed, through `PipeRequest::client()` (see the `PipeRequest` change above) ([#331](https://github.com/varnish-rs/varnish-rs/issues/331))
+
 ## [0.8.0](https://github.com/gquintard/varnish-rs-fork/compare/varnish-sys-v0.7.2...varnish-sys-v0.8.0) - 2026-09-21
 
 ### Other
