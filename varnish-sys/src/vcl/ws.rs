@@ -11,15 +11,20 @@
 //! conversion provided by [`crate::vcl::convert`], or store things in
 //! [`crate::vcl::vpriv::VPriv`].
 
-use std::ffi::{c_char, CStr};
+#[cfg(not(feature = "full"))]
+use std::ffi::c_char;
+use std::ffi::CStr;
 use std::fmt::Debug;
 use std::marker::PhantomData;
+#[cfg(not(feature = "full"))]
 use std::num::NonZeroUsize;
 
 use memchr::memchr;
 
 use crate::ffi;
-use crate::ffi::{txt, VCL_STRANDS, VCL_STRING};
+#[cfg(not(feature = "full"))]
+use crate::ffi::VCL_STRANDS;
+use crate::ffi::{txt, VCL_STRING};
 use crate::vcl::VclError;
 
 #[cfg(feature = "full")]
@@ -52,18 +57,56 @@ impl Workspace<'_> {
     }
 }
 
-// String copying always goes through `VRT_StrandsWS` (vrt.h-native), not `WS_Alloc`
-// (cache.h-only) — this is the only allocation path vrt-mode has, and full mode uses it
-// unconditionally too, to keep a single implementation. Note this means these methods can
-// only run inside a real varnishd process: `VRT_StrandsWS` is declared in the public vrt.h
-// but its implementation calls `WS_Alloc`/`WS_Assert` internally, which only resolve when
-// dynamically loaded into varnishd — they can't be exercised by a plain `cargo test` binary
-// the way `Workspace::alloc` et al. are (via the `#[cfg(test)]` fake `ffi::ws` impl in the
-// `full` module below). Verify via a `.vtc` test instead.
+// String copying: `full` mode copies with `WS_Alloc` (cache.h-only). vrt mode only has
+// `VRT_StrandsWS`, which builds the string with `WS_VSB_new` and therefore fails once the
+// workspace overflow flag is set, even if space is left (the same as VCL's own string handling).
+// `VRT_StrandsWS` only resolves inside varnishd, so vrt mode copies can't be exercised by a
+// plain `cargo test` binary the way the `full` ones are (via the `#[cfg(test)]` fake `ffi::ws`
+// impl in the `full` module below). Verify via a `.vtc` test instead.
 impl Workspace<'_> {
     /// Copy any `AsRef<CStr>` into a new [`txt`] stored in the workspace
+    ///
+    /// Without the `full` feature, this fails once the workspace has overflowed (e.g. after a
+    /// failed allocation), even if enough space is left.
     pub fn copy_txt(&mut self, value: impl AsRef<CStr>) -> Result<txt, VclError> {
-        let cstr = value.as_ref();
+        #[cfg(feature = "full")]
+        return self.copy_cstr_ws_alloc(value.as_ref());
+        #[cfg(not(feature = "full"))]
+        return self.copy_cstr_strands(value.as_ref());
+    }
+
+    /// Copy any `AsRef<CStr>` into a new [`VCL_STRING`] stored in the workspace
+    pub fn copy_cstr(&mut self, value: impl AsRef<CStr>) -> Result<VCL_STRING, VclError> {
+        Ok(VCL_STRING(self.copy_txt(value)?.b))
+    }
+
+    /// Copy bytes into the workspace as a NUL-terminated string, treating bytes as already
+    /// having an optional NULL character at the end. A `NULL` is added if it is missing.
+    /// Returns an error if `src` contains NULL characters in a non-last position.
+    pub fn copy_bytes_with_null(&mut self, src: impl AsRef<[u8]>) -> Result<txt, VclError> {
+        let src = src.as_ref();
+        match memchr(0, src) {
+            Some(pos) if pos + 1 == src.len() => {
+                // Safe because there is only one NULL at the end of the buffer.
+                self.copy_txt(unsafe { CStr::from_bytes_with_nul_unchecked(src) })
+            }
+            Some(_) => Err(VclError::CStr(c"NULL byte found in the source string")),
+            #[cfg(feature = "full")]
+            None => self.copy_bytes_add_null(src),
+            #[cfg(not(feature = "full"))]
+            None => {
+                // NUL byte not found: stage a temporary (non-workspace) copy with one
+                // appended, since `VRT_StrandsWS` needs a NUL-terminated input string.
+                let mut staged = Vec::with_capacity(src.len() + 1);
+                staged.extend_from_slice(src);
+                staged.push(0);
+                self.copy_cstr_strands(unsafe { CStr::from_bytes_with_nul_unchecked(&staged) })
+            }
+        }
+    }
+
+    #[cfg(not(feature = "full"))]
+    fn copy_cstr_strands(&mut self, cstr: &CStr) -> Result<txt, VclError> {
         // `VRT_StrandsWS` only reads `strands` for the duration of the call — it never
         // retains the descriptor itself, only copies the string data into the workspace —
         // so the descriptor can live on the Rust stack instead of costing a permanent
@@ -89,36 +132,9 @@ impl Workspace<'_> {
             Ok(txt::from_cstr(CStr::from_ptr(vcl_str.0)))
         }
     }
-
-    /// Copy any `AsRef<CStr>` into a new [`VCL_STRING`] stored in the workspace
-    pub fn copy_cstr(&mut self, value: impl AsRef<CStr>) -> Result<VCL_STRING, VclError> {
-        Ok(VCL_STRING(self.copy_txt(value)?.b))
-    }
-
-    /// Copy bytes into the workspace as a NUL-terminated string, treating bytes as already
-    /// having an optional NULL character at the end. A `NULL` is added if it is missing.
-    /// Returns an error if `src` contains NULL characters in a non-last position.
-    pub fn copy_bytes_with_null(&mut self, src: impl AsRef<[u8]>) -> Result<txt, VclError> {
-        let src = src.as_ref();
-        match memchr(0, src) {
-            Some(pos) if pos + 1 == src.len() => {
-                // Safe because there is only one NULL at the end of the buffer.
-                self.copy_txt(unsafe { CStr::from_bytes_with_nul_unchecked(src) })
-            }
-            Some(_) => Err(VclError::CStr(c"NULL byte found in the source string")),
-            None => {
-                // NUL byte not found: stage a temporary (non-workspace) copy with one
-                // appended, since `VRT_StrandsWS` needs a NUL-terminated input string —
-                // the workspace copy itself still happens inside `copy_txt`.
-                let mut staged = Vec::with_capacity(src.len() + 1);
-                staged.extend_from_slice(src);
-                staged.push(0);
-                self.copy_txt(unsafe { CStr::from_bytes_with_nul_unchecked(&staged) })
-            }
-        }
-    }
 }
 
+#[cfg(not(feature = "full"))]
 fn out_of_memory_size(cstr: &CStr) -> NonZeroUsize {
     NonZeroUsize::new(cstr.to_bytes().len() + 1).expect("len + 1 is never zero")
 }
@@ -129,14 +145,14 @@ fn out_of_memory_size(cstr: &CStr) -> NonZeroUsize {
 #[cfg(feature = "full")]
 mod full {
     use std::any::type_name;
-    use std::ffi::{c_char, c_void};
+    use std::ffi::{c_char, c_void, CStr};
     use std::mem::{align_of, size_of, transmute, MaybeUninit};
     use std::num::NonZeroUsize;
     use std::ptr;
     use std::slice::from_raw_parts_mut;
 
     #[allow(unused_imports)] // only used by the `vcl_string_builder` intra-doc link below
-    use crate::ffi::{self, vrt_blob, WS_Allocated, VCL_BLOB, VCL_STRING};
+    use crate::ffi::{self, txt, vrt_blob, WS_Allocated, VCL_BLOB, VCL_STRING};
     use crate::validate_ws;
     use crate::vcl::{VclError, VclResult};
 
@@ -274,6 +290,23 @@ mod full {
             Ok(unsafe { slice_assume_init_mut(dest) })
         }
 
+        /// `full` implementation of [`Workspace::copy_txt`]: a plain `WS_Alloc` copy, which,
+        /// unlike `VRT_StrandsWS`, still works after an earlier allocation overflowed.
+        pub(super) fn copy_cstr_ws_alloc(&mut self, value: &CStr) -> Result<txt, VclError> {
+            let dest = self.copy_bytes(value.to_bytes_with_nul())?;
+            Ok(bytes_with_nul_to_txt(dest))
+        }
+
+        /// `full` implementation of [`Workspace::copy_bytes_with_null`] for `src` without NUL.
+        pub(super) fn copy_bytes_add_null(&mut self, src: &[u8]) -> Result<txt, VclError> {
+            let len = src.len();
+            let dest = self.allocate(unsafe { NonZeroUsize::new_unchecked(len + 1) })?;
+            dest[..len].copy_from_slice(maybe_uninit(src));
+            dest[len].write(b'\0');
+            let dest = unsafe { slice_assume_init_mut(dest) };
+            Ok(bytes_with_nul_to_txt(dest))
+        }
+
         /// Copy any `AsRef<[u8]>` into a new [`VCL_BLOB`] stored in the workspace
         ///
         /// Only available under `full`: the vrt-native `VRT_blob()` needs a `VRT_CTX`, not just a
@@ -311,6 +344,10 @@ mod full {
         pub fn slice_builder<T: Copy>(&mut self) -> VclResult<WsTempBuffer<'ctx, T>> {
             unsafe { WsTempBuffer::new(validate_ws(self.raw)) }
         }
+    }
+
+    fn bytes_with_nul_to_txt(buf: &[u8]) -> txt {
+        txt::from_cstr(unsafe { CStr::from_bytes_with_nul_unchecked(buf) })
     }
 
     /// Internal helper to convert a `&[u8]` to a `&[MaybeUninit<u8>]`
@@ -398,6 +435,25 @@ mod full {
             unsafe {
                 assert!(ws.alloc(NonZero::new(1).expect("1 is non-zero")).is_null());
             }
+        }
+
+        #[test]
+        fn ws_test_copy_after_failed_alloc() {
+            let mut test_ws = TestWS::new(160);
+            let mut ws = test_ws.workspace();
+            // A failed allocation must not prevent later, smaller copies.
+            assert!(ws.allocate(NonZero::new(1000).expect("non-zero")).is_err());
+            let txt = ws.copy_txt(c"hello").expect("copy_txt");
+            assert_eq!(txt.to_slice(), Some(b"hello".as_slice()));
+            let txt = ws
+                .copy_bytes_with_null(b"abc")
+                .expect("copy_bytes_with_null");
+            assert_eq!(txt.to_slice(), Some(b"abc".as_slice()));
+            let txt = ws
+                .copy_bytes_with_null(b"def\0")
+                .expect("copy_bytes_with_null");
+            assert_eq!(txt.to_slice(), Some(b"def".as_slice()));
+            assert!(ws.copy_bytes_with_null(b"a\0b").is_err());
         }
     }
 }

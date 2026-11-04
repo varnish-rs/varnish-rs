@@ -1,0 +1,24 @@
+varnishtest "returning a string after a failed workspace allocation"
+
+# A failed allocation sets the workspace overflow flag. String returns must still work after it
+# (as long as there is space left). Backend side only: on the client side, varnishd itself fails
+# the delivery of a task whose workspace overflowed, whatever the vmod returns.
+server s1 {
+    rxreq
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import rustest from "${vmod}";
+
+    sub vcl_backend_response {
+        set beresp.http.x-backend = rustest.ws_fallback();
+    }
+} -start
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.status == 200
+    expect resp.http.x-backend == "fallback"
+} -run
