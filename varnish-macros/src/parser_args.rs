@@ -228,6 +228,9 @@ impl ParamType {
                 "FetchFilters parameters are only allowed in object constructors and event handlers."
             } }
             unique! { has_fetch_filters, "A FetchFilters param is allowed only once in a function args list" }
+            if !cfg!(feature = "full") {
+                error! { "`FetchFilters` requires the `full` feature of the `varnish` crate" }
+            }
             Self::FetchFilters
         } else if as_ref_mut_ty(arg_ty)
             .and_then(as_simple_ty)
@@ -240,6 +243,9 @@ impl ParamType {
                 "DeliveryFilters parameters are only allowed in object constructors and event handlers."
             } }
             unique! { has_delivery_filters, "A DeliveryFilters param is allowed only once in a function args list" }
+            if !cfg!(feature = "full") {
+                error! { "`DeliveryFilters` requires the `full` feature of the `varnish` crate" }
+            }
             Self::DeliveryFilters
         } else {
             // Only standard types left, possibly optional

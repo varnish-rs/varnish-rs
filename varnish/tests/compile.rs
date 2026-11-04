@@ -8,6 +8,14 @@ fn compile_expected_failures() {
     t.compile_fail("tests/fail/*.rs");
 }
 
+// Types that need the `full` feature must be rejected by `#[vmod]` in vrt-only builds.
+#[cfg(not(feature = "full"))]
+#[test]
+fn compile_expected_failures_vrt() {
+    let t = trybuild::TestCases::new();
+    t.compile_fail("tests/fail_vrt/*.rs");
+}
+
 #[test]
 fn compile_valid() {
     compile_pass("tests/pass/*.rs");

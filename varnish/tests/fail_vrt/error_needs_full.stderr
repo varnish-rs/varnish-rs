@@ -1,0 +1,47 @@
+error: `BackendRef` (VCL `BACKEND`) requires the `full` feature of the `varnish` crate
+ --> tests/fail_vrt/error_needs_full.rs:7:14
+  |
+7 |     pub fn f(_v: Option<BackendRef>) {}
+  |              ^^
+
+error: `Probe` (VCL `PROBE`) requires the `full` feature of the `varnish` crate
+  --> tests/fail_vrt/error_needs_full.rs:13:14
+   |
+13 |     pub fn f(_v: Option<Probe>) {}
+   |              ^^
+
+error: `CowProbe` (VCL `PROBE`) requires the `full` feature of the `varnish` crate
+  --> tests/fail_vrt/error_needs_full.rs:19:14
+   |
+19 |     pub fn f(_v: Option<CowProbe<'_>>) {}
+   |              ^^
+
+error: `SocketAddr` (VCL `IP`) requires the `full` feature of the `varnish` crate
+  --> tests/fail_vrt/error_needs_full.rs:25:14
+   |
+25 |     pub fn f(_v: Option<SocketAddr>) {}
+   |              ^^
+
+error: `Probe` (VCL `PROBE`) requires the `full` feature of the `varnish` crate
+  --> tests/fail_vrt/error_needs_full.rs:31:19
+   |
+31 |     pub fn f() -> Probe {
+   |                   ^^^^^
+
+error: `SocketAddr` (VCL `IP`) requires the `full` feature of the `varnish` crate
+  --> tests/fail_vrt/error_needs_full.rs:39:19
+   |
+39 |     pub fn f() -> SocketAddr {
+   |                   ^^^^^^^^^^
+
+error: `FetchFilters` requires the `full` feature of the `varnish` crate
+  --> tests/fail_vrt/error_needs_full.rs:48:57
+   |
+48 |     pub fn on_event(_ctx: &mut Ctx, #[event] _e: Event, _vfp: &mut FetchFilters) {}
+   |                                                         ^^^^
+
+error: `DeliveryFilters` requires the `full` feature of the `varnish` crate
+  --> tests/fail_vrt/error_needs_full.rs:55:57
+   |
+55 |     pub fn on_event(_ctx: &mut Ctx, #[event] _e: Event, _vdp: &mut DeliveryFilters) {}
+   |                                                         ^^^^
