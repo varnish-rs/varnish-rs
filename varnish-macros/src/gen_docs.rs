@@ -105,7 +105,7 @@ import {ident} from "path/to/lib{ident}.so";
 }
 
 fn write_function(
-    mut docs: &mut String,
+    docs: &mut String,
     top_obj: &str,
     prefix: &str,
     obj_or_typ: &str,
@@ -115,11 +115,7 @@ fn write_function(
 
     if !matches!(func.func_type, FuncType::Constructor) {
         wrt!(docs, "\n{prefix} {obj_or_typ} ");
-        ln!(
-            &mut docs,
-            "`{}`",
-            fn_sig(top_obj, func, &user_args, obj_or_typ)
-        );
+        ln!(docs, "`{}`", fn_sig(top_obj, func, &user_args, obj_or_typ));
     }
 
     write_restrict_note(docs, &func.restrict);

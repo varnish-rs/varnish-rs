@@ -41,4 +41,4 @@ From a user perspective, this function does the same thing as `.manual_fail()`,
 except its underlying `rust` implementation is slightly different.
 
 In a more idiomatic way, we return a Result, and the generated boilerplate will be in charge of
-calling `ctx.fail() and return a default value.
+calling `ctx.fail()` and return a default value.

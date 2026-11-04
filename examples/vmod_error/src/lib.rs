@@ -49,7 +49,7 @@ mod error {
     /// except its underlying `rust` implementation is slightly different.
     ///
     /// In a more idiomatic way, we return a Result, and the generated boilerplate will be in charge of
-    /// calling `ctx.fail() and return a default value.
+    /// calling `ctx.fail()` and return a default value.
     pub fn result_fail(fp: &str) -> Result<i64, String> {
         // read the file
         read_to_string(fp)
