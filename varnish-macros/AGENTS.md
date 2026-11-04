@@ -40,14 +40,16 @@ TokenStream (attr args, ItemMod)
 
 ## Key deps
 
-`darling` parses `#[vmod(...)]` into `VmodParams` (currently only supports `docs` — new args go through darling in `parser.rs`). `syn`/`proc-macro2`/`quote` for AST+codegen. `prettyplease` used **only in tests** (`tests.rs`) to pretty-print generated code before snapshotting. `serde_json`/`sha2` for VCC JSON blob + CString hashing at codegen time. `glob` for `run_vtc_tests!` discovery. `varnish-sys` supplies `VALID_RESTRICT_SCOPES`.
+`darling` parses `#[vmod(...)]` into `VmodParams` (currently only supports `docs` — new args go through darling in `parser.rs`). There is deliberately no `abi` arg: see `full` below. `syn`/`proc-macro2`/`quote` for AST+codegen. `prettyplease` used **only in tests** (`tests.rs`) to pretty-print generated code before snapshotting. `serde_json`/`sha2` for VCC JSON blob + CString hashing at codegen time. `glob` for `run_vtc_tests!` discovery. `varnish-sys` supplies `VALID_RESTRICT_SCOPES`.
 
-`full` feature (default-on) only forwards `varnish-sys/full` — the macro needs nothing from it. It exists so `varnish/full` can keep the host-side (proc-macro) `varnish-sys` feature set identical to the target-side one, letting cargo build `varnish-sys` once. Don't drop it or depend on `varnish-sys` with different features here.
+`full` feature (default-on) forwards `varnish-sys/full`, and is enabled by `varnish/full`, so it mirrors the vmod's own `varnish` feature selection. Two uses:
+- It decides the `$ABI`: with `full` → `$ABI strict` (`vmod_data.vrt_major/minor` = 0), without → `$ABI vrt` (real `VRT_MAJOR/MINOR_VERSION`, see `render_model` in `generator.rs`). vrt-mode output also contains a `const` assert against `varnish::ffi::VARNISH_RS_FULL_ABI`, so a vmod enabling `varnish-sys/full` directly without `varnish/full` fails to compile instead of declaring `$ABI vrt` while using `cache.h` layouts. `ParamTy::unavailable_reason` rejects `full`-only arg/return types (`SocketAddr`, `Probe`, ...) with a clear error.
+- It keeps the host-side (proc-macro) `varnish-sys` feature set identical to the target-side one, letting cargo build `varnish-sys` once in dev builds (release still builds a host copy, because of cargo's default `build-override`). Don't depend on `varnish-sys` with different features here.
 
 ## Testing — two systems, see [varnish/tests/AGENTS.md](../varnish/tests/AGENTS.md) for the fixture side
 
-1. `src/tests.rs` (insta): reads real fixtures from `varnish/tests/pass/*.rs` and `varnish/tests/pass_ffi/*.rs` (cross-crate!), runs parser/generator directly, snapshots 4 outputs per fixture (`@model`, `@docs`, `@code`, `@json`) into `varnish/snapshots<VARNISHAPI_VERSION>/` — one dir per supported Varnish version.
-2. `varnish/tests/compile.rs` (trybuild, lives in `varnish` crate): `fail/*.rs` + `.stderr` compile-fail, `pass/*.rs`/`pass_ffi/*.rs` compile-pass (same fixtures reused above).
+1. `src/tests.rs` (insta): reads real fixtures from `varnish/tests/pass*/*.rs` (cross-crate!), runs parser/generator directly, snapshots 4 outputs per fixture (`@model`, `@docs`, `@code`, `@json`) into `varnish/snapshots<VARNISHAPI_VERSION>/` — one dir per supported Varnish version. Fixtures always render as `$ABI strict` regardless of this crate's features; `parse_vrt_abi` renders one inline vmod as `$ABI vrt` (`abi_vrt@*.snap`, VRT numbers not redacted — stable per Varnish release).
+2. `varnish/tests/compile.rs` (trybuild, lives in `varnish` crate): `fail/*.rs` + `.stderr` compile-fail, `pass/*.rs` compile-pass in both modes, `pass_full/*.rs` only with `full`, `pass_ffi/*.rs` only with `ffi` (same fixtures reused above).
 
 **Update snapshots**: `just bless` (wraps `cargo insta test --accept --unreferenced=ignore -p varnish-macros -p varnish` + `TRYBUILD=overwrite`).
 

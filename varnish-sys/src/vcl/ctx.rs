@@ -21,9 +21,12 @@ pub use full::{log, BodyState, TestCtx};
 /// the provided methods to interact with them. If they are not enough, the `raw` field is actually
 /// the C original pointer that can be used to directly, and unsafely, act on the structure.
 ///
-/// The `http_*` fields are only available with the `full` Cargo feature (enabled by default), as
-/// the vrt-only ABI surface has no access to HTTP objects. When present, which `http_*` are set
-/// will depend on which VCL sub routine the function is called from.
+/// The `http_*` fields are only available with the `full` Cargo feature (enabled by default):
+/// `HttpHeaders` reads `struct http` directly, and that layout is only part of the `cache.h` ABI.
+/// vrt.h does provide header access through `VRT_GetHdr`, `VRT_SetHdr` and `VRT_UnsetHdr`
+/// (in [`ffi`](crate::ffi), usable via `raw`), but no safe wrapper exists for them yet.
+/// When present, which `http_*` are set will depend on which VCL sub routine the function is
+/// called from.
 ///
 #[cfg_attr(
     feature = "full",

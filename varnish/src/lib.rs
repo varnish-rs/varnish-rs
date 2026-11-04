@@ -50,6 +50,16 @@
 /// crate-type = ["cdylib"] # and this line
 /// ```
 ///
+/// ### The `full` feature and `$ABI`
+///
+/// `full` is enabled by default and gives access to the whole API. The vmod is then built as
+/// `$ABI strict`: `varnishd` only loads it if it was built against the exact same Varnish build.
+///
+/// With `default-features = false` on the `varnish` dependency, only the API backed by Varnish's
+/// portable `vrt.h` interface is available (no custom backends, filters, HTTP header access, VSL
+/// logging, etc.), and the vmod is built as `$ABI vrt`: it loads into any `varnishd` with the same
+/// VRT major version and an equal or newer VRT minor version.
+///
 /// ## src/lib.rs
 ///
 /// Next, we need to actually write the code. For this example, we are going to create two functions:

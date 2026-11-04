@@ -400,8 +400,8 @@ mod full {
 
     use super::IntoVCL;
 
-    // `VSA_GetPtr`/`VSA_Port` are vsa.h-only; no vrt.h-native way to read a `VCL_IP`'s bytes
-    // exists yet either (see the `write_ip_to_ptr` note below).
+    // `VSA_GetPtr`/`VSA_Port` are vsa.h-only. vrt.h has `VRT_VSA_GetPtr` to read the address
+    // bytes, but it needs a ctx (`From` has none) and there is no vrt.h port accessor.
     impl From<VCL_IP> for Option<SocketAddr> {
         fn from(value: VCL_IP) -> Self {
             let value = value.0;

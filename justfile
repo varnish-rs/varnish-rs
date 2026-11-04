@@ -101,6 +101,8 @@ check-vrt-abi:
 
 # Fail if a vmod build compiles `varnish-sys` more than once. The proc-macro (host) side and the
 # vmod (target) side must resolve to the same `varnish-sys` features, see `full` in varnish/Cargo.toml.
+# Dev profile only: in release, cargo's default `build-override` (different opt-level for host
+# deps) always builds a second, host-side copy.
 check-single-varnish-sys-build:
     #!/usr/bin/env bash
     set -euo pipefail
