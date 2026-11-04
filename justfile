@@ -103,8 +103,10 @@ check-single-varnish-sys-build:
     set -euo pipefail
     # Examples pin their mode in Cargo.toml: vmod_example = full, vmod_counters = ffi, vmod_timestamp = vrt.
     for pkg in vmod_example vmod_counters vmod_timestamp; do
-        count=$(cargo build -p $pkg --message-format=json \
-            | grep -c '"reason":"compiler-artifact".*"name":"varnish_sys"' || true)
+        # Capture first so `set -e` aborts on a failed build; `json-render-diagnostics` keeps
+        # compiler errors human-readable on stderr. `|| true` only covers grep's exit 1 on 0 matches.
+        out=$(cargo build -p $pkg --message-format=json-render-diagnostics)
+        count=$(grep -c '"reason":"compiler-artifact".*"name":"varnish_sys"' <<<"$out" || true)
         if [ "$count" != 1 ]; then
             echo "ERROR: varnish-sys was built $count times for 'cargo build -p $pkg', expected 1"
             exit 1
