@@ -287,7 +287,7 @@ mod obj {
         pub static Vmod_obj_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"95335543a305005bf00d0f2dcf61f2161606c9815eb6de4eed8d4302257e2c11"
+            file_id: c"a6a334363d130417a3a710d8d0a0884a33d6576e1d17e841de43094500116d36"
                 .as_ptr(),
             name: c"obj".as_ptr(),
             func_name: c"Vmod_vmod_obj_Func".as_ptr(),

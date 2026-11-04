@@ -235,9 +235,17 @@ impl FuncProcessor {
                     quote! { &__ctx.ws }
                 });
             }
-            ParamType::SelfType => {
+            ParamType::SelfType { is_mut: false } => {
                 self.func_pre_call
                     .push(quote! { let __obj = __obj.as_ref().expect("object pointer must not be null"); });
+            }
+            ParamType::SelfType { is_mut: true } => {
+                // Exclusive access is sound: the parser only allows `&mut self` on methods
+                // restricted to vcl_init/vcl_fini, which the restrict check enforces at runtime.
+                let obj_name = self.names.obj_access();
+                self.func_pre_call.push(quote! {
+                    let __obj = (__obj as *mut #obj_name).as_mut().expect("object pointer must not be null");
+                });
             }
             ParamType::Event => {
                 self.func_call_vars.push(quote! { __ev });
@@ -628,7 +636,22 @@ impl FuncProcessor {
         } else {
             quote! { return Default::default(); }
         };
+        let null_ctx_check = if info
+            .args
+            .iter()
+            .any(|a| matches!(a.ty, ParamType::SelfType { is_mut: true }))
+        {
+            // `&mut self` soundness relies on the scope check, so it must never be skipped
+            quote! {
+                if __ctx.is_null() {
+                    #return_stmt
+                }
+            }
+        } else {
+            quote! {}
+        };
         quote! {
+            #null_ctx_check
             if !__ctx.is_null() && (*__ctx).method & (#mask_expr) as c_uint == 0 {
                 Ctx::from_ptr(__ctx).fail(#err_msg);
                 #return_stmt

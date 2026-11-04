@@ -139,7 +139,9 @@ VmodInfo {
                         ParamTypeInfo {
                             ident: "self",
                             docs: "self docs - note that `rustfmt` will put `&self` right after this comment\non the same line, effectively removing the code!\nWe cannot really document it anyway, so we parse it but skip it later.",
-                            ty: SelfType,
+                            ty: SelfType {
+                                is_mut: false,
+                            },
                         },
                         ParamTypeInfo {
                             ident: "key",

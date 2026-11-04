@@ -133,8 +133,9 @@ pub enum ParamType {
     Context { is_mut: bool },
     /// An argument representing Varnish Workspace wrapper
     Workspace { is_mut: bool },
-    /// For object methods, the first argument is always a reference to the object
-    SelfType,
+    /// For object methods, the first argument is always a reference to the object.
+    /// `&mut self` is only allowed for methods restricted to `vcl_init`/`vcl_fini`.
+    SelfType { is_mut: bool },
     /// An argument is an event type
     Event,
     /// A `&str` or `&CStr` argument automatically passed for object creation representing a VCL name.

@@ -62,15 +62,19 @@ impl ParamTypeInfo {
         match arg {
             FnArg::Receiver(recv) => match status.func_type {
                 Method => {
-                    let is_plain_ref =
-                        matches!(&recv.kind, syn::ReceiverKind::Reference(_, _, None));
-                    if idx != 0 || !is_plain_ref {
-                        Err(error(&recv, "First method arg must be `&self`"))?;
-                    }
+                    let is_mut = match &recv.kind {
+                        syn::ReceiverKind::Reference(_, _, mutability) if idx == 0 => {
+                            mutability.is_some()
+                        }
+                        _ => Err(error(
+                            &recv,
+                            "First method arg must be `&self` or `&mut self`",
+                        ))?,
+                    };
                     Ok(Self {
                         ident: "self".to_string(),
                         docs: parse_and_rm_doc(&mut recv.attrs),
-                        ty: ParamType::SelfType,
+                        ty: ParamType::SelfType { is_mut },
                     })
                 }
                 _ => Err(error(&arg, "`self` is not allowed for this function"))?,

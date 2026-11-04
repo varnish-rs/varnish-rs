@@ -127,7 +127,7 @@ mod multi_constructor {
         pub static Vmod_multi_constructor_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"772c7596098c06a44b27ccbdb5d02ff214cd7195de3502130ecad33f8387f348"
+            file_id: c"98d75d2eb62fcf8a255129402cae88305f2bc63ee4718d2818de9e8f43d61dd4"
                 .as_ptr(),
             name: c"multi_constructor".as_ptr(),
             func_name: c"Vmod_vmod_multi_constructor_Func".as_ptr(),
