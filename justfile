@@ -101,6 +101,10 @@ check-vrt-abi:
     # only builds the test binary, not the cdylib.
     cargo build {{vrt_compatible_examples}} --no-default-features
     cargo test {{vrt_compatible_examples}} --no-default-features
+    # vrt-only behavior: a non-empty string return fails once the workspace overflowed (with
+    # `full` it succeeds, see varnish/tests/vmod_test/tests/test18.vtc). Kept out of `tests/` so
+    # the example's `run_vtc_tests!` doesn't pick it up in `full` builds.
+    varnishtest -Dvmod="$PWD/target/debug/libvmod_error.so" examples/vmod_error/tests-vrt/*.vtc
     just check-single-varnish-sys-build
 
 # Fail if a vmod build compiles `varnish-sys` more than once. The proc-macro (host) side and the

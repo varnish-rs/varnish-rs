@@ -24,7 +24,7 @@ See also: [workspace root](../AGENTS.md) · [varnish/](../varnish/AGENTS.md) · 
 | `vmod_timestamp` | `#[shared_per_task]` demo (duration since last call, same task) |
 | `vmod_counters` (crate `stats`) | custom VSC metrics via `Vsc`/`#[derive(VscMetric)]` |
 | `vmod_blobutils` | `VCL_BLOB`/`&[u8]` argument handling |
-| `vmod_error` | error handling patterns (`Result<T, VclError/&str/String>`) |
+| `vmod_error` | error handling patterns (`Result<T, VclError/&str/String>`), workspace overflow. `tests-vrt/*.vtc` hold vrt-only expectations, run by `just check-vrt-abi` |
 | `vmod_infiniteloop` | ignoring restart/retry limits — VCL control-flow edge case |
 | `vmod_restricted_callsites` | `#[restrict(...)]` — limits which VCL subs may call a fn, enforced at load time |
 | `vmod_native_backend`, `vmod_simple_backend` | custom backend/director impls (`VclBackend`/`VclResponse`) |
