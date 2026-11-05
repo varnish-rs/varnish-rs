@@ -122,6 +122,10 @@ fn generate_bindings(info: &VarnishInfo) {
         // call any of them through these bindings — std already provides them.
         .blocklist_function("memcpy|memmove|memset|memcmp|strlen|bcmp")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        // clang >= 23 implicitly declares libc builtins (strncpy, memchr, ...) with a predefined
+        // `__size_t` sugar type that bindgen renders as an opaque `__BindgenOpaqueArray8<[u8; 8]>`.
+        // Without builtins, clang uses the real `size_t` typedef, which bindgen maps to `usize`.
+        .clang_arg("-fno-builtin")
         .clang_args(
             full_abi_define
                 .into_iter()

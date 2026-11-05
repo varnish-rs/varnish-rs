@@ -491,14 +491,6 @@ impl<const N: usize> __BindgenBitfieldUnit<[u8; N]> {
         }
     }
 }
-#[derive(PartialEq, Eq, Copy, Clone, Debug, Hash)]
-#[repr(C, align(8))]
-pub struct __BindgenOpaqueArray8<T>(pub T);
-impl<T: Copy + Default, const N: usize> Default for __BindgenOpaqueArray8<[T; N]> {
-    fn default() -> Self {
-        Self([<T as Default>::default(); N])
-    }
-}
 #[derive(PartialEq, Copy, Clone, Hash, Debug, Default)]
 #[repr(C)]
 pub struct __BindgenComplex<T> {
@@ -2506,7 +2498,7 @@ unsafe extern "C" {
         __dest: *mut ::std::ffi::c_void,
         __src: *const ::std::ffi::c_void,
         __c: ::std::ffi::c_int,
-        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
+        __n: usize,
     ) -> *mut ::std::ffi::c_void;
 }
 unsafe extern "C" {
@@ -2527,7 +2519,7 @@ unsafe extern "C" {
     pub fn memchr(
         __s: *const ::std::ffi::c_void,
         __c: ::std::ffi::c_int,
-        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
+        __n: usize,
     ) -> *mut ::std::ffi::c_void;
 }
 unsafe extern "C" {
@@ -2540,7 +2532,7 @@ unsafe extern "C" {
     pub fn strncpy(
         __dest: *mut ::std::ffi::c_char,
         __src: *const ::std::ffi::c_char,
-        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
+        __n: usize,
     ) -> *mut ::std::ffi::c_char;
 }
 unsafe extern "C" {
@@ -2553,7 +2545,7 @@ unsafe extern "C" {
     pub fn strncat(
         __dest: *mut ::std::ffi::c_char,
         __src: *const ::std::ffi::c_char,
-        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
+        __n: usize,
     ) -> *mut ::std::ffi::c_char;
 }
 unsafe extern "C" {
@@ -2566,7 +2558,7 @@ unsafe extern "C" {
     pub fn strncmp(
         __s1: *const ::std::ffi::c_char,
         __s2: *const ::std::ffi::c_char,
-        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
+        __n: usize,
     ) -> ::std::ffi::c_int;
 }
 unsafe extern "C" {
@@ -2579,8 +2571,8 @@ unsafe extern "C" {
     pub fn strxfrm(
         __dest: *mut ::std::ffi::c_char,
         __src: *const ::std::ffi::c_char,
-        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
-    ) -> __BindgenOpaqueArray8<[u8; 8usize]>;
+        __n: usize,
+    ) -> usize;
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2636,10 +2628,7 @@ unsafe extern "C" {
     pub fn strdup(__s: *const ::std::ffi::c_char) -> *mut ::std::ffi::c_char;
 }
 unsafe extern "C" {
-    pub fn strndup(
-        __string: *const ::std::ffi::c_char,
-        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
-    ) -> *mut ::std::ffi::c_char;
+    pub fn strndup(__string: *const ::std::ffi::c_char, __n: usize) -> *mut ::std::ffi::c_char;
 }
 unsafe extern "C" {
     pub fn strchr(
@@ -2660,16 +2649,10 @@ unsafe extern "C" {
     ) -> *mut ::std::ffi::c_char;
 }
 unsafe extern "C" {
-    pub fn strcspn(
-        __s: *const ::std::ffi::c_char,
-        __reject: *const ::std::ffi::c_char,
-    ) -> __BindgenOpaqueArray8<[u8; 8usize]>;
+    pub fn strcspn(__s: *const ::std::ffi::c_char, __reject: *const ::std::ffi::c_char) -> usize;
 }
 unsafe extern "C" {
-    pub fn strspn(
-        __s: *const ::std::ffi::c_char,
-        __accept: *const ::std::ffi::c_char,
-    ) -> __BindgenOpaqueArray8<[u8; 8usize]>;
+    pub fn strspn(__s: *const ::std::ffi::c_char, __accept: *const ::std::ffi::c_char) -> usize;
 }
 unsafe extern "C" {
     pub fn strpbrk(
@@ -2728,7 +2711,7 @@ unsafe extern "C" {
     pub fn mempcpy(
         __dest: *mut ::std::ffi::c_void,
         __src: *const ::std::ffi::c_void,
-        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
+        __n: usize,
     ) -> *mut ::std::ffi::c_void;
 }
 unsafe extern "C" {
@@ -2749,14 +2732,10 @@ unsafe extern "C" {
     pub fn strerror_l(__errnum: ::std::ffi::c_int, __l: locale_t) -> *mut ::std::ffi::c_char;
 }
 unsafe extern "C" {
-    pub fn bcopy(
-        __src: *const ::std::ffi::c_void,
-        __dest: *mut ::std::ffi::c_void,
-        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
-    );
+    pub fn bcopy(__src: *const ::std::ffi::c_void, __dest: *mut ::std::ffi::c_void, __n: usize);
 }
 unsafe extern "C" {
-    pub fn bzero(__s: *mut ::std::ffi::c_void, __n: __BindgenOpaqueArray8<[u8; 8usize]>);
+    pub fn bzero(__s: *mut ::std::ffi::c_void, __n: usize);
 }
 unsafe extern "C" {
     pub fn index(__s: *const ::std::ffi::c_char, __c: ::std::ffi::c_int)
@@ -2787,7 +2766,7 @@ unsafe extern "C" {
     pub fn strncasecmp(
         __s1: *const ::std::ffi::c_char,
         __s2: *const ::std::ffi::c_char,
-        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
+        __n: usize,
     ) -> ::std::ffi::c_int;
 }
 unsafe extern "C" {
@@ -2840,22 +2819,22 @@ unsafe extern "C" {
     pub fn stpncpy(
         __dest: *mut ::std::ffi::c_char,
         __src: *const ::std::ffi::c_char,
-        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
+        __n: usize,
     ) -> *mut ::std::ffi::c_char;
 }
 unsafe extern "C" {
     pub fn strlcpy(
         __dest: *mut ::std::ffi::c_char,
         __src: *const ::std::ffi::c_char,
-        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
-    ) -> __BindgenOpaqueArray8<[u8; 8usize]>;
+        __n: usize,
+    ) -> usize;
 }
 unsafe extern "C" {
     pub fn strlcat(
         __dest: *mut ::std::ffi::c_char,
         __src: *const ::std::ffi::c_char,
-        __n: __BindgenOpaqueArray8<[u8; 8usize]>,
-    ) -> __BindgenOpaqueArray8<[u8; 8usize]>;
+        __n: usize,
+    ) -> usize;
 }
 pub type __cfloat128 = __BindgenComplex<u128>;
 pub type _Float128 = u128;
@@ -10169,7 +10148,7 @@ unsafe extern "C" {
     pub fn fork() -> __pid_t;
 }
 unsafe extern "C" {
-    pub fn vfork() -> ::std::ffi::c_int;
+    pub fn vfork() -> __pid_t;
 }
 unsafe extern "C" {
     pub fn ttyname(__fd: ::std::ffi::c_int) -> *mut ::std::ffi::c_char;

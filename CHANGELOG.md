@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Breaking**: most of the API now sits behind the new `full` feature, enabled by default. Builds using `default-features = false` now get the `$ABI vrt` subset; add `features = ["full"]` to keep the previous API.
+- `varnish_sys::ffi`: libc helpers pulled in from system headers (`strncpy`, `memchr`, `strndup`, ...) now take and return `usize` for `size_t` instead of `c_ulong`. Bindgen now runs with `-fno-builtin`, so that clang >= 23 no longer turns these into opaque `__BindgenOpaqueArray8` types.
 
 ### Added
 
