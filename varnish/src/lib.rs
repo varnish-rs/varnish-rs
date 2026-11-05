@@ -215,10 +215,13 @@
 /// | `std::time::SystemTime` | `VCL_TIME` |
 /// | `&str` | `VCL_STRING` |
 /// | `&[u8]` | `VCL_BLOB` |
-/// | `Option<CowProbe>` | `VCL_PROBE` |
-/// | `Option<Probe>` | `VCL_PROBE` |
-/// | `Option<std::net::SocketAddr>` | `VCL_IP` |
+/// | `Option<CowProbe>` | `VCL_PROBE` (`full` only) |
+/// | `Option<Probe>` | `VCL_PROBE` (`full` only) |
+/// | `Option<std::net::SocketAddr>` | `VCL_IP` (`full` only) |
 /// | `Subroutine` | `VCL_SUB` |
+///
+/// Types marked `full` only need the [`full` feature](#the-full-feature-and-abi). Without it,
+/// `#[vmod]` rejects them with a "requires the `full` feature" error.
 ///
 /// All types can in addition be wrapped in an `Option` to make the argument optional.
 ///
@@ -338,10 +341,12 @@
 /// | `&str` | `VCL_STRING` |
 /// | `String` | `VCL_STRING` |
 /// | `&[u8]` | `VCL_BLOB` |
-/// | `Option<CowProbe>` | `VCL_PROBE` |
-/// | `Option<Probe>` | `VCL_PROBE` |
-/// | `Option<std::net::SocketAddr>` | `VCL_IP` |
+/// | `Option<CowProbe>` | `VCL_PROBE` (`full` only) |
+/// | `Option<Probe>` | `VCL_PROBE` (`full` only) |
+/// | `Option<std::net::SocketAddr>` | `VCL_IP` (`full` only) |
 /// | `Subroutine` | `VCL_SUB` |
+///
+/// As for arguments, types marked `full` only need the `full` feature.
 ///
 /// You can also omit the return value entirely.
 ///
