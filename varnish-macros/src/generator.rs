@@ -14,8 +14,16 @@ use crate::gen_objects::ObjProcessor;
 use crate::model::{FuncInfo, ParamType, VmodInfo};
 use crate::names::{ForceCstr, Names, ToIdent};
 
-pub fn render_model(mut item_mod: ItemMod, info: &VmodInfo) -> TokenStream {
-    let output = Generator::render(info);
+pub fn render_model(item_mod: ItemMod, info: &VmodInfo) -> TokenStream {
+    // `varnish/full` forwards to `varnish-macros/full`, so this matches the vmod's own `varnish`
+    // feature selection. The generated code also asserts it against `varnish-sys` at compile time.
+    render_model_abi(item_mod, info, !cfg!(feature = "full"))
+}
+
+/// Same as [`render_model`], with the `$ABI` explicitly chosen instead of derived from the `full`
+/// feature. `vrt == true` means `$ABI vrt`, `false` means `$ABI strict`.
+pub fn render_model_abi(mut item_mod: ItemMod, info: &VmodInfo, vrt: bool) -> TokenStream {
+    let output = Generator::render(info, vrt);
     item_mod
         .content
         .as_mut()
@@ -32,14 +40,29 @@ pub struct Generator {
     pub file_id: CString,
     pub functions: Vec<FuncProcessor>,
     pub objects: Vec<ObjProcessor>,
+    /// The `vmod_data.vrt_major`/`vrt_minor` values, and the matching JSON header
+    /// `major`/`minor` fields (see [`gen_json`](Self::gen_json)). `(0, 0)` for `$ABI strict`
+    /// (built with the `full` feature — checked via an exact `VMOD_ABI_Version` match), or the
+    /// real `VRT_MAJOR_VERSION`/`VRT_MINOR_VERSION` for `$ABI vrt` (built without `full` —
+    /// checked via a loose major/minor comparison instead).
+    pub vrt_version: (u32, u32),
 }
 
 /// See also <https://varnish-cache.org/docs/7.6/reference/vmod.html>
 impl Generator {
-    pub fn render(vmod: &VmodInfo) -> TokenStream {
+    pub fn render(vmod: &VmodInfo, vrt: bool) -> TokenStream {
+        let vrt_version = if vrt {
+            (
+                varnish_sys::ffi::VRT_MAJOR_VERSION,
+                varnish_sys::ffi::VRT_MINOR_VERSION,
+            )
+        } else {
+            (0, 0)
+        };
         let mut obj = Self {
             names: Names::new(&vmod.ident),
             file_id: Self::calc_file_id(vmod).force_cstr(),
+            vrt_version,
             ..Self::default()
         };
         for info in &vmod.funcs {
@@ -128,8 +151,8 @@ impl Generator {
                 .to_str()
                 .expect("VMOD_ABI_Version must be valid UTF-8")
                 .into(),
-            "0".into(),
-            "0".into(),
+            self.vrt_version.0.to_string().into(),
+            self.vrt_version.1.to_string().into(),
         ]);
 
         let mut json: Vec<Value> = vec![header.into()];
@@ -174,6 +197,35 @@ impl Generator {
             struct_name = self.names.func_struct_name()
         );
         cproto
+    }
+
+    /// A vrt vmod must not be able to reach the cache.h API. `varnish-macros` and `varnish-sys`
+    /// features normally agree (both are driven by `varnish/full`), but a vmod could still
+    /// enable `varnish-sys/full` directly, so check against the target-side bindings.
+    fn gen_abi_guard(&self) -> TokenStream {
+        if self.vrt_version == (0, 0) {
+            return quote! {};
+        }
+        let msg = "this vmod declares `$ABI vrt` (`varnish` built without its `full` feature), \
+                   but `varnish-sys` was built with `full`: enable `full` on `varnish`, \
+                   or stop enabling it on `varnish-sys`";
+        // The VRT version is baked in from the proc-macro's (host) `varnish-sys`, which could see
+        // different Varnish headers than the vmod's own (target) one, e.g. when cross-compiling.
+        let major = proc_macro2::Literal::u32_unsuffixed(self.vrt_version.0);
+        let minor = proc_macro2::Literal::u32_unsuffixed(self.vrt_version.1);
+        let version_msg = format!(
+            "`$ABI vrt` version {}.{} (from the varnish-macros build) does not match \
+             the vrt.h this vmod is compiled against",
+            self.vrt_version.0, self.vrt_version.1
+        );
+        quote! {
+            const _: () = assert!(!varnish::ffi::VARNISH_RS_FULL_ABI, #msg);
+            const _: () = assert!(
+                varnish::ffi::VRT_MAJOR_VERSION == #major
+                    && varnish::ffi::VRT_MINOR_VERSION == #minor,
+                #version_msg
+            );
+        }
     }
 
     fn render_generated_mod(&self, vmod: &VmodInfo) -> TokenStream {
@@ -225,6 +277,10 @@ impl Generator {
 
         let c_func_name = self.names.func_struct_name().force_cstr();
         let func_name = quote! { func_name: #c_func_name.as_ptr(), };
+        // Unsuffixed, so `$ABI strict` output stays `vrt_major: 0` as before.
+        let vrt_major = proc_macro2::Literal::u32_unsuffixed(self.vrt_version.0);
+        let vrt_minor = proc_macro2::Literal::u32_unsuffixed(self.vrt_version.1);
+        let abi_guard = self.gen_abi_guard();
 
         let vmod_data_extras = quote! {
             vcs: c"".as_ptr(),  // FIXME: value?
@@ -266,8 +322,8 @@ impl Generator {
                 #[allow(non_upper_case_globals)]
                 #[no_mangle]
                 pub static #vmod_name_data: vmod_data = vmod_data {
-                    vrt_major: 0,
-                    vrt_minor: 0,
+                    vrt_major: #vrt_major,
+                    vrt_minor: #vrt_minor,
                     file_id: #file_id.as_ptr(),
                     name: #c_name.as_ptr(),
                     #func_name
@@ -280,6 +336,7 @@ impl Generator {
                 };
 
                 const JSON: &CStr = #json;
+                #abi_guard
             }
         )
     }

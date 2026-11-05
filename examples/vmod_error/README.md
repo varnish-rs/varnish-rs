@@ -42,3 +42,19 @@ except its underlying `rust` implementation is slightly different.
 
 In a more idiomatic way, we return a Result, and the generated boilerplate will be in charge of
 calling `ctx.fail()` and return a default value.
+
+### Function `BOOL error.huge_copy_fails()`
+
+Try to copy 64 MiB into the workspace, which is far more than it holds. Returns `true` if
+the copy failed, as it should. A failed workspace allocation is an error like any other:
+the vmod gets an `Err` and decides what to do with it.
+
+### Function `STRING error.ws_overflow_then(STRING s)`
+
+Overflow the workspace on purpose (like `huge_copy_fails()`), then return `s`.
+
+The failed allocation marks the workspace as overflowed, which matters for what comes
+next. An empty `s` can always be returned. A non-empty one has to be copied into the
+workspace: that works with the `full` feature (`WS_Alloc`), but fails the VCL without it
+(`$ABI vrt`, where copies go through `VRT_StrandsWS`, which refuses to allocate on an
+overflowed workspace).

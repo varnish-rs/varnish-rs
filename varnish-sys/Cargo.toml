@@ -15,6 +15,12 @@ readme.workspace = true
 [lib]
 name = "varnish_sys"
 
+[features]
+default = ["full"]
+# Full ($ABI strict) API surface: binds the entire Varnish header set (cache.h and friends),
+# not just the portable vdef.h/vrt.h/vrt_obj.h/vcl.h ($ABI vrt) subset.
+full = []
+
 [build-dependencies]
 bindgen_helpers.workspace = true
 pkg-config.workspace = true

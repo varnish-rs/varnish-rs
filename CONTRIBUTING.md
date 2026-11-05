@@ -6,6 +6,10 @@ the `cargo doc` pass that catches broken rustdoc intra-doc links. Plain
 `cargo build`/`clippy`/`test` won't catch a broken link or most warnings on
 their own, since they don't run with `-D warnings` or build docs.
 
+If your change touches code that also builds without the `full` feature (anything
+not behind `#[cfg(feature = "full")]`), also run `just check-vrt-abi`: it is a
+separate CI job, not part of `ci-test-latest`.
+
 If your change touches anything behind a version-gated
 `#[cfg(varnishsys_*)]`, also run `just ci-test-all-versions` (requires
 Docker). A single local Varnish install only exercises one cfg combination —

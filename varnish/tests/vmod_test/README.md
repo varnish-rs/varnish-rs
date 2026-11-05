@@ -27,6 +27,11 @@ import rustest from "path/to/librustest.so";
 
 ### Function `STRING rustest.ws_reserve(STRING s)`
 
+### Function `STRING rustest.ws_fallback()`
+
+Fail a huge workspace allocation, then return a short string: string returns must still
+work after an earlier allocation failed.
+
 ### Function `STRING rustest.out_str()`
 
 ### Function `STRING rustest.out_res_str()`

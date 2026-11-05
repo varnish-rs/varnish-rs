@@ -255,6 +255,30 @@ impl ParamTy {
         }
     }
 
+    /// Types whose Rust conversions only exist with the `full` feature of `varnish`.
+    pub fn needs_full(self) -> bool {
+        matches!(
+            self,
+            Self::BackendRef | Self::Probe | Self::ProbeCow | Self::SocketAddr
+        )
+    }
+
+    /// Compile error message if this type can't be used in the current (`full` or vrt-only) build.
+    pub fn unavailable_reason(self) -> Option<String> {
+        (!cfg!(feature = "full") && self.needs_full()).then(|| {
+            let rust_ty = match self {
+                Self::BackendRef => "BackendRef",
+                Self::Probe => "Probe",
+                Self::ProbeCow => "CowProbe",
+                _ => "SocketAddr",
+            };
+            format!(
+                "`{rust_ty}` (VCL `{}`) requires the `full` feature of the `varnish` crate",
+                self.to_vcc_type()
+            )
+        })
+    }
+
     /// Some VCL->Rust conversions require `TryFrom` instead of `From`,
     /// e.g. if `&CStr` contains invalid UTF-8 characters and cannot be converted to `&str`.
     pub fn use_try_from(self) -> bool {

@@ -59,6 +59,14 @@ mod rustest {
         }
     }
 
+    /// Fail a huge workspace allocation, then return a short string: string returns must still
+    /// work after an earlier allocation failed.
+    pub fn ws_fallback(ws: &mut Workspace) -> String {
+        let huge = std::num::NonZeroUsize::new(1 << 30).expect("non-zero");
+        assert!(ws.allocate(huge).is_err());
+        "fallback".to_string()
+    }
+
     pub fn out_str() -> &'static str {
         "str"
     }

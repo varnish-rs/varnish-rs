@@ -228,6 +228,9 @@ impl ParamType {
                 "FetchFilters parameters are only allowed in object constructors and event handlers."
             } }
             unique! { has_fetch_filters, "A FetchFilters param is allowed only once in a function args list" }
+            if !cfg!(feature = "full") {
+                error! { "`FetchFilters` requires the `full` feature of the `varnish` crate" }
+            }
             Self::FetchFilters
         } else if as_ref_mut_ty(arg_ty)
             .and_then(as_simple_ty)
@@ -240,6 +243,9 @@ impl ParamType {
                 "DeliveryFilters parameters are only allowed in object constructors and event handlers."
             } }
             unique! { has_delivery_filters, "A DeliveryFilters param is allowed only once in a function args list" }
+            if !cfg!(feature = "full") {
+                error! { "`DeliveryFilters` requires the `full` feature of the `varnish` crate" }
+            }
             Self::DeliveryFilters
         } else {
             // Only standard types left, possibly optional
@@ -249,6 +255,9 @@ impl ParamType {
             };
             if !opt && arg_ty.must_be_optional() {
                 error! { "This type of argument must be declared as optional with `Option<...>`" }
+            }
+            if let Some(msg) = arg_ty.unavailable_reason() {
+                error! { &msg }
             }
             let default = Self::get_arg_opts(pat_ty, arg_ty)?;
             let has_required = Self::get_required_attr(pat_ty)?;
@@ -423,6 +432,11 @@ impl OutputTy {
         let Some(ret_ty) = Self::try_parse(ty) else {
             Err(error(&ty, "This content type is not supported"))?
         };
+        if let Self::ParamType(param_ty) = &ret_ty {
+            if let Some(msg) = param_ty.unavailable_reason() {
+                Err(error(&ty, &msg))?;
+            }
+        }
 
         if matches!(func_type, Event) && !matches!(ret_ty, Self::Default) {
             Err(error(

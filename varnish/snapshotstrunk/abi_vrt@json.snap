@@ -1,0 +1,69 @@
+---
+source: varnish-macros/src/tests.rs
+---
+VMOD_JSON_SPEC
+[
+  [
+    "$VMOD",
+    "2.0",
+    "abi_vrt",
+    "Vmod_vmod_abi_vrt_Func",
+    "e10fb0b6a696d8ca22767aa15d76b85d0b027a5c4a34c8e5627d37207c234436",
+    "Varnish (version) (hash)",
+    "22",
+    "2"
+  ],
+  [
+    "$CPROTO",
+    "
+typedef VCL_INT td_vmod_abi_vrt_scalar_fn(
+    VRT_CTX,
+    VCL_INT
+);
+
+typedef VCL_STRING td_vmod_abi_vrt_echo(
+    VRT_CTX,
+    VCL_STRING
+);
+
+struct Vmod_vmod_abi_vrt_Func {
+  td_vmod_abi_vrt_scalar_fn *f_scalar_fn;
+  td_vmod_abi_vrt_echo *f_echo;
+};
+
+static struct Vmod_vmod_abi_vrt_Func Vmod_vmod_abi_vrt_Func;"
+  ],
+  [
+    "$FUNC",
+    "scalar_fn",
+    [
+      [
+        "INT"
+      ],
+      "Vmod_vmod_abi_vrt_Func.f_scalar_fn",
+      "",
+      [
+        "INT",
+        "x",
+        "x"
+      ]
+    ]
+  ],
+  [
+    "$FUNC",
+    "echo",
+    [
+      [
+        "STRING"
+      ],
+      "Vmod_vmod_abi_vrt_Func.f_echo",
+      "",
+      [
+        "STRING",
+        "s",
+        "s"
+      ]
+    ]
+  ]
+]
+
