@@ -40,6 +40,8 @@ fn parse_pass_tests() {
     run_parse_tests("../varnish/tests/pass/*.rs");
 }
 
+/// `pass_full` fixtures use types the parser rejects without `full` (probes, `SocketAddr`, filters).
+#[cfg(feature = "full")]
 #[test]
 fn parse_pass_full_tests() {
     run_parse_tests("../varnish/tests/pass_full/*.rs");
