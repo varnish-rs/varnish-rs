@@ -60,8 +60,34 @@ impl VclResponse for NativeVclResponseShim {}
 /// result, you don't want to drop it until after all the transfers are done. The most common way
 /// is just to have the backend be part of a vmod object because the object won't be dropped until
 /// the VCL is discarded and that can only happen once all the backend fetches are done.
+///
+/// `S` and `T` must be `'static`: Varnish reaches `S` (and the `T` of an in-flight fetch)
+/// through raw pointers on the registered `struct director`, which no Rust lifetime
+/// constrains. A [`Backend`] passed to [`std::mem::forget`], for one, stays registered for
+/// the life of its VCL, so a borrowing `S` would leave Varnish calling into a dangling borrow:
+///
+/// ```compile_fail,E0597
+/// # mod varnish { pub use varnish_sys::vcl; }
+/// use varnish::vcl::{Backend, Ctx, VclBackend, VclResult};
+///
+/// struct Borrowed<'a>(&'a str);
+///
+/// impl VclBackend<()> for Borrowed<'_> {
+///     fn get_response(&self, _ctx: &mut Ctx) -> VclResult<Option<()>> {
+///         let _ = self.0.len();
+///         Ok(None)
+///     }
+/// }
+///
+/// fn register(ctx: &mut Ctx) -> VclResult<()> {
+///     let name = String::from("borrowed");
+///     let be = Backend::new(ctx, "borrowed", "be", Borrowed(&name), false)?;
+///     std::mem::forget(be);
+///     Ok(())
+/// }
+/// ```
 #[derive(Debug)]
-pub struct Backend<S: VclBackend<T>, T: VclResponse> {
+pub struct Backend<S: VclBackend<T> + 'static, T: VclResponse + 'static> {
     #[expect(dead_code)]
     methods: Box<ffi::vdi_methods>,
     inner: Box<S>,
@@ -73,7 +99,7 @@ pub struct Backend<S: VclBackend<T>, T: VclResponse> {
     native_configuration: Option<(Box<ffi::vrt_endpoint>, Box<ffi::vrt_backend>)>,
 }
 
-impl<S: VclBackend<T>, T: VclResponse> Backend<S, T> {
+impl<S: VclBackend<T> + 'static, T: VclResponse + 'static> Backend<S, T> {
     /// Access the inner type wrapped by [Backend]. Note that it isn't `mut` as other threads are
     /// likely to have access to it too.
     pub fn get_inner(&self) -> &S {
@@ -255,7 +281,7 @@ impl VclResponse for () {
     }
 }
 
-impl<S: VclBackend<T>, T: VclResponse> Drop for Backend<S, T> {
+impl<S: VclBackend<T> + 'static, T: VclResponse + 'static> Drop for Backend<S, T> {
     fn drop(&mut self) {
         unsafe {
             let mut bep = self.backend_ref.vcl_ptr();
@@ -268,7 +294,7 @@ impl<S: VclBackend<T>, T: VclResponse> Drop for Backend<S, T> {
     }
 }
 
-impl<S: VclBackend<T>, T: VclResponse> AsRef<BackendRef> for Backend<S, T> {
+impl<S: VclBackend<T> + 'static, T: VclResponse + 'static> AsRef<BackendRef> for Backend<S, T> {
     fn as_ref(&self) -> &BackendRef {
         &self.backend_ref
     }
