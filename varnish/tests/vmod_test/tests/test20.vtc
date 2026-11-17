@@ -1,0 +1,26 @@
+varnishtest "weaken_etag keeps the original ETag when the workspace is exhausted"
+
+server s1 {
+    rxreq
+    expect req.http.etag == {"abc"}
+    expect req.http.err == "Unable to allocate 1 bytes in a Workspace"
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import rustest from "${vmod}";
+
+    sub vcl_recv {
+        set req.http.err = rustest.try_weaken_etag_no_ws();
+        return (pass);
+    }
+} -start
+
+# running out of workspace marks it as overflowed, failing the delivery
+client c1 {
+    txreq -hdr {etag: "abc"}
+    rxresp
+    expect resp.status == 500
+} -run
+
+varnish v1 -expect MAIN.ws_client_overflow == 1

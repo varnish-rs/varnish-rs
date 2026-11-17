@@ -21,6 +21,25 @@ import rustest from "path/to/librustest.so";
 
 ### Function `VOID rustest.set_hdr(STRING name, STRING value)`
 
+### Function `STRING rustest.try_big_hdr(STRING name, INT size)`
+
+Tries to set a `size`-byte header value, returning the error message, or "" on success
+
+### Function `STRING rustest.try_nul_hdr(STRING name)`
+
+Tries to set a header value containing a NUL byte, returning the error message,
+or "" on success
+
+### Function `STRING rustest.fill_hdr_slots(STRING name)`
+
+Appends `name` headers until the slots run out, returning the error message and
+how many workspace bytes the failed append consumed
+
+### Function `STRING rustest.try_weaken_etag_no_ws()`
+
+Calls `weaken_etag` with no free workspace, returning the error message, or "" on
+success. The workspace is restored afterwards.
+
 ### Function `VOID rustest.unset_hdr(STRING name)`
 
 ### Function `VOID rustest.set_url(STRING url)`

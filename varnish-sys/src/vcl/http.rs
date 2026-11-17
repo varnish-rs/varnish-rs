@@ -14,10 +14,12 @@
 use std::mem::transmute;
 use std::slice::from_raw_parts_mut;
 
-use crate::ffi;
-use crate::ffi::VslTag;
+use memchr::memchr;
+
+use crate::ffi::{txt, VslTag};
 use crate::vcl::str_or_bytes::StrOrBytes;
-use crate::vcl::{VclResult, Workspace};
+use crate::vcl::{VclError, VclResult, Workspace, WsStrBuffer};
+use crate::{ffi, validate_ws};
 
 // C constants pop up as u32, but header indexing uses u16, redefine
 // some stuff to avoid casting all the time
@@ -43,11 +45,15 @@ impl HttpHeaders<'_> {
         })
     }
 
-    fn change_header<'a>(&mut self, idx: u16, value: impl Into<StrOrBytes<'a>>) -> VclResult<()> {
-        assert!(idx < self.raw.nhd);
+    /// Returns the workspace this HTTP object allocates from.
+    // XXX: aliasing warning, it's the same pointer as the one in Ctx
+    fn ws(&self) -> Workspace<'_> {
+        Workspace::from_ptr(self.raw.ws)
+    }
 
-        /* XXX: aliasing warning, it's the same pointer as the one in Ctx */
-        let mut ws = Workspace::from_ptr(self.raw.ws);
+    /// Points the header slot at `idx` to an already allocated header line.
+    fn store_header(&mut self, idx: u16, hdr: txt) {
+        assert!(idx < self.raw.nhd);
         unsafe {
             let hd = self
                 .raw
@@ -55,7 +61,7 @@ impl HttpHeaders<'_> {
                 .offset(idx as isize)
                 .as_mut()
                 .expect("HTTP header descriptor pointer must not be null");
-            *hd = ws.copy_bytes_with_null(value.into())?;
+            *hd = hdr;
             let hdf = self
                 .raw
                 .hdf
@@ -64,36 +70,60 @@ impl HttpHeaders<'_> {
                 .expect("HTTP header flags pointer must not be null");
             *hdf = 0;
         }
-        Ok(())
     }
 
-    fn set_header_raw<'a>(&mut self, raw: impl Into<StrOrBytes<'a>>) -> VclResult<()> {
+    /// Fails if all header slots are taken.
+    ///
+    /// Callers check this before writing a header into the workspace, so that a failed
+    /// append does not consume workspace memory for the rest of the task.
+    fn check_header_slot(&self) -> VclResult<()> {
         assert!(self.raw.nhd <= self.raw.shd);
         if self.raw.nhd == self.raw.shd {
             return Err(c"no more header slot".into());
         }
-        let idx = self.raw.nhd;
-        self.raw.nhd += 1;
-        let res = self.change_header(idx, raw);
-        if res.is_ok() {
-            unsafe {
-                ffi::VSLbt(
-                    self.raw.vsl,
-                    transmute::<u32, VslTag>((self.raw.logtag as u32) + u32::from(HDR_FIRST)),
-                    *self.raw.hd.add(idx as usize),
-                );
-            }
-        } else {
-            self.raw.nhd -= 1;
-        }
-        res
+        Ok(())
     }
 
-    /// Append a new header using `name` and `value`. This can fail if we run out of internal slots
-    /// to store the new header
+    /// Appends an already allocated header line and logs it.
+    ///
+    /// Callers guarantee a free slot, see [`Self::check_header_slot`].
+    fn push_header(&mut self, hdr: txt) {
+        assert!(self.raw.nhd < self.raw.shd);
+        let idx = self.raw.nhd;
+        self.raw.nhd += 1;
+        self.store_header(idx, hdr);
+        unsafe {
+            ffi::VSLbt(
+                self.raw.vsl,
+                transmute::<u32, VslTag>((self.raw.logtag as u32) + u32::from(HDR_FIRST)),
+                *self.raw.hd.add(idx as usize),
+            );
+        }
+    }
+
+    fn change_header<'a>(&mut self, idx: u16, value: impl Into<StrOrBytes<'a>>) -> VclResult<()> {
+        let hdr = self.ws().copy_bytes_with_null(value.into())?;
+        self.store_header(idx, hdr);
+        Ok(())
+    }
+
+    /// Appends a `name: value` header, writing it into the Varnish workspace.
+    ///
+    /// # Errors
+    ///
+    /// Fails if all header slots are taken, if the workspace is out of memory, or if `name` or
+    /// `value` contain a NUL byte, which would truncate the header as seen by the C layers.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// http.set_header("X-Foo", "bar")?;
+    /// ```
     pub fn set_header(&mut self, name: &str, value: &str) -> VclResult<()> {
-        // FIXME: optimize this to avoid allocating a temporary string
-        self.set_header_raw(&format!("{name}: {value}"))
+        self.check_header_slot()?;
+        let hdr = alloc_header_line(&mut self.ws(), name, &[value.as_bytes()])?;
+        self.push_header(hdr);
+        Ok(())
     }
 
     /// Remove all headers matching `name` (case-insensitive). No-op if the header is absent.
@@ -238,11 +268,13 @@ impl HttpHeaders<'_> {
         if value.starts_with(b"W/") {
             return Ok(());
         }
-        let mut new_hdr = Vec::with_capacity(b"ETag: W/".len() + value.len());
-        new_hdr.extend_from_slice(b"ETag: W/");
-        new_hdr.extend_from_slice(value);
+        // Allocate first: `hdr` holds only raw pointers, so `value`'s borrow of `self` is
+        // released before the mutations below.
+        let hdr = alloc_header_line(&mut self.ws(), "ETag", &[b"W/", value])?;
+        // Unsetting the existing `ETag` frees a slot
         self.unset_header("ETag");
-        self.set_header_raw(new_hdr.as_slice())
+        self.push_header(hdr);
+        Ok(())
     }
 
     /// Returns the value of a header based on its name
@@ -261,6 +293,48 @@ impl HttpHeaders<'_> {
             cursor: HDR_FIRST as isize,
         }
     }
+}
+
+/// Writes `name: <parts...>` into the workspace, returning the header line.
+///
+/// Copies the fragments verbatim, bypassing `core::fmt`.
+///
+/// Running out of space marks the workspace as overflowed, like `WS_Alloc`, so the task
+/// fails and the `ws_*_overflow` counters account for it.
+fn alloc_header_line(ws: &mut Workspace<'_>, name: &str, parts: &[&[u8]]) -> VclResult<txt> {
+    let res = (|| {
+        let mut buf = ws.vcl_string_builder()?;
+        buf.extend_from_slice(name.as_bytes())?;
+        buf.extend_from_slice(b": ")?;
+        for part in parts {
+            buf.extend_from_slice(part)?;
+        }
+        finish_header_line(buf)
+    })();
+    if matches!(res, Err(VclError::WsOutOfMemory(_))) {
+        unsafe { validate_ws(ws.raw).mark_overflow() };
+    }
+    res
+}
+
+/// Turns the bytes written to `buf` into a header line.
+///
+/// [`WsStrBuffer::finish`] NUL-terminates them and releases the unused workspace.
+///
+/// # Errors
+///
+/// Fails if the line contains a NUL byte, which would truncate the header as seen by the C
+/// layers. Dropping `buf` reclaims the workspace it holds.
+fn finish_header_line(buf: WsStrBuffer<'_>) -> VclResult<txt> {
+    if memchr(0, buf.as_ref()).is_some() {
+        return Err(VclError::CStr(c"NULL byte found in the header"));
+    }
+    let len = buf.len();
+    let b = buf.finish().0;
+    Ok(txt {
+        b,
+        e: unsafe { b.add(len) },
+    })
 }
 
 impl<'a> IntoIterator for &'a HttpHeaders<'a> {

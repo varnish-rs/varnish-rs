@@ -28,6 +28,67 @@ mod rustest {
         }
     }
 
+    /// Tries to set a `size`-byte header value, returning the error message, or "" on success
+    pub fn try_big_hdr(ctx: &mut Ctx, name: &str, size: i64) -> String {
+        let n = usize::try_from(size).unwrap_or(0);
+        let Some(ref mut req) = ctx.http_req else {
+            return "no req".to_string();
+        };
+        match req.set_header(name, &"x".repeat(n)) {
+            Ok(()) => String::new(),
+            Err(e) => e.as_str().to_string(),
+        }
+    }
+
+    /// Tries to set a header value containing a NUL byte, returning the error message,
+    /// or "" on success
+    pub fn try_nul_hdr(ctx: &mut Ctx, name: &str) -> String {
+        let Some(ref mut req) = ctx.http_req else {
+            return "no req".to_string();
+        };
+        match req.set_header(name, "a\0b") {
+            Ok(()) => String::new(),
+            Err(e) => e.as_str().to_string(),
+        }
+    }
+
+    /// Appends `name` headers until the slots run out, returning the error message and
+    /// how many workspace bytes the failed append consumed
+    pub fn fill_hdr_slots(ctx: &mut Ctx, name: &str) -> String {
+        let ws = ctx.ws.raw;
+        let Some(ref mut req) = ctx.http_req else {
+            return "no req".to_string();
+        };
+        let free = || unsafe { (*ws).e.offset_from((*ws).f) };
+        loop {
+            let before = free();
+            if let Err(e) = req.set_header(name, "x") {
+                return format!("{} ({} bytes used)", e.as_str(), before - free());
+            }
+        }
+    }
+
+    /// Calls `weaken_etag` with no free workspace, returning the error message, or "" on
+    /// success. The workspace is restored afterwards.
+    pub fn try_weaken_etag_no_ws(ctx: &mut Ctx) -> String {
+        let ws = ctx.ws.raw;
+        let Some(ref mut req) = ctx.http_req else {
+            return "no req".to_string();
+        };
+        let res = unsafe {
+            let snapshot = varnish::ffi::WS_Snapshot(ws);
+            let free = (*ws).e.offset_from((*ws).f);
+            varnish::ffi::WS_Alloc(ws, u32::try_from(free).expect("free space fits in u32"));
+            let res = req.weaken_etag();
+            varnish::ffi::WS_Reset(ws, snapshot);
+            res
+        };
+        match res {
+            Ok(()) => String::new(),
+            Err(e) => e.as_str().to_string(),
+        }
+    }
+
     pub fn unset_hdr(ctx: &mut Ctx, name: &str) -> Result<(), &'static str> {
         if let Some(ref mut req) = ctx.http_req {
             req.unset_header(name);

@@ -1,0 +1,56 @@
+varnishtest "set_header fails gracefully when the workspace is exhausted"
+
+server s1 {
+    # 1. too big: fails, the header is not added
+    rxreq
+    expect req.http.err == "Unable to allocate 200000 bytes in a Workspace"
+    expect req.http.x-big == <undef>
+    expect req.http.x-after == "still-works"
+    expect req.http.x-reserve == "ok ok ok"
+    txresp
+
+    # 2. NUL byte: fails, the header is not added
+    rxreq
+    expect req.http.err == "NULL byte found in the header"
+    expect req.http.x-nul == <undef>
+    expect req.http.x-after == "still-works"
+    expect req.http.x-reserve == "ok ok ok"
+    txresp
+} -start
+
+# small workspace, so the oversized value below fails regardless of the default
+varnish v1 -arg "-p workspace_client=32k" -vcl+backend {
+    import rustest from "${vmod}";
+
+    sub vcl_recv {
+        if (req.http.case == "big") {
+            set req.http.err = rustest.try_big_hdr("x-big", 200000);
+        } else {
+            set req.http.err = rustest.try_nul_hdr("x-nul");
+        }
+
+        # a normal header, then a reservation: varnishd asserts if the failed
+        # attempt above left the workspace reserved
+        rustest.set_hdr("x-after", "still-works");
+        set req.http.x-reserve = rustest.ws_reserve("ok");
+        return (pass);
+    }
+} -start
+
+# running out of workspace marks it as overflowed, failing the delivery
+client c1 {
+    txreq -hdr "case: big"
+    rxresp
+    expect resp.status == 500
+} -run
+
+varnish v1 -expect MAIN.ws_client_overflow == 1
+
+# a NUL byte is not a workspace overflow
+client c2 {
+    txreq -hdr "case: nul"
+    rxresp
+    expect resp.status == 200
+} -run
+
+varnish v1 -expect MAIN.ws_client_overflow == 1

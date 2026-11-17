@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `HttpHeaders::set_header()` rejects a NUL byte anywhere in the header, including the single trailing one accepted before, with the error "NULL byte found in the header" instead of "NULL byte found in the source string" ([#320](https://github.com/varnish-rs/varnish-rs/pull/320))
+
+### Fixed
+
+- `HttpHeaders::set_header()` and `HttpHeaders::weaken_etag()` no longer allocate a temporary `String`/`Vec`, building the header line in the workspace instead ([#320](https://github.com/varnish-rs/varnish-rs/pull/320))
+- Release the workspace reservation when a `WsBuffer` fails to allocate, instead of leaving it held ([#320](https://github.com/varnish-rs/varnish-rs/pull/320))
+
 ## [0.8.0](https://github.com/gquintard/varnish-rs-fork/compare/varnish-sys-v0.7.2...varnish-sys-v0.8.0) - 2026-09-21
 
 ### Other

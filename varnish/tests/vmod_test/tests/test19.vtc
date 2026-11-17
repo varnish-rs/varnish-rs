@@ -1,0 +1,25 @@
+varnishtest "set_header fails without consuming workspace when header slots run out"
+
+server s1 {
+    rxreq
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import rustest from "${vmod}";
+
+    sub vcl_recv {
+        return (synth(200));
+    }
+
+    sub vcl_synth {
+        set resp.http.err = rustest.fill_hdr_slots("x-fill");
+    }
+} -start
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.status == 200
+    expect resp.http.err == "no more header slot (0 bytes used)"
+} -run

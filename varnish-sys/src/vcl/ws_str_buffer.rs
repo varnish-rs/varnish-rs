@@ -75,6 +75,8 @@ impl<'ws, Item: Copy, Suffix, Output> WsBuffer<'ws, Item, Suffix, Output> {
         };
 
         if reserved_space < required {
+            // Hand the reservation back, or the next `WS_ReserveAll` aborts varnishd
+            ws.release(0);
             return Err(WsOutOfMemory(NonZeroUsize::new_unchecked(required)));
         }
 
@@ -373,6 +375,21 @@ mod tests {
             .expect("workspace must have enough space");
         assert_eq!(buf.remaining(), 160 - used - 24);
         write!(buf, "this data is ignored").expect("write must succeed");
+    }
+
+    /// A buffer that fails to allocate must hand its reservation back, or the next
+    /// `WS_ReserveAll` aborts the varnishd child.
+    #[test]
+    fn oom_releases_reservation() {
+        let mut test_ws = TestWS::new(16);
+        let mut ws = test_ws.workspace();
+        ws.allocate(NonZeroUsize::new(16).expect("16 is non-zero"))
+            .expect("workspace must have enough space");
+
+        assert!(matches!(ws.vcl_string_builder(), Err(WsOutOfMemory(_))));
+        assert!(matches!(ws.vcl_string_builder(), Err(WsOutOfMemory(_))));
+        assert!(matches!(ws.vcl_blob_builder(), Err(WsOutOfMemory(_))));
+        assert!(matches!(ws.slice_builder::<u8>(), Err(WsOutOfMemory(_))));
     }
 
     #[repr(C)]
