@@ -295,41 +295,9 @@ impl<'a> Ctx<'a> {
     /// Fails if the body has not been cached (i.e. `std.cache_req_body()` was not called in VCL
     /// before this subroutine ran).
     pub fn cached_req_body(&mut self) -> Result<Vec<&'a [u8]>, VclError> {
-        unsafe extern "C" fn chunk_collector(
-            priv_: *mut c_void,
-            _flush: c_uint,
-            ptr: *const c_void,
-            len: isize,
-        ) -> c_int {
-            let v = priv_
-                .cast::<Vec<&[u8]>>()
-                .as_mut()
-                .expect("cached_req_body callback priv pointer must not be null");
-            let buf = std::slice::from_raw_parts(ptr.cast::<u8>(), len as usize);
-            v.push(buf);
-            0
-        }
-
-        let req = &mut *self.req.as_mut().ok_or("req object isn't available")?.raw;
-        unsafe {
-            if req.req_body_status != ffi::BS_CACHED.as_ptr() {
-                return Err("request body hasn't been previously cached".into());
-            }
-        }
-        let mut v: Box<Vec<&'a [u8]>> = Box::default();
-        let p: *mut Vec<&'a [u8]> = &raw mut *v;
-        match unsafe {
-            ffi::VRB_Iterate(
-                req.wrk,
-                req.vsl.as_mut_ptr(),
-                req,
-                Some(chunk_collector),
-                p.cast::<c_void>(),
-            )
-        } {
-            0 => Ok(*v),
-            _ => Err("req.body iteration failed".into()),
-        }
+        let req = &raw mut *self.req.as_mut().ok_or("req object isn't available")?.raw;
+        // SAFETY: `req` comes from a live `Ctx`, valid for `'a`.
+        unsafe { cached_req_body_chunks(req) }
     }
 
     /// Return the current state of the request body — `bereq`'s body from a
@@ -663,6 +631,45 @@ impl TestCtx {
     /// Return a [`Ctx`] wrapping this test context, for use in unit tests.
     pub fn ctx(&mut self) -> Ctx<'_> {
         Ctx::from_ref(&mut self.vrt_ctx)
+    }
+}
+
+/// Iterates over a cached request body (`std.cache_req_body()`), returning its chunks.
+///
+/// SAFETY: `req` must be a valid `req` pointer for `'a`.
+pub(crate) unsafe fn cached_req_body_chunks<'a>(
+    req: *mut ffi::req,
+) -> Result<Vec<&'a [u8]>, VclError> {
+    unsafe extern "C" fn chunk_collector(
+        priv_: *mut c_void,
+        _flush: c_uint,
+        ptr: *const c_void,
+        len: isize,
+    ) -> c_int {
+        let v = priv_
+            .cast::<Vec<&[u8]>>()
+            .as_mut()
+            .expect("cached_req_body callback priv pointer must not be null");
+        let buf = std::slice::from_raw_parts(ptr.cast::<u8>(), len as usize);
+        v.push(buf);
+        0
+    }
+
+    let req = &mut *req;
+    if req.req_body_status != ffi::BS_CACHED.as_ptr() {
+        return Err("request body hasn't been previously cached".into());
+    }
+    let mut v: Box<Vec<&'a [u8]>> = Box::default();
+    let p: *mut Vec<&'a [u8]> = &raw mut *v;
+    match ffi::VRB_Iterate(
+        req.wrk,
+        req.vsl.as_mut_ptr(),
+        req,
+        Some(chunk_collector),
+        p.cast::<c_void>(),
+    ) {
+        0 => Ok(*v),
+        _ => Err("req.body iteration failed".into()),
     }
 }
 

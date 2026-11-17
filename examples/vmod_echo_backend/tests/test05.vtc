@@ -1,0 +1,42 @@
+varnishtest "echo backend: pipe() gets the bytes sent along with the request headers"
+
+# The client sends its headers and body in a single write, so Varnish reads
+# the body along with the headers. PipeRequest::forward_preamble() must hand
+# these bytes over (EchoBackend::pipe() echoes them back), and they must be
+# accounted in PipeAcct, along with the Pipe/PipeSess timestamps.
+
+server s1 {} -start
+
+varnish v1 -vcl+backend {
+    import echo_backend from "${vmod}";
+
+    sub vcl_init {
+        new echo = echo_backend.new();
+    }
+
+    sub vcl_recv {
+        set req.backend_hint = echo.backend();
+        return (pipe);
+    }
+} -start
+
+logexpect l1 -v v1 -g request {
+    expect * *  ReqURL      "^/post$"
+    expect * =  Timestamp   "^Pipe:"
+    expect * =  Timestamp   "^PipeSess:"
+    # 51 bytes of request headers, no bereq sent, 5 bytes in, 69 bytes out
+    expect * =  PipeAcct    "^51 0 5 69$"
+} -start
+
+client c1 {
+    send "POST /post HTTP/1.1\r\nHost: x\r\nContent-Length: 5\r\n\r\nhello"
+    rxresp
+    expect resp.status == 200
+    expect resp.http.x-url == "/post"
+    expect resp.body == "hello"
+    expect_close
+} -run
+
+logexpect l1 -wait
+
+varnish v1 -expect MGT.child_panic == 0

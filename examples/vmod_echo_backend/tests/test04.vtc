@@ -1,0 +1,42 @@
+varnishtest "echo backend: pipe() answers on the borrowed client stream"
+
+# EchoBackend::pipe() writes a response straight to the client connection,
+# then returns. Varnish owns the fd and closes it afterwards: the Rust layer
+# must not close it as well, or the second close() fails with EBADF and trips
+# an assert in the child.
+
+server s1 {} -start
+
+varnish v1 -vcl+backend {
+    import echo_backend from "${vmod}";
+
+    sub vcl_init {
+        new echo = echo_backend.new();
+    }
+
+    sub vcl_recv {
+        set req.backend_hint = echo.backend();
+        return (pipe);
+    }
+} -start
+
+client c1 {
+    txreq -url "/first"
+    rxresp
+    expect resp.status == 200
+    expect resp.http.x-piped == "1"
+    expect resp.http.x-url == "/first"
+    expect resp.bodylen == 0
+    expect_close
+} -run
+
+client c2 {
+    txreq -url "/second"
+    rxresp
+    expect resp.status == 200
+    expect resp.http.x-url == "/second"
+    expect_close
+} -run
+
+varnish v1 -expect MGT.child_panic == 0
+varnish v1 -expect MAIN.sc_tx_pipe == 2
