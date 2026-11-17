@@ -1,6 +1,9 @@
 use std::io::{Cursor, Write};
+use std::net::TcpStream;
 
-use varnish::vcl::{Backend, Ctx, VclBackend, VclError, VclResponse, VclResult};
+use varnish::vcl::{
+    Backend, Ctx, HttpHeaders, LogTag, StreamClose, VclBackend, VclError, VclResponse, VclResult,
+};
 
 varnish::run_vtc_tests!("tests/*.vtc");
 
@@ -71,6 +74,29 @@ impl VclBackend<EchoResponse> for EchoBackend {
         Ok(Some(EchoResponse {
             inner: Cursor::new(body),
         }))
+    }
+
+    /// When the VCL returns `pipe`, answer directly on the client connection
+    /// with bereq's URL as the body. The stream is only borrowed: Varnish
+    /// closes the connection once we return.
+    fn pipe(&self, ctx: &mut Ctx, mut tcp_stream: &TcpStream) -> StreamClose {
+        let url = ctx
+            .http_bereq
+            .as_ref()
+            .and_then(HttpHeaders::url)
+            .map(|u| String::from_utf8_lossy(u.as_ref()).into_owned())
+            .unwrap_or_default();
+        let resp = format!(
+            "HTTP/1.1 200 OK\r\nx-piped: 1\r\ncontent-length: {}\r\n\r\n{url}",
+            url.len()
+        );
+        match tcp_stream.write_all(resp.as_bytes()) {
+            Ok(()) => StreamClose::TxPipe,
+            Err(e) => {
+                ctx.log(LogTag::Error, format!("pipe write failed: {e}"));
+                StreamClose::TxError
+            }
+        }
     }
 }
 
