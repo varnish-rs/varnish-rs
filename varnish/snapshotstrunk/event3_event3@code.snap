@@ -166,7 +166,7 @@ mod event3 {
         pub static Vmod_event3_Data: vmod_data = vmod_data {
             vrt_major: 0,
             vrt_minor: 0,
-            file_id: c"2e04e8a41fb633a6b2c76b6b78155396928a8dc4c57935089e8168db69187824"
+            file_id: c"1ea02adc6e42582a74e6788a0b864130e4ff879b66c4fe2fb5d788eb3afc9bdb"
                 .as_ptr(),
             name: c"event3".as_ptr(),
             func_name: c"Vmod_vmod_event3_Func".as_ptr(),

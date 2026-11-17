@@ -218,7 +218,9 @@ VmodInfo {
                         ParamTypeInfo {
                             ident: "self",
                             docs: "",
-                            ty: SelfType,
+                            ty: SelfType {
+                                is_mut: false,
+                            },
                         },
                         ParamTypeInfo {
                             ident: "tsk",
@@ -245,7 +247,9 @@ VmodInfo {
                         ParamTypeInfo {
                             ident: "self",
                             docs: "",
-                            ty: SelfType,
+                            ty: SelfType {
+                                is_mut: false,
+                            },
                         },
                         ParamTypeInfo {
                             ident: "tsk",
@@ -283,7 +287,9 @@ VmodInfo {
                         ParamTypeInfo {
                             ident: "self",
                             docs: "",
-                            ty: SelfType,
+                            ty: SelfType {
+                                is_mut: false,
+                            },
                         },
                         ParamTypeInfo {
                             ident: "tsk",

@@ -1,0 +1,29 @@
+error: `&mut self` methods require `#[restrict(vcl_init)]`, `#[restrict(vcl_fini)]` or `#[restrict(housekeeping)]`
+  --> tests/fail/error_obj_mut.rs:13:13
+   |
+13 |         pub fn no_restrict(&mut self) {}
+   |             ^^
+
+error: `&mut self` methods cannot be restricted to 'client'. Allowed scopes: vcl_init, vcl_fini, housekeeping
+  --> tests/fail/error_obj_mut.rs:16:13
+   |
+16 |         pub fn client_scope(&mut self) {}
+   |             ^^
+
+error: `&mut self` methods cannot be restricted to 'vcl_recv'. Allowed scopes: vcl_init, vcl_fini, housekeeping
+  --> tests/fail/error_obj_mut.rs:19:13
+   |
+19 |         pub fn mixed_scope(&mut self) {}
+   |             ^^
+
+error: `&mut self` methods cannot take `&mut Ctx` (a VCL sub call could re-enter the object); use `&Ctx`
+  --> tests/fail/error_obj_mut.rs:22:13
+   |
+22 |         pub fn mut_ctx(&mut self, ctx: &mut Ctx) {}
+   |             ^^
+
+error: First method arg must be `&self` or `&mut self`
+  --> tests/fail/error_obj_mut.rs:25:25
+   |
+25 |         pub fn by_value(mut self) {}
+   |                         ^^^

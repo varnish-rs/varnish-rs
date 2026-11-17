@@ -1,0 +1,5 @@
+error: Object `Obj` already has an `impl` block. All its methods must be in a single `impl` block
+  --> tests/fail/error_obj_mut_reentry_split.rs:19:10
+   |
+19 |     impl Obj {
+   |          ^^^
