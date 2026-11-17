@@ -1,0 +1,27 @@
+varnishtest "error.huge_copy_fails() and error.ws_overflow_then() with an empty string"
+
+# A failed workspace allocation must surface as an error to the vmod, and returning an empty
+# string afterwards must still work, with or without the `full` feature.
+# Backend side only: on the client side, varnishd itself fails the delivery of a task whose
+# workspace overflowed, whatever the vmod returns.
+server s1 {
+    rxreq
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import error from "${vmod}";
+
+    sub vcl_backend_response {
+        set beresp.http.x-fails = error.huge_copy_fails();
+        set beresp.http.x-overflow = "[" + error.ws_overflow_then("") + "]";
+    }
+} -start
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.status == 200
+    expect resp.http.x-fails == "true"
+    expect resp.http.x-overflow == "[]"
+} -run

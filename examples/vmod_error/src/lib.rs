@@ -9,7 +9,7 @@ varnish::run_vtc_tests!("tests/*.vtc");
 mod error {
     use std::fs::read_to_string;
 
-    use varnish::vcl::Ctx;
+    use varnish::vcl::{Ctx, Workspace};
 
     /// This function never fails, returning 0 if anything goes wrong
     pub fn cannot_fail(path: &str) -> i64 {
@@ -59,5 +59,24 @@ mod error {
             .parse()
             // map the error to a string message and return either the parsed integer or that error
             .map_err(|e| format!("result_fail: {e}"))
+    }
+
+    /// Try to copy 64 MiB into the workspace, which is far more than it holds. Returns `true` if
+    /// the copy failed, as it should. A failed workspace allocation is an error like any other:
+    /// the vmod gets an `Err` and decides what to do with it.
+    pub fn huge_copy_fails(ws: &mut Workspace) -> bool {
+        ws.copy_bytes_with_null(vec![b'a'; 64 << 20]).is_err()
+    }
+
+    /// Overflow the workspace on purpose (like `huge_copy_fails()`), then return `s`.
+    ///
+    /// The failed allocation marks the workspace as overflowed, which matters for what comes
+    /// next. An empty `s` can always be returned. A non-empty one has to be copied into the
+    /// workspace: that works with the `full` feature (`WS_Alloc`), but fails the VCL without it
+    /// (`$ABI vrt`, where copies go through `VRT_StrandsWS`, which refuses to allocate on an
+    /// overflowed workspace).
+    pub fn ws_overflow_then(ws: &mut Workspace, s: &str) -> String {
+        let _ = ws.copy_bytes_with_null(vec![b'a'; 64 << 20]);
+        s.to_string()
     }
 }

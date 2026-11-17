@@ -1,0 +1,30 @@
+varnishtest "error.ws_overflow_then() with a non-empty string, $ABI vrt build"
+
+# Only valid for a build without the `full` feature (run by `just check-vrt-abi`). In vrt mode
+# string copies go through VRT_StrandsWS, which refuses to allocate once the workspace has
+# overflowed, so the vmod call fails the VCL. With `full`, the same call succeeds, see
+# varnish/tests/vmod_test/tests/test18.vtc.
+server s1 {
+    rxreq
+    txresp
+} -start
+
+varnish v1 -vcl+backend {
+    import error from "${vmod}";
+
+    sub vcl_backend_response {
+        set beresp.http.x-overflow = error.ws_overflow_then("fallback");
+    }
+} -start
+
+logexpect l1 -v v1 -g raw {
+    expect * * VCL_Error "Unable to allocate"
+} -start
+
+client c1 {
+    txreq
+    rxresp
+    expect resp.status == 503
+} -run
+
+logexpect l1 -wait

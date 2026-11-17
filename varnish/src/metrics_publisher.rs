@@ -4,7 +4,8 @@
 //! visible to `varnishstat` and other monitoring tools. Define a struct, derive [`VscMetric`],
 //! wrap it in [`Vsc`], and access the fields directly via `Deref`.
 //!
-//! For the read-only counterpart used by external tools, see [`metrics_reader`](crate::metrics_reader).
+//! For the read-only counterpart used by external tools, see `MetricsReader` (requires the `full`
+//! feature).
 
 use std::ffi::{CStr, CString};
 use std::mem::size_of;

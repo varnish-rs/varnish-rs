@@ -4,7 +4,10 @@
 //!
 //! For a guide to building a VMOD — project structure, `Cargo.toml`, VTC tests — see [`vcl`].
 //!
-//! To read Varnish statistics from an external program, see [`MetricsReader`].
+#![cfg_attr(
+    feature = "full",
+    doc = "To read Varnish statistics from an external program, see [`MetricsReader`]."
+)]
 
 // Re-publish some varnish_sys modules
 /// This module gathers the tools needed to build a vmod in `rust`.
@@ -46,6 +49,16 @@
 /// [lib]
 /// crate-type = ["cdylib"] # and this line
 /// ```
+///
+/// ### The `full` feature and `$ABI`
+///
+/// `full` is enabled by default and gives access to the whole API. The vmod is then built as
+/// `$ABI strict`: `varnishd` only loads it if it was built against the exact same Varnish build.
+///
+/// With `default-features = false` on the `varnish` dependency, only the API backed by Varnish's
+/// portable `vrt.h` interface is available (no custom backends, filters, HTTP header access, VSL
+/// logging, etc.), and the vmod is built as `$ABI vrt`: it loads into any `varnishd` with the same
+/// VRT major version and an equal or newer VRT minor version.
 ///
 /// ## src/lib.rs
 ///
@@ -202,10 +215,13 @@
 /// | `std::time::SystemTime` | `VCL_TIME` |
 /// | `&str` | `VCL_STRING` |
 /// | `&[u8]` | `VCL_BLOB` |
-/// | `Option<CowProbe>` | `VCL_PROBE` |
-/// | `Option<Probe>` | `VCL_PROBE` |
-/// | `Option<std::net::SocketAddr>` | `VCL_IP` |
+/// | `Option<CowProbe>` | `VCL_PROBE` (`full` only) |
+/// | `Option<Probe>` | `VCL_PROBE` (`full` only) |
+/// | `Option<std::net::SocketAddr>` | `VCL_IP` (`full` only) |
 /// | `Subroutine` | `VCL_SUB` |
+///
+/// Types marked `full` only need the [`full` feature](#the-full-feature-and-abi). Without it,
+/// `#[vmod]` rejects them with a "requires the `full` feature" error.
 ///
 /// All types can in addition be wrapped in an `Option` to make the argument optional.
 ///
@@ -325,10 +341,12 @@
 /// | `&str` | `VCL_STRING` |
 /// | `String` | `VCL_STRING` |
 /// | `&[u8]` | `VCL_BLOB` |
-/// | `Option<CowProbe>` | `VCL_PROBE` |
-/// | `Option<Probe>` | `VCL_PROBE` |
-/// | `Option<std::net::SocketAddr>` | `VCL_IP` |
+/// | `Option<CowProbe>` | `VCL_PROBE` (`full` only) |
+/// | `Option<Probe>` | `VCL_PROBE` (`full` only) |
+/// | `Option<std::net::SocketAddr>` | `VCL_IP` (`full` only) |
 /// | `Subroutine` | `VCL_SUB` |
+///
+/// As for arguments, types marked `full` only need the `full` feature.
 ///
 /// You can also omit the return value entirely.
 ///
@@ -425,55 +443,60 @@
 ///
 /// See [vmod_counter](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_counters) for the full example.
 ///
-/// # Backends and directors
-///
-/// See [vmod_simple_backend](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_simple_backend/) for a complete example of a `rust` vmod that simply send a string set at construction time.
-///
-/// As a C construct, [`crate::ffi::VCL_BACKEND`] can be a bit confusing to create and manipulate, notably as it
-/// involves a bunch of structures with different lifetimes and quite a lot of casting. This
-/// module hopes to alleviate those issues by handling the most of them and by offering a more
-/// idiomatic interface centered around vmod objects.
-///
-/// Here's what's in the toolbox:
-/// - [`vcl::Backend`]: an "actual" backend that can be used by Varnish to create an HTTP response. It
-///   relies on two traits:
-///   - [`vcl::VclBackend`] reports health, and generates the response headers
-///   - [`vcl::VclResponse`] for the response body writer, structs implementing that trait are
-///     returned by [`vcl::VclBackend::get_response`]
-/// - [`vcl::NativeBackend`]: a specialization of [`vcl::Backend`], relying on the native Varnish
-///   implementation providing IP and UDS backends
-/// - [`vcl::NativeBackendBuilder`]: a builder to easily create a [`vcl::NativeBackend`]
-/// - [`vcl::Director`]: a routing object doesn't create responses, but instead picks a [`vcl::Backend`]
-///   or [`vcl::Director`] object based on the HTTP request, based on the [`vcl::VclDirector`].
-/// - [`vcl::BackendRef`]: a refcounted wrapper around [`vcl::Backend`] and [`vcl::Director`], this is the primary
-///   type used for arguments and returns of vmod functions.
-///
-///   **Important:** all these types wrap refcounted C structures that Varnish will try to free
-///   when a VCL goes cold, which means you can't hold onto them forever. It's not as scary as it
-///   sounds, and you can approach this in two different ways.
-///
-///   Use a vmod object that will own them. The object will automatically be dropped at the end of
-///   the VCL lifetime, as will all its fields, and all the types above will automatically decrease
-///   their refcount to the underlying C structure when this happens.
-///
-///   Otherwise, your vmod can implement the event function and drop the structs on a cold event.
-pub use varnish_sys::vcl;
+#[cfg_attr(
+    feature = "full",
+    doc = r#"# Backends and directors
 
-// Re-export the report_details_json macro
-pub use varnish_sys::report_details_json;
+See [vmod_simple_backend](https://github.com/varnish-rs/varnish-rs/tree/main/examples/vmod_simple_backend/) for a complete example of a `rust` vmod that simply send a string set at construction time.
+
+As a C construct, [`crate::ffi::VCL_BACKEND`] can be a bit confusing to create and manipulate, notably as it
+involves a bunch of structures with different lifetimes and quite a lot of casting. This
+module hopes to alleviate those issues by handling the most of them and by offering a more
+idiomatic interface centered around vmod objects.
+
+Here's what's in the toolbox:
+- [`vcl::Backend`]: an "actual" backend that can be used by Varnish to create an HTTP response. It
+  relies on two traits:
+  - [`vcl::VclBackend`] reports health, and generates the response headers
+  - [`vcl::VclResponse`] for the response body writer, structs implementing that trait are
+    returned by [`vcl::VclBackend::get_response`]
+- [`vcl::NativeBackend`]: a specialization of [`vcl::Backend`], relying on the native Varnish
+  implementation providing IP and UDS backends
+- [`vcl::NativeBackendBuilder`]: a builder to easily create a [`vcl::NativeBackend`]
+- [`vcl::Director`]: a routing object doesn't create responses, but instead picks a [`vcl::Backend`]
+  or [`vcl::Director`] object based on the HTTP request, based on the [`vcl::VclDirector`].
+- [`vcl::BackendRef`]: a refcounted wrapper around [`vcl::Backend`] and [`vcl::Director`], this is the primary
+  type used for arguments and returns of vmod functions.
+
+  **Important:** all these types wrap refcounted C structures that Varnish will try to free
+  when a VCL goes cold, which means you can't hold onto them forever. It's not as scary as it
+  sounds, and you can approach this in two different ways.
+
+  Use a vmod object that will own them. The object will automatically be dropped at the end of
+  the VCL lifetime, as will all its fields, and all the types above will automatically decrease
+  their refcount to the underlying C structure when this happens.
+
+  Otherwise, your vmod can implement the event function and drop the structs on a cold event."#
+)]
+#[cfg_attr(
+    not(feature = "full"),
+    doc = "# Backends and directors\n\nCustom backends and directors require the `full` feature."
+)]
+pub use varnish_sys::vcl;
 
 #[cfg(not(feature = "ffi"))]
 #[doc(hidden)]
 pub mod ffi {
     // This list must match the `use_ffi_items` in generator.rs
     pub use varnish_sys::ffi::{
-        vmod_data, vmod_priv, vmod_priv_methods, vrt_ctx, VMOD_ABI_Version, VclEvent, VCL_ACL,
-        VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT, VCL_IP, VCL_MET_BACKEND_ERROR,
-        VCL_MET_BACKEND_FETCH, VCL_MET_BACKEND_REFRESH, VCL_MET_BACKEND_RESPONSE, VCL_MET_DELIVER,
-        VCL_MET_FINI, VCL_MET_HASH, VCL_MET_HIT, VCL_MET_INIT, VCL_MET_MISS, VCL_MET_PASS,
-        VCL_MET_PIPE, VCL_MET_PURGE, VCL_MET_RECV, VCL_MET_SYNTH, VCL_MET_TASK_B, VCL_MET_TASK_C,
-        VCL_MET_TASK_H, VCL_PROBE, VCL_REAL, VCL_STRING, VCL_SUB, VCL_TIME, VCL_VOID,
-        VMOD_PRIV_METHODS_MAGIC,
+        vmod_data, vmod_priv, vmod_priv_methods, vrt_ctx, VMOD_ABI_Version, VclEvent,
+        VARNISH_RS_FULL_ABI, VCL_ACL, VCL_BACKEND, VCL_BLOB, VCL_BOOL, VCL_DURATION, VCL_INT,
+        VCL_IP, VCL_MET_BACKEND_ERROR, VCL_MET_BACKEND_FETCH, VCL_MET_BACKEND_REFRESH,
+        VCL_MET_BACKEND_RESPONSE, VCL_MET_DELIVER, VCL_MET_FINI, VCL_MET_HASH, VCL_MET_HIT,
+        VCL_MET_INIT, VCL_MET_MISS, VCL_MET_PASS, VCL_MET_PIPE, VCL_MET_PURGE, VCL_MET_RECV,
+        VCL_MET_SYNTH, VCL_MET_TASK_B, VCL_MET_TASK_C, VCL_MET_TASK_H, VCL_PROBE, VCL_REAL,
+        VCL_STRING, VCL_SUB, VCL_TIME, VCL_VOID, VMOD_PRIV_METHODS_MAGIC, VRT_MAJOR_VERSION,
+        VRT_MINOR_VERSION,
     };
 }
 
@@ -482,8 +505,17 @@ pub use varnish_sys::ffi;
 
 pub mod varnishtest;
 
+// `MetricsReader` reads stats from a running varnishd via `vapi/vsm.h`+`vapi/vsc.h` — an
+// external, non-vrt API surface unrelated to in-VCL runtime.
+#[cfg(feature = "full")]
 mod metrics_reader;
-pub use metrics_reader::{Metric, MetricFormat, MetricsReader, MetricsReaderBuilder, Semantics};
+// `report_details_json` is backend-only (see vcl::backend), grouped here with the
+// MetricsReader re-exports so the `full` gate isn't repeated on each.
+#[cfg(feature = "full")]
+pub use {
+    metrics_reader::{Metric, MetricFormat, MetricsReader, MetricsReaderBuilder, Semantics},
+    varnish_sys::report_details_json,
+};
 
 mod metrics_publisher;
 pub use metrics_publisher::{Vsc, VscMetric};

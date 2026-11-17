@@ -15,7 +15,7 @@ impl txt {
         }
     }
 
-    /// FIXME: This method is only used when calling [`crate::ffi::VSLbt`],
+    /// FIXME: This method is only used when calling `VSLbt`,
     /// and current implementation creates a string without a null terminator to pass it in.
     /// Going forward, we should probably refactor it to avoid extra string allocation.
     #[expect(clippy::should_implement_trait)]

@@ -5,8 +5,10 @@ publish = false
 edition.workspace = true
 
 [dependencies]
-varnish.workspace = true
-varnish-sys.workspace = true
+# Pinned to `full`: uses the director/backend API, which is gated out under the vrt-only surface.
+# Without this pin, a workspace-wide `--no-default-features` build would break this example.
+varnish = { workspace = true, features = ["full"] }
+varnish-sys = { workspace = true, features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
