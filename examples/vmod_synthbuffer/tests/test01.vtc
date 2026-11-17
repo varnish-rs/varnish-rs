@@ -1,5 +1,11 @@
 varnishtest "synthbuffer.push()/push_reverse() from vcl_synth and vcl_backend_error"
 
+# Varnish trunk's default synth-response storage (ssy) doesn't copy the synth
+# VSB into the object unless VCL opts out via the (trunk-only) resp.storage
+# variable, so vcl_synth's body comes back empty there. Skip until that
+# upstream feature stabilizes rather than forking this VCL per Varnish version.
+feature !cmd {pkg-config --modversion varnishapi | grep -qx trunk}
+
 server s1 {
     rxreq
     txresp
